@@ -21,8 +21,12 @@ test('2 Infiltrados contra 1 Tripulante vence Infiltrados',()=>{
   const r=runCheck([{id:'i1',role:'imp',alive:true},{id:'i2',role:'imp',alive:true},{id:'c1',role:'crew',alive:true}],['i1','i2']);
   assert.equal(r.ended,true);assert.equal(r.G.winner,'imp');
 });
-test('1 Infiltrado contra 1 Tripulante não vence por maioria estrita',()=>{
+test('1 Infiltrado contra 1 Tripulante dá vitória aos Infiltrados',()=>{
   const r=runCheck([{id:'i1',role:'imp',alive:true},{id:'c1',role:'crew',alive:true}],['i1']);
+  assert.equal(r.ended,true);assert.equal(r.G.winner,'imp');
+});
+test('Infiltrados não vencem quando há mais Tripulantes vivos e não resta 1 contra 1',()=>{
+  const r=runCheck([{id:'i1',role:'imp',alive:true},{id:'c1',role:'crew',alive:true},{id:'c2',role:'crew',alive:true}],['i1']);
   assert.equal(r.ended,false);assert.equal(r.G.over,false);
 });
 test('Infiltrado vence quando não há Tripulantes vivos',()=>{
