@@ -4,13 +4,13 @@ Esta pasta contém o jogo HTML completo, o servidor de salas/WebSocket e os test
 
 ## O que está incluído
 
-- Criação de salas com código numérico de 6 dígitos e entrada por código.
-- Tamanho de sala de 4 a 15 participantes; humanos e bots contam juntos.
+- Criação de salas com código exclusivo de 6 caracteres (letras maiúsculas e números), por exemplo `A7K9Q2`.
+- Tamanho de sala de 4 a 15 participantes, escolhido antes de criar e fixo depois; humanos e bots contam juntos.
 - 1 Infiltrado para 4–9 participantes e 3 Infiltrados para 10–15.
-- Configurações guardadas por sala, controladas pelo host.
+- Configurações independentes guardadas por sala; somente o host pode alterá-las no lobby.
 - Bots na partida, com tarefas, suspeitas, sabotagens, votações e papéis conforme a lógica existente.
 - Sincronização de movimento, personagens, tarefas, mortes, sabotagens, reuniões, votos e resultado final.
-- Transferência da liderança para outro jogador se o host sair.
+- Transferência da liderança para outro jogador se o host sair. Uma contagem regressiva de 5 segundos é cancelada se alguém entrar ou sair; depois aparece uma tela preta de carregamento.
 - Tela de fim de partida preta, com estrelas animadas, indicação da equipe vencedora e opções **Jogar de novo** e **Sair**.
 - A revanche reutiliza o código e as configurações da sala, redistribuindo funções no começo da rodada. Se a saída do host deixar exatamente 3 participantes contando os bots, a revanche continua com 1 Infiltrado para não bloquear a sala; as partidas novas normais continuam exigindo pelo menos 4.
 
@@ -66,6 +66,6 @@ Execute:
 npm test
 ```
 
-Os testes verificam os códigos de sala, salas cheias/inexistentes, limite com bots, configurações independentes, bloqueio de novas entradas após o início, transferência do host com papéis preservados, distribuição do resultado final e revanche na mesma sala. Também foram verificadas a sintaxe do JavaScript do jogo e dos arquivos do servidor.
+Os testes verificam códigos alfanuméricos, salas cheias/inexistentes, tamanho imutável, limite com bots, configurações independentes, cancelamento da contagem ao entrar/sair, bloqueio de novas entradas após o início, transferência do host com papéis preservados, distribuição do resultado final, revanche e condições de vitória após mortes/saídas. Também foram verificadas a sintaxe do JavaScript do jogo e dos arquivos do servidor.
 
 **Nota sobre a validação:** os testes automatizados validam a lógica do servidor e o protocolo de salas. Não substituem uma partida completa testada visualmente em navegador, com várias pessoas e todas as minitarefas; essa verificação manual ainda é recomendada antes de uma publicação pública.

@@ -26,7 +26,8 @@ function cleanSettings(input={}) {
   }
   return out;
 }
-function makeCode(){let code;do{code=String(crypto.randomInt(100000,1000000))}while(rooms.has(code));return code}
+const ROOM_CODE_CHARS='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function makeCode(){let code;do{code='';for(let i=0;i<6;i++)code+=ROOM_CODE_CHARS[crypto.randomInt(ROOM_CODE_CHARS.length)]}while(rooms.has(code));return code}
 function pickColor(requested, room) {
   const used = new Set(room.players.map(p=>p.color));
   if(COLORS.includes(requested) && !used.has(requested))return requested;
@@ -36,14 +37,25 @@ function roomPublic(room){return {code:room.code,hostId:room.hostId,size:room.si
 function sendRoomState(room){const pub=roomPublic(room);for(const p of room.players){const c=clients.get(p.id);if(c)send(c.ws,{type:'room_state',room:pub,youId:p.id})}}
 function roomFor(client){return client.roomCode?rooms.get(client.roomCode):null}
 function error(ws,message){send(ws,{type:'room_error',message})}
+function invalidateCountdown(room){
+  const active=room.status==='countdown'||room.status==='loading';
+  if(room.countdownTimer)clearTimeout(room.countdownTimer);
+  if(room.loadingTimer)clearTimeout(room.loadingTimer);
+  room.countdownTimer=null;room.loadingTimer=null;
+  if(active){room.countdownToken=(room.countdownToken||0)+1;room.status='lobby';room.rematchPending=false;room.countdownRoster=null;}
+  return active;
+}
+function rosterKey(room){return room.players.map(p=>p.id).sort().join('|')+'#'+room.bots;}
 function detachFromRoom(client,reason='leave'){
   const room=roomFor(client);if(!room){client.roomCode=null;return}
   const removed=room.players.find(p=>p.id===client.id);if(!removed){client.roomCode=null;return}
   const wasHost=room.hostId===client.id;
+  const cancelled=invalidateCountdown(room);
   room.players=room.players.filter(p=>p.id!==client.id);client.roomCode=null;
   if(room.players.length===0){rooms.delete(room.code);send(client.ws,{type:'left'});return}
   if(wasHost)room.hostId=room.players[0].id;
   sendRoomState(room);
+  if(cancelled)broadcast(room,{type:'countdown_cancelled',reason:'Um jogador saiu. A contagem foi cancelada.'});
   if(wasHost && room.status!=='lobby' && room.lastSnapshot){const elected=clients.get(room.hostId);if(elected)send(elected.ws,{type:'host_snapshot',snapshot:snapshotForNewHost(room.lastSnapshot,room.hostId)});}
   broadcast(room,{type:'player_left',playerId:client.id,name:removed.name,reason});
   if(wasHost)broadcast(room,{type:'host_changed',hostId:room.hostId});
@@ -66,17 +78,41 @@ function snapshotForNewHost(snapshot, recipientId){
   if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;}
   return s;
 }
-function startGame(room, rematch=false){
+function startGameNow(room, rematch=false){
   const total=room.players.length+room.bots;
   if(total<4 && !(rematch && total===3)){error(clients.get(room.hostId)?.ws,'Adicione bots ou espere mais jogadores: uma nova partida precisa de pelo menos 4 participantes.');return false}
   if(total>room.size||total>15){error(clients.get(room.hostId)?.ws,'A quantidade total excede o limite da sala.');return false}
-  room.status='playing';room.round++;
-  room.lastSnapshot=null;
+  if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);
+  room.countdownTimer=null;room.loadingTimer=null;room.status='playing';room.round++;room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.countdownRoster=null;
   sendRoomState(room);
   broadcast(room,{type:'game_start',room:roomPublic(room),round:room.round,rematch});
   return true;
 }
-function handle(ws, raw){
+function startGame(room, rematch=false, timings={}){
+  const total=room.players.length+room.bots;
+  if(total<4 && !(rematch && total===3)){error(clients.get(room.hostId)?.ws,'Adicione bots ou espere mais jogadores: uma nova partida precisa de pelo menos 4 participantes.');return false}
+  if(total>room.size||total>15){error(clients.get(room.hostId)?.ws,'A quantidade total excede o limite da sala.');return false}
+  if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);
+  room.countdownTimer=null;room.loadingTimer=null;room.countdownToken=(room.countdownToken||0)+1;
+  const token=room.countdownToken;room.status='countdown';room.rematchPending=rematch;room.countdownRoster=rosterKey(room);
+  const countdownMs=Math.max(0,Number(timings.countdownMs??5000));
+  const loadingMs=Math.max(0,Number(timings.loadingMs??1200));
+  sendRoomState(room);
+  broadcast(room,{type:'countdown_start',seconds:Math.ceil(countdownMs/1000),rematch,room:roomPublic(room)});
+  room.countdownTimer=setTimeout(()=>{
+    if(rooms.get(room.code)!==room||room.countdownToken!==token||room.status!=='countdown')return;
+    if(rosterKey(room)!==room.countdownRoster){const changed=invalidateCountdown(room);if(changed){sendRoomState(room);broadcast(room,{type:'countdown_cancelled',reason:'A lista de jogadores mudou. A contagem foi cancelada.'})}return}
+    room.countdownTimer=null;room.status='loading';sendRoomState(room);
+    broadcast(room,{type:'loading_start',duration:loadingMs,rematch,room:roomPublic(room)});
+    room.loadingTimer=setTimeout(()=>{
+      if(rooms.get(room.code)!==room||room.countdownToken!==token||room.status!=='loading')return;
+      if(rosterKey(room)!==room.countdownRoster){const changed=invalidateCountdown(room);if(changed){sendRoomState(room);broadcast(room,{type:'countdown_cancelled',reason:'A lista de jogadores mudou. A partida não foi iniciada.'})}return}
+      startGameNow(room,rematch);
+    },loadingMs);
+  },countdownMs);
+  return true;
+}
+function handle(ws, raw, timings={}){
   const c=ws.client;
   let m;try{m=JSON.parse(raw.toString())}catch{return error(ws,'Mensagem inválida.')}
   if(!m||typeof m.type!=='string')return;
@@ -91,19 +127,25 @@ function handle(ws, raw){
     const size=Math.min(15,Math.max(4,Math.round(Number(m.size)||10)));
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
     const code=makeCode();
-    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings),players:[],lastSnapshot:null,createdAt:Date.now()};
+    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings),players:[],lastSnapshot:null,createdAt:Date.now(),countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false};
     room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false});
     c.name=room.players[0].name;c.color=room.players[0].color;c.roomCode=code;rooms.set(code,room);
     sendRoomState(room);return;
   }
   if(m.type==='join_room'){
     if(c.roomCode)return error(ws,'Você já está em uma sala. Saia dela antes de entrar em outra.');
-    const code=String(m.code||'').replace(/\D/g,'');const room=rooms.get(code);
-    if(!room)return error(ws,'Sala inexistente. Confira o código de 6 dígitos.');
-    if(room.status!=='lobby')return error(ws,'Esta sala já começou ou foi encerrada.');
-    if(room.players.length+room.bots>=room.size)return error(ws,'Sala lotada. O host precisa remover bots ou aumentar o tamanho da sala.');
+    const code=String(m.code||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+    if(!/^[A-Z0-9]{6}$/.test(code))return error(ws,'O código precisa ter 6 letras maiúsculas ou números.');
+    const room=rooms.get(code);
+    if(!room)return error(ws,'Sala inexistente. Confira o código de 6 caracteres.');
+    if(!['lobby','countdown','loading'].includes(room.status))return error(ws,'Esta sala já começou ou foi encerrada.');
+    if(room.players.length+room.bots>=room.size)return error(ws,'Sala lotada. O host precisa remover bots para liberar uma vaga.');
+    const cancelled=invalidateCountdown(room);
     const player={id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false};
-    room.players.push(player);c.name=player.name;c.color=player.color;c.roomCode=code;sendRoomState(room);return;
+    room.players.push(player);c.name=player.name;c.color=player.color;c.roomCode=code;
+    sendRoomState(room);
+    if(cancelled)broadcast(room,{type:'countdown_cancelled',reason:'Um jogador entrou. A contagem foi cancelada.'});
+    return;
   }
   const room=roomFor(c);
   if(m.type==='leave_room'){detachFromRoom(c);return}
@@ -111,22 +153,22 @@ function handle(ws, raw){
   const isHost=room.hostId===c.id;
   if(m.type==='set_room'){
     if(!isHost)return error(ws,'Somente o host pode alterar as configurações.');
-    if(room.status!=='lobby')return error(ws,'As configurações só podem ser alteradas antes da partida.');
-    const size=Math.min(15,Math.max(4,Math.round(Number(m.size)||room.size)));
+    if(room.status!=='lobby')return error(ws,'As configurações só podem ser alteradas antes da contagem regressiva.');
+    if(m.size!==undefined&&Number(m.size)!==room.size)return error(ws,'O tamanho da sala é definido antes de criá-la e não pode ser alterado depois.');
     const humans=room.players.length;
-    const bots=Math.min(size-humans,Math.max(0,Math.round(Number(m.bots)||0)));
-    if(size<humans||size<humans+bots)return error(ws,'O tamanho da sala precisa comportar todos os humanos e bots.');
-    room.size=size;room.bots=bots;room.settings=cleanSettings(m.settings);sendRoomState(room);return;
+    const bots=Math.min(room.size-humans,Math.max(0,Math.round(Number.isFinite(Number(m.bots))?Number(m.bots):room.bots)));
+    if(humans+bots>room.size)return error(ws,'A sala não comporta essa quantidade de bots.');
+    room.bots=bots;room.settings=cleanSettings(m.settings);sendRoomState(room);return;
   }
   if(m.type==='start_game'){
     if(!isHost)return error(ws,'Somente o host pode iniciar a partida.');
     if(room.status!=='lobby')return error(ws,'Esta sala não está aguardando início.');
-    startGame(room,false);return;
+    startGame(room,false,timings);return;
   }
   if(m.type==='rematch'){
     if(!isHost)return error(ws,'Somente o host pode reiniciar a partida.');
     if(room.status!=='ended')return error(ws,'A partida ainda não terminou.');
-    startGame(room,true);return;
+    startGame(room,true,timings);return;
   }
   if(m.type==='game_end'){
     if(!isHost)return;
@@ -138,7 +180,7 @@ function handle(ws, raw){
     sendRoomState(room);return;
   }
   if(m.type==='state_snapshot'){
-    if(!isHost||room.status==='lobby'||!m.snapshot||typeof m.snapshot!=='object')return;
+    if(!isHost||room.status!=='playing'||!m.snapshot||typeof m.snapshot!=='object')return;
     room.lastSnapshot=m.snapshot;
     for(const p of room.players){if(p.id===c.id)continue;const target=clients.get(p.id);if(target)send(target.ws,{type:'snapshot',snapshot:personalizeSnapshot(m.snapshot,p.id)});}
     return;
@@ -176,7 +218,7 @@ function createGameServer(opts={}){
   const wss=new WebSocketServer({server,maxPayload:2*1024*1024});
   wss.on('connection',ws=>{
     ws.client={id:null,roomCode:null,name:'Tripulante',color:'azul',ws};
-    ws.on('message',data=>handle(ws,data));
+    ws.on('message',data=>handle(ws,data,{countdownMs:opts.countdownMs??5000,loadingMs:opts.loadingMs??1200}));
     ws.on('close',()=>{const c=ws.client;if(c.id){detachFromRoom(c,'disconnect');clients.delete(c.id)}});
     ws.on('error',()=>{});
   });
