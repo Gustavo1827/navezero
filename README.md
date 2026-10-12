@@ -69,3 +69,9 @@ npm test
 Os testes verificam códigos alfanuméricos, salas cheias/inexistentes, tamanho imutável, limite com bots, configurações independentes, cancelamento da contagem ao entrar/sair, bloqueio de novas entradas após o início, transferência do host com papéis preservados, distribuição do resultado final, revanche e condições de vitória após mortes/saídas. Também foram verificadas a sintaxe do JavaScript do jogo e dos arquivos do servidor.
 
 **Nota sobre a validação:** os testes automatizados validam a lógica do servidor e o protocolo de salas. Não substituem uma partida completa testada visualmente em navegador, com várias pessoas e todas as minitarefas; essa verificação manual ainda é recomendada antes de uma publicação pública.
+## Ajuste experimental de fluidez multiplayer
+
+A versão de teste inclui previsão local do movimento do jogador não-host e interpolação visual dos demais personagens entre snapshots. O host continua responsável por validar o estado autoritativo da partida; as correções recebidas são aplicadas gradualmente quando a diferença é pequena, enquanto teletransportes e mudanças importantes de estado são sincronizados diretamente. As colisões locais continuam sendo verificadas durante a previsão, e o host mantém a validação das ações.
+
+A suíte automatizada foi executada, mas essa alteração ainda precisa ser validada numa partida real em dois celulares.
+
