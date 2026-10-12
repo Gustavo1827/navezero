@@ -13,17 +13,57 @@ test('configurações completas incluem infiltrados e distância de renderizaç�
   assert.match(server, /cleanSettings\(\{\.\.\.room\.settings,\.\.\.\(m\.settings&&typeof m\.settings==='object'\?m\.settings:\{\}\)\}\)/);
 });
 
-test('resultado da votação dura 10 segundos e avança para uma fase de ejeção separada', () => {
-  assert.match(html, /M\.replyQ=\[\]; M\.dur=10; \$\('meetTitle'\)\.textContent='Resultado da votação'/);
+test('a reunião revela os votos por 10 segundos na mesma tela e depois passa à ejeção', () => {
+  assert.match(html, /M\.replyQ=\[\]; M\.dur=10; \$\('meetTitle'\)\.textContent='Votação'/);
   assert.match(html, /M\.phase==='result'\)\{if\(M\.t>=M\.dur\)setMeetPhase\('eject'\)\}/);
   assert.match(html, /M\.phase==='eject'\)\{if\(M\.t>=M\.dur\)endMeeting\(\)\}/);
+  assert.match(html, /\$\('meet'\)\.classList\.toggle\('vote-reveal',ph==='result'\)/);
+  assert.match(html, /\$\('meet'\)\.classList\.remove\('vote-reveal','space-result'\)/);
 });
 
-test('votos são exibidos pela cor de quem votou e removidos na ejeção', () => {
+test('bolinhas representam a cor de quem votou e desaparecem antes da ejeção', () => {
   assert.match(html, /M\.log\.forEach\(v=>\{const cd=M\.cards\[v\.target\]/);
-  assert.match(html, /d\.style\.background=chatCol\(charById\(v\.voter\)\|\|G\.player\)/);
+  assert.match(html, /d\.style\.background=COLOR_BY\[voter\.color\]\?\.main\|\|chatCol\(voter\)/);
   assert.match(html, /if\(ph==='eject'\)card\.classList\.remove\('pick'\)/);
-  assert.match(html, /#meet\.space-eject #voteBreakdown/);
+  assert.match(html, /if\(ph==='eject'\)\{[^}]*card\.dotsEl\.innerHTML=''/s);
+  assert.match(html, /function netPaintMeeting\(sm\)\{[\s\S]*?\$\('voteBreakdown'\)\.textContent='';\$\('voteBreakdown'\)\.hidden=true/);
+  assert.doesNotMatch(html.slice(html.indexOf('function netPaintMeeting(sm){'), html.indexOf('function netSyncCameraAndButtons()')), /sm\.voteBreakdown/);
+});
+
+test('Xerife tem configurações limitadas, aba própria e sincronização de sala', () => {
+  for (const k of ['sheriffCooldown','sheriffChance','sheriffMax']) {
+    assert.match(html, new RegExp("'"+k+"'"));
+    assert.match(server, new RegExp(k+':\\['));
+  }
+  assert.match(html, /sheriffCooldown:\[10,60\]/);
+  assert.match(html, /sheriffChance:\[0,100\]/);
+  assert.match(html, /sheriffMax:\[0,15\]/);
+  assert.match(html, /id="btnSheriffSection"/);
+  assert.match(html, /if\(G\.cfgPage==='functions'&&\(\(G\.cfgFunctionTab==='sheriff'\)!==isSheriff\)\)return/);
+  assert.match(html, /const sheriffEnabled=CFG\.sheriffMax>0&&CFG\.sheriffChance>0&&Math\.random\(\)\*100<CFG\.sheriffChance/);
+  assert.match(html, /sheriffEligible\.slice\(0,clamp\(CFG\.sheriffMax,0,15\)\)/);
+});
+
+test('disparo do Xerife é validado pelo host e respeita alcance, linha de visão e cooldown', () => {
+  assert.match(html, /command==='sheriff_shoot'[\s\S]*?activePlay&&!G\.M&&ch\.alive&&ch\.role==='crew'&&ch\.function==='sheriff'[\s\S]*?dist\(ch,target\)<=84&&losClear/);
+  assert.match(server, /'sheriff_shoot'/);
+  assert.match(html, /function doSheriffShot\(shooter,target\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(shooter\);addSheriffBody\(shooter,shooter\.id,'sheriff_misfire'\)/);
+  assert.match(html, /if\(shooter===G\.player\)G\.sheriffCd=CFG\.sheriffCooldown;else shooter\.netSheriffCd=CFG\.sheriffCooldown/);
+});
+
+
+test('frases prontas permitem alegar ou suspeitar das quatro funções', () => {
+  for (const id of ['roleDeny','roleSelf','roleSight','roleGuessPlayer']) assert.match(html, new RegExp("id:'"+id+"'"));
+  for (const role of ['Tripulante','Infiltrado','Xerife','Localizador']) assert.match(html, new RegExp(role));
+  assert.match(html, /function renderPhraseRoles\(phraseId,targetId=null\)/);
+  assert.match(html, /Vi alguém com a função de \$\{role\}/);
+});
+
+test('descrições das funções e classes usam exatamente os textos solicitados', () => {
+  assert.match(html, /Rastreie um tripulante pelo seu mapa\./);
+  assert.match(html, /Elimine um Infiltrado com suas habilidades\./);
+  assert.match(html, /Mate a tripulação e sabote a navegação\./);
+  assert.match(html, /Faça suas tarefas e descubra o\(s\) Infiltrado\(s\)\./);
 });
 
 test('cliente não marca tarefa concluída antes da confirmação autoritativa do host', () => {
