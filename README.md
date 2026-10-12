@@ -6,10 +6,13 @@ Esta pasta contém o jogo HTML completo, o servidor de salas/WebSocket e os test
 
 - Criação de salas com código exclusivo de 6 caracteres (letras maiúsculas e números), por exemplo `A7K9Q2`.
 - Tamanho de sala de 4 a 15 participantes, escolhido antes de criar e fixo depois; humanos e bots contam juntos.
-- 1 Infiltrado para 4–9 participantes e 3 Infiltrados para 10–15.
-- Configurações independentes guardadas por sala; somente o host pode alterá-las no lobby.
+- Quantidade de Infiltrados ajustável pelo host entre 1 e 3, respeitando o tamanho da partida.
+- Configurações independentes guardadas por sala e sincronizadas entre participantes; somente o host pode alterá-las no lobby. Inclui número de Infiltrados, tempos, velocidade, visões, Localizadores e distância de renderização.
+- Quantidade de bots preservada ao salvar a sala, iniciar e jogar novamente; atualizações parciais não resetam as configurações omitidas.
 - Bots na partida, com tarefas, suspeitas, sabotagens, votações e papéis conforme a lógica existente.
-- Sincronização de movimento, personagens, tarefas, mortes, sabotagens, reuniões, votos e resultado final.
+- Sincronização de movimento, personagens, tarefas, mortes, sabotagens, reuniões, votos e resultado final. Clientes não-hosts enviam interações para validação autoritativa do host, incluindo distância, permissões, dutos e conclusão de tarefas.
+- Resultado de votação com bolinhas coloridas sob cada jogador que recebeu votos, exibido por 10 segundos, seguido por uma tela de ejeção limpa.
+- Culling visual por sala: o piso, as sombras, a decoração, as estações e as grelhas de dutos são renderizados em camadas separadas; camadas distantes são ignoradas ou aparecem gradualmente ao aproximar. O cálculo é local a cada cliente e não altera colisões, tarefas ou regras.
 - Transferência da liderança para outro jogador se o host sair. Uma contagem regressiva de 5 segundos é cancelada se alguém entrar ou sair; depois aparece uma tela preta de carregamento.
 - Tela de fim de partida preta, com estrelas animadas, indicação da equipe vencedora e opções **Jogar de novo** e **Sair**.
 - A revanche reutiliza o código e as configurações da sala, redistribuindo funções no começo da rodada. Se a saída do host deixar exatamente 3 participantes contando os bots, a revanche continua com 1 Infiltrado para não bloquear a sala; as partidas novas normais continuam exigindo pelo menos 4.
@@ -66,10 +69,10 @@ Execute:
 npm test
 ```
 
-Os testes verificam códigos alfanuméricos, salas cheias/inexistentes, tamanho imutável, limite com bots, configurações independentes, cancelamento da contagem ao entrar/sair, bloqueio de novas entradas após o início, transferência do host com papéis preservados, distribuição do resultado final, revanche e condições de vitória após mortes/saídas. Também foram verificadas a sintaxe do JavaScript do jogo e dos arquivos do servidor.
+Os testes verificam códigos alfanuméricos, salas cheias/inexistentes, tamanho imutável, limite com bots, configurações independentes e preservação de parâmetros em atualizações parciais, cancelamento da contagem ao entrar/sair, bloqueio de novas entradas após o início, transferência do host com papéis preservados, distribuição do resultado final, revanche com quantidade de bots e configurações preservadas e condições de vitória após mortes/saídas. A sintaxe do JavaScript do jogo e do servidor também é validada.
 
-**Nota sobre a validação:** os testes automatizados validam a lógica do servidor e o protocolo de salas. Não substituem uma partida completa testada visualmente em navegador, com várias pessoas e todas as minitarefas; essa verificação manual ainda é recomendada antes de uma publicação pública.
+**Nota sobre a validação:** os testes automatizados validam a lógica do servidor e o protocolo de salas. Eles não substituem uma partida real em navegador com host e dois clientes, incluindo execução de minitarefas e confirmação visual do culling. Essa rodada manual ainda deve ocorrer antes de publicar a versão para todos.
 
-## Interpolação visual experimental (teste em dois dispositivos)
+## Interpolação e renderização local
 
-Esta variante interpola apenas a posição e a animação visual dos personagens no cliente entre snapshots do host. Ela **não** habilita movimento local preditivo e não altera a simulação autoritativa, colisões ou validação de ações do host. A sintaxe JavaScript e os 12 testes automatizados foram verificados; ainda é necessário testar uma partida real em dois dispositivos antes de publicar.
+O cliente interpola a posição visual entre snapshots recebidos do host e aplica culling por distância às camadas estáticas e aos elementos dinâmicos distantes. Isso não habilita movimento local preditivo e não altera a simulação autoritativa, a grade de colisões nem a validação de interações. A distância de renderização fica entre 500 e 1500 pixels e é salva como configuração da sala.
