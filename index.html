@@ -335,7 +335,6 @@ body.touch #stick{display:block}
     <canvas id="pv" width="280" height="260"></canvas>
     <div class="field"><label for="nameIn">Seu nome</label><input id="nameIn" maxlength="12" value="Você" autocomplete="off"></div>
     <div class="field"><label id="colLab">Sua cor</label><div id="swatches" role="group" aria-labelledby="colLab"></div></div>
-    <div class="row"><button class="big" id="btnPlay">Jogar</button></div>
     <div class="row onlineMenu"><button class="big" id="btnCreateRoom">Criar sala</button><button class="big alt" id="btnJoinRoom">Entrar na sala</button></div>
     <div id="createPanel" hidden>
       <h3 style="margin:0 0 10px;color:var(--amber)">Preparar sala</h3>
@@ -375,12 +374,7 @@ body.touch #stick{display:block}
         <label>Cooldown de reunião (s)<input id="roomMeetIn" type="number" min="10" max="60" value="20"></label>
         <label>Duração da discussão (s)<input id="roomDiscussionIn" type="number" min="5" max="90" value="25"></label>
         <label>Duração da votação (s)<input id="roomVotingIn" type="number" min="5" max="90" value="25"></label>
-        <label>Visão do Infiltrado<input id="roomImpVisionIn" type="number" min="260" max="900" step="20" value="700"></label>
         <label>Visão do Tripulante<input id="roomCrewVisionIn" type="number" min="260" max="900" step="20" value="520"></label>
-        <label>Máximo de Localizadores<input id="roomLocMaxIn" type="number" min="0" max="15" value="2"></label>
-        <label>Chance de Localizador (%)<input id="roomLocChanceIn" type="number" min="0" max="100" value="35"></label>
-        <label>Cooldown do Localizador (s)<input id="roomLocCooldownIn" type="number" min="15" max="60" value="15"></label>
-        <label>Duração do rastreio (s)<input id="roomLocDurationIn" type="number" min="40" max="90" value="40"></label>
       </div>
       <button class="big alt" id="btnSaveRoomConfig" type="button">Salvar configurações</button>
       <p class="phase">De 4 a 9 participantes: 1 Infiltrado. De 10 a 15: 3 Infiltrados. Bots contam no total.</p>
@@ -2868,7 +2862,6 @@ $('btnFollow').addEventListener('dblclick',e=>{
 });
 $('btnAgain').addEventListener('click',()=>{Snd.init();newGame()});
 $('btnMenu').addEventListener('click',toMenu);
-$('btnPlay').addEventListener('click',()=>{Snd.init();G.cfg.name=($('nameIn').value.trim()||'Você').slice(0,12);Snd.click();newGame()});
 // clique no painel no mapa
 cv.addEventListener('pointerdown',e=>{
   if(G.state!=='playing'||uiBusy()||(!G.player.alive&&!ghostActs()))return;
@@ -2952,7 +2945,7 @@ function netRenderRoom(){
   if(NET.isHost&&r.status==='lobby'){
     const st=r.settings||{};
     $('roomSizeIn').value=r.size;$('roomSizeIn').disabled=true;$('roomBotsIn').value=r.bots;$('roomBotsIn').max=Math.max(0,r.size-r.players.length);$('roomBotsIn').disabled=!NET.isHost||r.status!=='lobby';
-    $('roomSpeedIn').value=st.speed??CFG.speed;$('roomKillIn').value=st.kill??CFG.kill;$('roomSabIn').value=st.sab??CFG.sab;$('roomMeetIn').value=st.meet??CFG.meet;$('roomDiscussionIn').value=st.discussion??CFG.discussion;$('roomVotingIn').value=st.voting??CFG.voting;$('roomImpVisionIn').value=st.impVision??CFG.impVision;$('roomCrewVisionIn').value=st.crewVision??CFG.crewVision;$('roomLocMaxIn').value=st.locMax??CFG.locMax;$('roomLocChanceIn').value=st.locChance??CFG.locChance;$('roomLocCooldownIn').value=st.locCooldown??CFG.locCooldown;$('roomLocDurationIn').value=st.locDuration??CFG.locDuration;
+    $('roomSpeedIn').value=st.speed??CFG.speed;$('roomKillIn').value=st.kill??CFG.kill;$('roomSabIn').value=st.sab??CFG.sab;$('roomMeetIn').value=st.meet??CFG.meet;$('roomDiscussionIn').value=st.discussion??CFG.discussion;$('roomVotingIn').value=st.voting??CFG.voting;$('roomCrewVisionIn').value=st.crewVision??CFG.crewVision;
   }
 }
 function netShowRoom(){ $('joinPanel').hidden=true;$('roomLobby').hidden=false;$('menu').hidden=false;netRenderRoom() }
@@ -3015,13 +3008,13 @@ function netRoomSettingsFromControls(){
   const val=(id,k)=>{const n=Number($(id).value);return clamp(Math.round(Number.isFinite(n)?n:CFG[k]),CFG_LIM[k][0],CFG_LIM[k][1])};
   const players=NET.room?.players.length||1, fixedSize=NET.room?.size||10;
   const bots=clamp(Math.round(+$('roomBotsIn').value||0),0,Math.max(0,fixedSize-players));
-  const settings={...netSettings(),speed:val('roomSpeedIn','speed'),kill:val('roomKillIn','kill'),sab:val('roomSabIn','sab'),meet:val('roomMeetIn','meet'),discussion:val('roomDiscussionIn','discussion'),voting:val('roomVotingIn','voting'),impVision:val('roomImpVisionIn','impVision'),crewVision:val('roomCrewVisionIn','crewVision'),locMax:val('roomLocMaxIn','locMax'),locChance:val('roomLocChanceIn','locChance'),locCooldown:val('roomLocCooldownIn','locCooldown'),locDuration:val('roomLocDurationIn','locDuration')};
+  const settings={...netSettings(),speed:val('roomSpeedIn','speed'),kill:val('roomKillIn','kill'),sab:val('roomSabIn','sab'),meet:val('roomMeetIn','meet'),discussion:val('roomDiscussionIn','discussion'),voting:val('roomVotingIn','voting'),crewVision:val('roomCrewVisionIn','crewVision')};
   return {bots,settings};
 }
 function netApplyRoomToCFG(){if(NET.room?.settings)netApplySettings(NET.room.settings);CFG.impostors=netTotal()>=10?3:1}
 function netStartGame(){if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;netSaveRoomSettings();netSend({type:'start_game'})}
 function netSaveRoomSettings(){if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;const cfg=netRoomSettingsFromControls();netApplySettings(cfg.settings);netSend({type:'set_room',bots:cfg.bots,settings:cfg.settings})}
-function netSyncRoomControlsFromCFG(){if(!NET.room)return;const r=NET.room;const st=netSettings();$('roomSizeIn').value=r.size;$('roomSizeIn').disabled=true;$('roomBotsIn').value=r.bots;for(const [id,key] of [['roomSpeedIn','speed'],['roomKillIn','kill'],['roomSabIn','sab'],['roomMeetIn','meet'],['roomDiscussionIn','discussion'],['roomVotingIn','voting'],['roomImpVisionIn','impVision'],['roomCrewVisionIn','crewVision'],['roomLocMaxIn','locMax'],['roomLocChanceIn','locChance'],['roomLocCooldownIn','locCooldown'],['roomLocDurationIn','locDuration']])$(id).value=st[key]??CFG[key]}
+function netSyncRoomControlsFromCFG(){if(!NET.room)return;const r=NET.room;const st=netSettings();$('roomSizeIn').value=r.size;$('roomSizeIn').disabled=true;$('roomBotsIn').value=r.bots;for(const [id,key] of [['roomSpeedIn','speed'],['roomKillIn','kill'],['roomSabIn','sab'],['roomMeetIn','meet'],['roomDiscussionIn','discussion'],['roomVotingIn','voting'],['roomCrewVisionIn','crewVision']])$(id).value=st[key]??CFG[key]}
 function netShowCountdown(seconds=5){const overlay=$('mpWaitOverlay');clearInterval(NET.countdownUiTimer);overlay.hidden=false;overlay.classList.remove('loading');$('mpWaitTitle').textContent='Partida começando';$('mpWaitDesc').textContent='Aguarde. Se alguém entrar ou sair, a contagem será cancelada.';const end=Date.now()+Math.max(1,seconds)*1000;const draw=()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));$('mpWaitCount').textContent=String(left);if(left<=0){overlay.classList.add('loading');$('mpWaitTitle').textContent='Preparando partida…';$('mpWaitDesc').textContent='Carregando nave e participantes.'}};draw();NET.countdownUiTimer=setInterval(draw,100)}
 function netShowLoading(){const overlay=$('mpWaitOverlay');clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=0;overlay.hidden=false;overlay.classList.add('loading');$('mpWaitCount').textContent='';$('mpWaitTitle').textContent='Carregando…';$('mpWaitDesc').textContent='Preparando a partida para todos os jogadores.'}
 function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=0;$('mpWaitOverlay').hidden=true;$('mpWaitOverlay').classList.remove('loading')}
@@ -3157,8 +3150,6 @@ $('btnJoinRoom').addEventListener('click',()=>{$('joinPanel').hidden=false;$('ro
 $('btnJoinConfirm').addEventListener('click',()=>netJoinRoom());$('roomCodeIn').addEventListener('input',()=>{$('roomCodeIn').value=$('roomCodeIn').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)});$('roomCodeIn').addEventListener('keydown',e=>{if(e.key==='Enter')netJoinRoom()});$('btnJoinCancel').addEventListener('click',()=>$('joinPanel').hidden=true);
 $('btnSaveRoomConfig').addEventListener('click',netSaveRoomSettings);$('btnStartRoom').addEventListener('click',netStartGame);$('btnLeaveRoom').addEventListener('click',()=>{netLeaveRoom();netOriginalToMenu()});
 $('btnCopyCode').addEventListener('click',()=>{const code=NET.room?.code;if(!code)return;try{navigator.clipboard.writeText(code);toast('Código copiado: '+code)}catch(e){toast('Código da sala: '+code)}});
-// Override the original start button's free-play behavior only when in a room; offline play remains unchanged.
-$('btnPlay').addEventListener('click',e=>{if(NET.inRoom){e.stopImmediatePropagation();toast('Você já está em uma sala online.');return}},true);
 // Meeting chat / votes / action requests are sent to the host; the host answers with authoritative snapshots.
 function netSyncHostAfterAuthorityChange(){if(NET.inRoom&&NET.isHost){const snap=netCaptureSnapshot();netSend({type:'state_snapshot',snapshot:snap})}}
 // As telas de configuração só podem ser alteradas pelo host e salvam por sala no servidor.
