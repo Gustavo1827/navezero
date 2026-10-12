@@ -203,7 +203,8 @@ body.touch #stick{display:block}
 #meet.space-result .meetp header{justify-content:center}
 #meet.space-result #meetTitle{font-size:clamp(25px,5vw,42px);letter-spacing:2px;text-transform:uppercase;color:#d9eaff;text-shadow:0 0 20px #5a9dff}
 #meet.space-result #meetTimer{position:absolute;right:12px;top:12px}
-#meet.space-result #meetDesc{white-space:pre-line;color:#fff;font-size:clamp(22px,4.4vw,36px);font-weight:800;line-height:1.45;margin:28px auto;max-width:680px;text-shadow:0 2px 10px #000}
+#meet.space-result #meetDesc{white-space:pre-line;color:#fff;font-size:clamp(19px,3.4vw,27px);font-weight:800;line-height:1.35;margin:14px auto 8px;max-width:680px;text-shadow:0 2px 10px #000}
+#meet.space-result #voteBreakdown:not([hidden]){display:block;box-sizing:border-box;width:min(680px,100%);max-height:34vh;overflow-y:auto;overscroll-behavior:contain;margin:0 auto 8px;padding:10px 14px;border:1px solid rgba(159,202,255,.32);border-radius:12px;background:rgba(7,13,35,.72);color:#d9eaff;text-align:left;white-space:pre-line;font-size:clamp(12px,2.3vw,16px);font-weight:600;line-height:1.45;text-shadow:0 1px 3px #000}
 #meet.space-result #meetGrid,#meet.space-result #meetChat,#meet.space-result #meetSay,#meet.space-result #sayChips,#meet.space-result #meetFoot{display:none!important}
 #meet.space-result #meetStatus{color:#a9c9f8}
 @keyframes spaceDrift{from{transform:translateY(0)}to{transform:translateY(73px)}}
@@ -438,6 +439,7 @@ body.touch #stick{display:block}
   <div class="mpanel meetp" role="dialog" aria-modal="true" aria-labelledby="meetTitle">
     <header><h2 id="meetTitle"></h2><span class="chip" id="meetTimer">3s</span></header>
     <p id="meetDesc"></p>
+    <div id="voteBreakdown" hidden aria-live="polite"></div>
     <div id="meetGrid"></div>
     <div id="meetChat" aria-live="polite"></div>
     <div id="meetSay" hidden><input id="sayIn" maxlength="90" placeholder="Escreva uma mensagem" autocomplete="off" aria-label="Mensagem"><button class="chip" id="btnSay">Enviar</button></div>
@@ -1245,8 +1247,8 @@ function checkEnd(){
   const allKnownImpsGone=!!(trackedImps&&trackedImps.size&&[...trackedImps].every(id=>NET.departedImpIds.has(id)||!allChars.some(c=>c.id===id&&c.alive)));
   if((imps.length>0&&aliveImps.length===0)||allKnownImpsGone){endGame('crew','Todos os Infiltrados foram eliminados ou saíram da sala.');return true}
   const crewAlive=allChars.filter(c=>c.alive&&c.role==='crew').length;
-  // A maioria é estrita: 2 Infiltrados contra 1 Tripulante encerra; 1 contra 1 ainda não.
-  if(aliveImps.length&&aliveImps.length>crewAlive){endGame('imp','Há mais Infiltrados do que Tripulantes vivos.');return true}
+  // Infiltrados vencem quando superam os Tripulantes vivos ou quando resta 1 contra 1.
+  if(aliveImps.length&&(aliveImps.length>crewAlive||(aliveImps.length===1&&crewAlive===1))){endGame('imp','Os Infiltrados alcançaram a vantagem decisiva sobre os Tripulantes.');return true}
   if(progress()>=1){endGame('crew','Todas as tarefas foram concluídas e a nave está segura.');return true}
   return false;
 }
@@ -2615,6 +2617,7 @@ function buildMeetUI(){
   $('meetDesc').textContent=`${M.caller.name} convocou a reunião. ${why}`;
   $('meetStatus').textContent=''; $('meetChat').innerHTML=''; $('btnSkip').hidden=true; $('btnSkip').disabled=false; $('meetTimer').textContent='3s';
   $('meetSay').hidden=true; $('sayChips').hidden=true; $('sayChips').innerHTML=''; $('sayIn').value='';
+  $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';
   const grid=$('meetGrid'); grid.innerHTML='';
   G.chars.forEach(ch=>{
     const b=el('button','pc'+(ch.isPlayer?' me':'')+(ch.alive?'':' dead')); b.type='button';
@@ -2628,6 +2631,7 @@ function buildMeetUI(){
 }
 function setMeetPhase(ph){
   const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive; $('meet').classList.toggle('space-result',ph==='result');
+  $('voteBreakdown').hidden=ph!=='result';
   if(ph==='discuss'){
     $('meetTitle').textContent='Discussão'; $('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';
     genChat(); M.dur=CFG.discussion; M.endIn=undefined;
@@ -2702,6 +2706,16 @@ function playerVote(id){
 }
 function showResult(){
   const M=G.M, counts={}; M.log.forEach(v=>{counts[v.target]=(counts[v.target]||0)+1});
+  const grouped=new Map();
+  M.log.forEach(v=>{if(!grouped.has(v.target))grouped.set(v.target,[]);grouped.get(v.target).push(v)});
+  const voteLines=[...grouped.entries()].sort((a,b)=>b[1].length-a[1].length).map(([targetId,votes])=>{
+    const target=targetId==='skip'?null:charById(targetId);
+    const label=target?`${target.name} (${COLOR_BY[target.color]?.name||target.color})`:'Pular voto';
+    const voters=votes.map(v=>{const voter=charById(v.voter);return voter?`${voter.name} (${COLOR_BY[voter.color]?.name||voter.color})`:'Jogador desconectado'}).join(', ');
+    return `${label}: ${votes.length} ${votes.length===1?'voto':'votos'} — ${voters}`;
+  });
+  $('voteBreakdown').textContent='VOTOS REGISTRADOS\n'+(voteLines.length?voteLines.join('\n'):'Nenhum voto registrado.');
+  $('voteBreakdown').hidden=false;
   const entries=Object.entries(counts).filter(e=>e[0]!=='skip').sort((a,b)=>b[1]-a[1]), skipN=counts.skip||0;
   const top=entries[0], other=Math.max(skipN,entries[1]?entries[1][1]:0);
   const eject=(top&&top[1]>=2&&top[1]>other)?charById(top[0]):null;   // empate ou poucos votos: ninguém sai
@@ -2915,7 +2929,7 @@ buildStatic(); resize(); requestAnimationFrame(frame);
 /* =====================================================================
    MULTIPLAYER ONLINE — autoridade da sala no host + snapshots/requisições
    ===================================================================== */
-const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,applying:false,seq:0,recvSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0};
+const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,applying:false,seq:0,recvSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0};
 const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','locMax','locChance','locCooldown','locDuration'];
 function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
 function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
@@ -3034,7 +3048,7 @@ function netCaptureSnapshot(){
   const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
   const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null}));
-  const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,chatCount:$('meetChat').children.length}:null;
+  const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,voteBreakdown:$('voteBreakdown').textContent,chatCount:$('meetChat').children.length}:null;
   return {seq:++NET.seq,state:st,gt:G.gt,chars,tasks,bodies,sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
 }
 function netApplySnapshot(s,force=false){
@@ -3069,6 +3083,7 @@ function netPaintMeeting(sm){
   const M=G.M;if(!M)return;const ph=sm.phase;
   $('meetTimer').textContent=Math.max(0,Math.ceil((sm.dur||0)-(sm.t||0)))+'s';
   $('meetingIntro').hidden=ph!=='intro';$('meet').hidden=ph==='intro';$('meet').classList.toggle('space-result',ph==='result');
+  $('voteBreakdown').textContent=sm.voteBreakdown||'';$('voteBreakdown').hidden=ph!=='result';
   if(ph==='intro'){$('meetingIntroTitle').textContent=sm.reason==='body'?'CORPO REPORTADO':'REUNIÃO DE EMERGÊNCIA';$('meetingIntroDesc').textContent=sm.reason==='body'&&M.body?`Corpo de ${M.body.name} encontrado ${inRoom(M.body.room)}.`:`${M.caller.name} convocou a reunião.`}
   else if(ph==='discuss'){$('meetTitle').textContent='Discussão';$('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';$('meetSay').hidden=!G.player.alive;$('sayChips').hidden=!G.player.alive;if(!$('sayChips').children.length)renderQuickPhrases();$('btnSkip').hidden=true}
   else if(ph==='vote'){$('meetTitle').textContent='Votação';$('meetDesc').textContent='Escolha quem ejetar ou pule o voto.';$('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=!G.player.alive;$('btnSkip').disabled=M.votes[G.player.id]!==undefined;$('meetStatus').textContent=M.votes[G.player.id]!==undefined?'Voto registrado.':'Escolha seu voto.'}
@@ -3123,10 +3138,17 @@ function netUpdateRemote(dt){
   }
 }
 function netUpdateInput(){if(!NET.inRoom||!NET.id||!NET.ws||NET.ws.readyState!==WebSocket.OPEN)return;const v=inputVec();netSend({type:'input',x:v.x,y:v.y})}
-function netStartSnapshots(){if(NET.snapshotTimer)clearInterval(NET.snapshotTimer);NET.snapshotTimer=setInterval(()=>{
-  if(NET.inRoom&&NET.isHost&&NET.room&&NET.room.status==='playing'&&G.player&&G.chars.length){const snap=netCaptureSnapshot();netSend({type:'state_snapshot',snapshot:snap})}
-  if(NET.inRoom&&!NET.isHost)netUpdateInput();
-},100)}
+function netStartSnapshots(){
+  if(NET.snapshotTimer)clearInterval(NET.snapshotTimer);
+  if(NET.inputTimer)clearInterval(NET.inputTimer);
+  // Snapshots completos são caros: 6-7 por segundo são suficientes para sincronizar
+  // o estado sem reconstruir personagens e tarefas excessivamente nos clientes.
+  NET.snapshotTimer=setInterval(()=>{
+    if(NET.inRoom&&NET.isHost&&NET.room&&NET.room.status==='playing'&&G.player&&G.chars.length){const snap=netCaptureSnapshot();netSend({type:'state_snapshot',snapshot:snap})}
+  },150);
+  // Enviar comandos de movimento mais frequentemente reduz a latência dos não-hosts.
+  NET.inputTimer=setInterval(()=>{if(NET.inRoom&&!NET.isHost)netUpdateInput()},50);
+}
 // Client-local simulations are view-only; host owns NPC AI, kills, sabotages, tasks, meetings and victory checks.
 const netOriginalUpdateNPCs=updateNPCs;updateNPCs=function(dt){if(NET.inRoom&&!NET.isHost)return;if(NET.inRoom&&NET.isHost)netUpdateRemote(dt);netOriginalUpdateNPCs(dt)};
 const netOriginalUpdatePlayer=updatePlayer;updatePlayer=function(dt){if(NET.inRoom&&!NET.isHost)return;netOriginalUpdatePlayer(dt)};

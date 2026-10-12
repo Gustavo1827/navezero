@@ -182,7 +182,13 @@ function handle(ws, raw, timings={}){
   if(m.type==='state_snapshot'){
     if(!isHost||room.status!=='playing'||!m.snapshot||typeof m.snapshot!=='object')return;
     room.lastSnapshot=m.snapshot;
-    for(const p of room.players){if(p.id===c.id)continue;const target=clients.get(p.id);if(target)send(target.ws,{type:'snapshot',snapshot:personalizeSnapshot(m.snapshot,p.id)});}
+    for(const p of room.players){
+      if(p.id===c.id)continue;
+      const target=clients.get(p.id);
+      // Evita acumular snapshots antigos em clientes com conexão lenta; o próximo
+      // snapshot completo substitui o anterior, então descartar um atrasado é seguro.
+      if(target && (target.ws.socket?.writableLength||0)<512*1024)send(target.ws,{type:'snapshot',snapshot:personalizeSnapshot(m.snapshot,p.id)});
+    }
     return;
   }
   if(m.type==='input'){
