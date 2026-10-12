@@ -26,11 +26,11 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
 
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440}});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950}});
   const created=await onceMessage(host,m=>m.type==='room_state');
   const code=created.room.code;
   assert.match(code,/^[A-Z0-9]{6}$/);assert.equal(created.room.size,4);assert.equal(created.room.bots,3);assert.equal(created.room.players.length+created.room.bots,4);
-  assert.equal(created.room.settings.speed,210);
+  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);
 
   const blocked=await connect(url,'Visitante','verde');all.push(blocked);
   send(blocked,{type:'join_room',code});
@@ -42,7 +42,7 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   const started=await onceMessage(host,m=>m.type==='game_start');assert.equal(started.room.status,'playing');assert.equal(started.room.players.length+started.room.bots,4);
 
   const host2=await connect(url,'Host Dois','vermelho');all.push(host2);
-  send(host2,{type:'create_room',name:'Host Dois',color:'vermelho',size:5,bots:1,settings:{speed:130,kill:40,crewVision:800}});
+  send(host2,{type:'create_room',name:'Host Dois',color:'vermelho',size:5,bots:1,settings:{speed:130,kill:40,crewVision:800,impostors:3,renderDist:1000}});
   const created2=await onceMessage(host2,m=>m.type==='room_state');
   assert.notEqual(created2.room.code,code);assert.equal(created2.room.settings.speed,130);
   const visitor=await connect(url,'Visita','verde');all.push(visitor);
@@ -56,7 +56,7 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   assert.equal(rooms.get(created2.room.code).size,5);
   send(host2,{type:'set_room',bots:0,settings:{speed:130,kill:40,crewVision:800}});
   await onceMessage(visitor,m=>m.type==='room_state'&&m.room.bots===0);
-  assert.equal(rooms.get(created2.room.code).settings.speed,130);
+  assert.equal(rooms.get(created2.room.code).settings.speed,130);assert.equal(rooms.get(created2.room.code).settings.impostors,3,'configurações não enviadas em uma atualização parcial devem ser preservadas');assert.equal(rooms.get(created2.room.code).settings.renderDist,1000);
   assert.equal(rooms.get(code).settings.speed,210,'as configurações de outra sala não devem mudar');
 
   const third=await connect(url,'Terceiro','amarelo');all.push(third);
@@ -79,7 +79,7 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:6,bots:3,settings:{speed:180}});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:6,bots:3,settings:{speed:180,impostors:2,renderDist:950}});
   const made=await onceMessage(host,m=>m.type==='room_state');const code=made.room.code;
   const guest=await connect(url,'Convidado','verde');all.push(guest);
   send(guest,{type:'join_room',code});await onceMessage(guest,m=>m.type==='room_state');
@@ -119,7 +119,7 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   const restarted=await onceMessage(guest,m=>m.type==='game_start'&&m.rematch===true);
   await onceMessage(peer,m=>m.type==='game_start'&&m.rematch===true);
   assert.equal(restarted.room.code,code,'a revanche reutiliza o mesmo código de sala');
-  assert.equal(restarted.room.round,2);
+  assert.equal(restarted.room.round,2);assert.equal(restarted.room.bots,3,'a quantidade de bots deve sobreviver à revanche');assert.equal(restarted.room.settings.impostors,2);assert.equal(restarted.room.settings.renderDist,950);
 });
 
 test('revanche continua quando a saída do host deixa exatamente três participantes', async t=>{
@@ -177,7 +177,7 @@ test('código alfanumérico maiúsculo, tamanho fixo e cancelamento da contagem 
   const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:6,bots:3});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:6,bots:3,settings:{speed:215,impostors:2,renderDist:1000}});
   const created=await onceMessage(host,m=>m.type==='room_state');const code=created.room.code;
   assert.match(code,/^[A-Z0-9]{6}$/);assert.equal(created.room.size,6);
   send(host,{type:'set_room',size:7,bots:3});
@@ -197,5 +197,5 @@ test('código alfanumérico maiúsculo, tamanho fixo e cancelamento da contagem 
   send(guest,{type:'leave_room'});
   await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='lobby'&&m.room.players.length===1);
   await onceMessage(host,m=>m.type==='countdown_cancelled');
-  assert.equal(rooms.get(code).status,'lobby');
+  assert.equal(rooms.get(code).status,'lobby');assert.equal(rooms.get(code).settings.speed,215);assert.equal(rooms.get(code).settings.impostors,2);assert.equal(rooms.get(code).settings.renderDist,1000,'atualizar somente bots não deve zerar outras configurações');
 });
