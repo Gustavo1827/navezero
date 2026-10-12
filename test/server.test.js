@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { createGameServer, rooms } = require('../server');
+const { createGameServer, rooms, cleanSettings } = require('../server');
 
 function onceMessage(client, predicate, timeout=2500){
   return new Promise((resolve,reject)=>{
@@ -26,11 +26,11 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
 
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:48,sheriffChance:70,sheriffMax:4}});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:48,sheriffChance:70,sheriffMax:4,delayedEnabled:1,delayedDuration:40}});
   const created=await onceMessage(host,m=>m.type==='room_state');
   const code=created.room.code;
   assert.match(code,/^[A-Z0-9]{6}$/);assert.equal(created.room.size,4);assert.equal(created.room.bots,3);assert.equal(created.room.players.length+created.room.bots,4);
-  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,48);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);
+  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,48);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(created.room.settings.delayedEnabled,1);assert.equal(created.room.settings.delayedDuration,40);
 
   const blocked=await connect(url,'Visitante','verde');all.push(blocked);
   send(blocked,{type:'join_room',code});
@@ -198,4 +198,17 @@ test('código alfanumérico maiúsculo, tamanho fixo e cancelamento da contagem 
   await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='lobby'&&m.room.players.length===1);
   await onceMessage(host,m=>m.type==='countdown_cancelled');
   assert.equal(rooms.get(code).status,'lobby');assert.equal(rooms.get(code).settings.speed,215);assert.equal(rooms.get(code).settings.impostors,2);assert.equal(rooms.get(code).settings.renderDist,1000,'atualizar somente bots não deve zerar outras configurações');
+});
+
+
+test('configurações do Atrasado respeitam limites e valores padrão', () => {
+  const settings=cleanSettings({delayedEnabled:7,delayedDuration:99});
+  assert.equal(settings.delayedEnabled,1);
+  assert.equal(settings.delayedDuration,40);
+  const low=cleanSettings({delayedEnabled:-2,delayedDuration:1});
+  assert.equal(low.delayedEnabled,0);
+  assert.equal(low.delayedDuration,5);
+  const defaults=cleanSettings({});
+  assert.equal(defaults.delayedEnabled,0);
+  assert.equal(defaults.delayedDuration,20);
 });

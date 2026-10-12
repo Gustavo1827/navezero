@@ -39,7 +39,7 @@ test('Xerife tem configurações limitadas, aba própria e sincronização de sa
   assert.match(html, /sheriffChance:\[0,100\]/);
   assert.match(html, /sheriffMax:\[0,15\]/);
   assert.match(html, /id="btnSheriffSection"/);
-  assert.match(html, /if\(G\.cfgPage==='functions'&&\(\(G\.cfgFunctionTab==='sheriff'\)!==isSheriff\)\)return/);
+  assert.match(html, /G\.cfgFunctionTab==='sheriff'&&!isSheriff/);
   assert.match(html, /const sheriffEnabled=CFG\.sheriffMax>0&&CFG\.sheriffChance>0&&Math\.random\(\)\*100<CFG\.sheriffChance/);
   assert.match(html, /sheriffEligible\.slice\(0,clamp\(CFG\.sheriffMax,0,15\)\)/);
 });
@@ -60,10 +60,11 @@ test('frases prontas permitem alegar ou suspeitar das quatro funções', () => {
 });
 
 test('descrições das funções e classes usam exatamente os textos solicitados', () => {
-  assert.match(html, /Rastreie um tripulante pelo seu mapa\./);
-  assert.match(html, /Elimine um Infiltrado com suas habilidades\./);
-  assert.match(html, /Mate a tripulação e sabote a navegação\./);
-  assert.match(html, /Faça suas tarefas e descubra o\(s\) Infiltrado\(s\)\./);
+  assert.match(html, /Localizador — Rastreie um Tripulante com seu mapa\./);
+  assert.match(html, /Xerife — Elimine o Infiltrado\. Se você errar, será eliminado\./);
+  assert.match(html, /Mate a tripulação e sabote a nave\./);
+  assert.match(html, /Faça suas tarefas e encontre o Infiltrado\./);
+  assert.match(html, /Atrasado — Mate suas vítimas lentamente\./);
 });
 
 test('cliente não marca tarefa concluída antes da confirmação autoritativa do host', () => {
@@ -84,4 +85,23 @@ test('culling desenha camadas visuais por sala sem desativar colisões', () => {
   assert.match(html, /if\(a<=\.005\)return;\s*const layer=ROOM_STATIC\.get\(r\.id\)/);
   assert.match(html, /drawRoomStaticLayers\(c,cx,cy,vw,vh,cullViewer\)/);
   assert.match(html, /const floor=new Uint8Array\(COLS\*ROWS\), block=new Uint8Array\(COLS\*ROWS\), walk=new Uint8Array\(COLS\*ROWS\)/);
+});
+
+
+test('Atrasado tem aba vermelha, ativação, duração limitada e marcação autoritativa', () => {
+  assert.match(html, /id="btnDelayedSection"[^>]*>◷ Atrasado/);
+  assert.match(html, /id="btnDelayed"/);
+  assert.match(html, /delayedEnabled:\[0,1\]/);
+  assert.match(html, /delayedDuration:\[5,40\]/);
+  assert.match(html, /Tempo para marcar/);
+  assert.match(html, /Usa o mesmo cooldown configurado em/);
+  assert.match(html, /if\(CFG\.delayedEnabled\)/);
+  assert.match(html, /function doDelayedMark\(shooter,target\)/);
+  assert.match(html, /remaining:CFG\.delayedDuration/);
+  assert.match(html, /if\(G\.M\|\|G\.state==='meeting'/);
+  assert.match(html, /command==='delayed_mark'[\s\S]*?dist\(ch,target\)<=84&&losClear/);
+  assert.match(html, /delayedMarks:\{\.\.\.G\.delayedMarks\}/);
+  assert.match(server, /delayedEnabled:\[0,1\]/);
+  assert.match(server, /delayedDuration:\[5,40\]/);
+  assert.match(server, /'delayed_mark'/);
 });
