@@ -175,6 +175,8 @@ body.touch #stick{display:block}
 .act2.rep{background:var(--mint);color:#06301f;box-shadow:0 6px 0 #1f9d6c,0 8px 0 #10122a}
 .act2.locator{background:#65d8ff;color:#062d47;box-shadow:0 6px 0 #2685b0,0 8px 0 #10122a;font-size:24px}
 .act2.sheriff{background:#e8f0ff;color:#16234c;box-shadow:0 6px 0 #8aabd7,0 8px 0 #10122a}
+.act2.delayed,.delayed-tab{background:#ff5364!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
+.act2.delayed small{display:block;font-size:10px;line-height:1.05}
 #actions .row2:first-child{flex-wrap:wrap;justify-content:center;max-width:min(390px,96vw)}
 .act2.locator small{display:block;font-size:10px;line-height:1;margin-top:2px}
 .act2.locator.active{filter:none;outline:3px solid #65d8ff;outline-offset:2px}
@@ -420,7 +422,7 @@ body.touch #stick{display:block}
   <div id="ventPanel" class="panel" hidden><div class="vt">Dentro do duto</div><div class="vs" id="ventHere"></div><div id="ventList"></div><button class="chip exit" id="ventExit">Sair do duto</button></div>
   <div id="sabBar" hidden></div>
   <div id="stick"><i id="knob"></i></div>
-  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden>Atirar</button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>⌖<small>Rastrear</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
+  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden>Atirar</button><button class="act2 delayed" id="btnDelayed" aria-label="Marcar vítima" title="Atrasado — marcar um Tripulante próximo" hidden>◷<small>Marcar</small></button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>⌖<small>Rastrear</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
 </div>
 
 <div id="deathIntro" hidden aria-live="assertive"><div class="deathCard"><h2>ELIMINADO!</h2><canvas id="deathCv" width="460" height="230" aria-hidden="true"></canvas><p id="deathDesc">Você foi eliminado.</p></div></div>
@@ -462,7 +464,7 @@ body.touch #stick{display:block}
     <h2 id="cfgTitle">Configurações</h2><div class="row" id="cfgTabs"><button class="big" id="cfgTabSettings">Configurações</button><button class="big alt" id="cfgTabFunctions">Funções</button></div>
     <p class="cfgnote" id="cfgNote">Tempos de recarga, em segundos.</p>
     <div id="cfgRows"></div>
-    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">⌖ Localizador</button><button class="big alt" id="btnSheriffSection" type="button">✦ Xerife</button></div></div>
+    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">⌖ Localizador</button><button class="big alt" id="btnSheriffSection" type="button">✦ Xerife</button><button class="big alt delayed-tab" id="btnDelayedSection" type="button">◷ Atrasado</button></div></div>
     <div class="row"><button class="big alt" id="cfgReset">Restaurar padrão</button><button class="big" id="cfgClose">Fechar</button></div>
   </div>
 </div>
@@ -813,7 +815,7 @@ function drawStationBody(c,s){
    ===================================================================== */
 const G={cfgFunctionTab:'locator',state:'menu',t:0,chars:[],player:null,tasks:[],pin:null,mini:null,tok:0,tool:null,
   cam:{x:0,y:0},vision:820,visionTarget:820,cfg:{name:'Você',color:'azul'},over:false,lastRoom:null,action:null,
-  role:'crew',imp:null,locator:false,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,bodies:[],sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,dt:.016};
+  role:'crew',imp:null,locator:false,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,delayedCd:0,delayedT:null,delayedMarks:{},bodies:[],sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,dt:.016};
 const NAME_BUB={};
 const keys=new Set(); const joy={x:0,y:0};
 
@@ -1295,6 +1297,7 @@ function checkEnd(){
 }
 function endGame(winner,msg){
   if(G.over)return;   // vitória já confirmada: nada (nem sabotagem de impostor morto) a anula
+  G.delayedMarks={};G.delayedT=null;
   G.over=true; G.state='over'; G.winner=winner; G.endReason=msg; G.mapOpen=false; $('mapView').hidden=true; closeModalSilent(); $('meet').hidden=true; $('role').hidden=true;
   const mine=(winner==='crew')===(G.role==='crew');
   const e=$('end'); e.className=mine?'win':'lose'; e.hidden=false;
@@ -1320,7 +1323,7 @@ function newGame(){
   TID=0; doors.forEach(d=>d.closed=false); rebuildWalk(); G.walkVer++;
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); G.killT=null; $('ventPanel').hidden=true; VENT_DEFS.forEach(v=>v.flash=0);
   G.over=false; G.followTarget=null; G.tasks=[]; G.pin=null; G.bodies=[]; G.M=null; G.spec=null; G.fx=0; G.fixT=0; G.gt=0;
-  G.sab={lights:0,reactor:0,comms:0,doors:0,cd:CFG.sab}; G.killCd=Math.min(CFG.kill,15); G.sheriffCd=0;G.sheriffT=null; G.meetCd=CFG.meet; G.cfgOpen=false; $('settings').hidden=true; G.vision=G.visionTarget=CFG.crewVision;
+  G.sab={lights:0,reactor:0,comms:0,doors:0,cd:CFG.sab}; G.killCd=Math.min(CFG.kill,15); G.sheriffCd=0;G.sheriffT=null;G.delayedCd=0;G.delayedT=null;G.delayedMarks={}; G.meetCd=CFG.meet; G.cfgOpen=false; $('settings').hidden=true; G.vision=G.visionTarget=CFG.crewVision;
   const online=!!(typeof NET!=='undefined'&&NET.inRoom&&NET.room&&NET.room.status==='playing');
   const p=newChar(G.cfg.name,G.cfg.color,0,0,true); p.emUses=1; if(online)p.id=NET.id; G.player=p;
   const cols=shuffle(COLORS.filter(c=>c.id!==G.cfg.color)), names=shuffle([...NAMES,...Array.from({length:20},(_,i)=>'Tripulante '+(i+1))]);
@@ -1344,7 +1347,8 @@ function newGame(){
   const sheriffEligible=shuffle(G.chars.filter(c=>c.role==='crew'&&c.function!=='locator'&&(c.isPlayer||c.isRemoteHuman)));
   const sheriffEnabled=CFG.sheriffMax>0&&CFG.sheriffChance>0&&Math.random()*100<CFG.sheriffChance;
   if(sheriffEnabled){for(const ch of sheriffEligible.slice(0,clamp(CFG.sheriffMax,0,15)))ch.function='sheriff'}
-  G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.sheriffCd=0; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
+  if(CFG.delayedEnabled){const delayedEligible=G.imps.filter(c=>c.isPlayer||c.isRemoteHuman);if(delayedEligible.length){const delayed=pick(delayedEligible);delayed.function='delayed'}}
+  G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.sheriffCd=0;G.delayedCd=0;G.delayedT=null;G.delayedMarks={}; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
   const pts=cafePoints(G.chars.length); G.chars.forEach((c,i)=>placeChar(c,pts[i]));
   G.chars.forEach(c=>{
@@ -1353,13 +1357,13 @@ function newGame(){
     G.tasks.push(...ts);
   });
   $('tpHead').firstElementChild.textContent=G.role==='imp'?'Tarefas (falsas)':'Tarefas';
-  $('roleName').textContent=G.role==='imp'?'Infiltrado':(G.player.function==='sheriff'?'Tripulante · Xerife':(G.locator?'Tripulante · Localizador':'Tripulante'));
+  $('roleName').textContent=G.player.function==='delayed'?'Infiltrado · Atrasado':(G.role==='imp'?'Infiltrado':(G.player.function==='sheriff'?'Tripulante · Xerife':(G.locator?'Tripulante · Localizador':'Tripulante')));
   G.cam.x=p.x-VW/2; G.cam.y=p.y-VH/2; G.lastRoom=null; G.action=null;
   renderTasks(); updateSabUI();
   const isImp=G.role==='imp';
   $('role').className=isImp?'imp':'crew'; $('role').hidden=false;
-  $('roleTitle').textContent=isImp?'Você é um Infiltrado':(G.player.function==='sheriff'?'Você é um Xerife':'Você é um Tripulante');
-  $('roleMsg').textContent=G.player.function==='sheriff'?'Elimine um Infiltrado com suas habilidades.':(G.player.function==='locator'?'Rastreie um tripulante pelo seu mapa.':(isImp?'Mate a tripulação e sabote a navegação.':'Faça suas tarefas e descubra o(s) Infiltrado(s).'));
+  $('roleTitle').textContent=isImp?'Você é um Infiltrado':'Você é um Tripulante';
+  $('roleMsg').textContent=G.player.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(G.player.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(G.player.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(isImp?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.')));
   $('roleMsg').hidden=false;
   G.state='role'; G.roleT=9; Snd.open();
 }
@@ -1637,25 +1641,32 @@ function closeMap(){
   if(!G.mapOpen)return;
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
-const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Cooldown para atirar','Tempo de recarga da habilidade do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida','']];
+const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Cooldown para atirar','Tempo de recarga da habilidade do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['delayedEnabled','Ativar função Atrasado','Permite sortear um Infiltrado com a função Atrasado (0 = desativado; 1 = ativado)',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s']];
 function buildCfgUI(){
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
   const locked=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
-  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');
+  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');
+  if(G.cfgPage==='functions'&&G.cfgFunctionTab==='delayed'){
+    const cooldownRow=el('div','cfgrow fncompact'),top=el('div','cfgtop');
+    top.append(el('span','','◷ Tempo para marcar'),el('b','',CFG.kill+' s'));
+    cooldownRow.append(top,el('small','','Usa o mesmo cooldown configurado em “Tempo para matar” dos Infiltrados. Este valor não é o tempo até a eliminação.'));
+    box.appendChild(cooldownRow);
+  }
   CFG_ROWS.forEach(([k,l,d,unit])=>{
-    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'];
-    const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isFn=isLocator||isSheriff;
+    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedEnabled','delayedDuration'];
+    const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isDelayed=delayedKeys.includes(k),isFn=isLocator||isSheriff||isDelayed;
     if((G.cfgPage==='functions')!==isFn)return;
-    if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='sheriff')!==isSheriff))return;
+    if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='locator'&&!isLocator)||(G.cfgFunctionTab==='sheriff'&&!isSheriff)||(G.cfgFunctionTab==='delayed'&&!isDelayed)))return;
     const row=el('div','cfgrow'+(isFn?' fncompact':'')), top=el('div','cfgtop');
     if(isFn){
-      const value=el('b','',CFG[k]+(unit?' '+unit:''));
-      top.append(el('span','', (isSheriff?'✦ ':'⌖ ')+l),value);
+      const showCfgValue=()=>k==='delayedEnabled'?(CFG[k]?'Ativado':'Desativado'):(CFG[k]+(unit?' '+unit:''));
+      const value=el('b','',showCfgValue());
+      top.append(el('span','',(isDelayed?'◷ ':isSheriff?'✦ ':'⌖ ')+l),value);
       const stepper=el('div','fnstepper');
       const minus=el('button','','−'), number=el('output','',String(CFG[k])), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label','Diminuir '+l.toLowerCase()); plus.setAttribute('aria-label','Aumentar '+l.toLowerCase()); number.setAttribute('aria-label',l);
-      const sync=()=>{number.textContent=CFG[k];value.textContent=CFG[k]+(unit?' '+unit:'');minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=CFG_LIM[k][1]};
-      const change=delta=>{if(locked)return;CFG[k]=clamp(CFG[k]+delta,CFG_LIM[k][0],CFG_LIM[k][1]);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);Snd.click()};
+      const sync=()=>{number.textContent=k==='delayedEnabled'?(CFG[k]?'Sim':'Não'):String(CFG[k]);value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=CFG_LIM[k][1]};
+      const change=delta=>{if(locked)return;CFG[k]=clamp(k==='delayedEnabled'?(delta>0?1:0):CFG[k]+delta,CFG_LIM[k][0],CFG_LIM[k][1]);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);Snd.click()};
       minus.addEventListener('click',()=>change(-1));plus.addEventListener('click',()=>change(1));stepper.append(minus,number,plus);row.append(top,stepper,el('small','',d));sync();
     }else{
       const out=el('b','',CFG[k]+(unit?' '+unit:''));
@@ -1668,13 +1679,13 @@ function buildCfgUI(){
   });
 }
 function setCfgPage(page){
-  G.cfgPage=page==='functions'?'functions':'settings';if(G.cfgFunctionTab!=='sheriff')G.cfgFunctionTab='locator';
+  G.cfgPage=page==='functions'?'functions':'settings';if(!['locator','sheriff','delayed'].includes(G.cfgFunctionTab))G.cfgFunctionTab='locator';
   $('cfgTitle').textContent=G.cfgPage==='functions'?'Funções':'Configurações';
   $('cfgTabSettings').classList.toggle('alt',G.cfgPage!=='settings');
   $('cfgTabFunctions').classList.toggle('alt',G.cfgPage!=='functions');
   buildCfgUI();
   const lk=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));$('cfgReset').disabled=lk;$('cfgNote').classList.toggle('lock',lk);
-  $('cfgNote').textContent=lk?(inGame()?'Bloqueado durante a partida. Para alterar, saia do jogo e volte ao menu principal.':'Somente o host pode editar as configurações antes de iniciar a partida.'): (G.cfgPage==='functions'?(G.cfgFunctionTab==='sheriff'?'Configure o alcance temporal e a distribuição da função Xerife.':'Configure os limites e os tempos da função especial Localizador.'):(typeof NET!=='undefined'&&NET.inRoom?'Configure os parâmetros desta sala. As alterações serão salvas ao fechar este menu.':'Configure os tempos em segundos. Discussão e votação são independentes e valem em todas as reuniões.'));
+  $('cfgNote').textContent=lk?(inGame()?'Bloqueado durante a partida. Para alterar, saia do jogo e volte ao menu principal.':'Somente o host pode editar as configurações antes de iniciar a partida.'): (G.cfgPage==='functions'?(G.cfgFunctionTab==='sheriff'?'Configure o alcance temporal e a distribuição da função Xerife.':G.cfgFunctionTab==='delayed'?'Ative a função Atrasado e configure o tempo até a eliminação.':'Configure os limites e os tempos da função especial Localizador.'):(typeof NET!=='undefined'&&NET.inRoom?'Configure os parâmetros desta sala. As alterações serão salvas ao fechar este menu.':'Configure os tempos em segundos. Discussão e votação são independentes e valem em todas as reuniões.'));
 }
 function openCfg(){setCfgPage('settings');$('cfgTabs').hidden=false;G.cfgOpen=true;joy.x=joy.y=0;if(G.player)G.player.moving=false;$('settings').hidden=false;Snd.init();Snd.open()}
 function openFunctions(){openCfg();setCfgPage('functions')}
@@ -1834,11 +1845,11 @@ function updateNPC(ch,dt){
   }
 }
 /* ---------- configurações, personalidades e memória de suspeita ---------- */
-const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:25,sheriffChance:35,sheriffMax:1,renderDist:820};
-const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[10,60],sheriffChance:[0,100],sheriffMax:[0,15],renderDist:[500,1500]};
-const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:25,sheriffChance:35,sheriffMax:1,renderDist:820};
+const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:25,sheriffChance:35,sheriffMax:1,delayedEnabled:0,delayedDuration:20,renderDist:820};
+const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[10,60],sheriffChance:[0,100],sheriffMax:[0,15],delayedEnabled:[0,1],delayedDuration:[5,40],renderDist:[500,1500]};
+const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:25,sheriffChance:35,sheriffMax:1,delayedEnabled:0,delayedDuration:20,renderDist:820};
 (function(){try{const j=JSON.parse(localStorage.getItem('nz_cfg')||'{}');for(const k in CFG_LIM){const v=+j[k];if(v>=CFG_LIM[k][0]&&v<=CFG_LIM[k][1])CFG[k]=Math.round(v)}}catch(e){}})();
-function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,renderDist:CFG.renderDist}))}catch(e){}}
+function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,delayedEnabled:CFG.delayedEnabled,delayedDuration:CFG.delayedDuration,renderDist:CFG.renderDist}))}catch(e){}}
 const inGame=()=>G.state!=='menu';
 const uiBusy=()=>G.cfgOpen||G.confirmOpen;
 const PERS={
@@ -2254,6 +2265,44 @@ function playerSheriffShot(){
   }
   const target=sheriffTargetFor(shooter);if(!target){toast('Nenhum jogador no alcance do disparo.');Snd.err();return}
   if(!doSheriffShot(shooter,target)){toast('Disparo inválido: aproxime-se do alvo e tente novamente.');Snd.err()}
+}
+function delayedTargetFor(shooter){
+  if(!shooter)return null;let best=null,bd=84;
+  for(const ch of G.chars){if(!ch||ch===shooter||!ch.alive||ch.role!=='crew'||ch.vent||G.delayedMarks[ch.id])continue;const d=dist(shooter,ch);if(d<=bd&&losClear(shooter.x,shooter.y,ch.x,ch.y)){if(d<bd||!best){best=ch;bd=d}}}
+  return best;
+}
+function doDelayedMark(shooter,target){
+  if(!shooter||!target||G.over||!['playing','task','tool'].includes(G.state)||G.M||!shooter.alive||shooter.role!=='imp'||shooter.function!=='delayed'||shooter.vent||target===shooter||!target.alive||target.role!=='crew'||target.vent||G.delayedMarks[target.id])return false;
+  const cd=shooter===G.player?G.delayedCd:(shooter.netDelayedCd||0);
+  if(cd>0||dist(shooter,target)>84||!losClear(shooter.x,shooter.y,target.x,target.y))return false;
+  if(shooter===G.player)G.delayedCd=CFG.kill;else shooter.netDelayedCd=CFG.kill;
+  G.delayedMarks[target.id]={victimId:target.id,killerId:shooter.id,remaining:CFG.delayedDuration};
+  if(shooter.isPlayer){toast('Vítima marcada. A contagem está em andamento.',2200);Snd.tone(300,.12,'triangle',.07);Snd.tone(420,.14,'triangle',.06,0,.1)}
+  return true;
+}
+function playerDelayedMark(){
+  const shooter=G.player;
+  if(!shooter||G.state!=='playing'||G.M||uiBusy()||!shooter.alive||shooter.role!=='imp'||shooter.function!=='delayed'||shooter.vent)return;
+  if(G.delayedCd>0){toast('Atrasado recarregando: '+Math.ceil(G.delayedCd)+'s');Snd.err();return}
+  const target=delayedTargetFor(shooter);if(!target){toast('Nenhum Tripulante desmarcado no alcance.');Snd.err();return}
+  if(typeof NET!=='undefined'&&NET.inRoom&&!NET.isHost&&!NET.applying){if(NET.pendingDelayedMark)return;NET.pendingDelayedMark=true;netSend({type:'action',action:'delayed_mark',targetId:target.id});return}
+  if(!doDelayedMark(shooter,target)){toast('Marcação inválida. Aproxime-se do alvo e tente novamente.');Snd.err()}
+}
+function updateDelayedMarks(dt){
+  if(G.over){G.delayedMarks={};return}
+  if(G.M||G.state==='meeting'||!['playing','task','tool'].includes(G.state))return;
+  if(NET.inRoom&&!NET.isHost)return;
+  for(const [id,mark] of Object.entries(G.delayedMarks||{})){
+    const victim=charById(id);
+    if(!victim||!victim.alive||victim.role!=='crew'){delete G.delayedMarks[id];continue}
+    mark.remaining=Math.max(0,(Number(mark.remaining)||0)-dt);
+    if(mark.remaining>0)continue;
+    const killer=charById(mark.killerId)||G.imps?.[0]||victim;
+    killChar(victim);G.bodies.push({id:'delayed_'+String(victim.id)+'_'+Math.round(G.gt*1000),name:victim.name,color:victim.color,x:victim.x,y:victim.y,room:roomName(victim.x,victim.y),tKill:G.gt,killerId:killer.id,cause:'delayed'});
+    delete G.delayedMarks[id];
+    if(victim.isPlayer){showDeathIntro(killer,victim);toast('A marcação terminou. Você foi eliminado.',3600);Snd.victimSting()}
+    checkEnd();if(G.over){G.delayedMarks={};return}
+  }
 }
 function startLocator(){
   if(G.state!=='playing'||!G.player.alive||!G.locator||uiBusy())return;
@@ -2873,12 +2922,12 @@ let last=performance.now(), toolAcc=0;
 const simActive=()=>(G.state==='playing'||G.state==='task'||G.state==='tool')&&!G.confirmOpen;
 function updateButtons(){
   const p=G.player, can=G.state==='playing'&&(p.alive||ghostCanSab()), imp=G.role==='imp';
-  const bk=$('btnKill'), bsh=$('btnSheriff'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator'), sheriff=G.role==='crew'&&p.function==='sheriff';
-  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(imp&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));
+  const bk=$('btnKill'), bsh=$('btnSheriff'), bdel=$('btnDelayed'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator'), sheriff=G.role==='crew'&&p.function==='sheriff', delayed=G.role==='imp'&&p.function==='delayed';
+  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(imp&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bdel,!(delayed&&p.alive)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));
   const gh=$('btnGhost'), showGh=!p.alive&&G.role==='crew'; hv(gh,!showGh);
   const fb=$('btnFollow'); hv(fb,!(G.state==='playing'&&!p.alive)); if(!fb.hidden){const t=G.followTarget&&charById(G.followTarget);fb.innerHTML=t&&t.alive?'Seguindo<br>'+t.name:'Seguir<br>jogador';fb.title=t&&t.alive?'Toque para trocar de alvo; toque duas vezes para cancelar':'Toque para começar a seguir';}
   const gl='Modo: '+(G.ghostMode==='spec'?'Espectador':'Tarefas'); if(gh._l!==gl){gh._l=gl;gh.textContent=gl}
-  const rl=p.alive?(imp?'Infiltrado':(p.function==='sheriff'?'Tripulante · Xerife':'Tripulante')):(imp?'Infiltrado (morto)':(G.ghostMode==='spec'?'Espectador':'Tripulante (morto)')); const rn=$('roleName'); if(rn._l!==rl){rn._l=rl;rn.textContent=rl}
+  const rl=p.alive?(p.function==='delayed'?'Infiltrado · Atrasado':(imp?'Infiltrado':(p.function==='sheriff'?'Tripulante · Xerife':'Tripulante'))):(imp?'Infiltrado (morto)':(G.ghostMode==='spec'?'Espectador':'Tripulante (morto)')); const rn=$('roleName'); if(rn._l!==rl){rn._l=rl;rn.textContent=rl}
   const lab=(p.alive||ghostActs())?'Usar':'Trocar'; if(ub._l!==lab){ub._l=lab;ub.textContent=lab}
   G.killT=null;
   if(imp&&can&&G.killCd<=0&&!p.vent){let bd=72;for(const v of G.chars){if(!v.alive||v.role==='imp')continue;const d=dist(p,v);if(d<bd){bd=d;G.killT=v}}}
@@ -2887,6 +2936,8 @@ function updateButtons(){
   G.sheriffT=sheriff&&can&&!p.vent&&G.sheriffCd<=0?sheriffTargetFor(p):null;
   setCls(bsh,'ready',!!G.sheriffT&&!uiBusy()&&!(typeof NET!=='undefined'&&NET.pendingSheriffShot));
   const sht=G.sheriffCd>0?String(Math.ceil(G.sheriffCd)):(NET?.pendingSheriffShot?'…':'Atirar');if(bsh._l!==sht){bsh._l=sht;bsh.textContent=sht}
+  G.delayedT=delayed&&can&&!p.vent&&G.delayedCd<=0?delayedTargetFor(p):null;const dlab=G.delayedCd>0?String(Math.ceil(G.delayedCd)):(NET?.pendingDelayedMark?'…':'◷ Marcar');if(bdel._l!==dlab){bdel._l=dlab;bdel.innerHTML=dlab==='◷ Marcar'?'◷<small>Marcar</small>':dlab}
+  setCls(bdel,'ready',!!G.delayedT&&!uiBusy()&&!(NET?.pendingDelayedMark));
   setCls(bs,'ready',imp&&G.state==='playing'&&!uiBusy()&&G.sab.cd<=0);
   const st=G.sab.cd>0?String(Math.ceil(G.sab.cd)):'Sabotar'; if(bs._l!==st){bs._l=st;bs.textContent=st}
   setCls(br,'ready',!!(can&&nearBody())); setCls(bl,'active',G.trackTime>0); const lt=G.trackTime>0?'Cancelar':(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear');if(bl._l!==lt){bl._l=lt;bl.querySelector('small').textContent=lt;bl._l=lt}
@@ -2899,7 +2950,7 @@ function update(dt){
   if(NET.inRoom&&!NET.isHost)netUpdateVisualInterpolation();
   if(G.state==='playing'&&(p.alive||ghostActs())&&!uiBusy()&&!p.vent)updatePlayer(dt); else p.moving=false;
   if(simActive()){
-    G.gt+=dt; G.killCd=Math.max(0,G.killCd-dt); G.sheriffCd=Math.max(0,G.sheriffCd-dt); G.meetCd=Math.max(0,G.meetCd-dt); updateLocator(dt);
+    G.gt+=dt; G.killCd=Math.max(0,G.killCd-dt); G.sheriffCd=Math.max(0,G.sheriffCd-dt); G.delayedCd=Math.max(0,G.delayedCd-dt);G.chars.forEach(c=>{if(c.isRemoteHuman)c.netDelayedCd=Math.max(0,(c.netDelayedCd||0)-dt)}); G.meetCd=Math.max(0,G.meetCd-dt); updateLocator(dt);updateDelayedMarks(dt);if(G.over)return;
     updateSab(dt); if(G.over)return;
     updateNPCs(dt);
   }
@@ -2985,14 +3036,14 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>keys.delete(e.code));
 addEventListener('blur',()=>keys.clear());
 $('btnUse').addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();const p=G.player,a=G.action;if(!p.alive&&!(G.role==='crew'&&p.ghost&&a&&a.type==='task')){toast('Morto só pode realizar tarefas permitidas.');return;}doInteract(a)});
-$('btnKill').addEventListener('pointerdown',e=>{e.preventDefault();playerKill()});$('btnSheriff').addEventListener('pointerdown',e=>{e.preventDefault();playerSheriffShot()});
+$('btnKill').addEventListener('pointerdown',e=>{e.preventDefault();playerKill()});$('btnSheriff').addEventListener('pointerdown',e=>{e.preventDefault();playerSheriffShot()});$('btnDelayed').addEventListener('pointerdown',e=>{e.preventDefault();playerDelayedMark()});
 $('btnSab').addEventListener('pointerdown',e=>{e.preventDefault();playerSab()});
 $('btnReport').addEventListener('pointerdown',e=>{e.preventDefault();playerReport()});$('btnLocator').addEventListener('pointerdown',e=>{e.preventDefault();startLocator()});
 $('btnSkip').addEventListener('click',()=>playerVote('skip'));
 $('btnRole').addEventListener('click',startPlay);
 $('btnCfg').addEventListener('click',openCfg);  $('cfgClose').addEventListener('click',closeCfg);
 $('cfgReset').addEventListener('click',()=>{if(inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby')))return;Object.assign(CFG,CFG_DEF);saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
-$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});
+$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});$('btnDelayedSection').addEventListener('click',()=>{G.cfgFunctionTab='delayed';buildCfgUI();$('cfgNote').textContent='Ative a função Atrasado e configure o tempo até a eliminação.';Snd.click()});
 $('btnSay').addEventListener('click',()=>{const i=$('sayIn');sendSay(i.value);i.value=''});
 $('sayIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const i=$('sayIn');sendSay(i.value);i.value=''}});
 $('btnMap').addEventListener('click',toggleMap);
@@ -3089,7 +3140,7 @@ function netUpdateVisualInterpolation(){
     c.netVisualMoving=alpha<1?(!!c.netFromMoving||!!c.netToMoving):!!c.netToMoving;
   }
 }
-const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','renderDist'];
+const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','delayedEnabled','delayedDuration','renderDist'];
 function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
 function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
@@ -3218,12 +3269,12 @@ function netShowLoading(){const overlay=$('mpWaitOverlay');clearInterval(NET.cou
 function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=0;$('mpWaitOverlay').hidden=true;$('mpWaitOverlay').classList.remove('loading')}
 function netCaptureSnapshot(){
   const st=(G.state==='task'||G.state==='tool')?'playing':G.state;
-  if(G.player){G.player.netKillCd=G.killCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
-  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0}));
+  if(G.player){G.player.netKillCd=G.killCd;G.player.netDelayedCd=G.delayedCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
+  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
   const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
   const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chatCount:$('meetChat').children.length}:null;
-  return {seq:++NET.seq,state:st,gt:G.gt,chars,tasks,bodies,sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
+  return {seq:++NET.seq,state:st,gt:G.gt,chars,tasks,bodies,delayedMarks:{...G.delayedMarks},sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
 }
 function netApplySnapshot(s,force=false){
   if(!s||!Array.isArray(s.chars)||(!force&&Number.isFinite(+s.seq)&&+s.seq<NET.recvSeq))return;if(Number.isFinite(+s.seq))NET.recvSeq=+s.seq;NET.applying=true;
@@ -3261,8 +3312,9 @@ function netApplySnapshot(s,force=false){
     const oldTasks=new Map((G.tasks||[]).map(t=>[String(t.id),t]));
     G.tasks=s.tasks.map(r=>{let t=oldTasks.get(String(r.id));if(!t)t={id:r.id,steps:[]};t.id=r.id;t.key=r.key;t.name=r.name;t.owner=r.owner;t.fake=!!r.fake;t.fakeOnly=!!r.fakeOnly;t.fix=r.fix||null;const oldSteps=new Map((t.steps||[]).map((q,i)=>[String(q.st)+'/'+i,q]));t.steps=r.steps.map((q,i)=>{let z=oldSteps.get(String(q.st)+'/'+i);if(!z)z={};const key=String(t.id)+':'+String(q.st);Object.assign(z,q);if(q.done)NET.pendingTasks.delete(key);return z});t.done=!!r.done||t.steps.every(q=>q.done);for(const q of t.steps){const key=String(t.id)+':'+String(q.st);if(q.done||t.done)NET.pendingTasks.delete(key)}return t});
     const oldBodies=new Map((G.bodies||[]).map(b=>[String(b.id),b]));G.bodies=s.bodies.map(r=>{const b=oldBodies.get(String(r.id))||{};Object.assign(b,r);return b});
+    G.delayedMarks=s.delayedMarks&&typeof s.delayedMarks==='object'?{...s.delayedMarks}:{};
     if(s.cfg)netApplySettings(s.cfg);G.sab={...s.sab};const doorsChanged=doors.some((d,i)=>d.closed!==!!s.doors[i]);doors.forEach((d,i)=>{d.closed=!!s.doors[i]});if(doorsChanged){rebuildWalk();G.walkVer++}
-    G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;NET.pendingSheriffShot=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}
+    G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;G.delayedCd=s.selfDelayedCd??G.player.netDelayedCd??s.delayedCd??G.delayedCd;G.player.netDelayedCd=G.delayedCd;NET.pendingSheriffShot=false;NET.pendingDelayedMark=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}
     if(s.state==='meeting'){
       const sm=s.meeting;if(sm){const caller=charById(sm.callerId)||G.player;const body=sm.bodyId?G.bodies.find(b=>String(b.id)===String(sm.bodyId)):null;if(!G.M||oldState!=='meeting')callMeeting(caller,sm.reason,body);if(G.M){G.M.caller=caller;G.M.body=body;G.M.phase=sm.phase;G.M.t=sm.t;G.M.clock=sm.clock;G.M.dur=sm.dur;G.M.votes={...sm.votes};G.M.voteAt={...sm.voteAt};G.M.log=sm.log||[];G.M.result=(sm.phase==='result'||sm.phase==='eject')?{eject:sm.ejectId?charById(sm.ejectId):null,counts:sm.counts||{},skipN:sm.skipN||0,headline:sm.ejectHeadline||''}:null;G.M.resultHeadline=sm.resultHeadline||'';netPaintMeeting(sm)}}
       G.state='meeting';$('role').hidden=true;$('end').hidden=true;
@@ -3273,10 +3325,10 @@ function netApplySnapshot(s,force=false){
       if(G.M){G.M=null;$('meet').hidden=true;$('meetingIntro').hidden=true;$('meet').classList.remove('space-result','space-eject','vote-reveal');$('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';$('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML='');$('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'))}
       if(!(oldState==='task'||oldState==='tool')||s.state!=='playing')G.state=s.state;
       if(s.state==='playing'){$('role').hidden=true;$('end').hidden=true;$('menu').hidden=true;$('hud').hidden=false}
-      if(s.state==='role'){$('role').hidden=false;$('roleTitle').textContent=G.role==='imp'?'Você é um Infiltrado':(G.player.function==='sheriff'?'Você é um Xerife':'Você é um Tripulante');$('roleMsg').textContent=G.player.function==='sheriff'?'Elimine um Infiltrado com suas habilidades.':(G.player.function==='locator'?'Rastreie um tripulante pelo seu mapa.':(G.role==='imp'?'Mate a tripulação e sabote a navegação.':'Faça suas tarefas e descubra o(s) Infiltrado(s).'))}
+      if(s.state==='role'){$('role').hidden=false;$('roleTitle').textContent=G.role==='imp'?'Você é um Infiltrado':'Você é um Tripulante';$('roleMsg').textContent=G.player.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(G.player.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(G.player.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(G.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.')))}
     }
     if(!wasAlive&&G.player.alive){NET.ownWasAlive=true}else if(wasAlive&&!G.player.alive){const corpse=G.bodies.find(b=>String(b.name)===String(G.player.name));const killer=G.chars.find(c=>c.id===(corpse?.killerId||''))||G.imps[0];if(corpse?.cause==='sheriff_misfire'||corpse?.cause==='sheriff_recoil'){toast(corpse.cause==='sheriff_misfire'?'Você foi eliminado após atingir um Tripulante inocente.':'Você foi eliminado pelo disparo do Xerife.',3600)}else if(killer)showDeathIntro(killer,G.player);NET.ownWasAlive=false}
-    $('roleName').textContent=G.role==='imp'?'Infiltrado':(G.player.function==='sheriff'?'Tripulante · Xerife':(G.locator?'Tripulante · Localizador':'Tripulante'));renderTasks();updateSabUI();netSyncCameraAndButtons();
+    $('roleName').textContent=G.role==='imp'?'Infiltrado':(G.player.function==='sheriff'?'Tripulante · Xerife':(G.player.function==='delayed'?'Infiltrado · Atrasado':(G.locator?'Tripulante · Localizador':'Tripulante')));renderTasks();updateSabUI();netSyncCameraAndButtons();
   }catch(e){console.error('Falha ao aplicar estado online',e)}finally{NET.applying=false}
 }
 function netPaintMeeting(sm){
@@ -3333,6 +3385,9 @@ function netHostCommand(m){
       ch.netKillCd=CFG.kill;doKill(ch,target);}
   }else if(command==='sheriff_shoot'){
     const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&!G.M&&ch.alive&&ch.role==='crew'&&ch.function==='sheriff'&&!ch.vent&&(ch.netSheriffCd||0)<=0&&target&&target!==ch&&target.alive&&!target.vent&&dist(ch,target)<=84&&losClear(ch.x,ch.y,target.x,target.y)){doSheriffShot(ch,target)}
+  }else if(command==='delayed_mark'){
+    const target=G.chars.find(c=>c.id===m.targetId);
+    if(activePlay&&!G.M&&ch.alive&&ch.role==='imp'&&ch.function==='delayed'&&!ch.vent&&(ch.netDelayedCd||0)<=0&&target&&target!==ch&&target.alive&&target.role==='crew'&&!target.vent&&!G.delayedMarks[target.id]&&dist(ch,target)<=84&&losClear(ch.x,ch.y,target.x,target.y))doDelayedMark(ch,target);
   }else if(command==='report'){
     if(activePlay&&ch.alive&&!ch.vent){const b=G.bodies.find(b=>dist(ch,b)<100&&losClear(ch.x,ch.y,b.x,b.y));if(b)callMeeting(ch,'body',b)}
   }else if(command==='emergency'){
