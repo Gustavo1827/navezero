@@ -174,6 +174,8 @@ body.touch #stick{display:block}
 .act2.sab{background:#2b3379;color:var(--ink);box-shadow:0 6px 0 #161a4a,0 8px 0 #10122a}
 .act2.rep{background:var(--mint);color:#06301f;box-shadow:0 6px 0 #1f9d6c,0 8px 0 #10122a}
 .act2.locator{background:#65d8ff;color:#062d47;box-shadow:0 6px 0 #2685b0,0 8px 0 #10122a;font-size:24px}
+.act2.sheriff{background:#e8f0ff;color:#16234c;box-shadow:0 6px 0 #8aabd7,0 8px 0 #10122a}
+#actions .row2:first-child{flex-wrap:wrap;justify-content:center;max-width:min(390px,96vw)}
 .act2.locator small{display:block;font-size:10px;line-height:1;margin-top:2px}
 .act2.locator.active{filter:none;outline:3px solid #65d8ff;outline-offset:2px}
 #sabBar{position:absolute;left:50%;top:calc(64px + var(--st));transform:translateX(-50%);max-width:min(440px,70vw);text-align:center;background:#2a0f1e;border:2.5px solid var(--coral);border-radius:14px;padding:3px 14px 1px;font-weight:700;font-size:16px;line-height:1.3;animation:sabpulse 1s ease-in-out infinite;pointer-events:none}
@@ -198,6 +200,10 @@ body.touch #stick{display:block}
 .meetp{width:min(780px,100%)}
 /* Tela cinematográfica do resultado da votação */
 #meet.space-result,#meet.space-eject{background:radial-gradient(ellipse at 50% 45%,rgba(27,54,105,.72),rgba(3,6,22,.97) 68%),#030616;overflow:hidden}
+#meet.vote-reveal #meetDesc,#meet.vote-reveal #meetStatus,#meet.vote-reveal #meetChat,#meet.vote-reveal #meetSay,#meet.vote-reveal #sayChips,#meet.vote-reveal #meetFoot{display:none!important}
+#meet.vote-reveal #meetGrid{display:grid!important}
+#meet.vote-reveal .pc .pv{visibility:hidden}
+#meet.vote-reveal .pc .dots{min-height:18px;margin-top:3px}
 #meet.space-result:before,#meet.space-eject:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(#fff 1px,transparent 1.5px),radial-gradient(#9fcaff 1px,transparent 1.5px);background-size:73px 73px,119px 119px;background-position:7px 13px,31px 49px;opacity:.55;animation:spaceDrift 18s linear infinite}
 #meet.space-result .meetp,#meet.space-eject .meetp{position:relative;background:transparent;border:0;box-shadow:none;text-align:center;width:min(760px,100%);padding:28px 18px}
 #meet.space-result .meetp header,#meet.space-eject .meetp header{justify-content:center}
@@ -414,7 +420,7 @@ body.touch #stick{display:block}
   <div id="ventPanel" class="panel" hidden><div class="vt">Dentro do duto</div><div class="vs" id="ventHere"></div><div id="ventList"></div><button class="chip exit" id="ventExit">Sair do duto</button></div>
   <div id="sabBar" hidden></div>
   <div id="stick"><i id="knob"></i></div>
-  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>⌖<small>Rastrear</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
+  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden>Atirar</button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>⌖<small>Rastrear</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
 </div>
 
 <div id="deathIntro" hidden aria-live="assertive"><div class="deathCard"><h2>ELIMINADO!</h2><canvas id="deathCv" width="460" height="230" aria-hidden="true"></canvas><p id="deathDesc">Você foi eliminado.</p></div></div>
@@ -456,7 +462,7 @@ body.touch #stick{display:block}
     <h2 id="cfgTitle">Configurações</h2><div class="row" id="cfgTabs"><button class="big" id="cfgTabSettings">Configurações</button><button class="big alt" id="cfgTabFunctions">Funções</button></div>
     <p class="cfgnote" id="cfgNote">Tempos de recarga, em segundos.</p>
     <div id="cfgRows"></div>
-    <div id="cfgFunctionFooter" hidden><button class="big alt" id="btnLocatorSection" type="button">⌖ Localizador</button></div>
+    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">⌖ Localizador</button><button class="big alt" id="btnSheriffSection" type="button">✦ Xerife</button></div></div>
     <div class="row"><button class="big alt" id="cfgReset">Restaurar padrão</button><button class="big" id="cfgClose">Fechar</button></div>
   </div>
 </div>
@@ -805,9 +811,9 @@ function drawStationBody(c,s){
 /* =====================================================================
    ESTADO DO JOGO
    ===================================================================== */
-const G={state:'menu',t:0,chars:[],player:null,tasks:[],pin:null,mini:null,tok:0,tool:null,
+const G={cfgFunctionTab:'locator',state:'menu',t:0,chars:[],player:null,tasks:[],pin:null,mini:null,tok:0,tool:null,
   cam:{x:0,y:0},vision:820,visionTarget:820,cfg:{name:'Você',color:'azul'},over:false,lastRoom:null,action:null,
-  role:'crew',imp:null,locator:false,trackTarget:null,trackTime:0,trackCd:0,bodies:[],sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,dt:.016};
+  role:'crew',imp:null,locator:false,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,bodies:[],sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,dt:.016};
 const NAME_BUB={};
 const keys=new Set(); const joy={x:0,y:0};
 
@@ -1314,7 +1320,7 @@ function newGame(){
   TID=0; doors.forEach(d=>d.closed=false); rebuildWalk(); G.walkVer++;
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); G.killT=null; $('ventPanel').hidden=true; VENT_DEFS.forEach(v=>v.flash=0);
   G.over=false; G.followTarget=null; G.tasks=[]; G.pin=null; G.bodies=[]; G.M=null; G.spec=null; G.fx=0; G.fixT=0; G.gt=0;
-  G.sab={lights:0,reactor:0,comms:0,doors:0,cd:CFG.sab}; G.killCd=Math.min(CFG.kill,15); G.meetCd=CFG.meet; G.cfgOpen=false; $('settings').hidden=true; G.vision=G.visionTarget=CFG.crewVision;
+  G.sab={lights:0,reactor:0,comms:0,doors:0,cd:CFG.sab}; G.killCd=Math.min(CFG.kill,15); G.sheriffCd=0;G.sheriffT=null; G.meetCd=CFG.meet; G.cfgOpen=false; $('settings').hidden=true; G.vision=G.visionTarget=CFG.crewVision;
   const online=!!(typeof NET!=='undefined'&&NET.inRoom&&NET.room&&NET.room.status==='playing');
   const p=newChar(G.cfg.name,G.cfg.color,0,0,true); p.emUses=1; if(online)p.id=NET.id; G.player=p;
   const cols=shuffle(COLORS.filter(c=>c.id!==G.cfg.color)), names=shuffle([...NAMES,...Array.from({length:20},(_,i)=>'Tripulante '+(i+1))]);
@@ -1333,7 +1339,12 @@ function newGame(){
   // Sorteia funções uma única vez no host; os snapshots preservam o resultado para todos.
   const impostors=shuffle(G.chars.slice()).slice(0,clamp(CFG.impostors,1,3)); G.chars.forEach(c=>{c.role=impostors.includes(c)?'imp':'crew';c.function=null}); G.imps=impostors; G.imp=impostors[0]; G.role=p.role; G.locator=false; G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
   const eligible=shuffle(G.chars.filter(c=>c.role==='crew')); let locCount=0; for(const ch of eligible){if(locCount>=CFG.locMax)break;if(Math.random()*100<CFG.locChance){ch.function='locator';locCount++}}
-  G.player.function=G.player.function||null; G.locator=G.player.function==='locator'; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
+  // A chance é verificada uma vez por partida; se for aprovada, atribuímos a quantidade configurada,
+  // limitada ao número de tripulantes humanos elegíveis. Nenhum Xerife é atribuído com chance ou quantidade zero.
+  const sheriffEligible=shuffle(G.chars.filter(c=>c.role==='crew'&&c.function!=='locator'&&(c.isPlayer||c.isRemoteHuman)));
+  const sheriffEnabled=CFG.sheriffMax>0&&CFG.sheriffChance>0&&Math.random()*100<CFG.sheriffChance;
+  if(sheriffEnabled){for(const ch of sheriffEligible.slice(0,clamp(CFG.sheriffMax,0,15)))ch.function='sheriff'}
+  G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.sheriffCd=0; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
   const pts=cafePoints(G.chars.length); G.chars.forEach((c,i)=>placeChar(c,pts[i]));
   G.chars.forEach(c=>{
@@ -1342,13 +1353,13 @@ function newGame(){
     G.tasks.push(...ts);
   });
   $('tpHead').firstElementChild.textContent=G.role==='imp'?'Tarefas (falsas)':'Tarefas';
-  $('roleName').textContent=G.role==='imp'?'Infiltrado':(G.locator?'Tripulante · Localizador':'Tripulante');
+  $('roleName').textContent=G.role==='imp'?'Infiltrado':(G.player.function==='sheriff'?'Tripulante · Xerife':(G.locator?'Tripulante · Localizador':'Tripulante'));
   G.cam.x=p.x-VW/2; G.cam.y=p.y-VH/2; G.lastRoom=null; G.action=null;
   renderTasks(); updateSabUI();
   const isImp=G.role==='imp';
   $('role').className=isImp?'imp':'crew'; $('role').hidden=false;
-  $('roleTitle').textContent=isImp?'Você é um Infiltrado':'Você é um Tripulante';
-  $('roleMsg').textContent=G.player.function==='locator'?'Localizador\nRastreie a tripulação pelo seu mapa.':(isImp?'Mate a tripulação e sabote a nave':'Faça suas tarefas e descubra o Infiltrado');
+  $('roleTitle').textContent=isImp?'Você é um Infiltrado':(G.player.function==='sheriff'?'Você é um Xerife':'Você é um Tripulante');
+  $('roleMsg').textContent=G.player.function==='sheriff'?'Elimine um Infiltrado com suas habilidades.':(G.player.function==='locator'?'Rastreie um tripulante pelo seu mapa.':(isImp?'Mate a tripulação e sabote a navegação.':'Faça suas tarefas e descubra o(s) Infiltrado(s).'));
   $('roleMsg').hidden=false;
   G.state='role'; G.roleT=9; Snd.open();
 }
@@ -1626,39 +1637,44 @@ function closeMap(){
   if(!G.mapOpen)return;
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
-const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s']];
+const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Cooldown para atirar','Tempo de recarga da habilidade do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida','']];
 function buildCfgUI(){
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
+  const locked=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
+  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');
   CFG_ROWS.forEach(([k,l,d,unit])=>{
-    const isFn=['locMax','locChance','locCooldown','locDuration'].includes(k); if((G.cfgPage==='functions')!==isFn)return;
+    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'];
+    const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isFn=isLocator||isSheriff;
+    if((G.cfgPage==='functions')!==isFn)return;
+    if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='sheriff')!==isSheriff))return;
     const row=el('div','cfgrow'+(isFn?' fncompact':'')), top=el('div','cfgtop');
     if(isFn){
       const value=el('b','',CFG[k]+(unit?' '+unit:''));
-      top.append(el('span','', '⌖ '+l),value);
+      top.append(el('span','', (isSheriff?'✦ ':'⌖ ')+l),value);
       const stepper=el('div','fnstepper');
       const minus=el('button','','−'), number=el('output','',String(CFG[k])), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label','Diminuir '+l.toLowerCase()); plus.setAttribute('aria-label','Aumentar '+l.toLowerCase()); number.setAttribute('aria-label',l);
-      const sync=()=>{number.textContent=CFG[k];value.textContent=CFG[k]+(unit?' '+unit:'');minus.disabled=inGame()||CFG[k]<=CFG_LIM[k][0];plus.disabled=inGame()||CFG[k]>=CFG_LIM[k][1]};
-      const change=delta=>{if(inGame())return;CFG[k]=clamp(CFG[k]+delta,CFG_LIM[k][0],CFG_LIM[k][1]);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);Snd.click()};
+      const sync=()=>{number.textContent=CFG[k];value.textContent=CFG[k]+(unit?' '+unit:'');minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=CFG_LIM[k][1]};
+      const change=delta=>{if(locked)return;CFG[k]=clamp(CFG[k]+delta,CFG_LIM[k][0],CFG_LIM[k][1]);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);Snd.click()};
       minus.addEventListener('click',()=>change(-1));plus.addEventListener('click',()=>change(1));stepper.append(minus,number,plus);row.append(top,stepper,el('small','',d));sync();
     }else{
       const out=el('b','',CFG[k]+(unit?' '+unit:''));
       const inp=document.createElement('input'); inp.type='range'; inp.min=CFG_LIM[k][0]; inp.max=CFG_LIM[k][1]; inp.step=1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
-      inp.disabled=inGame();
-      inp.addEventListener('input',()=>{if(inGame()){inp.value=CFG[k];return}CFG[k]=clamp(+inp.value,CFG_LIM[k][0],CFG_LIM[k][1]);out.textContent=CFG[k]+(unit?' '+unit:'');saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
+      inp.disabled=locked;
+      inp.addEventListener('input',()=>{if(locked){inp.value=CFG[k];return}CFG[k]=clamp(+inp.value,CFG_LIM[k][0],CFG_LIM[k][1]);out.textContent=CFG[k]+(unit?' '+unit:'');saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
       top.append(el('span','',l),out); row.append(top,inp,el('small','',d));
     }
     box.appendChild(row);
   });
 }
 function setCfgPage(page){
-  G.cfgPage=page==='functions'?'functions':'settings';
+  G.cfgPage=page==='functions'?'functions':'settings';if(G.cfgFunctionTab!=='sheriff')G.cfgFunctionTab='locator';
   $('cfgTitle').textContent=G.cfgPage==='functions'?'Funções':'Configurações';
   $('cfgTabSettings').classList.toggle('alt',G.cfgPage!=='settings');
   $('cfgTabFunctions').classList.toggle('alt',G.cfgPage!=='functions');
   buildCfgUI();
-  const lk=inGame();$('cfgReset').disabled=lk;$('cfgNote').classList.toggle('lock',lk);
-  $('cfgNote').textContent=lk?'Bloqueado durante a partida. Para alterar, saia do jogo e volte ao menu principal.':(G.cfgPage==='functions'?'Configure os limites e os tempos da função especial Localizador.':(typeof NET!=='undefined'&&NET.inRoom?'Configure os parâmetros desta sala. As alterações serão salvas ao fechar este menu.':'Configure os tempos em segundos. Discussão e votação são independentes e valem em todas as reuniões.'));
+  const lk=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));$('cfgReset').disabled=lk;$('cfgNote').classList.toggle('lock',lk);
+  $('cfgNote').textContent=lk?(inGame()?'Bloqueado durante a partida. Para alterar, saia do jogo e volte ao menu principal.':'Somente o host pode editar as configurações antes de iniciar a partida.'): (G.cfgPage==='functions'?(G.cfgFunctionTab==='sheriff'?'Configure o alcance temporal e a distribuição da função Xerife.':'Configure os limites e os tempos da função especial Localizador.'):(typeof NET!=='undefined'&&NET.inRoom?'Configure os parâmetros desta sala. As alterações serão salvas ao fechar este menu.':'Configure os tempos em segundos. Discussão e votação são independentes e valem em todas as reuniões.'));
 }
 function openCfg(){setCfgPage('settings');$('cfgTabs').hidden=false;G.cfgOpen=true;joy.x=joy.y=0;if(G.player)G.player.moving=false;$('settings').hidden=false;Snd.init();Snd.open()}
 function openFunctions(){openCfg();setCfgPage('functions')}
@@ -1818,11 +1834,11 @@ function updateNPC(ch,dt){
   }
 }
 /* ---------- configurações, personalidades e memória de suspeita ---------- */
-const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,renderDist:820};
-const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],renderDist:[500,1500]};
-const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,renderDist:820};
+const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:25,sheriffChance:35,sheriffMax:1,renderDist:820};
+const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[10,60],sheriffChance:[0,100],sheriffMax:[0,15],renderDist:[500,1500]};
+const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:25,sheriffChance:35,sheriffMax:1,renderDist:820};
 (function(){try{const j=JSON.parse(localStorage.getItem('nz_cfg')||'{}');for(const k in CFG_LIM){const v=+j[k];if(v>=CFG_LIM[k][0]&&v<=CFG_LIM[k][1])CFG[k]=Math.round(v)}}catch(e){}})();
-function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,renderDist:CFG.renderDist}))}catch(e){}}
+function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,renderDist:CFG.renderDist}))}catch(e){}}
 const inGame=()=>G.state!=='menu';
 const uiBusy=()=>G.cfgOpen||G.confirmOpen;
 const PERS={
@@ -2202,6 +2218,43 @@ function playerKill(){
   if(G.state!=='playing'||uiBusy()||!G.player.alive||G.role!=='imp'||!G.killT)return;
   G.killCd=CFG.kill; doKill(G.player,G.killT);
 }
+function sheriffTargetFor(shooter){
+  if(!shooter)return null;let best=null,bd=84;
+  for(const ch of G.chars){if(!ch||ch===shooter||!ch.alive||ch.vent)continue;const d=dist(shooter,ch);if(d<=bd&&losClear(shooter.x,shooter.y,ch.x,ch.y)){if(d<bd||!best){best=ch;bd=d}}}
+  return best;
+}
+function addSheriffBody(ch,killerId,cause){
+  G.bodies.push({id:'body_'+String(ch.id)+'_'+Math.round(G.gt*1000),name:ch.name,color:ch.color,x:ch.x,y:ch.y,room:roomName(ch.x,ch.y),tKill:G.gt,killerId:killerId??null,cause});
+}
+function doSheriffShot(shooter,target){
+  if(!shooter||!target||G.over||!['playing','task','tool'].includes(G.state)||G.M||!shooter.alive||shooter.role!=='crew'||shooter.function!=='sheriff'||shooter.vent||target===shooter||!target.alive||target.vent)return false;
+  const cd=shooter===G.player?G.sheriffCd:(shooter.netSheriffCd||0);
+  if(cd>0||dist(shooter,target)>84||!losClear(shooter.x,shooter.y,target.x,target.y))return false;
+  if(shooter===G.player)G.sheriffCd=CFG.sheriffCooldown;else shooter.netSheriffCd=CFG.sheriffCooldown;
+  if(target.role==='imp'){
+    killChar(target);addSheriffBody(target,shooter.id,'sheriff_hit');
+    killChar(shooter);addSheriffBody(shooter,target.id,'sheriff_recoil');
+    if(target.isPlayer){showDeathIntro(shooter,target);Snd.victimSting()}
+    if(shooter.isPlayer){toast('Você eliminou um Infiltrado. O Xerife também foi eliminado.',3600);Snd.killSting()}
+  }else{
+    // Um alvo inocente não morre: a penalidade elimina apenas o Xerife.
+    killChar(shooter);addSheriffBody(shooter,shooter.id,'sheriff_misfire');
+    if(shooter.isPlayer){toast('Você atingiu um Tripulante inocente. O Xerife foi eliminado.',3600);Snd.err()}
+  }
+  checkEnd();return true;
+}
+function playerSheriffShot(){
+  const shooter=G.player;
+  if(!shooter||G.state!=='playing'||G.M||uiBusy()||!shooter.alive||shooter.role!=='crew'||shooter.function!=='sheriff'||shooter.vent)return;
+  if(G.sheriffCd>0){toast('Xerife recarregando: '+Math.ceil(G.sheriffCd)+'s');Snd.err();return}
+  if(typeof NET!=='undefined'&&NET.inRoom&&!NET.isHost&&!NET.applying){
+    if(NET.pendingSheriffShot)return;
+    const target=sheriffTargetFor(shooter);if(!target){toast('Nenhum jogador no alcance do disparo.');Snd.err();return}
+    NET.pendingSheriffShot=true;netSend({type:'action',action:'sheriff_shoot',targetId:target.id});return;
+  }
+  const target=sheriffTargetFor(shooter);if(!target){toast('Nenhum jogador no alcance do disparo.');Snd.err();return}
+  if(!doSheriffShot(shooter,target)){toast('Disparo inválido: aproxime-se do alvo e tente novamente.');Snd.err()}
+}
 function startLocator(){
   if(G.state!=='playing'||!G.player.alive||!G.locator||uiBusy())return;
   if(G.trackTime>0){G.trackTarget=null;G.trackTime=0;G.trackCd=CFG.locCooldown;Snd.err();toast('Rastreamento cancelado. Cooldown iniciado.');updateButtons();return}
@@ -2511,6 +2564,10 @@ const PRESET_PHRASES=[
   {id:'sabotageRoom',label:'Eu estava na [sala] quando a sabotagem começou.',room:true},
   {id:'roleGuess',label:'Será que [jogador] é o Localizador?',target:true},
   {id:'roleCrew',label:'Acho que [jogador] é inocente.',target:true},
+  {id:'roleDeny',label:'Não sou [função].',roleChoice:true},
+  {id:'roleSelf',label:'Sou [função].',roleChoice:true},
+  {id:'roleSight',label:'Vi alguém com a função de [função].',roleChoice:true},
+  {id:'roleGuessPlayer',label:'[jogador] é [função]?',target:true,roleChoice:true},
   {id:'fakeTask',label:'Não vi [jogador] fazendo tarefas.',target:true},
   {id:'locatorAsk',label:'Alguém sabe quem recebeu a função Localizador?'},
   {id:'ventAsk',label:'Alguém viu alguém entrando ou saindo dos dutos?'},
@@ -2531,10 +2588,23 @@ function renderPhraseTargets(phraseId){
     const b=el('button','chip phrase target',ch.name); b.type='button';
     b.addEventListener('click',()=>{
       const phrase=PRESET_PHRASES.find(x=>x.id===phraseId);
-      if(phrase&&phrase.room)renderPhraseRooms(phraseId,ch.id); else sendPresetPhrase(phraseId,ch.id,null);
+      if(phrase&&phrase.roleChoice)renderPhraseRoles(phraseId,ch.id);
+      else if(phrase&&phrase.room)renderPhraseRooms(phraseId,ch.id);
+      else sendPresetPhrase(phraseId,ch.id,null);
     }); box.appendChild(b);
   });
   const cancel=el('button','chip phrase cancel','Cancelar'); cancel.type='button'; cancel.addEventListener('click',renderQuickPhrases); box.appendChild(cancel);
+}
+function renderPhraseRoles(phraseId,targetId=null){
+  const box=$('sayChips');box.innerHTML='';
+  const title=el('span','mstatus','Escolha uma função:');title.style.width='100%';box.appendChild(title);
+  const roles=[['crew','Tripulante'],['imp','Infiltrado'],['sheriff','Xerife'],['locator','Localizador']];
+  for(const [id,label] of roles){
+    const b=el('button','chip phrase',label);b.type='button';
+    b.addEventListener('click',()=>sendPresetPhrase(phraseId,targetId,null,id));box.appendChild(b);
+  }
+  const cancel=el('button','chip phrase cancel','Cancelar');cancel.type='button';
+  cancel.addEventListener('click',()=>targetId?renderPhraseTargets(phraseId):renderQuickPhrases());box.appendChild(cancel);
 }
 function renderPhraseRooms(phraseId,targetId=null){
   const box=$('sayChips'); box.innerHTML='';
@@ -2551,10 +2621,11 @@ function choosePresetPhrase(id){
   const M=G.M; if(!M||M.phase!=='discuss'||!G.player.alive)return;
   const p=PRESET_PHRASES.find(x=>x.id===id); if(!p)return;
   if(p.target){renderPhraseTargets(id);$('meetStatus').textContent='Escolha quem deseja mencionar.';return}
+  if(p.roleChoice){renderPhraseRoles(id);$('meetStatus').textContent='Escolha a função que deseja mencionar.';return}
   if(p.room){renderPhraseRooms(id);$('meetStatus').textContent='Escolha a sala que deseja mencionar.';return}
   sendPresetPhrase(id,null,null);
 }
-function sendPresetPhrase(id,targetId,roomNamePicked){
+function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
   const M=G.M; if(!M||M.phase!=='discuss'||!G.player.alive)return;
   const T=targetId?charById(targetId):null;
   if(targetId&&(!T||!T.alive||T.isPlayer))return;
@@ -2582,6 +2653,17 @@ function sendPresetPhrase(id,targetId,roomNamePicked){
     case 'sabotageRoom': if(!rm)return; text=`Eu estava ${inRoom(rm)} quando a sabotagem começou.`; claim={from:G.player.id,kind:'alibi',target:G.player.id,room:rm,time:M.gt0,strong:false}; break;
     case 'roleGuess': if(!T)return; text=`Será que ${T.name} é o Localizador?`; claim={from:G.player.id,kind:'ask',target:T.id}; break;
     case 'roleCrew': if(!T)return; text=`Acho que ${T.name} é inocente.`; claim={from:G.player.id,kind:'defend',target:T.id}; break;
+    case 'roleDeny': case 'roleSelf': case 'roleSight': case 'roleGuessPlayer': {
+      const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador'};
+      const role=roles[rolePicked];if(!role)return;
+      const article=role==='Infiltrado'?'o Infiltrado':role==='Tripulante'?'Tripulante':`o ${role}`;
+      if(id==='roleDeny')text=`Não sou ${article}.`;
+      else if(id==='roleSelf')text=`Sou ${article}.`;
+      else if(id==='roleSight')text=`Vi alguém com a função de ${role}.`;
+      else {if(!T)return;text=`${T.name} é ${article}?`;}
+      claim={from:G.player.id,kind:id==='roleSelf'||id==='roleDeny'?'self':id==='roleGuessPlayer'?'ask':'suspicion',target:T?.id||null,role:rolePicked};
+      break;
+    }
     case 'fakeTask': if(!T)return; text=`Não vi ${T.name} fazendo tarefas.`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:false}; break;
     case 'locatorAsk': text='Alguém sabe quem recebeu a função Localizador?'; claim={from:G.player.id,kind:'ask'}; break;
     case 'ventAsk': text='Alguém viu alguém entrando ou saindo dos dutos?'; claim={from:G.player.id,kind:'ask'}; break;
@@ -2686,8 +2768,8 @@ function buildMeetUI(){
   renderMeetingIntro();
 }
 function setMeetPhase(ph){
-  const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive; $('meet').classList.toggle('space-result',ph==='result');
-  $('voteBreakdown').hidden=ph!=='result';
+  const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive; $('meet').classList.toggle('vote-reveal',ph==='result');$('meet').classList.toggle('space-result',false);
+  $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';
   if(ph==='discuss'){
     $('meetTitle').textContent='Discussão'; $('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';
     genChat(); M.dur=CFG.discussion; M.endIn=undefined;
@@ -2698,10 +2780,10 @@ function setMeetPhase(ph){
     G.chars.filter(c=>c.alive&&!c.isPlayer).forEach(c=>{M.voteAt[c.id]=Math.random()*Math.max(.25,M.dur-.25)});
     $('btnSkip').hidden=!al; $('meetStatus').textContent=al?'Escolha seu voto.':'Você foi eliminado e não pode votar.';
   }else if(ph==='result'){
-    M.replyQ=[]; M.dur=10; $('meetTitle').textContent='Resultado da votação'; $('btnSkip').hidden=true; showResult();
+    M.replyQ=[]; M.dur=10; $('meetTitle').textContent='Votação'; $('meetDesc').textContent='';$('meetStatus').textContent=''; $('btnSkip').hidden=true; showResult();
   }else if(ph==='eject'){
-    M.dur=3.5; $('meetTitle').textContent='Ejeção'; $('meetStatus').textContent=''; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent='';
-    $('meet').classList.add('space-result','space-eject');
+    M.dur=3.5; $('meetTitle').textContent='Ejeção'; $('meetStatus').textContent=''; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent='';$('meet').classList.remove('vote-reveal','space-result');
+    $('meet').classList.add('space-eject');
     for(const c of G.chars){const card=M.cards[c.id];if(card){card.dotsEl.innerHTML='';card.classList.remove('pick')}}
     $('meetDesc').textContent=M.result?.headline||'Ninguém foi ejetado.'; $('btnSkip').hidden=true;
   }
@@ -2737,7 +2819,7 @@ function updateMeeting(dt){
   }else if(M.phase==='result'){if(M.t>=M.dur)setMeetPhase('eject')}else if(M.phase==='eject'){if(M.t>=M.dur)endMeeting()}
 }
 function endMeeting(){
-  const M=G.M, ej=M.result?.eject||null; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject'); $('meetingIntro').hidden=true; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent=''; $('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML=''); $('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'));
+  const M=G.M, ej=M.result?.eject||null; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject','vote-reveal'); $('meetingIntro').hidden=true; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent=''; $('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML=''); $('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'));
   if(ej)killChar(ej);
   G.bodies=[]; G.M=null; G.state='playing';
   if(checkEnd())return;
@@ -2767,30 +2849,20 @@ function playerVote(id){
 }
 function showResult(){
   const M=G.M, counts={}; M.log.forEach(v=>{counts[v.target]=(counts[v.target]||0)+1});
-  const grouped=new Map();
-  M.log.forEach(v=>{if(!grouped.has(v.target))grouped.set(v.target,[]);grouped.get(v.target).push(v)});
-  const voteLines=[...grouped.entries()].sort((a,b)=>b[1].length-a[1].length).map(([targetId,votes])=>{
-    const target=targetId==='skip'?null:charById(targetId);
-    const label=target?`${target.name} (${COLOR_BY[target.color]?.name||target.color})`:'Pular voto';
-    const voters=votes.map(v=>{const voter=charById(v.voter);return voter?`${voter.name} (${COLOR_BY[voter.color]?.name||voter.color})`:'Jogador desconectado'}).join(', ');
-    return `${label}: ${votes.length} ${votes.length===1?'voto':'votos'} — ${voters}`;
-  });
-  $('voteBreakdown').textContent='VOTOS REGISTRADOS\n'+(voteLines.length?voteLines.join('\n'):'Nenhum voto registrado.');
-  $('voteBreakdown').hidden=false;
   const entries=Object.entries(counts).filter(e=>e[0]!=='skip').sort((a,b)=>b[1]-a[1]), skipN=counts.skip||0;
   const top=entries[0], other=Math.max(skipN,entries[1]?entries[1][1]:0);
-  const eject=(top&&top[1]>=2&&top[1]>other)?charById(top[0]):null;   // empate ou poucos votos: ninguém sai
+  const eject=(top&&top[1]>=2&&top[1]>other)?charById(top[0]):null;
   M.result={eject,counts,skipN,headline:''};
-  M.log.forEach(v=>{const cd=M.cards[v.target]; if(cd&&v.target!=='skip'){const d=el('i'); d.style.background=chatCol(charById(v.voter)||G.player); cd.dotsEl.appendChild(d)}});
-  G.chars.forEach(c=>{M.cards[c.id].pvEl.textContent=c.alive?'':'Eliminado'});
+  M.log.forEach(v=>{const cd=M.cards[v.target];if(cd&&v.target!=='skip'){const voter=charById(v.voter);if(!voter)return;const d=el('i');d.style.background=COLOR_BY[voter.color]?.main||chatCol(voter);d.setAttribute('aria-label','');cd.dotsEl.appendChild(d)}});
+  G.chars.forEach(c=>{const card=M.cards[c.id];if(card)card.pvEl.textContent=''});
   const aliveImps=G.chars.filter(c=>c.alive&&c.role==='imp').length-(eject&&eject.role==='imp'?1:0);
   let headline='';
-  if(eject) headline=`${eject.name} foi ejetado.\n${eject.name} ${eject.role==='imp'?'era':'não era'} um Infiltrado.\nHá ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
-  else if(skipN>0&&skipN>=(top?top[1]:0)) headline='Ninguém foi ejetado (pulado).\n'+`Há ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
+  if(eject)headline=`${eject.name} foi ejetado.\n${eject.name} ${eject.role==='imp'?'era':'não era'} um Infiltrado.\nHá ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
+  else if(skipN>0&&skipN>=(top?top[1]:0))headline='Ninguém foi ejetado (pulado).\n'+`Há ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
   else headline='Ninguém foi ejetado (empate).\n'+`Há ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
-  M.result.headline=headline; M.resultHeadline='Votação encerrada. Confira abaixo quem votou em cada participante.';
-  $('meetTitle').textContent='Resultado da votação'; $('meetDesc').textContent=M.resultHeadline;
-  $('meetStatus').textContent='A tela de ejeção será exibida em 10 segundos.';
+  M.result.headline=headline;M.resultHeadline='';
+  $('meetTitle').textContent='Votação';$('meetDesc').textContent='';$('meetStatus').textContent='';$('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';
+  $('meet').classList.add('vote-reveal');$('meet').classList.remove('space-result','space-eject');
   if(eject)Snd.err();
 }
 
@@ -2801,17 +2873,20 @@ let last=performance.now(), toolAcc=0;
 const simActive=()=>(G.state==='playing'||G.state==='task'||G.state==='tool')&&!G.confirmOpen;
 function updateButtons(){
   const p=G.player, can=G.state==='playing'&&(p.alive||ghostCanSab()), imp=G.role==='imp';
-  const bk=$('btnKill'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator');
-  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(imp&&p.alive)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));
+  const bk=$('btnKill'), bsh=$('btnSheriff'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator'), sheriff=G.role==='crew'&&p.function==='sheriff';
+  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(imp&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));
   const gh=$('btnGhost'), showGh=!p.alive&&G.role==='crew'; hv(gh,!showGh);
   const fb=$('btnFollow'); hv(fb,!(G.state==='playing'&&!p.alive)); if(!fb.hidden){const t=G.followTarget&&charById(G.followTarget);fb.innerHTML=t&&t.alive?'Seguindo<br>'+t.name:'Seguir<br>jogador';fb.title=t&&t.alive?'Toque para trocar de alvo; toque duas vezes para cancelar':'Toque para começar a seguir';}
   const gl='Modo: '+(G.ghostMode==='spec'?'Espectador':'Tarefas'); if(gh._l!==gl){gh._l=gl;gh.textContent=gl}
-  const rl=p.alive?(imp?'Infiltrado':'Tripulante'):(imp?'Infiltrado (morto)':(G.ghostMode==='spec'?'Espectador':'Tripulante (morto)')); const rn=$('roleName'); if(rn._l!==rl){rn._l=rl;rn.textContent=rl}
+  const rl=p.alive?(imp?'Infiltrado':(p.function==='sheriff'?'Tripulante · Xerife':'Tripulante')):(imp?'Infiltrado (morto)':(G.ghostMode==='spec'?'Espectador':'Tripulante (morto)')); const rn=$('roleName'); if(rn._l!==rl){rn._l=rl;rn.textContent=rl}
   const lab=(p.alive||ghostActs())?'Usar':'Trocar'; if(ub._l!==lab){ub._l=lab;ub.textContent=lab}
   G.killT=null;
   if(imp&&can&&G.killCd<=0&&!p.vent){let bd=72;for(const v of G.chars){if(!v.alive||v.role==='imp')continue;const d=dist(p,v);if(d<bd){bd=d;G.killT=v}}}
   setCls(bk,'ready',!!G.killT);
   const kt=G.killCd>0?String(Math.ceil(G.killCd)):'Matar'; if(bk._l!==kt){bk._l=kt;bk.textContent=kt}
+  G.sheriffT=sheriff&&can&&!p.vent&&G.sheriffCd<=0?sheriffTargetFor(p):null;
+  setCls(bsh,'ready',!!G.sheriffT&&!uiBusy()&&!(typeof NET!=='undefined'&&NET.pendingSheriffShot));
+  const sht=G.sheriffCd>0?String(Math.ceil(G.sheriffCd)):(NET?.pendingSheriffShot?'…':'Atirar');if(bsh._l!==sht){bsh._l=sht;bsh.textContent=sht}
   setCls(bs,'ready',imp&&G.state==='playing'&&!uiBusy()&&G.sab.cd<=0);
   const st=G.sab.cd>0?String(Math.ceil(G.sab.cd)):'Sabotar'; if(bs._l!==st){bs._l=st;bs.textContent=st}
   setCls(br,'ready',!!(can&&nearBody())); setCls(bl,'active',G.trackTime>0); const lt=G.trackTime>0?'Cancelar':(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear');if(bl._l!==lt){bl._l=lt;bl.querySelector('small').textContent=lt;bl._l=lt}
@@ -2824,7 +2899,7 @@ function update(dt){
   if(NET.inRoom&&!NET.isHost)netUpdateVisualInterpolation();
   if(G.state==='playing'&&(p.alive||ghostActs())&&!uiBusy()&&!p.vent)updatePlayer(dt); else p.moving=false;
   if(simActive()){
-    G.gt+=dt; G.killCd=Math.max(0,G.killCd-dt); G.meetCd=Math.max(0,G.meetCd-dt); updateLocator(dt);
+    G.gt+=dt; G.killCd=Math.max(0,G.killCd-dt); G.sheriffCd=Math.max(0,G.sheriffCd-dt); G.meetCd=Math.max(0,G.meetCd-dt); updateLocator(dt);
     updateSab(dt); if(G.over)return;
     updateNPCs(dt);
   }
@@ -2899,7 +2974,7 @@ addEventListener('keydown',e=>{
     else if(G.player.vent){if(use)exitVent(G.player); else if(e.code==='KeyX')playerSab()}
     else if(!G.player.alive){if(e.code==='KeyX'&&G.role==='imp')playerSab(); else if(use)cycleSpec()}
     else if(use)doInteract(G.action);
-    else if(e.code==='KeyQ')playerKill();
+    else if(e.code==='KeyQ'){if(G.role==='imp')playerKill();else if(G.player?.function==='sheriff')playerSheriffShot()}
     else if(e.code==='KeyR')playerReport();
     else if(e.code==='KeyX')playerSab();
   }
@@ -2910,14 +2985,14 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>keys.delete(e.code));
 addEventListener('blur',()=>keys.clear());
 $('btnUse').addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();const p=G.player,a=G.action;if(!p.alive&&!(G.role==='crew'&&p.ghost&&a&&a.type==='task')){toast('Morto só pode realizar tarefas permitidas.');return;}doInteract(a)});
-$('btnKill').addEventListener('pointerdown',e=>{e.preventDefault();playerKill()});
+$('btnKill').addEventListener('pointerdown',e=>{e.preventDefault();playerKill()});$('btnSheriff').addEventListener('pointerdown',e=>{e.preventDefault();playerSheriffShot()});
 $('btnSab').addEventListener('pointerdown',e=>{e.preventDefault();playerSab()});
 $('btnReport').addEventListener('pointerdown',e=>{e.preventDefault();playerReport()});$('btnLocator').addEventListener('pointerdown',e=>{e.preventDefault();startLocator()});
 $('btnSkip').addEventListener('click',()=>playerVote('skip'));
 $('btnRole').addEventListener('click',startPlay);
 $('btnCfg').addEventListener('click',openCfg);  $('cfgClose').addEventListener('click',closeCfg);
-$('cfgReset').addEventListener('click',()=>{if(inGame())return;Object.assign(CFG,CFG_DEF);saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
-$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{const first=$('cfgRows').querySelector('.fncompact');if(first){first.scrollIntoView({behavior:'smooth',block:'start'});first.style.outline='2px solid #65d8ff';window.setTimeout(()=>first.style.outline='',900)}Snd.click()});
+$('cfgReset').addEventListener('click',()=>{if(inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby')))return;Object.assign(CFG,CFG_DEF);saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
+$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});
 $('btnSay').addEventListener('click',()=>{const i=$('sayIn');sendSay(i.value);i.value=''});
 $('sayIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const i=$('sayIn');sendSay(i.value);i.value=''}});
 $('btnMap').addEventListener('click',toggleMap);
@@ -3014,7 +3089,7 @@ function netUpdateVisualInterpolation(){
     c.netVisualMoving=alpha<1?(!!c.netFromMoving||!!c.netToMoving):!!c.netToMoving;
   }
 }
-const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','renderDist'];
+const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','renderDist'];
 function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
 function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
@@ -3144,11 +3219,11 @@ function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=
 function netCaptureSnapshot(){
   const st=(G.state==='task'||G.state==='tool')?'playing':G.state;
   if(G.player){G.player.netKillCd=G.killCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
-  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0}));
+  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
-  const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null}));
-  const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',voteBreakdown:$('voteBreakdown').textContent,chatCount:$('meetChat').children.length}:null;
-  return {seq:++NET.seq,state:st,gt:G.gt,chars,tasks,bodies,sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
+  const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
+  const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chatCount:$('meetChat').children.length}:null;
+  return {seq:++NET.seq,state:st,gt:G.gt,chars,tasks,bodies,sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
 }
 function netApplySnapshot(s,force=false){
   if(!s||!Array.isArray(s.chars)||(!force&&Number.isFinite(+s.seq)&&+s.seq<NET.recvSeq))return;if(Number.isFinite(+s.seq))NET.recvSeq=+s.seq;NET.applying=true;
@@ -3187,7 +3262,7 @@ function netApplySnapshot(s,force=false){
     G.tasks=s.tasks.map(r=>{let t=oldTasks.get(String(r.id));if(!t)t={id:r.id,steps:[]};t.id=r.id;t.key=r.key;t.name=r.name;t.owner=r.owner;t.fake=!!r.fake;t.fakeOnly=!!r.fakeOnly;t.fix=r.fix||null;const oldSteps=new Map((t.steps||[]).map((q,i)=>[String(q.st)+'/'+i,q]));t.steps=r.steps.map((q,i)=>{let z=oldSteps.get(String(q.st)+'/'+i);if(!z)z={};const key=String(t.id)+':'+String(q.st);Object.assign(z,q);if(q.done)NET.pendingTasks.delete(key);return z});t.done=!!r.done||t.steps.every(q=>q.done);for(const q of t.steps){const key=String(t.id)+':'+String(q.st);if(q.done||t.done)NET.pendingTasks.delete(key)}return t});
     const oldBodies=new Map((G.bodies||[]).map(b=>[String(b.id),b]));G.bodies=s.bodies.map(r=>{const b=oldBodies.get(String(r.id))||{};Object.assign(b,r);return b});
     if(s.cfg)netApplySettings(s.cfg);G.sab={...s.sab};const doorsChanged=doors.some((d,i)=>d.closed!==!!s.doors[i]);doors.forEach((d,i)=>{d.closed=!!s.doors[i]});if(doorsChanged){rebuildWalk();G.walkVer++}
-    G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.role=s.role||G.player.role;G.locator=!!s.locator;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}
+    G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;NET.pendingSheriffShot=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}
     if(s.state==='meeting'){
       const sm=s.meeting;if(sm){const caller=charById(sm.callerId)||G.player;const body=sm.bodyId?G.bodies.find(b=>String(b.id)===String(sm.bodyId)):null;if(!G.M||oldState!=='meeting')callMeeting(caller,sm.reason,body);if(G.M){G.M.caller=caller;G.M.body=body;G.M.phase=sm.phase;G.M.t=sm.t;G.M.clock=sm.clock;G.M.dur=sm.dur;G.M.votes={...sm.votes};G.M.voteAt={...sm.voteAt};G.M.log=sm.log||[];G.M.result=(sm.phase==='result'||sm.phase==='eject')?{eject:sm.ejectId?charById(sm.ejectId):null,counts:sm.counts||{},skipN:sm.skipN||0,headline:sm.ejectHeadline||''}:null;G.M.resultHeadline=sm.resultHeadline||'';netPaintMeeting(sm)}}
       G.state='meeting';$('role').hidden=true;$('end').hidden=true;
@@ -3195,28 +3270,58 @@ function netApplySnapshot(s,force=false){
       if(!G.over||oldState!=='over'){G.over=false;G.M=null;$('meet').hidden=true;$('meetingIntro').hidden=true;endGame(s.winner||'crew',s.endReason||'A partida terminou.')}
       G.state='over';$('role').hidden=true;
     }else{
-      if(G.M){G.M=null;$('meet').hidden=true;$('meetingIntro').hidden=true;$('meet').classList.remove('space-result','space-eject');$('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';$('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML='');$('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'))}
+      if(G.M){G.M=null;$('meet').hidden=true;$('meetingIntro').hidden=true;$('meet').classList.remove('space-result','space-eject','vote-reveal');$('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';$('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML='');$('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'))}
       if(!(oldState==='task'||oldState==='tool')||s.state!=='playing')G.state=s.state;
       if(s.state==='playing'){$('role').hidden=true;$('end').hidden=true;$('menu').hidden=true;$('hud').hidden=false}
-      if(s.state==='role'){$('role').hidden=false;$('roleTitle').textContent=G.role==='imp'?'Você é um Infiltrado':'Você é um Tripulante';$('roleMsg').textContent=G.player.function==='locator'?'Localizador\nRastreie a tripulação pelo seu mapa.':(G.role==='imp'?'Mate a tripulação e sabote a nave':'Faça suas tarefas e descubra o Infiltrado')}
+      if(s.state==='role'){$('role').hidden=false;$('roleTitle').textContent=G.role==='imp'?'Você é um Infiltrado':(G.player.function==='sheriff'?'Você é um Xerife':'Você é um Tripulante');$('roleMsg').textContent=G.player.function==='sheriff'?'Elimine um Infiltrado com suas habilidades.':(G.player.function==='locator'?'Rastreie um tripulante pelo seu mapa.':(G.role==='imp'?'Mate a tripulação e sabote a navegação.':'Faça suas tarefas e descubra o(s) Infiltrado(s).'))}
     }
-    if(!wasAlive&&G.player.alive){NET.ownWasAlive=true}else if(wasAlive&&!G.player.alive){const corpse=G.bodies.find(b=>String(b.name)===String(G.player.name));const killer=G.chars.find(c=>c.id===(corpse?.killerId||''))||G.imps[0];if(killer)showDeathIntro(killer,G.player);NET.ownWasAlive=false}
-    $('roleName').textContent=G.role==='imp'?'Infiltrado':(G.locator?'Tripulante · Localizador':'Tripulante');renderTasks();updateSabUI();netSyncCameraAndButtons();
+    if(!wasAlive&&G.player.alive){NET.ownWasAlive=true}else if(wasAlive&&!G.player.alive){const corpse=G.bodies.find(b=>String(b.name)===String(G.player.name));const killer=G.chars.find(c=>c.id===(corpse?.killerId||''))||G.imps[0];if(corpse?.cause==='sheriff_misfire'||corpse?.cause==='sheriff_recoil'){toast(corpse.cause==='sheriff_misfire'?'Você foi eliminado após atingir um Tripulante inocente.':'Você foi eliminado pelo disparo do Xerife.',3600)}else if(killer)showDeathIntro(killer,G.player);NET.ownWasAlive=false}
+    $('roleName').textContent=G.role==='imp'?'Infiltrado':(G.player.function==='sheriff'?'Tripulante · Xerife':(G.locator?'Tripulante · Localizador':'Tripulante'));renderTasks();updateSabUI();netSyncCameraAndButtons();
   }catch(e){console.error('Falha ao aplicar estado online',e)}finally{NET.applying=false}
 }
 function netPaintMeeting(sm){
   const M=G.M;if(!M)return;const ph=sm.phase;
   $('meetTimer').textContent=Math.max(0,Math.ceil((sm.dur||0)-(sm.t||0)))+'s';
-  $('meetingIntro').hidden=ph!=='intro';$('meet').hidden=ph==='intro';$('meet').classList.toggle('space-result',ph==='result'||ph==='eject');$('meet').classList.toggle('space-eject',ph==='eject');
-  $('voteBreakdown').textContent=ph==='result'?(sm.voteBreakdown||''):'';$('voteBreakdown').hidden=ph!=='result';
-  if(ph==='intro'){$('meetingIntroTitle').textContent=sm.reason==='body'?'CORPO REPORTADO':'REUNIÃO DE EMERGÊNCIA';$('meetingIntroDesc').textContent=sm.reason==='body'&&M.body?`Corpo de ${M.body.name} encontrado ${inRoom(M.body.room)}.`:`${M.caller.name} convocou a reunião.`}
-  else if(ph==='discuss'){$('meetTitle').textContent='Discussão';$('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';$('meetSay').hidden=!G.player.alive;$('sayChips').hidden=!G.player.alive;if(!$('sayChips').children.length)renderQuickPhrases();$('btnSkip').hidden=true}
-  else if(ph==='vote'){$('meetTitle').textContent='Votação';$('meetDesc').textContent='Escolha quem ejetar ou pule o voto.';$('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=!G.player.alive;$('btnSkip').disabled=M.votes[G.player.id]!==undefined;$('meetStatus').textContent=M.votes[G.player.id]!==undefined?'Voto registrado.':'Escolha seu voto.'}
-  else if(ph==='result'){$('meetTitle').textContent='Resultado da votação';$('meetDesc').textContent=sm.resultHeadline||sm.headline||'Votação encerrada.';$('meetStatus').textContent='A tela de ejeção será exibida em 10 segundos.';$('btnSkip').hidden=true}
-  else if(ph==='eject'){$('meetTitle').textContent='Ejeção';$('meetDesc').textContent=sm.ejectHeadline||sm.headline||'Ninguém foi ejetado.';$('meetStatus').textContent='';$('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';$('btnSkip').hidden=true}
-  for(const c of G.chars){const card=M.cards[c.id];if(!card)continue;card.pvEl.textContent=M.votes[c.id]!==undefined?'Votou':(c.alive?'':'Eliminado');card.dotsEl.innerHTML='';if(ph==='eject')card.classList.remove('pick')}
-  if(ph==='result')(sm.log||[]).forEach(v=>{const card=M.cards[v.target];if(card&&v.target!=='skip'){const voter=charById(v.voter);const dot=el('i');dot.style.background=chatCol(voter||G.player);dot.setAttribute('aria-label','Voto de '+(voter?.name||'jogador'));card.dotsEl.append(dot)}});
+  $('meetingIntro').hidden=ph!=='intro';$('meet').hidden=ph==='intro';
+  $('meet').classList.toggle('vote-reveal',ph==='result');
+  $('meet').classList.remove('space-result');$('meet').classList.toggle('space-eject',ph==='eject');
+  // Os resultados visuais usam exclusivamente bolinhas; não há lista nem explicação textual.
+  $('voteBreakdown').textContent='';$('voteBreakdown').hidden=true;
+  if(ph==='intro'){
+    $('meetingIntroTitle').textContent=sm.reason==='body'?'CORPO REPORTADO':'REUNIÃO DE EMERGÊNCIA';
+    $('meetingIntroDesc').textContent=sm.reason==='body'&&M.body?`Corpo de ${M.body.name} encontrado ${inRoom(M.body.room)}.`:`${M.caller.name} convocou a reunião.`;
+  }else if(ph==='discuss'){
+    $('meetTitle').textContent='Discussão';$('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';
+    $('meetStatus').textContent='';$('meetSay').hidden=!G.player.alive;$('sayChips').hidden=!G.player.alive;
+    if(!$('sayChips').children.length)renderQuickPhrases();$('btnSkip').hidden=true;
+  }else if(ph==='vote'){
+    $('meetTitle').textContent='Votação';$('meetDesc').textContent='Escolha quem ejetar ou pule o voto.';
+    $('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=!G.player.alive;
+    $('btnSkip').disabled=M.votes[G.player.id]!==undefined;
+    $('meetStatus').textContent=M.votes[G.player.id]!==undefined?'Voto registrado.':'Escolha seu voto.';
+  }else if(ph==='result'){
+    $('meetTitle').textContent='Votação';$('meetDesc').textContent='';$('meetStatus').textContent='';
+    $('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=true;
+  }else if(ph==='eject'){
+    $('meetTitle').textContent='Ejeção';$('meetDesc').textContent=sm.ejectHeadline||sm.headline||'Ninguém foi ejetado.';
+    $('meetStatus').textContent='';$('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=true;
+  }
+  for(const c of G.chars){
+    const card=M.cards[c.id];if(!card)continue;
+    card.pvEl.textContent=ph==='vote'&&M.votes[c.id]!==undefined?'Votou':'';
+    card.dotsEl.innerHTML='';
+    if(ph==='eject')card.classList.remove('pick');
+  }
+  if(ph==='result'){
+    (sm.log||[]).forEach(v=>{
+      const card=M.cards[v.target];if(!card||v.target==='skip')return;
+      const voter=charById(v.voter);if(!voter)return;
+      const dot=el('i');dot.style.background=COLOR_BY[voter.color]?.main||chatCol(voter);
+      dot.setAttribute('aria-hidden','true');card.dotsEl.append(dot);
+    });
+  }
 }
+
 function netSyncCameraAndButtons(){if(G.player){G.action=(G.state==='playing'&&(G.player.alive||(G.role==='crew'&&G.player.ghost)))?bestAction():null;updateButtons();if(G.mapOpen)drawMapPanelIfOpen()}}
 function netHostCommand(m){
   const ch=G.chars.find(c=>c.id===m.playerId&&c.isRemoteHuman);if(!ch)return;
@@ -3226,6 +3331,8 @@ function netHostCommand(m){
   if(command==='kill'){
     const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&ch.alive&&ch.role==='imp'&&!ch.vent&&(ch.netKillCd||0)<=0&&target&&target.alive&&target.role!=='imp'&&dist(ch,target)<=84&&losClear(ch.x,ch.y,target.x,target.y)){
       ch.netKillCd=CFG.kill;doKill(ch,target);}
+  }else if(command==='sheriff_shoot'){
+    const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&!G.M&&ch.alive&&ch.role==='crew'&&ch.function==='sheriff'&&!ch.vent&&(ch.netSheriffCd||0)<=0&&target&&target!==ch&&target.alive&&!target.vent&&dist(ch,target)<=84&&losClear(ch.x,ch.y,target.x,target.y)){doSheriffShot(ch,target)}
   }else if(command==='report'){
     if(activePlay&&ch.alive&&!ch.vent){const b=G.bodies.find(b=>dist(ch,b)<100&&losClear(ch.x,ch.y,b.x,b.y));if(b)callMeeting(ch,'body',b)}
   }else if(command==='emergency'){
@@ -3262,7 +3369,7 @@ function netWithRemotePlayer(ch,fn){
 function netUpdateRemote(dt){
   for(const c of G.chars){if(!c.isRemoteHuman)continue;const inp=NET.remoteInputs.get(c.id)||{x:0,y:0,at:0};if(Date.now()-inp.at>500){inp.x=inp.y=0}
     if(['playing','task','tool'].includes(G.state)&&c.alive&&!c.vent&&(inp.x||inp.y)){const l=Math.hypot(inp.x,inp.y)||1;const sp=CFG.speed*(c.ghost?2:1)*dt;const moved=moveChar(c,inp.x/l*sp,inp.y/l*sp);c.moving=moved;if(moved)c.walk+=dt;c.face=inp.x?Math.sign(inp.x):c.face}else c.moving=false;
-    if(c.netKillCd>0)c.netKillCd=Math.max(0,c.netKillCd-dt);if(c.netTrackCd>0)c.netTrackCd=Math.max(0,c.netTrackCd-dt);if(c.netTrackTime>0){const t=G.chars.find(x=>x.id===c.netTrackTarget);c.netTrackTime=Math.max(0,c.netTrackTime-dt);if(!t||!t.alive||c.netTrackTime<=0){c.netTrackTarget=null;c.netTrackTime=0;c.netTrackCd=CFG.locCooldown}};
+    if(c.netKillCd>0)c.netKillCd=Math.max(0,c.netKillCd-dt);if(c.netSheriffCd>0)c.netSheriffCd=Math.max(0,c.netSheriffCd-dt);if(c.netTrackCd>0)c.netTrackCd=Math.max(0,c.netTrackCd-dt);if(c.netTrackTime>0){const t=G.chars.find(x=>x.id===c.netTrackTarget);c.netTrackTime=Math.max(0,c.netTrackTime-dt);if(!t||!t.alive||c.netTrackTime<=0){c.netTrackTarget=null;c.netTrackTime=0;c.netTrackCd=CFG.locCooldown}};
   }
 }
 function netUpdateInput(){if(!NET.inRoom||!NET.id||!NET.ws||NET.ws.readyState!==WebSocket.OPEN)return;const blocked=G.state!=='playing'||uiBusy()||!!G.mapOpen||!!G.player?.vent;const v=blocked?{x:0,y:0}:inputVec();netSend({type:'input',x:v.x,y:v.y})}
