@@ -3163,7 +3163,7 @@ $('btnCopyCode').addEventListener('click',()=>{const code=NET.room?.code;if(!cod
 // Meeting chat / votes / action requests are sent to the host; the host answers with authoritative snapshots.
 function netSyncHostAfterAuthorityChange(){if(NET.inRoom&&NET.isHost){const snap=netCaptureSnapshot();netSend({type:'state_snapshot',snapshot:snap})}}
 // As telas de configuração só podem ser alteradas pelo host e salvam por sala no servidor.
-$('btnCfg').addEventListener('click',e=>{if(NET.inRoom){if(!NET.isHost||NET.room?.status!=='lobby'){e.stopImmediatePropagation();toast('Somente o host pode alterar as opções antes da contagem.');return}netApplySettings(NET.room.settings);netSyncRoomControlsFromCFG()}},true);
+$('btnCfg').addEventListener('click',e=>{if(!NET.inRoom)return;e.stopImmediatePropagation();if(NET.room?.settings)netApplySettings(NET.room.settings);netSyncRoomControlsFromCFG();openCfg();if(!NET.isHost||NET.room?.status!=='lobby'){toast('Configurações da sala em modo de visualização. Só o host pode alterar antes da partida.')}},true);
 
 const netOriginalCloseCfg=closeCfg;closeCfg=function(){const shouldSave=NET.inRoom&&NET.isHost&&NET.room?.status==='lobby';if(shouldSave){netSyncRoomControlsFromCFG();const cfg=netRoomSettingsFromControls();netApplySettings(cfg.settings);netSend({type:'set_room',bots:cfg.bots,settings:cfg.settings})}return netOriginalCloseCfg()};
 window.addEventListener('beforeunload',()=>{if(NET.inRoom&&NET.ws&&NET.ws.readyState===WebSocket.OPEN)netSend({type:'leave_room'})});
