@@ -648,9 +648,10 @@ function nameSprite(text,col){
 }
 function drawChar(c,ch,showName=true){
   const col=COLOR_BY[ch.color];
-  c.save(); c.translate(ch.x,ch.y);
+  const visual=netVisualState(ch), vx=visual?visual.x:ch.x, vy=visual?visual.y:ch.y;
+  c.save(); c.translate(vx,vy);
   c.fillStyle='rgba(0,0,0,.32)'; c.beginPath(); c.ellipse(0,18,16,6,0,0,6.283); c.fill();
-  const mv=ch.moving, ph=ch.walk*11, s=mv?Math.sin(ph):0, bob=mv?-Math.abs(Math.cos(ph))*3:0;
+  const mv=visual?visual.moving:ch.moving, ph=(visual?visual.walk:ch.walk)*11, s=mv?Math.sin(ph):0, bob=mv?-Math.abs(Math.cos(ph))*3:0;
   c.translate(0,bob); c.scale(ch.face,1);
   c.lineWidth=2.5; c.strokeStyle='#10122a'; c.lineJoin='round';
   c.fillStyle=col.dark;
@@ -664,7 +665,7 @@ function drawChar(c,ch,showName=true){
   c.restore();
   if(showName&&ch.name){
     const sp=nameSprite(ch.name,ch.nameCol||'#fff');
-    c.drawImage(sp.cv,ch.x-sp.w/2,ch.y-35-sp.asc,sp.w,sp.h);
+    c.drawImage(sp.cv,vx-sp.w/2,vy-35-sp.asc,sp.w,sp.h);
   }
 }
 
@@ -2759,9 +2760,8 @@ function update(dt){
   if(G.mapOpen&&G.state!=='playing')closeMap();
   if(G.state==='task'&&G.mini&&G.mini.task.fix&&!G.mini.finished&&!(G.sab[G.mini.task.fix]>0))closeModal();
   tickVents(dt);
+  if(NET.inRoom&&!NET.isHost)netUpdateVisualInterpolation();
   if(G.state==='playing'&&(p.alive||ghostActs())&&!uiBusy()&&!p.vent)updatePlayer(dt); else p.moving=false;
-  // Correções de rede são aplicadas gradualmente para evitar saltos visuais.
-  if(NET.inRoom&&!NET.isHost){netReconcileLocalPlayer(dt);netInterpolateRemoteChars(dt)}
   if(simActive()){
     G.gt+=dt; G.killCd=Math.max(0,G.killCd-dt); G.meetCd=Math.max(0,G.meetCd-dt); updateLocator(dt);
     updateSab(dt); if(G.over)return;
@@ -2774,7 +2774,9 @@ function update(dt){
   const baseVision=G.role==='imp'?CFG.impVision:CFG.crewVision;
   G.visionTarget=!p.alive?Math.max(CFG.impVision,CFG.crewVision):(G.sab.lights>0&&G.role==='crew'?Math.max(110,baseVision*.34):baseVision);
   G.vision+=(G.visionTarget-G.vision)*Math.min(1,dt*4);
-  const tx=clamp(f.x-VW/2,Math.min(0,(WORLD_W-VW)/2),Math.max(0,WORLD_W-VW)), ty=clamp(f.y-VH/2,Math.min(0,(WORLD_H-VH)/2),Math.max(0,WORLD_H-VH));
+  const fx=NET.inRoom&&!NET.isHost&&Number.isFinite(f.netVisualX)?f.netVisualX:f.x;
+  const fy=NET.inRoom&&!NET.isHost&&Number.isFinite(f.netVisualY)?f.netVisualY:f.y;
+  const tx=clamp(fx-VW/2,Math.min(0,(WORLD_W-VW)/2),Math.max(0,WORLD_W-VW)), ty=clamp(fy-VH/2,Math.min(0,(WORLD_H-VH)/2),Math.max(0,WORLD_H-VH));
   const k=Math.min(1,dt*9); G.cam.x+=(tx-G.cam.x)*k; G.cam.y+=(ty-G.cam.y)*k;
   G.action=(G.state==='playing'&&(p.alive||(G.role==='crew'&&p.ghost)))?bestAction():null;
   const btn=$('btnUse'), hint=$('useHint');
@@ -2931,7 +2933,26 @@ buildStatic(); resize(); requestAnimationFrame(frame);
 /* =====================================================================
    MULTIPLAYER ONLINE — autoridade da sala no host + snapshots/requisições
    ===================================================================== */
-const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,applying:false,seq:0,recvSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,localCorrection:null};
+const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,applying:false,seq:0,recvSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,lastSnapshotAt:0,snapshotBlendDuration:.15};
+function netVisualState(ch){
+  if(!NET.inRoom||NET.isHost||!Number.isFinite(ch.netVisualX)||!Number.isFinite(ch.netVisualY))return null;
+  return {x:ch.netVisualX,y:ch.netVisualY,walk:Number.isFinite(ch.netVisualWalk)?ch.netVisualWalk:(ch.walk||0),moving:!!ch.netVisualMoving};
+}
+function netUpdateVisualInterpolation(){
+  if(!NET.inRoom||NET.isHost)return;
+  const now=performance.now();
+  for(const c of G.chars||[]){
+    if(!Number.isFinite(c.netFromX)||!Number.isFinite(c.netFromY)||!Number.isFinite(c.netToX)||!Number.isFinite(c.netToY)){
+      c.netVisualX=c.x;c.netVisualY=c.y;c.netVisualWalk=c.walk||0;c.netVisualMoving=!!c.moving;continue;
+    }
+    const duration=Math.max(0,(+c.netBlendDuration||0)*1000);
+    const alpha=duration>0?clamp((now-(+c.netBlendStart||now))/duration,0,1):1;
+    c.netVisualX=c.netFromX+(c.netToX-c.netFromX)*alpha;
+    c.netVisualY=c.netFromY+(c.netToY-c.netFromY)*alpha;
+    c.netVisualWalk=(c.netFromWalk||0)+((c.netToWalk||0)-(c.netFromWalk||0))*alpha;
+    c.netVisualMoving=alpha<1?(!!c.netFromMoving||!!c.netToMoving):!!c.netToMoving;
+  }
+}
 const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','locMax','locChance','locCooldown','locDuration'];
 function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
 function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
@@ -2955,7 +2976,7 @@ function netConnect(action){
 function netRoomPayload(){const size=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createSizeIn').value=size;const bots=clamp(Math.round(+$('createBotsIn').value||0),0,size-1);$('createBotsIn').value=bots;return {size,bots,settings:netSettings()}}
 function netCreateRoom(){Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';$('createPanel').hidden=true;netConnect(()=>netSend({type:'create_room',name:G.cfg.name,color:G.cfg.color,...netRoomPayload()}))}
 function netJoinRoom(){const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(!/^[A-Z0-9]{6}$/.test(code)){toast('Digite o código completo de 6 letras maiúsculas ou números.');return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';netConnect(()=>netSend({type:'join_room',code,name:G.cfg.name,color:G.cfg.color}))}
-function netLeaveRoom(){if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;netHideWait();$('roomLobby').hidden=true}
+function netLeaveRoom(){if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;netHideWait();$('roomLobby').hidden=true}
 function netTotal(room=NET.room){return room?(room.players.length+(room.bots||0)):0}
 function netRenderRoom(){
   const r=NET.room;if(!r)return;
@@ -3010,7 +3031,7 @@ function netHandleMessage(m){
   if(m.type==='loading_start'){NET.room=m.room||NET.room;netShowLoading();return}
   if(m.type==='countdown_cancelled'){netHideWait();toast(m.reason||'Contagem cancelada.',2400);if(NET.room&&['lobby','countdown'].includes(NET.room.status))netShowRoom();return}
   if(m.type==='game_start'){
-    netHideWait();NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.matchImpIds.clear();NET.departedImpIds.clear();
+    netHideWait();NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;NET.matchImpIds.clear();NET.departedImpIds.clear();
     const own=m.room.players.find(p=>p.id===NET.id);if(own){G.cfg.name=own.name;G.cfg.color=own.color;$('nameIn').value=own.name}
     netApplySettings(m.room.settings);if((m.room.players.length+m.room.bots)>=10)CFG.impostors=3;else CFG.impostors=1;
     $('roomLobby').hidden=true;$('joinPanel').hidden=true;$('menu').hidden=true;
@@ -3057,38 +3078,31 @@ function netApplySnapshot(s,force=false){
   if(!s||!Array.isArray(s.chars)||(!force&&Number.isFinite(+s.seq)&&+s.seq<NET.recvSeq))return;if(Number.isFinite(+s.seq))NET.recvSeq=+s.seq;NET.applying=true;
   try{
     const oldState=G.state, prevPlayer=G.player, wasAlive=prevPlayer?prevPlayer.alive:true;
+    const arrival=performance.now();
+    const clientSnapshot=!force&&NET.inRoom&&!NET.isHost;
+    const snapshotDuration=NET.lastSnapshotAt>0?clamp((arrival-NET.lastSnapshotAt)/1000,.05,.25):.15;
+    if(clientSnapshot){NET.snapshotBlendDuration=snapshotDuration;NET.lastSnapshotAt=arrival}
+    const canBlendClient=clientSnapshot&&['playing','task','tool'].includes(oldState)&&s.state==='playing';
     const oldChars=new Map((G.chars||[]).map(c=>[c.id,c]));
-    // O cliente prevê o próprio movimento localmente e interpola os demais personagens
-    // entre snapshots. O host continua sendo a autoridade do estado real da partida.
-    const keepClientMotion=!force&&NET.inRoom&&!NET.isHost&&['playing','task','tool'].includes(oldState)&&s.state==='playing';
     G.chars=s.chars.map(r=>{
-      let c=oldChars.get(r.id);const hadOld=!!c;
-      if(!c)c=newChar(r.name,r.color,0,0,r.id===NET.id);
-      const oldX=c.x,oldY=c.y,oldWalk=c.walk,oldFace=c.face,oldMoving=c.moving;
-      const oldVent=c.vent||null,oldAlive=!!c.alive,oldGhost=!!c.ghost;
-      const ai=c.ai;Object.assign(c,r);
-      if(ai)c.ai=ai;else if(!r.isBot&&!r.isRemoteHuman&&!c.isPlayer)c.ai=null;
-      c.isPlayer=c.id===NET.id;
-      c.isRemoteHuman=c.id!==NET.id&&(!!NET.room?.players.some(p=>p.id===c.id)||!!r.isRemoteHuman);
-      c.isBot=!!r.isBot;
-      if(keepClientMotion){
-        const tx=Number.isFinite(+r.x)?+r.x:c.x,ty=Number.isFinite(+r.y)?+r.y:c.y;
-        c.netTargetX=tx;c.netTargetY=ty;
-        const isLocal=c.id===NET.id,delta=Math.hypot(tx-oldX,ty-oldY);
-        const shouldSnap=!hadOld||!Number.isFinite(oldX)||!Number.isFinite(oldY)||
-          delta>(isLocal?90:160)||oldVent!==(r.vent||null)||oldAlive!==!!r.alive||oldGhost!==!!r.ghost;
-        if(!shouldSnap){
-          c.x=oldX;c.y=oldY;
-          if(isLocal){
-            c.walk=oldWalk;c.face=oldFace;c.moving=oldMoving;
-            NET.localCorrection={x:tx-oldX,y:ty-oldY,remaining:.15};
-          }else if(Number.isFinite(oldWalk))c.walk=oldWalk;
-        }else{
-          c.x=tx;c.y=ty;
-          if(isLocal)NET.localCorrection=null;
-        }
+      let c=oldChars.get(r.id);const hadOld=!!c;if(!c)c=newChar(r.name,r.color,0,0,r.id===NET.id);
+      const oldX=+c.x,oldY=+c.y,oldWalk=+c.walk,oldMoving=!!c.moving,oldAlive=!!c.alive,oldGhost=!!c.ghost,oldVent=c.vent||null;
+      const oldVisualX=Number.isFinite(+c.netVisualX)?+c.netVisualX:oldX,oldVisualY=Number.isFinite(+c.netVisualY)?+c.netVisualY:oldY;
+      const oldVisualWalk=Number.isFinite(+c.netVisualWalk)?+c.netVisualWalk:oldWalk,oldVisualMoving=typeof c.netVisualMoving==='boolean'?c.netVisualMoving:oldMoving;
+      const ai=c.ai;Object.assign(c,r);if(ai)c.ai=ai;else if(!r.isBot&&!r.isRemoteHuman&&!c.isPlayer)c.ai=null;c.isPlayer=c.id===NET.id;c.isRemoteHuman=c.id!==NET.id&&(!!NET.room?.players.some(p=>p.id===c.id)||!!r.isRemoteHuman);c.isBot=!!r.isBot;
+      const targetX=Number.isFinite(+r.x)?+r.x:c.x,targetY=Number.isFinite(+r.y)?+r.y:c.y;
+      const targetWalk=Number.isFinite(+r.walk)?+r.walk:0, targetMoving=!!r.moving;
+      const delta=Math.hypot(targetX-oldX,targetY-oldY);
+      const blend=canBlendClient&&hadOld&&Number.isFinite(oldX)&&Number.isFinite(oldY)&&Number.isFinite(oldWalk)&&delta<=110&&oldVent===(r.vent||null)&&oldAlive===!!r.alive&&oldGhost===!!r.ghost;
+      if(blend){
+        c.netFromX=oldVisualX;c.netFromY=oldVisualY;c.netToX=targetX;c.netToY=targetY;
+        c.netFromWalk=oldVisualWalk;c.netToWalk=targetWalk;c.netFromMoving=oldVisualMoving;c.netToMoving=targetMoving;
+        c.netBlendStart=arrival;c.netBlendDuration=snapshotDuration;
+        c.netVisualX=oldVisualX;c.netVisualY=oldVisualY;c.netVisualWalk=oldVisualWalk;c.netVisualMoving=oldVisualMoving||targetMoving;
       }else{
-        c.netTargetX=c.x;c.netTargetY=c.y;
+        c.netFromX=c.netToX=c.netVisualX=targetX;c.netFromY=c.netToY=c.netVisualY=targetY;
+        c.netFromWalk=c.netToWalk=c.netVisualWalk=targetWalk;c.netFromMoving=c.netToMoving=c.netVisualMoving=targetMoving;
+        c.netBlendStart=arrival;c.netBlendDuration=0;
       }
       return c;
     });
@@ -3172,26 +3186,6 @@ function netUpdateRemote(dt){
     if(c.netKillCd>0)c.netKillCd=Math.max(0,c.netKillCd-dt);if(c.netTrackCd>0)c.netTrackCd=Math.max(0,c.netTrackCd-dt);if(c.netTrackTime>0){const t=G.chars.find(x=>x.id===c.netTrackTarget);c.netTrackTime=Math.max(0,c.netTrackTime-dt);if(!t||!t.alive||c.netTrackTime<=0){c.netTrackTarget=null;c.netTrackTime=0;c.netTrackCd=CFG.locCooldown}};
   }
 }
-// Ajuste suave da previsão local contra a posição autoritativa recebida do host.
-function netReconcileLocalPlayer(dt){
-  const p=G.player,c=NET.localCorrection;
-  if(!p||!c)return;
-  if(!['playing','task','tool'].includes(G.state)||!p.alive&& !p.ghost){NET.localCorrection=null;return}
-  const remaining=Math.max(.001,c.remaining),fraction=Math.min(1,dt/remaining),dx=c.x*fraction,dy=c.y*fraction,face=p.face,ox=p.x,oy=p.y;
-  moveChar(p,dx,dy);
-  c.x-=p.x-ox;c.y-=p.y-oy;c.remaining=Math.max(0,c.remaining-dt);p.face=face;
-  if(c.remaining<=.001||Math.hypot(c.x,c.y)<.5)NET.localCorrection=null;
-}
-// Os outros personagens chegam em snapshots menos frequentes; interpolar preserva fluidez visual.
-function netInterpolateRemoteChars(dt){
-  if(!['playing','task','tool'].includes(G.state))return;
-  const f=Math.min(1,dt/.12);
-  for(const c of G.chars){
-    if(c.id===NET.id||!Number.isFinite(c.netTargetX)||!Number.isFinite(c.netTargetY))continue;
-    c.x+=(c.netTargetX-c.x)*f;c.y+=(c.netTargetY-c.y)*f;
-    if(c.moving)c.walk=(c.walk||0)+dt;
-  }
-}
 function netUpdateInput(){if(!NET.inRoom||!NET.id||!NET.ws||NET.ws.readyState!==WebSocket.OPEN)return;const v=inputVec();netSend({type:'input',x:v.x,y:v.y})}
 function netStartSnapshots(){
   if(NET.snapshotTimer)clearInterval(NET.snapshotTimer);
@@ -3206,7 +3200,7 @@ function netStartSnapshots(){
 }
 // Client-local simulations are view-only; host owns NPC AI, kills, sabotages, tasks, meetings and victory checks.
 const netOriginalUpdateNPCs=updateNPCs;updateNPCs=function(dt){if(NET.inRoom&&!NET.isHost)return;if(NET.inRoom&&NET.isHost)netUpdateRemote(dt);netOriginalUpdateNPCs(dt)};
-// updatePlayer também roda nos clientes online para prever o movimento local; o host valida o estado autoritativo.
+const netOriginalUpdatePlayer=updatePlayer;updatePlayer=function(dt){if(NET.inRoom&&!NET.isHost)return;netOriginalUpdatePlayer(dt)};
 const netOriginalUpdateSab=updateSab;updateSab=function(dt){if(NET.inRoom&&!NET.isHost)return;netOriginalUpdateSab(dt)};
 const netOriginalUpdateLocator=updateLocator;updateLocator=function(dt){if(NET.inRoom&&!NET.isHost)return;netOriginalUpdateLocator(dt);if(NET.inRoom&&NET.isHost&&G.player){G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd;G.player.netKillCd=G.killCd}};
 const netOriginalUpdateMeeting=updateMeeting;updateMeeting=function(dt){if(NET.inRoom&&!NET.isHost)return;netOriginalUpdateMeeting(dt)};
