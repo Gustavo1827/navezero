@@ -170,6 +170,8 @@ body.touch #stick{display:block}
 .act2.ready{filter:none}
 .act2:active{transform:translateY(5px)}
 .act2:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+.act2.cooldown-label{font-size:22px!important;line-height:1!important;font-variant-numeric:tabular-nums}
+.act2.cooldown-label small,.act2.cooldown-label .sheriffButtonLabel{font-size:22px!important;line-height:1!important}
 .act2.kill{background:var(--coral);color:#33050d;box-shadow:0 6px 0 #a02a3a,0 8px 0 #10122a}
 .act2.sab{background:#2b3379;color:var(--ink);box-shadow:0 6px 0 #161a4a,0 8px 0 #10122a}
 .act2.rep{background:var(--mint);color:#06301f;box-shadow:0 6px 0 #1f9d6c,0 8px 0 #10122a}
@@ -228,8 +230,9 @@ body.touch #stick{display:block}
 #meet.space-result #meetTitle,#meet.space-eject #meetTitle{font-size:clamp(25px,5vw,42px);letter-spacing:2px;text-transform:uppercase;color:#d9eaff;text-shadow:0 0 20px #5a9dff}
 #meet.space-result #meetTimer,#meet.space-eject #meetTimer{position:absolute;right:12px;top:12px}
 #meet.space-result #meetDesc,#meet.space-eject #meetDesc{white-space:pre-line;color:#fff;font-size:clamp(19px,3.4vw,27px);font-weight:800;line-height:1.35;margin:14px auto 8px;max-width:680px;text-shadow:0 2px 10px #000}
-#skipVoteDots{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:0 auto 10px}
-#skipVoteDots i{display:block;width:17px;height:17px;border:2px solid rgba(255,255,255,.9);border-radius:50%;box-shadow:0 1px 5px #000}
+#skipVoteDots{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;margin:0 auto 10px}
+#skipVoteDots .skip-vote-label{font-size:clamp(14px,2.2vw,18px);font-weight:800;color:#d9eaff;text-shadow:0 2px 5px #000}
+#skipVoteDots i{display:block;width:17px;height:17px;border:2px solid rgba(255,255,255,.9);border-radius:50%;box-shadow:0 1px 5px #000;flex:none}
 #meet.vote-reveal #skipVoteDots:not([hidden]){display:flex}
 #meet.space-result #voteBreakdown:not([hidden]){display:block;box-sizing:border-box;width:min(680px,100%);max-height:34vh;overflow-y:auto;overscroll-behavior:contain;margin:0 auto 8px;padding:10px 14px;border:1px solid rgba(159,202,255,.32);border-radius:12px;background:rgba(7,13,35,.72);color:#d9eaff;text-align:left;white-space:pre-line;font-size:clamp(12px,2.3vw,16px);font-weight:600;line-height:1.45;text-shadow:0 1px 3px #000}
 #meet.space-result #meetGrid,#meet.space-result #meetChat,#meet.space-result #meetSay,#meet.space-result #sayChips,#meet.space-result #meetFoot,#meet.space-eject #voteBreakdown,#meet.space-eject #meetGrid,#meet.space-eject #meetChat,#meet.space-eject #meetSay,#meet.space-eject #sayChips,#meet.space-eject #meetFoot{display:none!important}
@@ -335,7 +338,8 @@ body.touch #stick{display:block}
 .roomDot{width:18px;height:18px;border-radius:50%;border:2px solid #080a20;flex:none}
 .roomPlayer span:last-child{margin-left:auto;color:var(--ink2);font-size:13px}
 .roomFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 12px}
-.roomFields label{display:flex;flex-direction:column;gap:4px;color:var(--ink2);font-size:13px}.roomFields #roomBotsOk{align-self:end;min-height:40px}
+.roomFields label{display:flex;flex-direction:column;gap:4px;color:var(--ink2);font-size:13px}.roomFields #roomBotsOk{align-self:end;min-height:36px;min-width:58px;padding:5px 24px 3px;font:800 20px var(--font);border-radius:14px;box-shadow:0 4px 0 var(--amber-d),0 6px 0 #10122a}
+.roomFields #roomBotsOk:active{transform:translateY(3px);box-shadow:0 1px 0 var(--amber-d),0 2px 0 #10122a}
 .roomFields input{width:100%;min-width:0;background:#0d1033;border:2px solid var(--edge);border-radius:10px;padding:7px;color:var(--ink);font:700 16px var(--font)}
 .roomActions{justify-content:center;margin-top:14px}
 #createPanel{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(12,17,44,.7)}
@@ -1385,7 +1389,7 @@ function newGame(){
   const sheriffEligible=shuffle(G.chars.filter(c=>c.role==='crew'&&c.function!=='locator'));
   const sheriffEnabled=CFG.sheriffMax>0&&CFG.sheriffChance>0&&Math.random()*100<CFG.sheriffChance;
   if(sheriffEnabled){for(const ch of sheriffEligible.slice(0,clamp(CFG.sheriffMax,0,15)))ch.function='sheriff'}
-  if(CFG.delayedEnabled&&CFG.delayedChance>0&&CFG.delayedMax>0&&Math.random()*100<CFG.delayedChance){const delayedEligible=shuffle([...G.imps]);for(const ch of delayedEligible.slice(0,Math.min(clamp(CFG.delayedMax,0,3),G.imps.length)))ch.function='delayed'}
+  if(CFG.delayedChance>0&&CFG.delayedMax>0&&Math.random()*100<CFG.delayedChance){const delayedEligible=shuffle([...G.imps]);for(const ch of delayedEligible.slice(0,Math.min(clamp(CFG.delayedMax,0,3),G.imps.length)))ch.function='delayed'}
   G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.sheriffCd=0;G.delayedCd=0;G.delayedT=null;G.delayedMarks={}; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
   const pts=cafePoints(G.chars.length); G.chars.forEach((c,i)=>placeChar(c,pts[i]));
@@ -1686,7 +1690,7 @@ function closeMap(){
   if(!G.mapOpen)return;
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
-const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['delayedEnabled','Ativar função Atrasado','Permite habilitar ou desabilitar a função Atrasado',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s']];
+const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s']];
 function buildCfgUI(){
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
   const locked=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
@@ -1698,21 +1702,22 @@ function buildCfgUI(){
     box.appendChild(cooldownRow);
   }
   CFG_ROWS.forEach(([k,l,d,unit])=>{
-    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedEnabled','delayedChance','delayedMax','delayedDuration'];
+    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedChance','delayedMax','delayedDuration'];
     const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isDelayed=delayedKeys.includes(k),isFn=isLocator||isSheriff||isDelayed;
     if((G.cfgPage==='functions')!==isFn)return;
     if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='locator'&&!isLocator)||(G.cfgFunctionTab==='sheriff'&&!isSheriff)||(G.cfgFunctionTab==='delayed'&&!isDelayed)))return;
     const row=el('div','cfgrow'+(isFn?' fncompact':'')), top=el('div','cfgtop');
     if(isFn){
-      const showCfgValue=()=>k==='delayedEnabled'?(CFG[k]?'Ativado':'Desativado'):(CFG[k]+(unit?' '+unit:''));
+      const showCfgValue=()=>CFG[k]+(unit?' '+unit:'');
       const value=el('b','',showCfgValue());
       const icon=el('span','fnicon',isDelayed?'◷':isSheriff?'🔫':'⌖'); top.append(icon,el('span','',l),value);
       const stepper=el('div','fnstepper');
       const minus=el('button','','−'), number=el('output','',String(CFG[k])), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label','Diminuir '+l.toLowerCase()); plus.setAttribute('aria-label','Aumentar '+l.toLowerCase()); number.setAttribute('aria-label',l);
-      const sync=()=>{number.textContent=k==='delayedEnabled'?(CFG[k]?'Sim':'Não'):String(CFG[k]);value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=CFG_LIM[k][1]};
-      const change=delta=>{if(locked)return;CFG[k]=clamp(k==='delayedEnabled'?(delta>0?1:0):CFG[k]+delta,CFG_LIM[k][0],CFG_LIM[k][1]);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);Snd.click()};
-      minus.addEventListener('click',()=>change(-1));plus.addEventListener('click',()=>change(1));stepper.append(minus,number,plus);row.append(top,stepper,el('small','',d));sync();
+      const sync=()=>{number.textContent=String(CFG[k]);value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=CFG_LIM[k][1]};
+      const change=(delta,silent=false)=>{if(locked)return;CFG[k]=clamp(CFG[k]+delta,CFG_LIM[k][0],CFG_LIM[k][1]);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);if(!silent)Snd.click()};
+      const wireRepeat=(btn,delta)=>{let delayTimer=null,repeatTimer=null;const stop=()=>{if(delayTimer!==null){clearTimeout(delayTimer);delayTimer=null}if(repeatTimer!==null){clearInterval(repeatTimer);repeatTimer=null}};const canStep=()=>!locked&&(delta<0?CFG[k]>CFG_LIM[k][0]:CFG[k]<CFG_LIM[k][1]);const down=e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();if(!canStep())return;stop();if(btn.setPointerCapture&&e.pointerId!==undefined){try{btn.setPointerCapture(e.pointerId)}catch{}}change(delta);delayTimer=setTimeout(()=>{delayTimer=null;if(!canStep())return;repeatTimer=setInterval(()=>{if(!canStep()){stop();return}change(delta,true)},70)},280)};btn.addEventListener('pointerdown',down);btn.addEventListener('pointerup',stop);btn.addEventListener('pointercancel',stop);btn.addEventListener('lostpointercapture',stop);btn.addEventListener('click',e=>{if(e.detail===0)change(delta)});};
+      wireRepeat(minus,-1);wireRepeat(plus,1);stepper.append(minus,number,plus);row.append(top,stepper,el('small','',d));sync();
     }else{
       const out=el('b','',CFG[k]+(unit?' '+unit:''));
       const inp=document.createElement('input'); inp.type='range'; inp.min=CFG_LIM[k][0]; inp.max=CFG_LIM[k][1]; inp.step=1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
@@ -2986,6 +2991,7 @@ function playerVote(id){
 function renderSkipVoteDots(log){
   const box=$('skipVoteDots');box.innerHTML='';
   const skipped=(log||[]).filter(v=>v.target==='skip');
+  if(skipped.length){box.appendChild(el('span','skip-vote-label','Votos Pulados:'));}
   skipped.forEach(v=>{const voter=charById(v.voter);if(!voter)return;const dot=el('i');dot.style.background=COLOR_BY[voter.color]?.main||chatCol(voter);dot.title=`${voter.name} pulou a votação`;dot.setAttribute('aria-label',dot.title);box.appendChild(dot)});
   box.hidden=skipped.length===0;
 }
@@ -3026,15 +3032,15 @@ function updateButtons(){
   G.killT=null;
   if(directKill&&can&&G.killCd<=0&&!p.vent){let bd=72;for(const v of G.chars){if(!v.alive||v.role==='imp')continue;const d=dist(p,v);if(d<bd){bd=d;G.killT=v}}}
   setCls(bk,'ready',!!G.killT);
-  const kt=G.killCd>0?String(Math.ceil(G.killCd)):'Matar'; if(bk._l!==kt){bk._l=kt;bk.textContent=kt}
+  const kt=G.killCd>0?String(Math.ceil(G.killCd)):'Matar';setCls(bk,'cooldown-label',G.killCd>0);if(bk._l!==kt){bk._l=kt;bk.textContent=kt}
   G.sheriffT=sheriff&&can&&!p.vent&&G.sheriffCd<=0?sheriffTargetFor(p):null;
   setCls(bsh,'ready',!!G.sheriffT&&!uiBusy()&&!(typeof NET!=='undefined'&&NET.pendingSheriffShot));
-  const sht=G.sheriffCd>0?String(Math.ceil(G.sheriffCd)):(NET?.pendingSheriffShot?'…':'Atirar');if(bsh._l!==sht){bsh._l=sht;const label=bsh.querySelector('.sheriffButtonLabel');if(label)label.textContent=sht;else bsh.textContent=sht}
-  G.delayedT=delayed&&can&&!p.vent&&G.delayedCd<=0?delayedTargetFor(p):null;const dlab=G.delayedCd>0?String(Math.ceil(G.delayedCd)):(NET?.pendingDelayedMark?'…':'◷ Marcar');if(bdel._l!==dlab){bdel._l=dlab;bdel.innerHTML=dlab==='◷ Marcar'?'◷<small>Marcar</small>':dlab}
+  const sht=G.sheriffCd>0?String(Math.ceil(G.sheriffCd)):(NET?.pendingSheriffShot?'…':'Atirar');setCls(bsh,'cooldown-label',G.sheriffCd>0);if(bsh._l!==sht){bsh._l=sht;const label=bsh.querySelector('.sheriffButtonLabel');if(label)label.textContent=sht;else bsh.textContent=sht}
+  G.delayedT=delayed&&can&&!p.vent&&G.delayedCd<=0?delayedTargetFor(p):null;const dlab=G.delayedCd>0?String(Math.ceil(G.delayedCd)):(NET?.pendingDelayedMark?'…':'◷ Marcar');setCls(bdel,'cooldown-label',G.delayedCd>0);if(bdel._l!==dlab){bdel._l=dlab;bdel.innerHTML=dlab==='◷ Marcar'?'◷<small>Marcar</small>':dlab}
   setCls(bdel,'ready',!!G.delayedT&&!uiBusy()&&!(NET?.pendingDelayedMark));
   setCls(bs,'ready',imp&&G.state==='playing'&&!uiBusy()&&G.sab.cd<=0);
-  const st=G.sab.cd>0?String(Math.ceil(G.sab.cd)):'Sabotar'; if(bs._l!==st){bs._l=st;bs.textContent=st}
-  setCls(br,'ready',!!(can&&nearBody())); setCls(bl,'active',G.trackTime>0); const lt=G.trackTime>0?String(Math.ceil(G.trackTime)):(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear');if(bl._l!==lt){bl._l=lt;bl.querySelector('small').textContent=lt;bl._l=lt}
+  const st=G.sab.cd>0?String(Math.ceil(G.sab.cd)):'Sabotar';setCls(bs,'cooldown-label',G.sab.cd>0);if(bs._l!==st){bs._l=st;bs.textContent=st}
+  setCls(br,'ready',!!(can&&nearBody())); setCls(bl,'active',G.trackTime>0); const lt=G.trackTime>0?String(Math.ceil(G.trackTime)):(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear');setCls(bl,'cooldown-label',G.trackTime>0||G.trackCd>0);if(bl._l!==lt){bl._l=lt;bl.querySelector('small').textContent=lt;bl._l=lt}
 }
 function update(dt){
   const p=G.player;
