@@ -1,28 +1,28 @@
-# Nave Zero Online — pacote de correções
+# Nave Zero Online — correções pontuais
 
-Este pacote preserva a estrutura existente do jogo e inclui as correções multiplayer já presentes na versão-base, além da votação visual, da função Xerife e da nova função Atrasado.
+Este pacote mantém a estrutura do jogo e reúne as correções multiplayer existentes com os ajustes solicitados para o Xerife, Atrasado, chat escrito, falas dos bots e revanche.
 
 ## Alterações incluídas
 
-- Resultados da votação na mesma tela da reunião por 10 segundos, com bolinhas usando a cor de cada votante; as bolinhas são removidas ao entrar na tela de ejeção.
-- Função Xerife exclusiva de Tripulantes, com botão de disparo, alvo dentro do alcance e linha de visão, cooldown configurável e validação autoritativa no host.
-- Se o alvo for Infiltrado, o alvo e o Xerife são eliminados; se for Tripulante, o alvo permanece vivo e o Xerife é eliminado. A condição de vitória é verificada após a ação.
-- Aba Xerife na seção Funções, com cooldown de 10–60 s, chance de 0–100% e quantidade de 0–15; as configurações usam o sistema existente de salvamento e sincronização da sala.
-- Frases prontas para alegar, negar ou suspeitar das funções Tripulante, Infiltrado, Xerife e Localizador.
-- Descrições de funções e classes atualizadas para os textos solicitados.
-- Função Atrasado exclusiva dos Infiltrados, com botão vermelho de relógio, ativação/desativação na aba Funções e duração da marcação configurável entre 5 e 40 segundos.
-- Cooldown de marcação reutiliza o valor de “Tempo para matar”, sem criar um segundo parâmetro de cooldown.
-- O host valida alvo, alcance, linha de visão, vida, equipe, estado da partida e cooldown; a contagem regressiva é autoritativa, pausa durante reuniões, elimina a vítima ao terminar e é sincronizada por snapshots. Marcações duplicadas na mesma vítima são bloqueadas e as marcações são limpas quando a vítima morre ou a partida termina.
-- Preservadas as correções anteriores de configurações de sala, tarefas e dutos online, sincronização, bots e culling visual por distância.
+- **Ícone do Xerife:** substituído por um SVG de arma no estilo visual do jogo.
+- **Atrasado sem eliminação direta:** o botão e o comando genérico de eliminação bloqueiam essa função. O Atrasado continua podendo sabotar e usar apenas a habilidade de marcação.
+- **Cronômetro privado do Atrasado:** o host mantém a marcação autoritativa; os snapshots enviados a cada cliente incluem a contagem regressiva somente para quem fez a marcação. A vítima e os outros jogadores não recebem esses metadados.
+- **Configurações do Atrasado:** chance de 0–100% e quantidade de 0–3; a atribuição fica limitada à quantidade real de Infiltrados. A função permanece sujeita à opção geral de ativação já existente.
+- **Chat escrito:** mensagens de até 180 caracteres são sanitizadas, limitadas por taxa e retransmitidas apenas aos membros conectados à mesma sala. A interface cria os elementos de mensagem usando texto, sem interpretar conteúdo como HTML.
+- **Bots e funções:** bots podem receber Xerife ou Atrasado conforme os limites configurados; Xerifes bots usam a habilidade dentro das condições de suspeita, alcance, linha de visão e cooldown. Bots Atrasados marcam vítimas em vez de eliminá-las diretamente.
+- **Falas contextuais dos bots:** adicionadas frases sobre corpos, jogadores não vistos recentemente, tarefas realmente feitas e suspeitos apoiados pela memória/evidência da IA. Nomes de jogadores e tarefas são obtidos do estado da partida.
+- **Nomes únicos e persistentes dos bots:** cada sala tem um cadastro estável de IDs e nomes, sem colisão com nomes humanos na sala; a revanche mantém esse cadastro. A partida offline também reutiliza os nomes enquanto o jogador local mantém o mesmo nome.
+- **Jogar de novo:** o host pode reiniciar a mesma sala e o servidor mantém o código, participantes que ainda estão conectados, quantidade de bots e configurações. O reinício continua passando pela validação e pelo fluxo sincronizado já existente.
+- Preservadas as correções anteriores de configurações da sala, tarefas/dutos online, votação visual, culling por distância e estados de vitória.
 
 ## Testes executados
 
 - `node --check server.js`
 - `node --check websocket.js`
-- Verificação sintática do script JavaScript embutido em `index.html`.
-- `npm test`: 24 testes automatizados aprovados, incluindo os limites e a persistência da configuração do Atrasado.
+- Extração do JavaScript inline de `index.html` e `node --check` do script extraído.
+- `npm test`: **30 testes automatizados aprovados, 0 falhas**. Inclui limites da configuração do Atrasado, roteamento do chat isolado por sala, privacidade dos cronômetros nos snapshots, nomes dos bots estáveis na revanche, permissões do host para reiniciar e regressões visuais do código.
 
-Os testes automatizados cobrem regras e fluxos do código, mas não substituem uma partida real no navegador. A validação visual e funcional com um host e dois clientes conectados ainda deve ser feita em uma sala de teste antes de atualizar a implantação pública.
+Os testes de WebSocket usam clientes simulados contra o servidor local e verificam os eventos e snapshots. **Não foi executada uma sessão real de navegador em três dispositivos físicos**, então a interação visual, a câmera e o comportamento em rede móvel ainda devem ser conferidos numa partida de teste antes de substituir a versão pública.
 
 ## Executar localmente
 
@@ -33,4 +33,4 @@ npm install
 npm start
 ```
 
-Abra `http://localhost:8080`. O endpoint `/health` informa se o servidor está respondendo.
+Abra `http://localhost:8080`. O endpoint `/health` verifica se o servidor está respondendo.
