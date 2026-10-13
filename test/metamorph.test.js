@@ -95,3 +95,29 @@ test('joystick volta à velocidade normal, a bolha bloqueia movimento e o estado
   assert.match(html, /morphBubble:c\.morphBubble\?\{\.\.\.c\.morphBubble\}:null/);
   assert.match(html, /command==='metamorphose'[\s\S]*?beginMetamorph\(ch,target\)/);
 });
+
+
+test('limite de Infiltrados segue o tamanho da sala no servidor', () => {
+  assert.equal(cleanSettings({impostors:3},4).impostors,1);
+  assert.equal(cleanSettings({impostors:3},7).impostors,1);
+  assert.equal(cleanSettings({impostors:3},8).impostors,2);
+  assert.equal(cleanSettings({impostors:3},9).impostors,2);
+  assert.equal(cleanSettings({impostors:3},10).impostors,3);
+  assert.equal(cleanSettings({impostors:3},15).impostors,3);
+});
+
+test('NPC Metamorfo só inicia durante sabotagem ou sem testemunhas próximas e pode copiar qualquer vivo', () => {
+  const start=html.indexOf('function metamorphBotThink(ch,dt)');
+  const end=html.indexOf('function playerMetamorphose()',start);
+  const body=html.slice(start,end);
+  assert.match(body,/const sabotageActive=G\.sab\.lights>0\|\|G\.sab\.reactor>0\|\|G\.sab\.comms>0\|\|G\.sab\.doors>0/);
+  assert.match(body,/if\(!sabotageActive&&nearby\)return/);
+  assert.match(body,/const targets=G\.chars\.filter\(t=>t\.alive&&t!==ch\)/);
+});
+
+test('ações de NPC respeitam cooldown na própria função de eliminação e Localizador possui recarga/duração', () => {
+  assert.match(html,/\(!k\.isPlayer&&!k\.isRemoteHuman&&k\.ai&&k\.ai\.killCd>0\)/);
+  assert.match(html,/function locatorBotThink\(ch,dt\)/);
+  assert.match(html,/ch\.netTrackCd=Math\.max\(0,\(ch\.netTrackCd\|\|0\)-dt\)/);
+  assert.match(html,/ch\.netTrackTime=Math\.max\(0,ch\.netTrackTime-dt\)/);
+});

@@ -30,7 +30,7 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   const created=await onceMessage(host,m=>m.type==='room_state');
   const code=created.room.code;
   assert.match(code,/^[A-Z0-9]{6}$/);assert.equal(created.room.size,4);assert.equal(created.room.bots,3);assert.equal(created.room.players.length+created.room.bots,4);
-  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,50);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(Object.hasOwn(created.room.settings,'delayedEnabled'),false);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);assert.equal(created.room.settings.metamorphChance,100);assert.equal(created.room.settings.metamorphMax,2);assert.equal(created.room.settings.metamorphDuration,25);assert.equal(created.room.settings.metamorphCooldown,55);
+  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,1);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,50);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(Object.hasOwn(created.room.settings,'delayedEnabled'),false);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);assert.equal(created.room.settings.metamorphChance,100);assert.equal(created.room.settings.metamorphMax,1);assert.equal(created.room.settings.metamorphDuration,25);assert.equal(created.room.settings.metamorphCooldown,55);
   assert.equal(created.room.botRoster.length,3);
   const norm=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const allNames=[...created.room.players.map(p=>p.name),...created.room.botRoster.map(b=>b.name)];
@@ -60,7 +60,7 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   assert.equal(rooms.get(created2.room.code).size,5);
   send(host2,{type:'set_room',bots:0,settings:{speed:130,kill:40,crewVision:800}});
   await onceMessage(visitor,m=>m.type==='room_state'&&m.room.bots===0);
-  assert.equal(rooms.get(created2.room.code).settings.speed,130);assert.equal(rooms.get(created2.room.code).settings.impostors,3,'configurações não enviadas em uma atualização parcial devem ser preservadas');assert.equal(rooms.get(created2.room.code).settings.renderDist,1000);assert.equal(rooms.get(created2.room.code).settings.sheriffCooldown,50);assert.equal(rooms.get(created2.room.code).settings.sheriffChance,35);assert.equal(rooms.get(created2.room.code).settings.sheriffMax,1);
+  assert.equal(rooms.get(created2.room.code).settings.speed,130);assert.equal(rooms.get(created2.room.code).settings.impostors,1,'o limite é recalculado conforme a capacidade fixa da sala');assert.equal(rooms.get(created2.room.code).settings.renderDist,1000);assert.equal(rooms.get(created2.room.code).settings.sheriffCooldown,50);assert.equal(rooms.get(created2.room.code).settings.sheriffChance,35);assert.equal(rooms.get(created2.room.code).settings.sheriffMax,1);
   assert.equal(rooms.get(code).settings.speed,210,'as configurações de outra sala não devem mudar');
 
   const third=await connect(url,'Terceiro','amarelo');all.push(third);
@@ -128,7 +128,7 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   const returned=await onceMessage(guest,m=>m.type==='room_state'&&m.room.status==='lobby');
   await onceMessage(peer,m=>m.type==='room_state'&&m.room.status==='lobby');
   assert.equal(returned.room.code,code,'o retorno reutiliza o mesmo código de sala');
-  assert.equal(returned.room.bots,3,'a quantidade de bots deve sobreviver ao retorno');assert.equal(returned.room.settings.impostors,2);assert.equal(returned.room.settings.renderDist,950);assert.equal(returned.room.settings.sheriffCooldown,50);assert.equal(returned.room.settings.sheriffChance,85);assert.equal(returned.room.settings.sheriffMax,2);
+  assert.equal(returned.room.bots,3,'a quantidade de bots deve sobreviver ao retorno');assert.equal(returned.room.settings.impostors,1);assert.equal(returned.room.settings.renderDist,950);assert.equal(returned.room.settings.sheriffCooldown,50);assert.equal(returned.room.settings.sheriffChance,85);assert.equal(returned.room.settings.sheriffMax,2);
   assert.deepEqual(returned.room.botRoster,botRosterBefore,'nomes e IDs dos bots devem permanecer estáveis ao retornar');
 });
 
@@ -207,7 +207,7 @@ test('código alfanumérico maiúsculo, tamanho fixo e cancelamento da contagem 
   send(guest,{type:'leave_room'});
   await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='lobby'&&m.room.players.length===1);
   await onceMessage(host,m=>m.type==='countdown_cancelled');
-  assert.equal(rooms.get(code).status,'lobby');assert.equal(rooms.get(code).settings.speed,215);assert.equal(rooms.get(code).settings.impostors,2);assert.equal(rooms.get(code).settings.renderDist,1000,'atualizar somente bots não deve zerar outras configurações');
+  assert.equal(rooms.get(code).status,'lobby');assert.equal(rooms.get(code).settings.speed,215);assert.equal(rooms.get(code).settings.impostors,1);assert.equal(rooms.get(code).settings.renderDist,1000,'atualizar somente bots não deve zerar outras configurações');
 });
 
 
@@ -266,7 +266,7 @@ test('servidor encaminha pedidos de metamorfose ao host da sala', async t=>{
   const host=await connect(url,'Host Meta','azul');all.push(host);
   send(host,{type:'create_room',name:'Host Meta',color:'azul',size:4,bots:2,settings:{impostors:2,metamorphChance:100,metamorphMax:2,metamorphDuration:15,metamorphCooldown:20}});
   const created=await onceMessage(host,m=>m.type==='room_state');
-  assert.equal(created.room.settings.metamorphMax,2);
+  assert.equal(created.room.settings.metamorphMax,1);
   const guest=await connect(url,'Convidado Meta','verde');all.push(guest);
   send(guest,{type:'join_room',code:created.room.code});
   await onceMessage(guest,m=>m.type==='room_state');

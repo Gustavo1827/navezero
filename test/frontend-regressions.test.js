@@ -10,7 +10,7 @@ test('configurações completas incluem infiltrados e distância de renderizaç�
   assert.match(html, /NET_SETTING_KEYS=\[[^\]]*'impostors'[^\]]*'renderDist'/);
   assert.match(html, /renderDist:\[500,1500\]/);
   assert.match(server, /impostors:\[1,3\][^\n]*renderDist:\[500,1500\]/);
-  assert.match(server, /cleanSettings\(\{\.\.\.room\.settings,\.\.\.\(m\.settings&&typeof m\.settings==='object'\?m\.settings:\{\}\)\}\)/);
+  assert.match(server, /cleanSettings\(\{\.\.\.room\.settings,\.\.\.\(m\.settings&&typeof m\.settings==='object'\?m\.settings:\{\}\)\},room\.size\)/);
 });
 
 test('a reunião revela os votos por 10 segundos na mesma tela e depois passa à ejeção', () => {
@@ -197,4 +197,14 @@ test('frases prontas incluem metamorfose, tarefas, respostas curtas e denúncias
   assert.match(html, /Vi \$\{T\.name\} se metamorfando em \$\{T2\.name\}/);
   assert.match(html, /completed=G\.tasks\.filter/);
   assert.match(html, /Encontrei o corpo de \$\{T\.name\} na \$\{rm\}!/);
+});
+
+
+test('slider de Infiltrados ajusta limites pela capacidade da sala e steppers Infiltrados são vermelhos transparentes', () => {
+  assert.match(html, /function impostorLimitForRoom\(size=configuredRoomSize\(\)\)\{return size>=10\?3:\(size>=8\?2:1\)\}/);
+  assert.match(html, /inp\.max=k==='impostors'\?impostorLimitForRoom\(\):CFG_LIM\[k\]\[1\]/);
+  assert.match(html, /CFG\.impostors=clamp\(CFG\.impostors,1,impostorLimitForRoom\(online\?NET\.room\?\.size:configuredRoomSize\(\)\)\)/);
+  assert.match(html, /\.fnstepper\.imp-stepper button\{background:rgba\(210,43,62,\.28\)/);
+  assert.match(server, /function cleanSettings\(input=\{\}, roomSize=10\)/);
+  assert.match(server, /const maxImpostors=roomSize>=10\?3:\(roomSize>=8\?2:1\)/);
 });
