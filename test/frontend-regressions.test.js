@@ -13,8 +13,9 @@ test('configurações completas incluem infiltrados e distância de renderizaç�
   assert.match(server, /cleanSettings\(\{\.\.\.room\.settings,\.\.\.\(m\.settings&&typeof m\.settings==='object'\?m\.settings:\{\}\)\}\)/);
 });
 
-test('a reunião revela os votos por 10 segundos na mesma tela e depois passa à ejeção', () => {
-  assert.match(html, /M\.replyQ=\[\]; M\.dur=10; \$\('meetTitle'\)\.textContent='Votação'/);
+test('a reunião revela os votos por 5 segundos e mantém a tela de ejeção por 10 segundos', () => {
+  assert.match(html, /M\.replyQ=\[\]; M\.dur=5; \$\('meetTitle'\)\.textContent='Votação'/);
+  assert.match(html, /M\.dur=10; \$\('meetTitle'\)\.textContent='Ejeção'/);
   assert.match(html, /M\.phase==='result'\)\{if\(M\.t>=M\.dur\)setMeetPhase\('eject'\)\}/);
   assert.match(html, /M\.phase==='eject'\)\{if\(M\.t>=M\.dur\)endMeeting\(\)\}/);
   assert.match(html, /\$\('meet'\)\.classList\.toggle\('vote-reveal',ph==='result'\)/);
@@ -23,6 +24,9 @@ test('a reunião revela os votos por 10 segundos na mesma tela e depois passa à
 
 test('bolinhas representam a cor de quem votou e desaparecem antes da ejeção', () => {
   assert.match(html, /M\.log\.forEach\(v=>\{const cd=M\.cards\[v\.target\]/);
+  assert.match(html, /function renderSkipVoteDots\(log\)/);
+  assert.match(html, /filter\(v=>v\.target==='skip'\)/);
+  assert.match(html, /id="skipVoteDots"/);
   assert.match(html, /d\.style\.background=COLOR_BY\[voter\.color\]\?\.main\|\|chatCol\(voter\)/);
   assert.match(html, /if\(ph==='eject'\)card\.classList\.remove\('pick'\)/);
   assert.match(html, /if\(ph==='eject'\)\{[^}]*card\.dotsEl\.innerHTML=''/s);
