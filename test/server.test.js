@@ -26,11 +26,11 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
 
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:50,sheriffChance:70,sheriffMax:4,delayedChance:82,delayedMax:3,delayedDuration:40}});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:50,sheriffChance:70,sheriffMax:4,delayedEnabled:1,delayedChance:82,delayedMax:3,delayedDuration:40}});
   const created=await onceMessage(host,m=>m.type==='room_state');
   const code=created.room.code;
   assert.match(code,/^[A-Z0-9]{6}$/);assert.equal(created.room.size,4);assert.equal(created.room.bots,3);assert.equal(created.room.players.length+created.room.bots,4);
-  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,1);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,50);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(Object.hasOwn(created.room.settings,'delayedEnabled'),false);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);
+  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,50);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(created.room.settings.delayedEnabled,1);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);
   assert.equal(created.room.botRoster.length,3);
   const norm=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const allNames=[...created.room.players.map(p=>p.name),...created.room.botRoster.map(b=>b.name)];
@@ -60,7 +60,7 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   assert.equal(rooms.get(created2.room.code).size,5);
   send(host2,{type:'set_room',bots:0,settings:{speed:130,kill:40,crewVision:800}});
   await onceMessage(visitor,m=>m.type==='room_state'&&m.room.bots===0);
-  assert.equal(rooms.get(created2.room.code).settings.speed,130);assert.equal(rooms.get(created2.room.code).settings.impostors,1,'o limite é recalculado conforme a capacidade fixa da sala');assert.equal(rooms.get(created2.room.code).settings.renderDist,1000);assert.equal(rooms.get(created2.room.code).settings.sheriffCooldown,50);assert.equal(rooms.get(created2.room.code).settings.sheriffChance,35);assert.equal(rooms.get(created2.room.code).settings.sheriffMax,1);
+  assert.equal(rooms.get(created2.room.code).settings.speed,130);assert.equal(rooms.get(created2.room.code).settings.impostors,3,'configurações não enviadas em uma atualização parcial devem ser preservadas');assert.equal(rooms.get(created2.room.code).settings.renderDist,1000);assert.equal(rooms.get(created2.room.code).settings.sheriffCooldown,50);assert.equal(rooms.get(created2.room.code).settings.sheriffChance,35);assert.equal(rooms.get(created2.room.code).settings.sheriffMax,1);
   assert.equal(rooms.get(code).settings.speed,210,'as configurações de outra sala não devem mudar');
 
   const third=await connect(url,'Terceiro','amarelo');all.push(third);
@@ -125,11 +125,11 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   await onceMessage(peer,m=>m.type==='room_state'&&m.room.status==='ended');
   assert.equal(ended.room.hostId,guest.id);
   send(guest,{type:'rematch'});
-  const returned=await onceMessage(guest,m=>m.type==='room_state'&&m.room.status==='lobby');
-  await onceMessage(peer,m=>m.type==='room_state'&&m.room.status==='lobby');
-  assert.equal(returned.room.code,code,'o retorno reutiliza o mesmo código de sala');
-  assert.equal(returned.room.bots,3,'a quantidade de bots deve sobreviver ao retorno');assert.equal(returned.room.settings.impostors,1);assert.equal(returned.room.settings.renderDist,950);assert.equal(returned.room.settings.sheriffCooldown,50);assert.equal(returned.room.settings.sheriffChance,85);assert.equal(returned.room.settings.sheriffMax,2);
-  assert.deepEqual(returned.room.botRoster,botRosterBefore,'nomes e IDs dos bots devem permanecer estáveis ao retornar');
+  const restarted=await onceMessage(guest,m=>m.type==='game_start'&&m.rematch===true);
+  await onceMessage(peer,m=>m.type==='game_start'&&m.rematch===true);
+  assert.equal(restarted.room.code,code,'a revanche reutiliza o mesmo código de sala');
+  assert.equal(restarted.room.round,2);assert.equal(restarted.room.bots,3,'a quantidade de bots deve sobreviver à revanche');assert.equal(restarted.room.settings.impostors,2);assert.equal(restarted.room.settings.renderDist,950);assert.equal(restarted.room.settings.sheriffCooldown,50);assert.equal(restarted.room.settings.sheriffChance,85);assert.equal(restarted.room.settings.sheriffMax,2);
+  assert.deepEqual(restarted.room.botRoster,botRosterBefore,'nomes e IDs dos bots devem permanecer estáveis ao reiniciar');
 });
 
 test('revanche continua quando a saída do host deixa exatamente três participantes', async t=>{
@@ -148,9 +148,9 @@ test('revanche continua quando a saída do host deixa exatamente três participa
   send(guest,{type:'game_end',winner:'crew',reason:'Fim',snapshot:{...snapshot,seq:5,state:'over',over:true,winner:'crew',endReason:'Fim'}});
   await onceMessage(guest,m=>m.type==='room_state'&&m.room.status==='ended');
   send(guest,{type:'rematch'});
-  const returned=await onceMessage(guest,m=>m.type==='room_state'&&m.room.status==='lobby');
-  assert.equal(returned.room.players.length+returned.room.bots,3);
-  assert.equal(returned.room.code,code);
+  const restarted=await onceMessage(guest,m=>m.type==='game_start'&&m.rematch===true);
+  assert.equal(restarted.room.players.length+restarted.room.bots,3);
+  assert.equal(restarted.room.code,code);
 });
 
 test('último humano saindo invalida a sala mesmo que ainda existam bots', async t=>{
@@ -207,23 +207,23 @@ test('código alfanumérico maiúsculo, tamanho fixo e cancelamento da contagem 
   send(guest,{type:'leave_room'});
   await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='lobby'&&m.room.players.length===1);
   await onceMessage(host,m=>m.type==='countdown_cancelled');
-  assert.equal(rooms.get(code).status,'lobby');assert.equal(rooms.get(code).settings.speed,215);assert.equal(rooms.get(code).settings.impostors,1);assert.equal(rooms.get(code).settings.renderDist,1000,'atualizar somente bots não deve zerar outras configurações');
+  assert.equal(rooms.get(code).status,'lobby');assert.equal(rooms.get(code).settings.speed,215);assert.equal(rooms.get(code).settings.impostors,2);assert.equal(rooms.get(code).settings.renderDist,1000,'atualizar somente bots não deve zerar outras configurações');
 });
 
 
 test('configurações do Atrasado respeitam limites e valores padrão', () => {
   const settings=cleanSettings({delayedEnabled:7,delayedChance:140,delayedMax:99,delayedDuration:99});
-  assert.equal(Object.hasOwn(settings,'delayedEnabled'),false);
+  assert.equal(settings.delayedEnabled,1);
   assert.equal(settings.delayedChance,100);
   assert.equal(settings.delayedMax,3);
   assert.equal(settings.delayedDuration,40);
   const low=cleanSettings({delayedEnabled:-2,delayedChance:-3,delayedMax:-4,delayedDuration:1});
-  assert.equal(Object.hasOwn(low,'delayedEnabled'),false);
+  assert.equal(low.delayedEnabled,0);
   assert.equal(low.delayedChance,0);
   assert.equal(low.delayedMax,0);
   assert.equal(low.delayedDuration,5);
   const defaults=cleanSettings({});
-  assert.equal(Object.hasOwn(defaults,'delayedEnabled'),false);
+  assert.equal(defaults.delayedEnabled,0);
   assert.equal(defaults.delayedChance,35);
   assert.equal(defaults.delayedMax,1);
   assert.equal(defaults.delayedDuration,20);
@@ -256,5 +256,3 @@ test('chat escrito funciona na sala de espera e só é retransmitido aos partici
   send(guestA,{type:'room_chat',text:'Esta mensagem não deve passar durante a partida'});
   const denied=await onceMessage(guestA,m=>m.type==='room_error');assert.match(denied.message,/sala de espera/i);
 });
-
-

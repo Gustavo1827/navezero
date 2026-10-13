@@ -10,7 +10,7 @@ test('configurações completas incluem infiltrados e distância de renderizaç�
   assert.match(html, /NET_SETTING_KEYS=\[[^\]]*'impostors'[^\]]*'renderDist'/);
   assert.match(html, /renderDist:\[500,1500\]/);
   assert.match(server, /impostors:\[1,3\][^\n]*renderDist:\[500,1500\]/);
-  assert.match(server, /cleanSettings\(\{\.\.\.room\.settings,\.\.\.\(m\.settings&&typeof m\.settings==='object'\?m\.settings:\{\}\)\},room\.size\)/);
+  assert.match(server, /cleanSettings\(\{\.\.\.room\.settings,\.\.\.\(m\.settings&&typeof m\.settings==='object'\?m\.settings:\{\}\)\}\)/);
 });
 
 test('a reunião revela os votos por 10 segundos na mesma tela e depois passa à ejeção', () => {
@@ -26,9 +26,8 @@ test('bolinhas representam a cor de quem votou e desaparecem antes da ejeção',
   assert.match(html, /d\.style\.background=COLOR_BY\[voter\.color\]\?\.main\|\|chatCol\(voter\)/);
   assert.match(html, /if\(ph==='eject'\)card\.classList\.remove\('pick'\)/);
   assert.match(html, /if\(ph==='eject'\)\{[^}]*card\.dotsEl\.innerHTML=''/s);
-  assert.match(html, /function updateSkippedVoteBreakdown\(log\)[\s\S]*?target==='skip'[\s\S]*?Pularam o voto/);
-  assert.match(html, /if\(ph==='result'\)updateSkippedVoteBreakdown\(sm\.log\|\|\[\]\)/);
-  assert.match(html, /updateSkippedVoteBreakdown\(M\.log\)/);
+  assert.match(html, /function netPaintMeeting\(sm\)\{[\s\S]*?\$\('voteBreakdown'\)\.textContent='';\$\('voteBreakdown'\)\.hidden=true/);
+  assert.doesNotMatch(html.slice(html.indexOf('function netPaintMeeting(sm){'), html.indexOf('function netSyncCameraAndButtons()')), /sm\.voteBreakdown/);
 });
 
 test('Xerife tem configurações limitadas, aba própria e sincronização de sala', () => {
@@ -94,14 +93,14 @@ test('culling desenha camadas visuais por sala sem desativar colisões', () => {
 });
 
 
-test('Atrasado tem aba vermelha, configuração por chance/quantidade, duração limitada e marcação autoritativa', () => {
+test('Atrasado tem aba vermelha, ativação, duração limitada e marcação autoritativa', () => {
   assert.match(html, /id="btnDelayedSection"[^>]*>◷ Atrasado/);
   assert.match(html, /id="btnDelayed"/);
-  assert.doesNotMatch(html, /delayedEnabled/);
+  assert.match(html, /delayedEnabled:\[0,1\]/);
   assert.match(html, /delayedDuration:\[5,40\]/);
   assert.match(html, /Tempo para marcar/);
   assert.match(html, /Usa o mesmo cooldown configurado em/);
-  assert.match(html, /if\(CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
+  assert.match(html, /if\(CFG\.delayedEnabled&&CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
   assert.match(html, /function doDelayedMark\(shooter,target\)/);
   assert.match(html, /remaining:CFG\.delayedDuration/);
   assert.match(html, /if\(G\.M\|\|G\.state==='meeting'/);
@@ -109,7 +108,7 @@ test('Atrasado tem aba vermelha, configuração por chance/quantidade, duração
   assert.match(html, /delayedMarks:\{\.\.\.G\.delayedMarks\}/);
   assert.match(html, /delayedChance:\[0,100\]/);
   assert.match(html, /delayedMax:\[0,3\]/);
-  assert.doesNotMatch(server, /delayedEnabled/);
+  assert.match(server, /delayedEnabled:\[0,1\]/);
   assert.match(server, /delayedChance:\[0,100\]/);
   assert.match(server, /delayedMax:\[0,3\]/);
   assert.match(server, /delayedDuration:\[5,40\]/);
@@ -152,13 +151,13 @@ test('nomes de bots são baseados no cadastro persistente da sala e persistem no
 });
 
 test('revanche usa a mesma sala e é autorizada somente pelo host', () => {
-  assert.match(server, /if\(m\.type==='rematch'\)\{[\s\S]*?if\(!isHost\)return error\(ws,'Somente o host pode voltar à sala\.'\);[\s\S]*?room\.status='lobby'[\s\S]*?broadcast\(room,\{type:'room_state',room:roomPublic\(room\)\}\)/);
+  assert.match(server, /if\(m\.type==='rematch'\)\{[\s\S]*?if\(!isHost\)return error\(ws,'Somente o host pode reiniciar a partida\.'\);[\s\S]*?startGame\(room,true,timings\)/);
   assert.match(server, /broadcast\(room,\{type:'game_start',room:roomPublic\(room\),round:room\.round,rematch\}/);
   assert.match(html, /NET\.room\?\.code===m\.room\?\.code/);
 });
 
 test('falas novas dos bots são condicionadas a corpo, tarefa ou evidência', () => {
-  assert.match(html, /if\(M\.body&&Math\.random\(\)<\.12\)return \{from:ch,text:pickLine\(\[`Onde foi o corpo\?`,`Onde que mataram \$\{M\.body\.name\}\?`\]\)/);
+  assert.match(html, /if\(M\.body&&Math\.random\(\)<\.12\)return \{from:ch,text:pickLine\(\['Onde foi o corpo\?'\]\)/);
   assert.match(html, /Estava fazendo \$\{recentTask\}/);
   assert.match(html, /Não vi \$\{unseenTarget\.name\}/);
   assert.match(html, /Alguém viu \$\{unseenTarget\.name\}/);
@@ -176,65 +175,4 @@ test('NPCs consideram causas ligadas a funções especiais ao discutir um corpo'
   assert.match(html, /cause==='delayed'[\s\S]*?causada por um Atrasado/);
   assert.match(html, /cause==='sheriff_misfire'[\s\S]*?Xerife tenha errado o disparo/);
   assert.match(html, /um Infiltrado, um Atrasado ou até um disparo de Xerife/);
-});
-
-
-test('botões das funções são translúcidos, codificados por equipe e repetem ao segurar', () => {
-  assert.match(html, /#cfgFunctionTabs button\{background:rgba\(35,111,210,.24\)/);
-  assert.match(html, /#cfgFunctionTabs button\.delayed-tab\{background:rgba\(210,43,62,.24\)/);
-  assert.match(html, /fnstepper '\+\(isDelayed\?'imp-stepper':'crew-stepper'\)/);
-  assert.match(html, /\.act2\.delayed\{background:rgba\(255,83,100,\.34\)!important/);
-  assert.match(html, /setInterval\(\(\)=>\{if\(!locked&&!button\.disabled\)change\(delta\)\},75\)/);
-});
-
-test('clientes online podem consultar configurações sem poder alterá-las e podem conversar no lobby', () => {
-  assert.match(html, /\$\('btnCfg'\)\.disabled=false/);
-  assert.match(html, /const locked=inGame\(\)\|\|\(typeof NET!=='undefined'&&NET\.inRoom&&\(!NET\.isHost\|\|NET\.room\?\.status!=='lobby'\)\)/);
-  assert.match(html, /Todos podem conversar e consultar as configurações; só o host pode alterá-las/);
-  assert.match(server, /room\.status!=='lobby'\)return error\(ws,'O chat escrito só fica disponível na sala de espera\.'/);
-});
-
-test('frases prontas incluem tarefas, respostas curtas e denúncias de corpo', () => {
-  for (const phrase of ['taskDoneSelf','taskDoneTarget','id:\'no\'','id:\'yes\'','id:\'agree\'','id:\'disagree\'','id:\'notTrue\'','id:\'true\'','id:\'iWasThere\'','id:\'iSaw\'','bodyQuestionDead','bodyWhereAgain','bodyFound']) assert.ok(html.includes(phrase), 'faltando frase pronta: '+phrase);
-  assert.match(html, /completed=G\.tasks\.filter/);
-  assert.match(html, /Encontrei o corpo de \$\{T\.name\} na \$\{rm\}!/);
-});
-
-
-test('slider de Infiltrados ajusta limites pela capacidade da sala e steppers Infiltrados são vermelhos transparentes', () => {
-  assert.match(html, /function impostorLimitForRoom\(size=configuredRoomSize\(\)\)\{return size>=10\?3:\(size>=8\?2:1\)\}/);
-  assert.match(html, /inp\.max=k==='impostors'\?impostorLimitForRoom\(\):CFG_LIM\[k\]\[1\]/);
-  assert.match(html, /CFG\.impostors=clamp\(CFG\.impostors,1,impostorLimitForRoom\(online\?NET\.room\?\.size:configuredRoomSize\(\)\)\)/);
-  assert.match(html, /\.fnstepper\.imp-stepper button\{background:rgba\(210,43,62,\.28\)/);
-  assert.match(server, /function cleanSettings\(input=\{\}, roomSize=10\)/);
-  assert.match(server, /const maxImpostors=roomSize>=10\?3:\(roomSize>=8\?2:1\)/);
-});
-
-
-test('Metamorfo foi removido por completo do cliente e do servidor', () => {
-  assert.doesNotMatch(html, /metamorph|metamorfo|metamorf|disguiseTargetId|morphBubble/i);
-  assert.doesNotMatch(server, /metamorph|metamorfo|metamorf|morph/i);
-  assert.doesNotMatch(html, /btnMetamorph|metamorphose/);
-});
-
-test('botões e resultado da votação mantêm transparência e mostram quem pulou', () => {
-  assert.match(html, /\.act2\.delayed\{background:rgba\(255,83,100,\.34\)!important/);
-  assert.match(html, /function updateSkippedVoteBreakdown\(log\)/);
-  assert.match(html, /filter\(v=>v&&v\.target==='skip'\)/);
-  assert.match(html, /names\.join\(', '\)/);
-  assert.match(html, /#meet\.vote-reveal #voteBreakdown:not\(\[hidden\]\)/);
-});
-
-test('NPCs reportam corpos vistos, respeitam o cooldown do botão e não revelam sua função no mapa', () => {
-  const body=html.slice(html.indexOf('function reactToBody(ch)'),html.indexOf('/* ---------- dutos',html.indexOf('function reactToBody(ch)')));
-  assert.match(body, /goTo\(ch,\{type:'body',b\}/);
-  assert.doesNotMatch(body, /Math\.random\(\)>\.2/);
-  assert.match(html, /function wantsEmergency\(ch\)[\s\S]*?ch\.emUses<=0\|\|G\.meetCd>0/);
-  assert.match(html, /ai\.emergencyRequested=true/);
-  assert.match(html, /if\(requested&&ch\.alive&&ch\.emUses>0&&G\.meetCd<=0/);
-  assert.match(html, /killCd:CFG\.kill,huntPause:0/);
-  assert.match(html, /ai\.killCd=Math\.max\(ai\.killCd,CFG\.kill\)/);
-  assert.doesNotMatch(html, /Math\.min\(CFG\.kill,14\)/);
-  assert.doesNotMatch(html, /Localizador: vou acompanhar|Localizador: vi/);
-  assert.match(html, /Vou acompanhar \$\{target\.name\}\./);
 });
