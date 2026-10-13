@@ -283,7 +283,7 @@ body.touch #stick{display:block}
 #cfgRows .cfgrow.fncompact{background:rgba(20,26,67,.34);backdrop-filter:blur(5px)}
 #cfgRows .fnstepper.crew-stepper{background:rgba(12,67,135,.24);border-color:rgba(85,165,255,.65)}
 #cfgRows .fnstepper.imp-stepper{background:rgba(130,14,34,.24);border-color:rgba(255,93,112,.65)}
-.fnstepper button{background:rgba(38,121,220,.42);color:#e1f2ff;box-shadow:0 3px 0 rgba(9,45,100,.45);border:1px solid rgba(110,190,255,.5);touch-action:none;user-select:none;-webkit-user-select:none}
+.fnstepper button{background:rgba(38,121,220,.42);color:#e1f2ff;box-shadow:0 3px 0 rgba(9,45,100,.45);border:1px solid rgba(110,190,255,.5);touch-action:none;user-select:none;-webkit-user-select:none}.fnstepper.imp-stepper button{background:rgba(210,43,62,.28);color:#ffe1e5;box-shadow:0 3px 0 rgba(100,8,22,.42);border-color:rgba(255,105,122,.55)}.fnstepper.imp-stepper button:disabled{background:rgba(120,36,48,.2);color:rgba(255,225,229,.5);border-color:rgba(255,105,122,.24)}
 .fnstepper.imp-stepper button{background:rgba(218,40,62,.42);color:#fff0f2;box-shadow:0 3px 0 rgba(95,7,20,.45);border-color:rgba(255,112,128,.55)}
 .fnstepper button:disabled{opacity:.32}
 
@@ -1393,7 +1393,8 @@ function newGame(){
     cols.slice(0,14).forEach((c,i)=>{const n=makeNPC(names[i],c.id); n.ai.killCd=Math.min(CFG.kill,14); G.chars.push(n)});
   }
   // Sorteia funções uma única vez no host; os snapshots preservam o resultado para todos.
-  const impostors=shuffle(G.chars.slice()).slice(0,clamp(CFG.impostors,1,3)); G.chars.forEach(c=>{c.role=impostors.includes(c)?'imp':'crew';c.function=null}); G.imps=impostors; G.imp=impostors[0]; G.role=p.role; G.locator=false; G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
+  CFG.impostors=clamp(CFG.impostors,1,impostorLimitForRoom(online?NET.room?.size:configuredRoomSize()));
+  const impostors=shuffle(G.chars.slice()).slice(0,clamp(CFG.impostors,1,impostorLimitForRoom(online?NET.room?.size:configuredRoomSize()))); G.chars.forEach(c=>{c.role=impostors.includes(c)?'imp':'crew';c.function=null}); G.imps=impostors; G.imp=impostors[0]; G.role=p.role; G.locator=false; G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
   const eligible=shuffle(G.chars.filter(c=>c.role==='crew')); let locCount=0; for(const ch of eligible){if(locCount>=CFG.locMax)break;if(Math.random()*100<CFG.locChance){ch.function='locator';locCount++}}
   // A chance é verificada uma vez por partida; os Xerifes podem ser humanos ou bots, sempre entre Tripulantes sem outra função. Nenhum Xerife é atribuído com chance ou quantidade zero.
   const sheriffEligible=shuffle(G.chars.filter(c=>c.role==='crew'&&c.function!=='locator'));
@@ -1696,8 +1697,11 @@ function closeMap(){
   if(!G.mapOpen)return;
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
-const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['metamorphChance','Chance de ser Metamorfo','Chance de a função Metamorfo ser atribuída na partida','%'],['metamorphMax','Quantidade de Metamorfos','Máximo de Metamorfos, limitado à quantidade de Infiltrados',''],['metamorphDuration','Tempo limite da Metamorfose','Duração máxima da aparência copiada','s'],['metamorphCooldown','Cooldown da Metamorfose','Tempo de recarga após cancelar ou terminar','s']];
+function configuredRoomSize(){const onlineSize=Number(typeof NET!=='undefined'&&NET.room&&NET.room.size);if(Number.isFinite(onlineSize)&&onlineSize>=4)return Math.round(onlineSize);const selected=Number($('createSizeIn')?.value);if(Number.isFinite(selected)&&selected>=4)return Math.round(selected);const input=Number($('roomSizeIn')?.value);return Number.isFinite(input)&&input>=4?Math.round(input):10}
+function impostorLimitForRoom(size=configuredRoomSize()){return size>=10?3:(size>=8?2:1)}
+const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Limite automático conforme o tamanho da sala: 4–7 jogadores: 1; 8–9: até 2; 10 ou mais: até 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['metamorphChance','Chance de ser Metamorfo','Chance de a função Metamorfo ser atribuída na partida','%'],['metamorphMax','Quantidade de Metamorfos','Máximo de Metamorfos, limitado à quantidade de Infiltrados',''],['metamorphDuration','Tempo limite da Metamorfose','Duração máxima da aparência copiada','s'],['metamorphCooldown','Cooldown da Metamorfose','Tempo de recarga após cancelar ou terminar','s']];
 function buildCfgUI(){
+  CFG.impostors=clamp(CFG.impostors,1,impostorLimitForRoom());
   CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
   const locked=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
@@ -1721,14 +1725,14 @@ function buildCfgUI(){
       const stepper=el('div','fnstepper '+((isDelayed||isMetamorph)?'imp-stepper':'crew-stepper'));
       const minus=el('button','','−'), number=el('output','',String(CFG[k])), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label','Diminuir '+l.toLowerCase()); plus.setAttribute('aria-label','Aumentar '+l.toLowerCase()); number.setAttribute('aria-label',l);
-      const maxValue=k==='metamorphMax'?Math.min(CFG_LIM[k][1],CFG.impostors):CFG_LIM[k][1];const sync=()=>{number.textContent=String(CFG[k]);value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=maxValue};
-      const change=delta=>{if(locked)return;CFG[k]=clamp(CFG[k]+delta,CFG_LIM[k][0],k==='metamorphMax'?Math.min(CFG_LIM[k][1],CFG.impostors):CFG_LIM[k][1]);if(k==='impostors')CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);Snd.click()};
+      const maxValue=k==='impostors'?impostorLimitForRoom():(k==='metamorphMax'?Math.min(CFG_LIM[k][1],CFG.impostors):CFG_LIM[k][1]);const sync=()=>{number.textContent=String(CFG[k]);value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=maxValue};
+      const change=delta=>{if(locked)return;CFG[k]=clamp(CFG[k]+delta,CFG_LIM[k][0],k==='impostors'?impostorLimitForRoom():(k==='metamorphMax'?Math.min(CFG_LIM[k][1],CFG.impostors):CFG_LIM[k][1]));if(k==='impostors')CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);Snd.click()};
       const bindRepeat=(button,delta)=>{let delayTimer=0,repeatTimer=0,suppressClickUntil=0;const stop=()=>{clearTimeout(delayTimer);clearInterval(repeatTimer);delayTimer=repeatTimer=0};button.addEventListener('pointerdown',e=>{if(locked||button.disabled)return;if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();stop();change(delta);suppressClickUntil=performance.now()+700;try{button.setPointerCapture(e.pointerId)}catch(_){}delayTimer=setTimeout(()=>{repeatTimer=setInterval(()=>{if(!locked&&!button.disabled)change(delta)},75)},320)});for(const ev of ['pointerup','pointercancel','lostpointercapture','blur'])button.addEventListener(ev,()=>{stop();suppressClickUntil=performance.now()+700});button.addEventListener('click',e=>{if(performance.now()<suppressClickUntil){e.preventDefault();return}change(delta)});};bindRepeat(minus,-1);bindRepeat(plus,1);stepper.append(minus,number,plus);row.append(top,stepper,el('small','',d));sync();
     }else{
       const out=el('b','',CFG[k]+(unit?' '+unit:''));
-      const inp=document.createElement('input'); inp.type='range'; inp.min=CFG_LIM[k][0]; inp.max=CFG_LIM[k][1]; inp.step=1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
+      const inp=document.createElement('input'); inp.type='range'; inp.min=CFG_LIM[k][0]; inp.max=k==='impostors'?impostorLimitForRoom():CFG_LIM[k][1]; inp.step=1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
       inp.disabled=locked;
-      inp.addEventListener('input',()=>{if(locked){inp.value=CFG[k];return}CFG[k]=clamp(+inp.value,CFG_LIM[k][0],CFG_LIM[k][1]);if(k==='impostors')CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);out.textContent=CFG[k]+(unit?' '+unit:'');saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
+      inp.addEventListener('input',()=>{if(locked){inp.value=CFG[k];return}CFG[k]=clamp(+inp.value,CFG_LIM[k][0],k==='impostors'?impostorLimitForRoom():CFG_LIM[k][1]);if(k==='impostors')CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);out.textContent=CFG[k]+(unit?' '+unit:'');saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
       top.append(el('span','',l),out); row.append(top,inp,el('small','',d));
     }
     box.appendChild(row);
@@ -1886,10 +1890,12 @@ function updateNPC(ch,dt){
   if(ai.reactT>0){ai.reactT-=dt;ch.moving=false;if(ai.reactT<=0)reactToBody(ch);return}
   if(ch.role==='imp'){if(ch.function==='metamorph')metamorphBotThink(ch,dt);if(ch.morphBubble&&ch.morphBubble.remaining>0){ch.moving=false;return}impThink(ch,dt)}
   else if(ch.function==='sheriff')sheriffBotThink(ch,dt);
+  else if(ch.function==='locator')locatorBotThink(ch,dt);
   if(G.over)return;
   switch(ai.state){
     case 'idle': ch.moving=false; if(ai.wait>0){ai.wait-=dt;break} chooseGoal(ch); break;
     case 'walk': {
+      if(ai.goal?.type==='locator_follow'&&(!ai.goal.v||!ai.goal.v.alive)){ai.goal=null;ai.path=[];ai.state='idle';ai.wait=.3;break}
       if(ai.pathVer!==G.walkVer&&!repath(ch)){ai.state='idle';ai.wait=1;break}
       const g=ai.goal;
       if(g.type==='body'){
@@ -2089,7 +2095,7 @@ function onArrive(ch){
   }
   if(g.type==='vent'){
     ai.state='idle'; ai.wait=0;
-    if(ch.role==='imp'&&ch.ventCd<=0&&(ventWitnesses(g.v,ch).length===0||Math.random()<.1)&&enterVent(ch,g.v)){ai.ventHops=rand(0,2);ai.ventT=.8;ai.ventStay=0}
+    if(ch.role==='imp'&&ch.ventCd<=0&&ventWitnesses(g.v,ch).length===0&&enterVent(ch,g.v)){ai.ventHops=rand(0,2);ai.ventT=.8;ai.ventStay=0}
     return;
   }
   if(g.type==='task'||g.type==='fix'){
@@ -2240,6 +2246,30 @@ function delayedBotThink(ch,dt){
   ai.repT-=dt;if(ai.state!=='walk'||!ai.goal||ai.goal.type!=='delayed_hunt'||ai.repT<=0){ai.repT=.6;const vt=tileOf(v);goTo(ch,{type:'delayed_hunt',v},(x,y)=>Math.abs(x-vt.x)+Math.abs(y-vt.y)<=1)}
   if(d>=84&&d<180&&losClear(ch.x,ch.y,v.x,v.y)){const st=Math.min(d-76,ai.speed*dt);ai.path=[];if(st>0&&moveChar(ch,(v.x-ch.x)/d*st,(v.y-ch.y)/d*st)){ch.moving=true;ch.walk+=dt}}
 }
+function locatorBotThink(ch,dt){
+  const ai=ch.ai;
+  if(!ch.alive||ch.role!=='crew'||ch.function!=='locator'||ch.vent||G.M||G.over||!['playing','task','tool'].includes(G.state))return false;
+  let target=ch.netTrackTarget?charById(ch.netTrackTarget):null;
+  if((ch.netTrackTime||0)>0){
+    ch.netTrackTime=Math.max(0,ch.netTrackTime-dt);
+    if(!target||!target.alive||ch.netTrackTime<=0){ch.netTrackTarget=null;ch.netTrackTime=0;ch.netTrackCd=CFG.locCooldown;return false}
+    if(dist(ch,target)<620&&(ai.state!=='walk'||ai.goal?.type!=='locator_follow'||ai.goal?.v!==target||ai.repT<=0)){
+      ai.repT=.8;const tt=tileOf(target);goTo(ch,{type:'locator_follow',v:target},(x,y)=>Math.abs(x-tt.x)+Math.abs(y-tt.y)<=2);
+    }
+    return true;
+  }
+  if(ai.goal?.type==='locator_follow'){ai.goal=null;ai.path=[];ai.state='idle';ai.wait=.3}
+  ch.netTrackTarget=null;ch.netTrackCd=Math.max(0,(ch.netTrackCd||0)-dt);
+  if(ch.netTrackCd>0)return false;
+  const visible=G.chars.filter(t=>t!==ch&&t.alive&&!t.vent&&ai.seen[t.id]&&G.t-ai.seen[t.id].t<3);
+  const suspect=topSuspect(ch);target=(suspect&&visible.includes(charById(suspect.id))?charById(suspect.id):null)||visible.sort((a,b)=>dist(ch,a)-dist(ch,b))[0]||null;
+  if(!target)return false;
+  ch.netTrackTarget=target.id;ch.netTrackTime=CFG.locDuration;ai.locatorTarget=target.id;ai.repT=0;
+  npcSay(ch,`Localizador: vou acompanhar ${target.name}.`);
+  if(dist(ch,target)<620){const tt=tileOf(target);goTo(ch,{type:'locator_follow',v:target},(x,y)=>Math.abs(x-tt.x)+Math.abs(y-tt.y)<=2)}
+  return true;
+}
+
 function sheriffBotThink(ch,dt){
   const ai=ch.ai;if(!ch.alive||ch.role!=='crew'||ch.function!=='sheriff'||ch.vent||G.M||G.over||!['playing','task','tool'].includes(G.state))return false;
   ch.netSheriffCd=Math.max(0,(ch.netSheriffCd||0)-dt);if(ch.netSheriffCd>0)return false;
@@ -2266,12 +2296,15 @@ function metamorphBotThink(ch,dt){
   const ai=ch.ai;ai.morphThinkT=(ai.morphThinkT||4)-dt;
   if(ai.morphThinkT>0||ch.disguiseTargetId||ch.morphCd>0||(ch.morphBubble&&ch.morphBubble.remaining>0))return;
   ai.morphThinkT=rand(8,16);
-  const targets=G.chars.filter(t=>t.alive&&t!==ch&&t.role!=='imp');if(!targets.length)return;
-  const hasWitness=G.chars.some(w=>w!==ch&&w.alive&&w.role==='crew'&&!w.vent&&dist(w,ch)<260&&losClear(w.x,w.y,ch.x,ch.y));
+  const sabotageActive=G.sab.lights>0||G.sab.reactor>0||G.sab.comms>0||G.sab.doors>0;
+  const nearby=G.chars.some(w=>w!==ch&&w.alive&&!w.vent&&dist(w,ch)<260&&losClear(w.x,w.y,ch.x,ch.y));
+  // Sem sabotagem, só se metamorfoseia quando realmente não há ninguém por perto para testemunhar.
+  if(!sabotageActive&&nearby)return;
+  const targets=G.chars.filter(t=>t.alive&&t!==ch);if(!targets.length)return;
   let target=null,bestScore=-Infinity;
   for(const t of targets){
     const d=dist(ch,t);if(d>=420)continue;
-    const score=(t.ai?.state==='work'?2:0)+(hasWitness?-3:0)+(1-d/420)*.35+Math.random();
+    const score=(t.ai?.state==='work'?2:0)+(1-d/420)*.35;
     if(score>bestScore){bestScore=score;target=t}
   }
   if(target)beginMetamorph(ch,target);
@@ -2334,7 +2367,7 @@ function killChar(c){
   else if(c.ai){const ai=c.ai; ai.ghostT=rand(120,220)/10; ai.hunt=null; ai.path=[]; ai.state='idle'; ai.fix=null}
 }
 function doKill(k,v){
-  if(!k||!v||!k.alive||k.role!=='imp'||k.function==='delayed'||!v.alive||v.role==='imp'||k===v||k.vent||v.vent)return;   // só o impostor vivo elimina tripulantes vivos
+  if(!k||!v||!k.alive||k.role!=='imp'||k.function==='delayed'||!v.alive||v.role==='imp'||k===v||k.vent||v.vent||(!k.isPlayer&&!k.isRemoteHuman&&k.ai&&k.ai.killCd>0))return;   // só o impostor vivo elimina tripulantes vivos
   killChar(v);
   const body={id:v.id,name:v.name,color:v.color,x:v.x,y:v.y,room:roomName(v.x,v.y),tKill:G.gt,killerId:k.id}; G.bodies.push(body);
   k.x=v.x; k.y=v.y;
@@ -3334,14 +3367,14 @@ cv.addEventListener('pointerdown',e=>{
   doInteract(a);
 });
 // joystick
-const stick=$('stick'), knob=$('knob'); let sid=null;
+const stick=$('stick'), knob=$('knob'); let sid=null,stickStart={x:0,y:0};
 function moveStick(e){
-  const r=stick.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2, R=r.width/2-6;
-  let dx=e.clientX-cx, dy=e.clientY-cy; const l=Math.hypot(dx,dy); if(l>R){dx=dx/l*R;dy=dy/l*R}
+  const r=stick.getBoundingClientRect(), R=r.width/2-6;
+  let dx=e.clientX-stickStart.x, dy=e.clientY-stickStart.y; const l=Math.hypot(dx,dy); if(l>R){dx=dx/l*R;dy=dy/l*R}
   knob.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
-  const m=Math.hypot(dx,dy); if(m/R<.25){joy.x=joy.y=0}else{joy.x=dx/m;joy.y=dy/m}   // direção normalizada: velocidade máxima constante
+  const m=Math.hypot(dx,dy); if(m/R<.12){joy.x=joy.y=0}else{joy.x=dx/R;joy.y=dy/R} // direção relativa ao início do toque, com velocidade analógica
 }
-stick.addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();sid=e.pointerId;stick.setPointerCapture(sid);moveStick(e)});
+stick.addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();sid=e.pointerId;stickStart={x:e.clientX,y:e.clientY};joy.x=joy.y=0;knob.style.transform='translate(-50%,-50%)';stick.setPointerCapture(sid)});
 stick.addEventListener('pointermove',e=>{if(e.pointerId===sid)moveStick(e)});
 const endStick=e=>{if(e.pointerId===sid){sid=null;joy.x=joy.y=0;knob.style.transform='translate(-50%,-50%)'}};
 stick.addEventListener('pointerup',endStick); stick.addEventListener('pointercancel',endStick);
@@ -3379,8 +3412,8 @@ function netUpdateVisualInterpolation(){
   }
 }
 const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','delayedChance','delayedMax','delayedDuration','metamorphChance','metamorphMax','metamorphDuration','metamorphCooldown','renderDist'];
-function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
-function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
+function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];o.impostors=clamp(o.impostors,1,impostorLimitForRoom());return o}
+function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}CFG.impostors=clamp(CFG.impostors,1,impostorLimitForRoom());CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
 if($('serverUrlIn'))$('serverUrlIn').value=netDefaultUrl();
 function netSend(o){if(NET.ws&&NET.ws.readyState===WebSocket.OPEN){try{NET.ws.send(JSON.stringify(o));return true}catch(e){}}return false}
