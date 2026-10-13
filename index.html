@@ -185,7 +185,13 @@ body.touch #stick{display:block}
 #roomChatInput{flex:1;min-width:0;font:600 14px var(--font);color:var(--ink);background:#0a0c26;border:2px solid var(--edge);border-radius:10px;padding:6px 8px;outline:none;user-select:text;-webkit-user-select:text;touch-action:manipulation}
 #roomChatInput:focus-visible{border-color:var(--amber)}
 @media(max-width:560px){#roomChatPanel{right:8px;top:auto;bottom:calc(155px + var(--sb));height:min(38vh,330px);width:min(330px,calc(100vw - 16px))}}
-.act2.delayed,.delayed-tab{background:#ff5364!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
+.act2.delayed,.delayed-tab{background:rgba(255,53,78,.58)!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
+.act2.delayed{font-size:29px!important}
+.act2.sheriff{background:#3c83e8!important;color:#fff!important;box-shadow:0 6px 0 #2055a5,0 8px 0 #10122a!important}
+.act2.sheriff .sheriffGunIcon{width:36px;height:27px}
+.act2.locator{font-size:28px!important}
+#cfgFunctionTabs button{font-size:1.08em}
+#cfgRows .fncompact .cfgtop .fnicon{font-size:1.3em;vertical-align:-1px}
 .act2.delayed small{display:block;font-size:10px;line-height:1.05}
 #actions .row2:first-child{flex-wrap:wrap;justify-content:center;max-width:min(390px,96vw)}
 .act2.locator small{display:block;font-size:10px;line-height:1;margin-top:2px}
@@ -222,6 +228,9 @@ body.touch #stick{display:block}
 #meet.space-result #meetTitle,#meet.space-eject #meetTitle{font-size:clamp(25px,5vw,42px);letter-spacing:2px;text-transform:uppercase;color:#d9eaff;text-shadow:0 0 20px #5a9dff}
 #meet.space-result #meetTimer,#meet.space-eject #meetTimer{position:absolute;right:12px;top:12px}
 #meet.space-result #meetDesc,#meet.space-eject #meetDesc{white-space:pre-line;color:#fff;font-size:clamp(19px,3.4vw,27px);font-weight:800;line-height:1.35;margin:14px auto 8px;max-width:680px;text-shadow:0 2px 10px #000}
+#skipVoteDots{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:0 auto 10px}
+#skipVoteDots i{display:block;width:17px;height:17px;border:2px solid rgba(255,255,255,.9);border-radius:50%;box-shadow:0 1px 5px #000}
+#meet.vote-reveal #skipVoteDots:not([hidden]){display:flex}
 #meet.space-result #voteBreakdown:not([hidden]){display:block;box-sizing:border-box;width:min(680px,100%);max-height:34vh;overflow-y:auto;overscroll-behavior:contain;margin:0 auto 8px;padding:10px 14px;border:1px solid rgba(159,202,255,.32);border-radius:12px;background:rgba(7,13,35,.72);color:#d9eaff;text-align:left;white-space:pre-line;font-size:clamp(12px,2.3vw,16px);font-weight:600;line-height:1.45;text-shadow:0 1px 3px #000}
 #meet.space-result #meetGrid,#meet.space-result #meetChat,#meet.space-result #meetSay,#meet.space-result #sayChips,#meet.space-result #meetFoot,#meet.space-eject #voteBreakdown,#meet.space-eject #meetGrid,#meet.space-eject #meetChat,#meet.space-eject #meetSay,#meet.space-eject #sayChips,#meet.space-eject #meetFoot{display:none!important}
 #meet.space-result #meetStatus,#meet.space-eject #meetStatus{color:#a9c9f8}
@@ -326,7 +335,7 @@ body.touch #stick{display:block}
 .roomDot{width:18px;height:18px;border-radius:50%;border:2px solid #080a20;flex:none}
 .roomPlayer span:last-child{margin-left:auto;color:var(--ink2);font-size:13px}
 .roomFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 12px}
-.roomFields label{display:flex;flex-direction:column;gap:4px;color:var(--ink2);font-size:13px}
+.roomFields label{display:flex;flex-direction:column;gap:4px;color:var(--ink2);font-size:13px}.roomFields #roomBotsOk{align-self:end;min-height:40px}
 .roomFields input{width:100%;min-width:0;background:#0d1033;border:2px solid var(--edge);border-radius:10px;padding:7px;color:var(--ink);font:700 16px var(--font)}
 .roomActions{justify-content:center;margin-top:14px}
 #createPanel{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(12,17,44,.7)}
@@ -387,7 +396,7 @@ body.touch #stick{display:block}
       <h3>Opções da sala</h3>
       <div class="roomQuickActions"><button class="big" id="btnCfg" type="button">Configurações</button></div>
       <div class="roomFields">
-        <label>Bots<input id="roomBotsIn" type="number" min="0" max="14" value="3"></label>
+        <label>Bots<input id="roomBotsIn" type="number" min="0" max="14" value="3"></label><button class="big" id="roomBotsOk" type="button">OK</button>
       </div>
       <p class="phase">Toque em <b>Configurações</b> para ajustar a partida. Dentro do menu, abra <b>Funções</b> para configurar o Localizador. De 4 a 9 participantes: 1 Infiltrado; de 10 a 15: 3 Infiltrados. Bots contam no total.</p>
       <!-- Campos mantidos para compatibilidade com o salvamento da sala; os valores são editados no menu Configurações. -->
@@ -465,7 +474,7 @@ body.touch #stick{display:block}
   <div class="mpanel meetp" role="dialog" aria-modal="true" aria-labelledby="meetTitle">
     <header><h2 id="meetTitle"></h2><span class="chip" id="meetTimer">3s</span></header>
     <p id="meetDesc"></p>
-    <div id="voteBreakdown" hidden aria-live="polite"></div>
+    <div id="voteBreakdown" hidden aria-live="polite"></div><div id="skipVoteDots" class="skip-vote-dots" hidden aria-label="Cores dos jogadores que pularam a votação"></div>
     <div id="meetGrid"></div>
     <div id="meetChat" aria-live="polite"></div>
     <div id="meetSay" hidden><input id="sayIn" maxlength="90" placeholder="Escreva uma mensagem" autocomplete="off" aria-label="Mensagem"><button class="chip" id="btnSay">Enviar</button></div>
@@ -1419,7 +1428,12 @@ function toMenu(){
   G.state='menu'; updateSabUI();
 }
 let toastT=0;
-function toast(m,ms=2200){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms)}
+function toast(m,ms=2200){
+  const msg=String(m);
+  // Mantém apenas alertas importantes; mensagens rotineiras deixam de ocupar o topo.
+  if(!/(sabot|reator|eliminad|morte|vit[oó]ria|derrota|conex[aã]o perdida|sala fechada|cooldown|recarga|vota[cç][aã]o|ejetad|erro|inv[aá]lid|emerg[eê]ncia|marcad|restaurad|estabilizad|reabert|destrav|aplicad)/i.test(msg))return;
+  const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms)
+}
 
 /* =====================================================================
    RENDER
@@ -1692,7 +1706,7 @@ function buildCfgUI(){
     if(isFn){
       const showCfgValue=()=>k==='delayedEnabled'?(CFG[k]?'Ativado':'Desativado'):(CFG[k]+(unit?' '+unit:''));
       const value=el('b','',showCfgValue());
-      top.append(el('span','',(isDelayed?'◷ ':isSheriff?'✦ ':'⌖ ')+l),value);
+      const icon=el('span','fnicon',isDelayed?'◷':isSheriff?'🔫':'⌖'); top.append(icon,el('span','',l),value);
       const stepper=el('div','fnstepper');
       const minus=el('button','','−'), number=el('output','',String(CFG[k])), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label','Diminuir '+l.toLowerCase()); plus.setAttribute('aria-label','Aumentar '+l.toLowerCase()); number.setAttribute('aria-label',l);
@@ -2405,7 +2419,7 @@ function startSabotage(type,by){
   }else if(type==='lights')S.lights=60;
   else if(type==='reactor')S.reactor=40;
   else S.comms=45;
-  S.cd=CFG.sab;
+  S.cd=0;
   G.chars.forEach(o=>{if(o.alive&&!o.isPlayer&&!o.isRemoteHuman&&o.role==='crew'){o.ai.sabs.push({type,gt:G.gt,room:roomName(o.x,o.y)});if(o.ai.sabs.length>4)o.ai.sabs.shift()}});
   G.chars.forEach(o=>{ if(!o.alive||o.isPlayer||o.isRemoteHuman||o.role!=='crew')return; o.ai.incidents++;
     if(by.alive&&o!==by&&dist(o,by)<320&&losClear(o.x,o.y,by.x,by.y))addSusp(o,by.id,1.4,'sabNear',{room:roomName(by.x,by.y)}) });
@@ -2415,7 +2429,7 @@ function startSabotage(type,by){
 }
 function resolveSab(type){
   if(!(G.sab[type]>0))return;
-  G.sab[type]=0; G.chars.forEach(c=>{if(c.ai&&c.ai.fix===type)c.ai.fix=null});
+  G.sab[type]=0;G.sab.cd=CFG.sab; G.chars.forEach(c=>{if(c.ai&&c.ai.fix===type)c.ai.fix=null});
   if(type==='doors'){doors.forEach(d=>d.closed=false);rebuildWalk();G.walkVer++}
   if(G.mini&&G.mini.task&&G.mini.task.fix===type&&!G.mini.finished)closeModal();   // reparo já resolvido: tarefa de emergência some na hora
   renderTasks();
@@ -2429,9 +2443,9 @@ function dispatchFixers(type){
 }
 function updateSab(dt){
   const S=G.sab; S.cd=Math.max(0,S.cd-dt);
-  if(S.lights>0){S.lights-=dt;if(S.lights<=0){S.lights=0;renderTasks();toast('Luzes restauradas.')}}
-  if(S.comms>0){S.comms-=dt;if(S.comms<=0){S.comms=0;renderTasks();toast('Comunicações restabelecidas.')}}
-  if(S.doors>0){S.doors-=dt;if(S.doors<=0){S.doors=0;doors.forEach(d=>d.closed=false);rebuildWalk();G.walkVer++;renderTasks();toast('Portas destravadas.')}}
+  if(S.lights>0){S.lights-=dt;if(S.lights<=0){S.lights=0;S.cd=CFG.sab;renderTasks();toast('Luzes restauradas.')}}
+  if(S.comms>0){S.comms-=dt;if(S.comms<=0){S.comms=0;S.cd=CFG.sab;renderTasks();toast('Comunicações restabelecidas.')}}
+  if(S.doors>0){S.doors-=dt;if(S.doors<=0){S.doors=0;S.cd=CFG.sab;doors.forEach(d=>d.closed=false);rebuildWalk();G.walkVer++;renderTasks();toast('Portas destravadas.')}}
   if(S.reactor>0){S.reactor-=dt;if(S.reactor<=0){S.reactor=0;endGame('imp','O reator derreteu antes que a tripulação conseguisse estabilizá-lo.');return}}
   G.fixT-=dt;
   if(G.fixT<=0){G.fixT=3;['lights','reactor','comms'].forEach(t=>{
@@ -2888,7 +2902,7 @@ function buildMeetUI(){
 }
 function setMeetPhase(ph){
   const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive; $('meet').classList.toggle('vote-reveal',ph==='result');$('meet').classList.toggle('space-result',false);
-  $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';
+  $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';if(ph!=='result'){$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML=''}
   if(ph==='discuss'){
     $('meetTitle').textContent='Discussão'; $('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';
     genChat(); M.dur=CFG.discussion; M.endIn=undefined;
@@ -2899,9 +2913,9 @@ function setMeetPhase(ph){
     G.chars.filter(c=>c.alive&&!c.isPlayer).forEach(c=>{M.voteAt[c.id]=Math.random()*Math.max(.25,M.dur-.25)});
     $('btnSkip').hidden=!al; $('meetStatus').textContent=al?'Escolha seu voto.':'Você foi eliminado e não pode votar.';
   }else if(ph==='result'){
-    M.replyQ=[]; M.dur=10; $('meetTitle').textContent='Votação'; $('meetDesc').textContent='';$('meetStatus').textContent=''; $('btnSkip').hidden=true; showResult();
+    M.replyQ=[]; M.dur=5; $('meetTitle').textContent='Votação'; $('meetDesc').textContent='';$('meetStatus').textContent=''; $('btnSkip').hidden=true; showResult();
   }else if(ph==='eject'){
-    M.dur=3.5; $('meetTitle').textContent='Ejeção'; $('meetStatus').textContent=''; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent='';$('meet').classList.remove('vote-reveal','space-result');
+    M.dur=10; $('meetTitle').textContent='Ejeção'; $('meetStatus').textContent=''; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent='';$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML='';$('meet').classList.remove('vote-reveal','space-result');
     $('meet').classList.add('space-eject');
     for(const c of G.chars){const card=M.cards[c.id];if(card){card.dotsEl.innerHTML='';card.classList.remove('pick')}}
     $('meetDesc').textContent=M.result?.headline||'Ninguém foi ejetado.'; $('btnSkip').hidden=true;
@@ -2938,7 +2952,7 @@ function updateMeeting(dt){
   }else if(M.phase==='result'){if(M.t>=M.dur)setMeetPhase('eject')}else if(M.phase==='eject'){if(M.t>=M.dur)endMeeting()}
 }
 function endMeeting(){
-  const M=G.M, ej=M.result?.eject||null; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject','vote-reveal'); $('meetingIntro').hidden=true; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent=''; $('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML=''); $('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'));
+  const M=G.M, ej=M.result?.eject||null; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject','vote-reveal'); $('meetingIntro').hidden=true; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent=''; $('skipVoteDots').hidden=true; $('skipVoteDots').innerHTML=''; $('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML=''); $('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'));
   if(ej)killChar(ej);
   G.bodies=[]; G.M=null; G.state='playing';
   if(checkEnd())return;
@@ -2969,6 +2983,12 @@ function playerVote(id){
   castVote(G.player.id,id); Snd.click(); if(id!=='skip')M.cards[id].classList.add('pick');
   $('btnSkip').disabled=true; $('meetStatus').textContent=id==='skip'?'Você pulou o voto.':'Voto registrado em '+charById(id).name+'.';
 }
+function renderSkipVoteDots(log){
+  const box=$('skipVoteDots');box.innerHTML='';
+  const skipped=(log||[]).filter(v=>v.target==='skip');
+  skipped.forEach(v=>{const voter=charById(v.voter);if(!voter)return;const dot=el('i');dot.style.background=COLOR_BY[voter.color]?.main||chatCol(voter);dot.title=`${voter.name} pulou a votação`;dot.setAttribute('aria-label',dot.title);box.appendChild(dot)});
+  box.hidden=skipped.length===0;
+}
 function showResult(){
   const M=G.M, counts={}; M.log.forEach(v=>{counts[v.target]=(counts[v.target]||0)+1});
   const entries=Object.entries(counts).filter(e=>e[0]!=='skip').sort((a,b)=>b[1]-a[1]), skipN=counts.skip||0;
@@ -2982,7 +3002,7 @@ function showResult(){
   if(eject)headline=`${eject.name} foi ejetado.\n${eject.name} ${eject.role==='imp'?'era':'não era'} um Infiltrado.\nHá ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
   else if(skipN>0&&skipN>=(top?top[1]:0))headline='Ninguém foi ejetado (pulado).\n'+`Há ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
   else headline='Ninguém foi ejetado (empate).\n'+`Há ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
-  M.result.headline=headline;M.resultHeadline='';
+  M.result.headline=headline;M.resultHeadline='';renderSkipVoteDots(M.log);
   $('meetTitle').textContent='Votação';$('meetDesc').textContent='';$('meetStatus').textContent='';$('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';
   $('meet').classList.add('vote-reveal');$('meet').classList.remove('space-result','space-eject');
   if(eject)Snd.err();
@@ -3014,7 +3034,7 @@ function updateButtons(){
   setCls(bdel,'ready',!!G.delayedT&&!uiBusy()&&!(NET?.pendingDelayedMark));
   setCls(bs,'ready',imp&&G.state==='playing'&&!uiBusy()&&G.sab.cd<=0);
   const st=G.sab.cd>0?String(Math.ceil(G.sab.cd)):'Sabotar'; if(bs._l!==st){bs._l=st;bs.textContent=st}
-  setCls(br,'ready',!!(can&&nearBody())); setCls(bl,'active',G.trackTime>0); const lt=G.trackTime>0?'Cancelar':(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear');if(bl._l!==lt){bl._l=lt;bl.querySelector('small').textContent=lt;bl._l=lt}
+  setCls(br,'ready',!!(can&&nearBody())); setCls(bl,'active',G.trackTime>0); const lt=G.trackTime>0?String(Math.ceil(G.trackTime)):(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear');if(bl._l!==lt){bl._l=lt;bl.querySelector('small').textContent=lt;bl._l=lt}
 }
 function update(dt){
   const p=G.player;
@@ -3413,7 +3433,7 @@ function netPaintMeeting(sm){
   $('meet').classList.toggle('vote-reveal',ph==='result');
   $('meet').classList.remove('space-result');$('meet').classList.toggle('space-eject',ph==='eject');
   // Os resultados visuais usam exclusivamente bolinhas; não há lista nem explicação textual.
-  $('voteBreakdown').textContent='';$('voteBreakdown').hidden=true;
+  $('voteBreakdown').textContent='';$('voteBreakdown').hidden=true;if(ph==='result')renderSkipVoteDots(sm.log||M.log);else{$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML=''}
   if(ph==='intro'){
     $('meetingIntroTitle').textContent=sm.reason==='body'?'CORPO REPORTADO':'REUNIÃO DE EMERGÊNCIA';
     $('meetingIntroDesc').textContent=sm.reason==='body'&&M.body?`Corpo de ${M.body.name} encontrado ${inRoom(M.body.room)}.`:`${M.caller.name} convocou a reunião.`;
@@ -3560,6 +3580,7 @@ $('btnJoinConfirm').addEventListener('click',()=>netJoinRoom());$('roomCodeIn').
 $('btnSaveRoomConfig').addEventListener('click',netSaveRoomSettings);
 for(const [id,key] of [['roomSpeedIn','speed'],['roomKillIn','kill'],['roomSabIn','sab'],['roomMeetIn','meet'],['roomDiscussionIn','discussion'],['roomVotingIn','voting'],['roomCrewVisionIn','crewVision']])$(id).addEventListener('input',()=>netNoteRoomControl(key,$(id).value));
 $('roomBotsIn').addEventListener('input',()=>netNoteRoomBots($('roomBotsIn').value));
+$('roomBotsOk').addEventListener('click',()=>{if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;const max=Math.max(0,NET.room.size-NET.room.players.length);$('roomBotsIn').value=clamp(Math.round(Number($('roomBotsIn').value)||0),0,max);netNoteRoomBots($('roomBotsIn').value);netSaveRoomSettings();toast('Quantidade de bots aplicada.')});
 $('btnStartRoom').addEventListener('click',netStartGame);$('btnLeaveRoom').addEventListener('click',()=>{netLeaveRoom();netOriginalToMenu()});
 $('btnCopyCode').addEventListener('click',()=>{const code=NET.room?.code;if(!code)return;try{navigator.clipboard.writeText(code);toast('Código copiado: '+code)}catch(e){toast('Código da sala: '+code)}});
 // Meeting chat / votes / action requests are sent to the host; the host answers with authoritative snapshots.
