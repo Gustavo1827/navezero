@@ -26,11 +26,15 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
 
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:48,sheriffChance:70,sheriffMax:4,delayedEnabled:1,delayedDuration:40}});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:48,sheriffChance:70,sheriffMax:4,delayedEnabled:1,delayedChance:82,delayedMax:3,delayedDuration:40}});
   const created=await onceMessage(host,m=>m.type==='room_state');
   const code=created.room.code;
   assert.match(code,/^[A-Z0-9]{6}$/);assert.equal(created.room.size,4);assert.equal(created.room.bots,3);assert.equal(created.room.players.length+created.room.bots,4);
-  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,48);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(created.room.settings.delayedEnabled,1);assert.equal(created.room.settings.delayedDuration,40);
+  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,48);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(created.room.settings.delayedEnabled,1);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);
+  assert.equal(created.room.botRoster.length,3);
+  const norm=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const allNames=[...created.room.players.map(p=>p.name),...created.room.botRoster.map(b=>b.name)];
+  assert.equal(new Set(allNames.map(norm)).size,allNames.length,'nomes de humanos e bots precisam ser únicos por sala');
 
   const blocked=await connect(url,'Visitante','verde');all.push(blocked);
   send(blocked,{type:'join_room',code});
@@ -81,6 +85,8 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   const host=await connect(url,'Host','azul');all.push(host);
   send(host,{type:'create_room',name:'Host',color:'azul',size:6,bots:3,settings:{speed:180,impostors:2,renderDist:950,sheriffCooldown:44,sheriffChance:85,sheriffMax:2}});
   const made=await onceMessage(host,m=>m.type==='room_state');const code=made.room.code;
+  const botRosterBefore=made.room.botRoster.map(b=>({...b}));
+  assert.equal(new Set(botRosterBefore.map(b=>b.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase())).size,botRosterBefore.length);
   const guest=await connect(url,'Convidado','verde');all.push(guest);
   send(guest,{type:'join_room',code});await onceMessage(guest,m=>m.type==='room_state');
   const peer=await connect(url,'Segundo convidado','rosa');all.push(peer);send(peer,{type:'join_room',code});await onceMessage(peer,m=>m.type==='room_state');
@@ -91,20 +97,23 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   const authoritative={seq:23,state:'playing',gt:12,chars:[
     {id:host.id,name:'Host',color:'azul',role:'imp',function:null,x:100,y:100,alive:true,netKillCd:5},
     {id:guest.id,name:'Convidado',color:'verde',role:'crew',function:'locator',x:140,y:100,alive:true,netKillCd:0},
-    {id:peer.id,name:'Segundo convidado',color:'rosa',role:'crew',function:null,x:160,y:100,alive:true,netKillCd:0},
+    {id:peer.id,name:'Segundo convidado',color:'rosa',role:'imp',function:'delayed',x:160,y:100,alive:true,netKillCd:0,netDelayedCd:0},
     {id:'bot-id',name:'Bot',color:'amarelo',role:'imp',function:null,x:180,y:100,alive:true,netKillCd:0}
-  ],tasks:[],bodies:[],sab:{lights:0,reactor:0,comms:0,doors:0,cd:20},doors:[],cfg:{speed:180},killCd:5,trackTarget:null,trackTime:0,trackCd:0,meetCd:20,fixT:0,meeting:null,over:false,winner:null,endReason:'',role:'imp',locator:false,cam:{x:0,y:0},walkVer:0};
+  ],tasks:[],bodies:[],delayedMarks:{[guest.id]:{victimId:guest.id,killerId:peer.id,remaining:12}},sab:{lights:0,reactor:0,comms:0,doors:0,cd:20},doors:[],cfg:{speed:180},killCd:5,trackTarget:null,trackTime:0,trackCd:0,meetCd:20,fixT:0,meeting:null,over:false,winner:null,endReason:'',role:'imp',locator:false,cam:{x:0,y:0},walkVer:0};
   send(host,{type:'state_snapshot',snapshot:authoritative});
   const guestSnapshot=await onceMessage(guest,m=>m.type==='snapshot'&&m.snapshot.seq===23);
   const peerSnapshot=await onceMessage(peer,m=>m.type==='snapshot'&&m.snapshot.seq===23);
   assert.equal(guestSnapshot.snapshot.chars.find(c=>c.id===host.id).role,'crew','o snapshot público esconde o papel de outro jogador');
-  assert.equal(peerSnapshot.snapshot.chars.find(c=>c.id===host.id).role,'crew');
+  assert.equal(peerSnapshot.snapshot.chars.find(c=>c.id===host.id).role,'imp','Infiltrados ainda veem o papel do colega de equipe');
+  assert.deepEqual(guestSnapshot.snapshot.delayedMarks,{},'a vítima não recebe o cronômetro privado');
+  assert.equal(peerSnapshot.snapshot.delayedMarks[guest.id].remaining,12,'somente o Atrasado que marcou recebe o cronômetro');
   send(host,{type:'leave_room'});
   const transferred=await onceMessage(guest,m=>m.type==='room_state'&&m.room.hostId===guest.id);
   assert.equal(transferred.room.status,'playing');
   const takeover=await onceMessage(guest,m=>m.type==='host_snapshot'&&m.snapshot.seq===23);
   assert.equal(takeover.snapshot.chars.find(c=>c.id===host.id).role,'imp','o novo host recebe a versão autoritativa com papéis completos');
   assert.equal(takeover.snapshot.chars.find(c=>c.id===guest.id).function,'locator');
+  assert.equal(takeover.snapshot.delayedMarks[guest.id].remaining,12,'novo host recebe snapshot completo para assumir a autoridade');
   await onceMessage(guest,m=>m.type==='player_left'&&m.playerId===host.id);
   await onceMessage(peer,m=>m.type==='player_left'&&m.playerId===host.id);
   const finalSnapshot={...authoritative,seq:24,state:'over',over:true,winner:'crew',endReason:'Fim de teste'};
@@ -120,6 +129,7 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   await onceMessage(peer,m=>m.type==='game_start'&&m.rematch===true);
   assert.equal(restarted.room.code,code,'a revanche reutiliza o mesmo código de sala');
   assert.equal(restarted.room.round,2);assert.equal(restarted.room.bots,3,'a quantidade de bots deve sobreviver à revanche');assert.equal(restarted.room.settings.impostors,2);assert.equal(restarted.room.settings.renderDist,950);assert.equal(restarted.room.settings.sheriffCooldown,44);assert.equal(restarted.room.settings.sheriffChance,85);assert.equal(restarted.room.settings.sheriffMax,2);
+  assert.deepEqual(restarted.room.botRoster,botRosterBefore,'nomes e IDs dos bots devem permanecer estáveis ao reiniciar');
 });
 
 test('revanche continua quando a saída do host deixa exatamente três participantes', async t=>{
@@ -202,13 +212,46 @@ test('código alfanumérico maiúsculo, tamanho fixo e cancelamento da contagem 
 
 
 test('configurações do Atrasado respeitam limites e valores padrão', () => {
-  const settings=cleanSettings({delayedEnabled:7,delayedDuration:99});
+  const settings=cleanSettings({delayedEnabled:7,delayedChance:140,delayedMax:99,delayedDuration:99});
   assert.equal(settings.delayedEnabled,1);
+  assert.equal(settings.delayedChance,100);
+  assert.equal(settings.delayedMax,3);
   assert.equal(settings.delayedDuration,40);
-  const low=cleanSettings({delayedEnabled:-2,delayedDuration:1});
+  const low=cleanSettings({delayedEnabled:-2,delayedChance:-3,delayedMax:-4,delayedDuration:1});
   assert.equal(low.delayedEnabled,0);
+  assert.equal(low.delayedChance,0);
+  assert.equal(low.delayedMax,0);
   assert.equal(low.delayedDuration,5);
   const defaults=cleanSettings({});
   assert.equal(defaults.delayedEnabled,0);
+  assert.equal(defaults.delayedChance,35);
+  assert.equal(defaults.delayedMax,1);
   assert.equal(defaults.delayedDuration,20);
+});
+
+
+test('chat escrito é retransmitido em tempo real só para participantes da própria sala', async t=>{
+  const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:15,loadingMs:10});
+  await new Promise(resolve=>app.server.once('listening',resolve));
+  const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
+  t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+  const hostA=await connect(url,'Host A','azul');all.push(hostA);
+  send(hostA,{type:'create_room',name:'Host A',color:'azul',size:6,bots:3});
+  const roomA=await onceMessage(hostA,m=>m.type==='room_state');
+  const guestA=await connect(url,'Visitante A','verde');all.push(guestA);
+  send(guestA,{type:'join_room',code:roomA.room.code});await onceMessage(guestA,m=>m.type==='room_state');
+  const hostB=await connect(url,'Host B','vermelho');all.push(hostB);
+  send(hostB,{type:'create_room',name:'Host B',color:'vermelho',size:4,bots:3});
+  const roomB=await onceMessage(hostB,m=>m.type==='room_state');
+  send(hostA,{type:'start_game'});await onceMessage(hostA,m=>m.type==='game_start');await onceMessage(guestA,m=>m.type==='game_start');
+  send(hostB,{type:'start_game'});await onceMessage(hostB,m=>m.type==='game_start');
+  send(guestA,{type:'room_chat',text:'Olá, sala A!'});
+  const [echoA,echoGuest]=await Promise.all([
+    onceMessage(hostA,m=>m.type==='room_chat_message'),
+    onceMessage(guestA,m=>m.type==='room_chat_message')
+  ]);
+  assert.equal(echoA.roomCode,roomA.room.code);assert.equal(echoGuest.roomCode,roomA.room.code);
+  assert.equal(echoA.text,'Olá, sala A!');assert.equal(echoGuest.name,'Visitante A');
+  await new Promise(r=>setTimeout(r,100));
+  assert.equal(hostB.messages.some(m=>m.type==='room_chat_message'),false,`a sala ${roomB.room.code} não deve receber mensagens da sala ${roomA.room.code}`);
 });

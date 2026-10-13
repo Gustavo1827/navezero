@@ -95,13 +95,63 @@ test('Atrasado tem aba vermelha, ativação, duração limitada e marcação aut
   assert.match(html, /delayedDuration:\[5,40\]/);
   assert.match(html, /Tempo para marcar/);
   assert.match(html, /Usa o mesmo cooldown configurado em/);
-  assert.match(html, /if\(CFG\.delayedEnabled\)/);
+  assert.match(html, /if\(CFG\.delayedEnabled&&CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
   assert.match(html, /function doDelayedMark\(shooter,target\)/);
   assert.match(html, /remaining:CFG\.delayedDuration/);
   assert.match(html, /if\(G\.M\|\|G\.state==='meeting'/);
   assert.match(html, /command==='delayed_mark'[\s\S]*?dist\(ch,target\)<=84&&losClear/);
   assert.match(html, /delayedMarks:\{\.\.\.G\.delayedMarks\}/);
+  assert.match(html, /delayedChance:\[0,100\]/);
+  assert.match(html, /delayedMax:\[0,3\]/);
   assert.match(server, /delayedEnabled:\[0,1\]/);
+  assert.match(server, /delayedChance:\[0,100\]/);
+  assert.match(server, /delayedMax:\[0,3\]/);
   assert.match(server, /delayedDuration:\[5,40\]/);
+  assert.match(server, /mark\.killerId===recipientId/);
+  assert.match(html, /privateMark\.killerId===G\.player\.id/);
+  assert.match(html, /k\.function==='delayed'/);
+  assert.match(html, /G\.player\.function==='delayed'\|\|!G\.killT/);
   assert.match(server, /'delayed_mark'/);
+});
+
+
+test('ícone do Xerife é uma arma e Atrasado não recebe eliminação direta', () => {
+  assert.match(html, /id="btnSheriff"[\s\S]*?sheriffGunIcon[\s\S]*?<path d="M2 4H21L24 7H34V12H24L21 17H14V23H8V15H3Z"/);
+  assert.match(html, /const p=G\.player, can=[^;]*directKill=imp&&p\.function!=='delayed'/);
+  assert.match(html, /function playerKill\(\)[\s\S]*?G\.player\.function==='delayed'/);
+  assert.match(html, /k\.role!=='imp'\|\|k\.function==='delayed'/);
+  assert.match(html, /ch\.function!=='delayed'&&!ch\.vent/);
+});
+
+test('chat escrito de sala tem UI, sanitização, limitação e filtragem por código de sala', () => {
+  assert.match(html, /id="roomChatPanel"/);
+  assert.match(html, /id="roomChatInput" maxlength="180"/);
+  assert.match(html, /type:'room_chat',text/);
+  assert.match(html, /m\.roomCode===NET\.room\.code/);
+  assert.match(html, /textContent|el\('span','',String\(m\.text/);
+  assert.match(server, /m\.type==='room_chat'/);
+  assert.match(server, /broadcast\(room,\{type:'room_chat_message',roomCode:room\.code/);
+  assert.match(server, /slice\(0,180\)/);
+});
+
+test('nomes de bots são baseados no cadastro persistente da sala e persistem no offline', () => {
+  assert.match(server, /function ensureBotRoster\(room\)/);
+  assert.match(server, /botRoster:room\.botRoster\.map\(b=>\(\{\.\.\.b\}\)\)/);
+  assert.match(html, /NET\.room\.botRoster/);
+  assert.match(html, /function offlineBotNames\(owner\)/);
+  assert.match(html, /const names=online\?fallbackNames:offlineBotNames\(G\.cfg\.name\)/);
+});
+
+test('revanche usa a mesma sala e é autorizada somente pelo host', () => {
+  assert.match(server, /if\(m\.type==='rematch'\)\{[\s\S]*?if\(!isHost\)return error\(ws,'Somente o host pode reiniciar a partida\.'\);[\s\S]*?startGame\(room,true,timings\)/);
+  assert.match(server, /broadcast\(room,\{type:'game_start',room:roomPublic\(room\),round:room\.round,rematch\}/);
+  assert.match(html, /NET\.room\?\.code===m\.room\?\.code/);
+});
+
+test('falas novas dos bots são condicionadas a corpo, tarefa ou evidência', () => {
+  assert.match(html, /if\(M\.body&&Math\.random\(\)<\.12\)return \{from:ch,text:pickLine\(\['Onde foi o corpo\?'\]\)/);
+  assert.match(html, /Estava fazendo \$\{recentTask\}/);
+  assert.match(html, /Não vi \$\{unseenTarget\.name\}/);
+  assert.match(html, /Alguém viu \$\{unseenTarget\.name\}/);
+  assert.match(html, /\$\{suspect\.name\} é suspeito\./);
 });
