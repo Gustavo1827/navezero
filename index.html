@@ -185,7 +185,7 @@ body.touch #stick{display:block}
 #roomChatInput{flex:1;min-width:0;font:600 14px var(--font);color:var(--ink);background:#0a0c26;border:2px solid var(--edge);border-radius:10px;padding:6px 8px;outline:none;user-select:text;-webkit-user-select:text;touch-action:manipulation}
 #roomChatInput:focus-visible{border-color:var(--amber)}
 @media(max-width:560px){#roomChatPanel{right:8px;top:auto;bottom:calc(155px + var(--sb));height:min(38vh,330px);width:min(330px,calc(100vw - 16px))}}
-.act2.metamorph{background:#b8f3d4!important;color:#103b2a!important;box-shadow:0 5px 0 #4ca67d,0 7px 0 #10122a!important}.metamorph-tab{background:#b8f3d4!important;color:#103b2a!important}
+.act2.metamorph{background:#ff5364!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}.metamorph-tab{background:rgba(210,43,62,.24)!important;border-color:rgba(255,105,122,.78)!important;color:#ffe1e5!important}
 .act2.delayed,.delayed-tab{background:#ff5364!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
 .act2.delayed small{display:block;font-size:10px;line-height:1.05}
 #actions .row2:first-child{flex-wrap:wrap;justify-content:center;max-width:min(390px,96vw)}
@@ -939,7 +939,7 @@ function pendingAt(stationId){
    JOGADOR, MOVIMENTO E COLISÃO
    ===================================================================== */
 function newChar(name,color,tx,ty,isPlayer){
-  return {id:isPlayer?'player':'npc'+Math.random().toString(36).slice(2,7),name,color,x:tx*TILE+TILE/2,y:ty*TILE+TILE/2,face:1,walk:0,moving:false,alive:true,ghost:false,vent:null,ventAnim:null,ventCd:0,ventMv:0,bubble:null,disguiseTargetId:null,morphTime:0,morphCd:0,morphBubble:null,morphEventSeq:0,isPlayer};
+  return {id:isPlayer?'player':'npc'+Math.random().toString(36).slice(2,7),name,color,x:tx*TILE+TILE/2,y:ty*TILE+TILE/2,face:1,walk:0,moving:false,alive:true,ghost:false,vent:null,ventAnim:null,ventCd:0,ventMv:0,bubble:null,disguiseTargetId:null,morphTime:0,morphCd:0,morphBubble:null,morphEventSeq:0,morphOriginalSpeed:null,speed:CFG.speed,isPlayer};
 }
 const HALF_W=11,HALF_H=9,OFF_Y=6;
 function boxBlocked(x,y,g){
@@ -972,7 +972,7 @@ function inputVec(){
 }
 function updatePlayer(dt){
   const p=G.player;if(p.morphBubble&&p.morphBubble.remaining>0){p.moving=false;return}
-  const sp=CFG.speed*(p.ghost?2:1)*dt; let v=inputVec();
+  const sp=(p.morphBubble&&p.morphBubble.remaining>0?0:(p.speed??CFG.speed))*(p.ghost?2:1)*dt; let v=inputVec();
   if(p.ghost&&G.followTarget){const target=charById(G.followTarget);if(target&&target.alive){const dx=target.x-p.x,dy=target.y-p.y,d=Math.hypot(dx,dy);if(d>34)v={x:dx/d,y:dy/d};else v={x:0,y:0}}else G.followTarget=null}
   const moved=(v.x||v.y)?moveChar(p,v.x*sp,v.y*sp):false;
   p.moving=moved; if(moved)p.walk+=dt;
@@ -1409,7 +1409,7 @@ function newGame(){
   const isImp=G.role==='imp';
   $('role').className=isImp?'imp':'crew'; $('role').hidden=false;
   $('roleTitle').textContent=isImp?'Você é um Infiltrado':'Você é um Tripulante';
-  $('roleMsg').textContent=G.player.function==='metamorph'?'Disfarce-se de outros Tripulantes.':(G.player.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(G.player.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(G.player.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(isImp?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.'))));
+  $('roleMsg').textContent=G.player.function==='metamorph'?'Metamorfo - Disfarce-se de outros Tripulantes.':(G.player.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(G.player.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(G.player.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(isImp?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.'))));
   $('roleMsg').hidden=false;
   G.state='role'; G.roleT=9; Snd.open();
 }
@@ -2229,19 +2229,19 @@ function sheriffBotThink(ch,dt){
 
 function beginMetamorph(ch,target){
   if(!ch||!target||G.over||G.M||G.state!=='playing'||!ch.alive||ch.role!=='imp'||ch.function!=='metamorph'||ch.vent||target===ch||!target.alive||ch.disguiseTargetId||ch.morphCd>0||(ch.morphBubble&&ch.morphBubble.remaining>0))return false;
-  ch.disguiseTargetId=target.id;ch.morphTime=CFG.metamorphDuration;ch.morphBubble={remaining:2.4,eventId:++ch.morphEventSeq,targetId:target.id};ch.moving=false;ch.morphCd=0;return true;
+  ch.disguiseTargetId=target.id;ch.morphTime=CFG.metamorphDuration;ch.morphBubble={remaining:2.4,eventId:++ch.morphEventSeq,targetId:target.id};ch.morphOriginalSpeed=CFG.speed;ch.speed=0;ch.moving=false;ch.morphCd=0;return true;
 }
 function endMetamorph(ch,startCooldown=true){
   if(!ch)return false;const targetId=ch.disguiseTargetId;if(!targetId&&!ch.morphTime)return false;
-  ch.disguiseTargetId=null;ch.morphTime=0;ch.morphBubble={remaining:2.4,eventId:++ch.morphEventSeq,targetId:targetId||null};ch.moving=false;if(startCooldown)ch.morphCd=CFG.metamorphCooldown;return true;
+  ch.disguiseTargetId=null;ch.morphTime=0;ch.morphBubble={remaining:2.4,eventId:++ch.morphEventSeq,targetId:targetId||null};ch.morphOriginalSpeed=CFG.speed;ch.speed=0;ch.moving=false;if(startCooldown)ch.morphCd=CFG.metamorphCooldown;return true;
 }
 function updateMetamorphs(dt){
-  for(const ch of G.chars){if(ch.morphCd>0)ch.morphCd=Math.max(0,ch.morphCd-dt);if(ch.morphBubble&&ch.morphBubble.remaining>0){ch.morphBubble.remaining=Math.max(0,ch.morphBubble.remaining-dt);if(ch.morphBubble.remaining===0)ch.morphBubble=null}if(ch.disguiseTargetId){const target=charById(ch.disguiseTargetId);if(!target||!target.alive||!ch.alive||G.M||G.over||G.state==='meeting'||G.state==='over'){endMetamorph(ch,true)}else{ch.morphTime=Math.max(0,(ch.morphTime||0)-dt);if(ch.morphTime<=0)endMetamorph(ch,true)}}}
+  for(const ch of G.chars){if(ch.morphCd>0)ch.morphCd=Math.max(0,ch.morphCd-dt);if(ch.morphBubble&&ch.morphBubble.remaining>0){ch.speed=0;ch.morphBubble.remaining=Math.max(0,ch.morphBubble.remaining-dt);if(ch.morphBubble.remaining===0){ch.morphBubble=null;ch.speed=CFG.speed;ch.morphOriginalSpeed=null}}else if(ch.speed!==CFG.speed){ch.speed=CFG.speed}if(ch.disguiseTargetId){const target=charById(ch.disguiseTargetId);if(!target||!target.alive||!ch.alive||G.M||G.over||G.state==='meeting'||G.state==='over'){endMetamorph(ch,true)}else{ch.morphTime=Math.max(0,(ch.morphTime||0)-dt);if(ch.morphTime<=0)endMetamorph(ch,true)}}}
 }
 function metamorphBotThink(ch,dt){
   if(!ch.alive||ch.role!=='imp'||ch.function!=='metamorph'||ch.vent||G.M||G.over||G.state!=='playing')return;
   ch.ai.morphThinkT=(ch.ai.morphThinkT||4)-dt;if(ch.ai.morphThinkT>0||ch.disguiseTargetId||ch.morphCd>0)return;
-  ch.ai.morphThinkT=rand(8,16);const targets=shuffle(G.chars.filter(t=>t.alive&&t!==ch));const target=targets[0];if(target)beginMetamorph(ch,target);
+  ch.ai.morphThinkT=rand(8,16);const targets=G.chars.filter(t=>t.alive&&t!==ch&&t.role!=='imp').map(t=>({t,score:(t.ai?.state==='work'?2:0)+(G.chars.some(w=>w!==ch&&w!==t&&w.alive&&w.role==='crew'&&dist(w,ch)<260&&losClear(w.x,w.y,ch.x,ch.y))?-3:0)+Math.random()})).sort((a,b)=>b.score-a.score);const target=targets[0]?.t;if(target&&dist(ch,target)<420)beginMetamorph(ch,target);
 }
 function playerMetamorphose(){
   const p=G.player;if(!p||G.state!=='playing'||G.M||G.over||!p.alive||G.role!=='imp'||p.function!=='metamorph'||p.vent||uiBusy())return;
@@ -3250,7 +3250,7 @@ $('btnFollow').addEventListener('dblclick',e=>{
   e.preventDefault(); if(!G.player||G.player.alive||G.state!=='playing')return;
   G.followTarget=null; Snd.click(); toast('Seguimento cancelado. Você controla o morto novamente.',2200);
 });
-$('btnAgain').addEventListener('click',()=>{Snd.init();newGame()});
+$('btnAgain').addEventListener('click',()=>{Snd.init();if(typeof NET!=='undefined'&&NET.inRoom){if(!NET.isHost){toast('Somente o host pode voltar a sala.');return}netSend({type:'rematch'});return}newGame()});
 $('btnMenu').addEventListener('click',toMenu);
 // clique no painel no mapa
 cv.addEventListener('pointerdown',e=>{
@@ -3446,7 +3446,7 @@ function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=
 function netCaptureSnapshot(){
   const st=(G.state==='task'||G.state==='tool')?'playing':G.state;
   if(G.player){G.player.netKillCd=G.killCd;G.player.netDelayedCd=G.delayedCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
-  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,bubble:c.bubble||null,disguiseTargetId:c.disguiseTargetId||null,morphTime:c.morphTime||0,morphCd:c.morphCd||0,morphBubble:c.morphBubble?{...c.morphBubble}:null,morphEventSeq:c.morphEventSeq||0,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0}));
+  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,bubble:c.bubble||null,disguiseTargetId:c.disguiseTargetId||null,morphTime:c.morphTime||0,morphCd:c.morphCd||0,morphBubble:c.morphBubble?{...c.morphBubble}:null,morphEventSeq:c.morphEventSeq||0,speed:c.speed??CFG.speed,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
   const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
   const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chatCount:$('meetChat').children.length}:null;
@@ -3501,7 +3501,7 @@ function netApplySnapshot(s,force=false){
       if(G.M){G.M=null;$('meet').hidden=true;$('meetingIntro').hidden=true;$('meet').classList.remove('space-result','space-eject','vote-reveal');$('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';$('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML='');$('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'))}
       if(!(oldState==='task'||oldState==='tool')||s.state!=='playing')G.state=s.state;
       if(s.state==='playing'){$('role').hidden=true;$('end').hidden=true;$('menu').hidden=true;$('hud').hidden=false}
-      if(s.state==='role'){$('role').hidden=false;$('roleTitle').textContent=G.role==='imp'?'Você é um Infiltrado':'Você é um Tripulante';$('roleMsg').textContent=G.player.function==='metamorph'?'Disfarce-se de outros Tripulantes.':(G.player.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(G.player.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(G.player.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(G.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.'))))}
+      if(s.state==='role'){$('role').hidden=false;$('roleTitle').textContent=G.role==='imp'?'Você é um Infiltrado':'Você é um Tripulante';$('roleMsg').textContent=G.player.function==='metamorph'?'Metamorfo - Disfarce-se de outros Tripulantes.':(G.player.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(G.player.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(G.player.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(G.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.'))))}
     }
     if(!wasAlive&&G.player.alive){NET.ownWasAlive=true}else if(wasAlive&&!G.player.alive){const corpse=G.bodies.find(b=>String(b.name)===String(G.player.name));const killer=G.chars.find(c=>c.id===(corpse?.killerId||''))||G.imps[0];if(corpse?.cause==='sheriff_misfire'||corpse?.cause==='sheriff_recoil'){toast(corpse.cause==='sheriff_misfire'?'Você foi eliminado após atingir um Tripulante inocente.':'Você foi eliminado pelo disparo do Xerife.',3600)}else if(killer)showDeathIntro(killer,G.player);NET.ownWasAlive=false}
     $('roleName').textContent=G.role==='imp'?(G.player.function==='metamorph'?'Infiltrado · Metamorfo':G.player.function==='delayed'?'Infiltrado · Atrasado':'Infiltrado'):(G.player.function==='sheriff'?'Tripulante · Xerife':(G.player.function==='delayed'?'Infiltrado · Atrasado':(G.locator?'Tripulante · Localizador':'Tripulante')));renderTasks();updateSabUI();netSyncCameraAndButtons();
@@ -3600,7 +3600,7 @@ function netWithRemotePlayer(ch,fn){
 }
 function netUpdateRemote(dt){
   for(const c of G.chars){if(!c.isRemoteHuman)continue;const inp=NET.remoteInputs.get(c.id)||{x:0,y:0,at:0};if(Date.now()-inp.at>500){inp.x=inp.y=0}
-    if(['playing','task','tool'].includes(G.state)&&c.alive&&!c.vent&&!(c.morphBubble&&c.morphBubble.remaining>0)&&(inp.x||inp.y)){const l=Math.hypot(inp.x,inp.y)||1;const sp=CFG.speed*(c.ghost?2:1)*dt;const moved=moveChar(c,inp.x/l*sp,inp.y/l*sp);c.moving=moved;if(moved)c.walk+=dt;c.face=inp.x?Math.sign(inp.x):c.face}else c.moving=false;
+    if(['playing','task','tool'].includes(G.state)&&c.alive&&!c.vent&&!(c.morphBubble&&c.morphBubble.remaining>0)&&(inp.x||inp.y)){const l=Math.hypot(inp.x,inp.y)||1;const sp=(c.morphBubble&&c.morphBubble.remaining>0?0:(c.speed??CFG.speed))*(c.ghost?2:1)*dt;const moved=moveChar(c,inp.x/l*sp,inp.y/l*sp);c.moving=moved;if(moved)c.walk+=dt;c.face=inp.x?Math.sign(inp.x):c.face}else c.moving=false;
     if(c.netKillCd>0)c.netKillCd=Math.max(0,c.netKillCd-dt);if(c.netSheriffCd>0)c.netSheriffCd=Math.max(0,c.netSheriffCd-dt);if(c.netTrackCd>0)c.netTrackCd=Math.max(0,c.netTrackCd-dt);if(c.netTrackTime>0){const t=G.chars.find(x=>x.id===c.netTrackTarget);c.netTrackTime=Math.max(0,c.netTrackTime-dt);if(!t||!t.alive||c.netTrackTime<=0){c.netTrackTarget=null;c.netTrackTime=0;c.netTrackCd=CFG.locCooldown}};
   }
 }
@@ -3651,7 +3651,7 @@ $('roomChatForm').addEventListener('submit',e=>{e.preventDefault();if(!NET.inRoo
 const netOriginalHandleRoomChat=netHandleMessage;netHandleMessage=function(m){if(m.type==='room_chat_message'){if(NET.inRoom&&NET.room?.status==='lobby'&&m.roomCode===NET.room.code)appendRoomChatMessage(m);return}if(m.type==='room_state'&&m.room?.code!==NET.room?.code){closeRoomChat();$('roomChatMessages').innerHTML=''}if(m.type==='game_start'&&NET.room?.code===m.room?.code){$('roomChatMessages').innerHTML='';closeRoomChat()}return netOriginalHandleRoomChat(m)};
 const netOriginalToMenu=toMenu;toMenu=function(){if(NET.inRoom)netLeaveRoom();return netOriginalToMenu()};
 // Override end/rematch controls without changing offline behavior.
-$('btnAgain').addEventListener('click',e=>{if(NET.inRoom){e.stopImmediatePropagation();if(!NET.isHost){toast('Somente o host pode reiniciar a partida.');return}netSend({type:'rematch'});return}},true);
+$('btnAgain').addEventListener('click',e=>{if(NET.inRoom){e.stopImmediatePropagation();if(!NET.isHost){toast('Somente o host pode voltar a sala.');return}netSend({type:'rematch'});return}},true);
 $('btnMenu').addEventListener('click',e=>{if(NET.inRoom){e.stopImmediatePropagation();netLeaveRoom();netOriginalToMenu();return}},true);
 $('btnCreateRoom').addEventListener('click',()=>{$('joinPanel').hidden=true;$('createPanel').hidden=false;$('createSizeIn').focus()});
 $('btnCreateConfirm').addEventListener('click',netCreateRoom);$('btnCreateCancel').addEventListener('click',()=>$('createPanel').hidden=true);

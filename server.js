@@ -185,9 +185,13 @@ function handle(ws, raw, timings={}){
     startGame(room,false,timings);return;
   }
   if(m.type==='rematch'){
-    if(!isHost)return error(ws,'Somente o host pode reiniciar a partida.');
+    if(!isHost)return error(ws,'Somente o host pode voltar à sala.');
     if(room.status!=='ended')return error(ws,'A partida ainda não terminou.');
-    startGame(room,true,timings);return;
+    room.countdownToken=(room.countdownToken||0)+1;
+    if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);
+    room.countdownTimer=null;room.loadingTimer=null;room.countdownRoster=null;room.rematchPending=false;
+    room.status='lobby';room.winner=null;room.endReason='';room.lastSnapshot=null;
+    broadcast(room,{type:'room_state',room:roomPublic(room)});return;
   }
   if(m.type==='game_end'){
     if(!isHost)return;
