@@ -13,9 +13,9 @@ const clients = new Map();
 const COLORS = ['vermelho','azul','amarelo','verde','rosa','roxo','laranja','ciano','preto','branco','carmim','banana','caqui','coral','cinza'];
 const LIMITS = {
   kill:[10,60], sab:[10,90], meet:[10,60], speed:[100,280], impVision:[260,900], crewVision:[260,900],
-  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[10,60], sheriffChance:[0,100], sheriffMax:[0,15], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], renderDist:[500,1500]
+  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], renderDist:[500,1500]
 };
-const DEFAULT_SETTINGS = {kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:25,sheriffChance:35,sheriffMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,renderDist:820};
+const DEFAULT_SETTINGS = {kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,renderDist:820};
 const BOT_NAMES = ['João','Duda','Lia','Maria','Fernando','Caio','Aurora','Bruno','Iris','Mateus','Nina','Ravi','Bia','Theo','Yasmin','Gael','Luna','Cecília','Miguel','Helena','Enzo','Rafa','Alice','Pedro','Sofia','Lucas','Maya','Noah','Lara','Vitor'];
 const nameKey = value => String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]/g,'');
 function ensureBotRoster(room){
@@ -222,7 +222,7 @@ function handle(ws, raw, timings={}){
     send(host.ws,{type:'host_command',...allowedData});return;
   }
   if(m.type==='room_chat'){
-    if(room.status!=='playing')return error(ws,'O chat da sala só fica disponível durante a partida.');
+    if(room.status!=='lobby')return error(ws,'O chat escrito só fica disponível na sala de espera.');
     const player=room.players.find(p=>p.id===c.id);if(!player)return;
     const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;
     const now=Date.now();if(now-(c.lastRoomChatAt||0)<350)return;c.lastRoomChatAt=now;
