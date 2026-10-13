@@ -35,7 +35,9 @@ test('Xerife tem configurações limitadas, aba própria e sincronização de sa
     assert.match(html, new RegExp("'"+k+"'"));
     assert.match(server, new RegExp(k+':\\['));
   }
-  assert.match(html, /sheriffCooldown:\[10,60\]/);
+  assert.match(html, /sheriffCooldown:\[50,120\]/);
+  assert.match(server, /sheriffCooldown:\[50,120\]/);
+  assert.match(html, /'sheriffCooldown','Tempo para atirar'/);
   assert.match(html, /sheriffChance:\[0,100\]/);
   assert.match(html, /sheriffMax:\[0,15\]/);
   assert.match(html, /id="btnSheriffSection"/);
@@ -47,7 +49,10 @@ test('Xerife tem configurações limitadas, aba própria e sincronização de sa
 test('disparo do Xerife é validado pelo host e respeita alcance, linha de visão e cooldown', () => {
   assert.match(html, /command==='sheriff_shoot'[\s\S]*?activePlay&&!G\.M&&ch\.alive&&ch\.role==='crew'&&ch\.function==='sheriff'[\s\S]*?dist\(ch,target\)<=84&&losClear/);
   assert.match(server, /'sheriff_shoot'/);
-  assert.match(html, /function doSheriffShot\(shooter,target\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(shooter\);addSheriffBody\(shooter,shooter\.id,'sheriff_misfire'\)/);
+  assert.match(html, /function doSheriffShot\(shooter,target\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(target\);addSheriffBody\(target,shooter\.id,'sheriff_hit'\)/);
+  const shotBody=html.slice(html.indexOf('function doSheriffShot(shooter,target)'),html.indexOf('function playerSheriffShot()'));
+  assert.doesNotMatch(shotBody.slice(shotBody.indexOf("if(target.role==='imp')"),shotBody.indexOf('}else{')), /killChar\(shooter\)/, 'o Xerife sobrevive ao acertar um Infiltrado');
+  assert.match(shotBody, /killChar\(shooter\);addSheriffBody\(shooter,shooter\.id,'sheriff_misfire'\)/, 'ao errar, somente o Xerife morre');
   assert.match(html, /if\(shooter===G\.player\)G\.sheriffCd=CFG\.sheriffCooldown;else shooter\.netSheriffCd=CFG\.sheriffCooldown/);
 });
 
@@ -125,6 +130,9 @@ test('ícone do Xerife é uma arma e Atrasado não recebe eliminação direta', 
 
 test('chat escrito de sala tem UI, sanitização, limitação e filtragem por código de sala', () => {
   assert.match(html, /id="roomChatPanel"/);
+  assert.match(html, /id="btnRoomChatLobby"/);
+  assert.match(html, /r\.status!=='lobby'\)closeRoomChat\(\)/);
+  assert.match(html, /NET\.room\?\.status!=='lobby'.*O chat escrito só funciona na sala de espera/s);
   assert.match(html, /id="roomChatInput" maxlength="180"/);
   assert.match(html, /type:'room_chat',text/);
   assert.match(html, /m\.roomCode===NET\.room\.code/);
@@ -154,4 +162,17 @@ test('falas novas dos bots são condicionadas a corpo, tarefa ou evidência', ()
   assert.match(html, /Não vi \$\{unseenTarget\.name\}/);
   assert.match(html, /Alguém viu \$\{unseenTarget\.name\}/);
   assert.match(html, /\$\{suspect\.name\} é suspeito\./);
+});
+
+
+test('após a reunião, todos os cooldowns de habilidades voltam à recarga completa', () => {
+  assert.match(html, /G\.meetCd=CFG\.meet; G\.killCd=CFG\.kill; G\.sheriffCd=CFG\.sheriffCooldown; G\.delayedCd=CFG\.kill/);
+  assert.match(html, /G\.sab\.cd=CFG\.sab/);
+  assert.match(html, /c\.netKillCd=CFG\.kill;c\.netSheriffCd=CFG\.sheriffCooldown;c\.netDelayedCd=CFG\.kill;c\.netTrackTarget=null;c\.netTrackTime=0;c\.netTrackCd=CFG\.locCooldown;c\.ventCd=VENT_CD/);
+});
+
+test('NPCs consideram causas ligadas a funções especiais ao discutir um corpo', () => {
+  assert.match(html, /cause==='delayed'[\s\S]*?causada por um Atrasado/);
+  assert.match(html, /cause==='sheriff_misfire'[\s\S]*?Xerife tenha errado o disparo/);
+  assert.match(html, /um Infiltrado, um Atrasado ou até um disparo de Xerife/);
 });

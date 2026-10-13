@@ -26,11 +26,11 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
 
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:48,sheriffChance:70,sheriffMax:4,delayedEnabled:1,delayedChance:82,delayedMax:3,delayedDuration:40}});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:50,sheriffChance:70,sheriffMax:4,delayedEnabled:1,delayedChance:82,delayedMax:3,delayedDuration:40}});
   const created=await onceMessage(host,m=>m.type==='room_state');
   const code=created.room.code;
   assert.match(code,/^[A-Z0-9]{6}$/);assert.equal(created.room.size,4);assert.equal(created.room.bots,3);assert.equal(created.room.players.length+created.room.bots,4);
-  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,48);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(created.room.settings.delayedEnabled,1);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);
+  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,50);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(created.room.settings.delayedEnabled,1);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);
   assert.equal(created.room.botRoster.length,3);
   const norm=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const allNames=[...created.room.players.map(p=>p.name),...created.room.botRoster.map(b=>b.name)];
@@ -60,7 +60,7 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   assert.equal(rooms.get(created2.room.code).size,5);
   send(host2,{type:'set_room',bots:0,settings:{speed:130,kill:40,crewVision:800}});
   await onceMessage(visitor,m=>m.type==='room_state'&&m.room.bots===0);
-  assert.equal(rooms.get(created2.room.code).settings.speed,130);assert.equal(rooms.get(created2.room.code).settings.impostors,3,'configurações não enviadas em uma atualização parcial devem ser preservadas');assert.equal(rooms.get(created2.room.code).settings.renderDist,1000);assert.equal(rooms.get(created2.room.code).settings.sheriffCooldown,25);assert.equal(rooms.get(created2.room.code).settings.sheriffChance,35);assert.equal(rooms.get(created2.room.code).settings.sheriffMax,1);
+  assert.equal(rooms.get(created2.room.code).settings.speed,130);assert.equal(rooms.get(created2.room.code).settings.impostors,3,'configurações não enviadas em uma atualização parcial devem ser preservadas');assert.equal(rooms.get(created2.room.code).settings.renderDist,1000);assert.equal(rooms.get(created2.room.code).settings.sheriffCooldown,50);assert.equal(rooms.get(created2.room.code).settings.sheriffChance,35);assert.equal(rooms.get(created2.room.code).settings.sheriffMax,1);
   assert.equal(rooms.get(code).settings.speed,210,'as configurações de outra sala não devem mudar');
 
   const third=await connect(url,'Terceiro','amarelo');all.push(third);
@@ -83,7 +83,7 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:6,bots:3,settings:{speed:180,impostors:2,renderDist:950,sheriffCooldown:44,sheriffChance:85,sheriffMax:2}});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:6,bots:3,settings:{speed:180,impostors:2,renderDist:950,sheriffCooldown:50,sheriffChance:85,sheriffMax:2}});
   const made=await onceMessage(host,m=>m.type==='room_state');const code=made.room.code;
   const botRosterBefore=made.room.botRoster.map(b=>({...b}));
   assert.equal(new Set(botRosterBefore.map(b=>b.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase())).size,botRosterBefore.length);
@@ -128,7 +128,7 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   const restarted=await onceMessage(guest,m=>m.type==='game_start'&&m.rematch===true);
   await onceMessage(peer,m=>m.type==='game_start'&&m.rematch===true);
   assert.equal(restarted.room.code,code,'a revanche reutiliza o mesmo código de sala');
-  assert.equal(restarted.room.round,2);assert.equal(restarted.room.bots,3,'a quantidade de bots deve sobreviver à revanche');assert.equal(restarted.room.settings.impostors,2);assert.equal(restarted.room.settings.renderDist,950);assert.equal(restarted.room.settings.sheriffCooldown,44);assert.equal(restarted.room.settings.sheriffChance,85);assert.equal(restarted.room.settings.sheriffMax,2);
+  assert.equal(restarted.room.round,2);assert.equal(restarted.room.bots,3,'a quantidade de bots deve sobreviver à revanche');assert.equal(restarted.room.settings.impostors,2);assert.equal(restarted.room.settings.renderDist,950);assert.equal(restarted.room.settings.sheriffCooldown,50);assert.equal(restarted.room.settings.sheriffChance,85);assert.equal(restarted.room.settings.sheriffMax,2);
   assert.deepEqual(restarted.room.botRoster,botRosterBefore,'nomes e IDs dos bots devem permanecer estáveis ao reiniciar');
 });
 
@@ -230,7 +230,7 @@ test('configurações do Atrasado respeitam limites e valores padrão', () => {
 });
 
 
-test('chat escrito é retransmitido em tempo real só para participantes da própria sala', async t=>{
+test('chat escrito funciona na sala de espera e só é retransmitido aos participantes da própria sala', async t=>{
   const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:15,loadingMs:10});
   await new Promise(resolve=>app.server.once('listening',resolve));
   const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
@@ -243,8 +243,6 @@ test('chat escrito é retransmitido em tempo real só para participantes da pró
   const hostB=await connect(url,'Host B','vermelho');all.push(hostB);
   send(hostB,{type:'create_room',name:'Host B',color:'vermelho',size:4,bots:3});
   const roomB=await onceMessage(hostB,m=>m.type==='room_state');
-  send(hostA,{type:'start_game'});await onceMessage(hostA,m=>m.type==='game_start');await onceMessage(guestA,m=>m.type==='game_start');
-  send(hostB,{type:'start_game'});await onceMessage(hostB,m=>m.type==='game_start');
   send(guestA,{type:'room_chat',text:'Olá, sala A!'});
   const [echoA,echoGuest]=await Promise.all([
     onceMessage(hostA,m=>m.type==='room_chat_message'),
@@ -254,4 +252,7 @@ test('chat escrito é retransmitido em tempo real só para participantes da pró
   assert.equal(echoA.text,'Olá, sala A!');assert.equal(echoGuest.name,'Visitante A');
   await new Promise(r=>setTimeout(r,100));
   assert.equal(hostB.messages.some(m=>m.type==='room_chat_message'),false,`a sala ${roomB.room.code} não deve receber mensagens da sala ${roomA.room.code}`);
+  send(hostA,{type:'start_game'});await onceMessage(hostA,m=>m.type==='game_start');await onceMessage(guestA,m=>m.type==='game_start');
+  send(guestA,{type:'room_chat',text:'Esta mensagem não deve passar durante a partida'});
+  const denied=await onceMessage(guestA,m=>m.type==='room_error');assert.match(denied.message,/sala de espera/i);
 });
