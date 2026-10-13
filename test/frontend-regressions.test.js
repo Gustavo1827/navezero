@@ -104,7 +104,9 @@ test('Atrasado tem aba vermelha, ativação, duração limitada e marcação aut
   assert.match(html, /delayedDuration:\[5,40\]/);
   assert.match(html, /Tempo para marcar/);
   assert.match(html, /Usa o mesmo cooldown configurado em/);
-  assert.match(html, /if\(CFG\.delayedEnabled&&CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
+  assert.match(html, /if\(CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
+  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Atrasado'/);
+  assert.doesNotMatch(html, /if\(CFG\.delayedEnabled&&CFG\.delayedChance>0/);
   assert.match(html, /function doDelayedMark\(shooter,target\)/);
   assert.match(html, /remaining:CFG\.delayedDuration/);
   assert.match(html, /if\(G\.M\|\|G\.state==='meeting'/);
@@ -123,6 +125,17 @@ test('Atrasado tem aba vermelha, ativação, duração limitada e marcação aut
   assert.match(server, /'delayed_mark'/);
 });
 
+
+test('ajustes atuais: cooldowns maiores e uniformes, votos pulados identificados, OK menor e stepper contínuo', () => {
+  assert.match(html, /\.act2\.cooldown-label\{font-size:22px!important/);
+  assert.match(html, /\.act2\.cooldown-label small,\.act2\.cooldown-label \.sheriffButtonLabel\{font-size:22px!important/);
+  assert.match(html, /el\('span','skip-vote-label','Votos Pulados:'\)/);
+  assert.match(html, /dot\.style\.background=COLOR_BY\[voter\.color\]\?\.main\|\|chatCol\(voter\)/);
+  assert.match(html, /#roomBotsOk\{[^}]*font:800 20px/);
+  assert.match(html, /wireRepeat\(minus,-1\);wireRepeat\(plus,1\)/);
+  assert.match(html, /repeatTimer=setInterval\(\(\)=>\{if\(!canStep\(\)\)\{stop\(\);return\}change\(delta,true\)\},70\)/);
+  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Atrasado'/);
+});
 
 test('ícone do Xerife é uma arma e Atrasado não recebe eliminação direta', () => {
   assert.match(html, /id="btnSheriff"[\s\S]*?sheriffGunIcon[\s\S]*?<path d="M2 4H21L24 7H34V12H24L21 17H14V23H8V15H3Z"/);
