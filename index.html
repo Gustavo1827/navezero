@@ -271,7 +271,17 @@ body.touch #stick{display:block}
 .cfgrow small{display:block;color:var(--ink2);font-size:13.5px}
 #cfgRows .range{width:100%}
 #cfgFunctionFooter{margin:10px 0 4px;padding-top:10px;border-top:2px solid var(--edge)}
-#cfgFunctionFooter button{width:100%;border-color:#65d8ff;color:#bceeff;background:#12294b}
+#cfgFunctionFooter button{width:100%;border-color:rgba(101,216,255,.72);color:#d9f4ff;background:rgba(18,41,75,.48);backdrop-filter:blur(5px)}
+#cfgFunctionTabs button{background:rgba(35,111,210,.24);border-color:rgba(90,174,255,.72);color:#d9efff;box-shadow:0 3px 0 rgba(8,45,100,.35)}
+#cfgFunctionTabs button.delayed-tab,#cfgFunctionTabs button.metamorph-tab{background:rgba(210,43,62,.24);border-color:rgba(255,105,122,.78);color:#ffe1e5;box-shadow:0 3px 0 rgba(100,8,22,.35)}
+#cfgFunctionTabs button.alt{opacity:.78;background:rgba(24,30,58,.34)}
+#cfgRows .cfgrow.fncompact{background:rgba(20,26,67,.34);backdrop-filter:blur(5px)}
+#cfgRows .fnstepper.crew-stepper{background:rgba(12,67,135,.24);border-color:rgba(85,165,255,.65)}
+#cfgRows .fnstepper.imp-stepper{background:rgba(130,14,34,.24);border-color:rgba(255,93,112,.65)}
+.fnstepper button{background:rgba(38,121,220,.42);color:#e1f2ff;box-shadow:0 3px 0 rgba(9,45,100,.45);border:1px solid rgba(110,190,255,.5);touch-action:none;user-select:none;-webkit-user-select:none}
+.fnstepper.imp-stepper button{background:rgba(218,40,62,.42);color:#fff0f2;box-shadow:0 3px 0 rgba(95,7,20,.45);border-color:rgba(255,112,128,.55)}
+.fnstepper button:disabled{opacity:.32}
+
 /* Controles compactos da página Funções */
 #cfgRows .cfgrow.fncompact{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;margin:7px 0;padding:8px 10px;border:1.5px solid var(--edge);border-radius:12px;background:rgba(20,26,67,.72)}
 #cfgRows .fncompact .cfgtop{display:block;font-size:15px;line-height:1.15}
@@ -1382,7 +1392,7 @@ function newGame(){
   const sheriffEligible=shuffle(G.chars.filter(c=>c.role==='crew'&&c.function!=='locator'));
   const sheriffEnabled=CFG.sheriffMax>0&&CFG.sheriffChance>0&&Math.random()*100<CFG.sheriffChance;
   if(sheriffEnabled){for(const ch of sheriffEligible.slice(0,clamp(CFG.sheriffMax,0,15)))ch.function='sheriff'}
-  if(CFG.delayedEnabled&&CFG.delayedChance>0&&CFG.delayedMax>0&&Math.random()*100<CFG.delayedChance){const delayedEligible=shuffle([...G.imps]);for(const ch of delayedEligible.slice(0,Math.min(clamp(CFG.delayedMax,0,3),G.imps.length)))ch.function='delayed'}
+  if(CFG.delayedChance>0&&CFG.delayedMax>0&&Math.random()*100<CFG.delayedChance){const delayedEligible=shuffle([...G.imps]);for(const ch of delayedEligible.slice(0,Math.min(clamp(CFG.delayedMax,0,3),G.imps.length)))ch.function='delayed'}
   if(CFG.metamorphChance>0&&CFG.metamorphMax>0&&Math.random()*100<CFG.metamorphChance){const metamorphEligible=shuffle(G.imps.filter(ch=>!ch.function));for(const ch of metamorphEligible.slice(0,Math.min(clamp(CFG.metamorphMax,0,3),G.imps.length)))ch.function='metamorph'}
   G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.sheriffCd=0;G.delayedCd=0;G.delayedT=null;G.delayedMarks={}; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
@@ -1679,12 +1689,12 @@ function closeMap(){
   if(!G.mapOpen)return;
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
-const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['delayedEnabled','Ativar função Atrasado','Permite habilitar ou desabilitar a função Atrasado',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['metamorphChance','Chance de ser Metamorfo','Chance de a função Metamorfo ser atribuída na partida','%'],['metamorphMax','Quantidade de Metamorfos','Máximo de Metamorfos, limitado à quantidade de Infiltrados',''],['metamorphDuration','Tempo limite da Metamorfose','Duração máxima da aparência copiada','s'],['metamorphCooldown','Cooldown da Metamorfose','Tempo de recarga após cancelar ou terminar','s']];
+const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['metamorphChance','Chance de ser Metamorfo','Chance de a função Metamorfo ser atribuída na partida','%'],['metamorphMax','Quantidade de Metamorfos','Máximo de Metamorfos, limitado à quantidade de Infiltrados',''],['metamorphDuration','Tempo limite da Metamorfose','Duração máxima da aparência copiada','s'],['metamorphCooldown','Cooldown da Metamorfose','Tempo de recarga após cancelar ou terminar','s']];
 function buildCfgUI(){
   CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
   const locked=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
-  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnMetamorphSection').classList.toggle('alt',G.cfgFunctionTab!=='metamorph');
+  $('btnLocatorSection').classList.add('crew-function-btn');$('btnSheriffSection').classList.add('crew-function-btn');$('btnDelayedSection').classList.add('imp-function-btn');$('btnMetamorphSection').classList.add('imp-function-btn');$('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnMetamorphSection').classList.toggle('alt',G.cfgFunctionTab!=='metamorph');
   if(G.cfgPage==='functions'&&G.cfgFunctionTab==='delayed'){
     const cooldownRow=el('div','cfgrow fncompact'),top=el('div','cfgtop');
     top.append(el('span','','◷ Tempo para marcar'),el('b','',CFG.kill+' s'));
@@ -1692,21 +1702,21 @@ function buildCfgUI(){
     box.appendChild(cooldownRow);
   }
   CFG_ROWS.forEach(([k,l,d,unit])=>{
-    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedEnabled','delayedChance','delayedMax','delayedDuration'], metamorphKeys=['metamorphChance','metamorphMax','metamorphDuration','metamorphCooldown'];
+    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedChance','delayedMax','delayedDuration'], metamorphKeys=['metamorphChance','metamorphMax','metamorphDuration','metamorphCooldown'];
     const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isDelayed=delayedKeys.includes(k),isMetamorph=metamorphKeys.includes(k),isFn=isLocator||isSheriff||isDelayed||isMetamorph;
     if((G.cfgPage==='functions')!==isFn)return;
     if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='locator'&&!isLocator)||(G.cfgFunctionTab==='sheriff'&&!isSheriff)||(G.cfgFunctionTab==='delayed'&&!isDelayed)||(G.cfgFunctionTab==='metamorph'&&!isMetamorph)))return;
     const row=el('div','cfgrow'+(isFn?' fncompact':'')), top=el('div','cfgtop');
     if(isFn){
-      const showCfgValue=()=>k==='delayedEnabled'?(CFG[k]?'Ativado':'Desativado'):(CFG[k]+(unit?' '+unit:''));
+      const showCfgValue=()=>CFG[k]+(unit?' '+unit:'');
       const value=el('b','',showCfgValue());
       top.append(el('span','',(isMetamorph?'♧ ':isDelayed?'◷ ':isSheriff?'✦ ':'⌖ ')+l),value);
-      const stepper=el('div','fnstepper');
+      const stepper=el('div','fnstepper '+((isDelayed||isMetamorph)?'imp-stepper':'crew-stepper'));
       const minus=el('button','','−'), number=el('output','',String(CFG[k])), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label','Diminuir '+l.toLowerCase()); plus.setAttribute('aria-label','Aumentar '+l.toLowerCase()); number.setAttribute('aria-label',l);
-      const maxValue=k==='metamorphMax'?Math.min(CFG_LIM[k][1],CFG.impostors):CFG_LIM[k][1];const sync=()=>{number.textContent=k==='delayedEnabled'?(CFG[k]?'Sim':'Não'):String(CFG[k]);value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=maxValue};
-      const change=delta=>{if(locked)return;CFG[k]=clamp(k==='delayedEnabled'?(delta>0?1:0):CFG[k]+delta,CFG_LIM[k][0],k==='metamorphMax'?Math.min(CFG_LIM[k][1],CFG.impostors):CFG_LIM[k][1]);if(k==='impostors')CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);Snd.click()};
-      minus.addEventListener('click',()=>change(-1));plus.addEventListener('click',()=>change(1));stepper.append(minus,number,plus);row.append(top,stepper,el('small','',d));sync();
+      const maxValue=k==='metamorphMax'?Math.min(CFG_LIM[k][1],CFG.impostors):CFG_LIM[k][1];const sync=()=>{number.textContent=String(CFG[k]);value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=maxValue};
+      const change=delta=>{if(locked)return;CFG[k]=clamp(CFG[k]+delta,CFG_LIM[k][0],k==='metamorphMax'?Math.min(CFG_LIM[k][1],CFG.impostors):CFG_LIM[k][1]);if(k==='impostors')CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);Snd.click()};
+      const bindRepeat=(button,delta)=>{let delayTimer=0,repeatTimer=0,suppressClickUntil=0;const stop=()=>{clearTimeout(delayTimer);clearInterval(repeatTimer);delayTimer=repeatTimer=0};button.addEventListener('pointerdown',e=>{if(locked||button.disabled)return;if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();stop();change(delta);suppressClickUntil=performance.now()+700;try{button.setPointerCapture(e.pointerId)}catch(_){}delayTimer=setTimeout(()=>{repeatTimer=setInterval(()=>{if(!locked&&!button.disabled)change(delta)},75)},320)});for(const ev of ['pointerup','pointercancel','lostpointercapture','blur'])button.addEventListener(ev,()=>{stop();suppressClickUntil=performance.now()+700});button.addEventListener('click',e=>{if(performance.now()<suppressClickUntil){e.preventDefault();return}change(delta)});};bindRepeat(minus,-1);bindRepeat(plus,1);stepper.append(minus,number,plus);row.append(top,stepper,el('small','',d));sync();
     }else{
       const out=el('b','',CFG[k]+(unit?' '+unit:''));
       const inp=document.createElement('input'); inp.type='range'; inp.min=CFG_LIM[k][0]; inp.max=CFG_LIM[k][1]; inp.step=1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
@@ -1724,7 +1734,7 @@ function setCfgPage(page){
   $('cfgTabFunctions').classList.toggle('alt',G.cfgPage!=='functions');
   buildCfgUI();
   const lk=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));$('cfgReset').disabled=lk;$('cfgNote').classList.toggle('lock',lk);
-  $('cfgNote').textContent=lk?(inGame()?'Bloqueado durante a partida. Para alterar, saia do jogo e volte ao menu principal.':'Somente o host pode editar as configurações antes de iniciar a partida.'): (G.cfgPage==='functions'?(G.cfgFunctionTab==='sheriff'?'Configure o alcance temporal e a distribuição da função Xerife.':G.cfgFunctionTab==='delayed'?'Ative a função Atrasado e configure o tempo até a eliminação.':G.cfgFunctionTab==='metamorph'?'Configure a chance, quantidade, duração e cooldown da função Metamorfo.':'Configure os limites e os tempos da função especial Localizador.'):(typeof NET!=='undefined'&&NET.inRoom?'Configure os parâmetros desta sala. As alterações serão salvas ao fechar este menu.':'Configure os tempos em segundos. Discussão e votação são independentes e valem em todas as reuniões.'));
+  $('cfgNote').textContent=lk?(inGame()?'Bloqueado durante a partida. Para alterar, saia do jogo e volte ao menu principal.':'Somente o host pode editar as configurações antes de iniciar a partida.'): (G.cfgPage==='functions'?(G.cfgFunctionTab==='sheriff'?'Configure o alcance temporal e a distribuição da função Xerife.':G.cfgFunctionTab==='delayed'?'Configure a chance, quantidade e tempo até a eliminação da função Atrasado.':G.cfgFunctionTab==='metamorph'?'Configure a chance, quantidade, duração e cooldown da função Metamorfo.':'Configure os limites e os tempos da função especial Localizador.'):(typeof NET!=='undefined'&&NET.inRoom?'Configure os parâmetros desta sala. As alterações serão salvas ao fechar este menu.':'Configure os tempos em segundos. Discussão e votação são independentes e valem em todas as reuniões.'));
 }
 function openCfg(){setCfgPage('settings');$('cfgTabs').hidden=false;G.cfgOpen=true;joy.x=joy.y=0;if(G.player)G.player.moving=false;$('settings').hidden=false;Snd.init();Snd.open()}
 function openFunctions(){openCfg();setCfgPage('functions')}
@@ -1885,11 +1895,11 @@ function updateNPC(ch,dt){
   }
 }
 /* ---------- configurações, personalidades e memória de suspeita ---------- */
-const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,metamorphChance:35,metamorphMax:1,metamorphDuration:15,metamorphCooldown:20,renderDist:820};
-const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],metamorphChance:[0,100],metamorphMax:[0,3],metamorphDuration:[5,30],metamorphCooldown:[5,60],renderDist:[500,1500]};
-const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,metamorphChance:35,metamorphMax:1,metamorphDuration:15,metamorphCooldown:20,renderDist:820};
+const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,delayedChance:35,delayedMax:1,delayedDuration:20,metamorphChance:35,metamorphMax:1,metamorphDuration:15,metamorphCooldown:20,renderDist:820};
+const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],metamorphChance:[0,100],metamorphMax:[0,3],metamorphDuration:[5,30],metamorphCooldown:[5,60],renderDist:[500,1500]};
+const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,delayedChance:35,delayedMax:1,delayedDuration:20,metamorphChance:35,metamorphMax:1,metamorphDuration:15,metamorphCooldown:20,renderDist:820};
 (function(){try{const j=JSON.parse(localStorage.getItem('nz_cfg')||'{}');for(const k in CFG_LIM){const v=+j[k];if(v>=CFG_LIM[k][0]&&v<=CFG_LIM[k][1])CFG[k]=Math.round(v)}}catch(e){}})();
-function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,delayedEnabled:CFG.delayedEnabled,delayedChance:CFG.delayedChance,delayedMax:CFG.delayedMax,delayedDuration:CFG.delayedDuration,metamorphChance:CFG.metamorphChance,metamorphMax:CFG.metamorphMax,metamorphDuration:CFG.metamorphDuration,metamorphCooldown:CFG.metamorphCooldown,renderDist:CFG.renderDist}))}catch(e){}}
+function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,delayedChance:CFG.delayedChance,delayedMax:CFG.delayedMax,delayedDuration:CFG.delayedDuration,metamorphChance:CFG.metamorphChance,metamorphMax:CFG.metamorphMax,metamorphDuration:CFG.metamorphDuration,metamorphCooldown:CFG.metamorphCooldown,renderDist:CFG.renderDist}))}catch(e){}}
 const inGame=()=>G.state!=='menu';
 const uiBusy=()=>G.cfgOpen||G.confirmOpen;
 const PERS={
@@ -2736,7 +2746,17 @@ const PRESET_PHRASES=[
   {id:'locatorAsk',label:'Alguém sabe quem recebeu a função Localizador?'},
   {id:'ventAsk',label:'Alguém viu alguém entrando ou saindo dos dutos?'},
   {id:'taskCheck',label:'Precisamos confirmar quem realmente fez tarefas.'},
-  {id:'roomBody',label:'Confiram a sala [sala] com atenção.',room:true}
+  {id:'roomBody',label:'Confiram a sala [sala] com atenção.',room:true},
+  {id:'morphWitness',label:'Vi [jogador] se metamorfando em [jogador].',target:true,secondTarget:true},
+  {id:'taskDoneSelf',label:'Eu fiz [tarefa].',taskChoice:true},
+  {id:'taskDoneTarget',label:'[jogador] fez [tarefa].',target:true,taskChoice:true},
+  {id:'no',label:'Não.'}, {id:'yes',label:'Sim.'},
+  {id:'agree',label:'Concordo.'}, {id:'disagree',label:'Discordo.'},
+  {id:'notTrue',label:'Isso não é verdade.'}, {id:'true',label:'Isso é verdade.'},
+  {id:'iWasThere',label:'Eu estava!'}, {id:'iSaw',label:'Eu vi!'},
+  {id:'bodyQuestionDead',label:'Onde que mataram [morto]?',target:true,deadTarget:true},
+  {id:'bodyWhereAgain',label:'Onde foi o corpo?'},
+  {id:'bodyFound',label:'Encontrei o corpo de [morto] na [local]!',target:true,deadTarget:true,room:true}
 ];
 function renderQuickPhrases(){
   const box=$('sayChips'); box.innerHTML='';
@@ -2748,16 +2768,34 @@ function renderQuickPhrases(){
 function renderPhraseTargets(phraseId){
   const box=$('sayChips'); box.innerHTML='';
   const title=el('span','mstatus','Escolha um jogador vivo:'); title.style.width='100%'; box.appendChild(title);
-  G.chars.filter(c=>c.alive&&c.id!==G.player.id).forEach(ch=>{
+  const phraseDef=PRESET_PHRASES.find(x=>x.id===phraseId);
+  G.chars.filter(c=>phraseDef?.deadTarget?!c.alive:(c.alive&&c.id!==G.player.id)).forEach(ch=>{
+    if(ch.id===G.player.id&&!phraseDef?.deadTarget)return;
     const b=el('button','chip phrase target',ch.name); b.type='button';
     b.addEventListener('click',()=>{
       const phrase=PRESET_PHRASES.find(x=>x.id===phraseId);
-      if(phrase&&phrase.roleChoice)renderPhraseRoles(phraseId,ch.id);
+      if(phrase&&phrase.secondTarget)renderPhraseSecondTarget(phraseId,ch.id);
+      else if(phrase&&phrase.taskChoice)renderPhraseTasks(phraseId,ch.id);
       else if(phrase&&phrase.room)renderPhraseRooms(phraseId,ch.id);
       else sendPresetPhrase(phraseId,ch.id,null);
     }); box.appendChild(b);
   });
   const cancel=el('button','chip phrase cancel','Cancelar'); cancel.type='button'; cancel.addEventListener('click',renderQuickPhrases); box.appendChild(cancel);
+}
+function renderPhraseSecondTarget(phraseId,firstTargetId){
+  const box=$('sayChips');box.innerHTML='';const first=charById(firstTargetId);
+  const title=el('span','mstatus',`Escolha em quem ${first?.name||'o jogador'} se transformou:`);title.style.width='100%';box.appendChild(title);
+  G.chars.filter(c=>c.alive&&c.id!==G.player.id&&c.id!==firstTargetId).forEach(ch=>{const b=el('button','chip phrase target',ch.name);b.type='button';b.addEventListener('click',()=>sendPresetPhrase(phraseId,firstTargetId,null,null,ch.id));box.appendChild(b)});
+  const cancel=el('button','chip phrase cancel','Cancelar');cancel.type='button';cancel.addEventListener('click',()=>renderPhraseTargets(phraseId));box.appendChild(cancel);
+}
+function renderPhraseTasks(phraseId,targetId=null){
+  const ownerId=targetId||G.player.id,owner=charById(ownerId);
+  const completed=G.tasks.filter(t=>String(t.owner)===String(ownerId)&&!t.fakeOnly&&(t.done||(Array.isArray(t.steps)&&t.steps.length>0&&t.steps.every(q=>q.done))));
+  const box=$('sayChips');box.innerHTML='';const title=el('span','mstatus',`Escolha uma tarefa concluída por ${owner?.name||'esse jogador'}:`);title.style.width='100%';box.appendChild(title);
+  const names=[...new Set(completed.map(t=>String(t.name||t.key||'Tarefa')).filter(Boolean))];
+  if(!names.length){box.appendChild(el('span','mstatus','Nenhuma tarefa concluída por esse jogador está registrada.'));}
+  names.forEach(task=>{const b=el('button','chip phrase',task);b.type='button';b.addEventListener('click',()=>sendPresetPhrase(phraseId,targetId,null,null,null,task));box.appendChild(b)});
+  const cancel=el('button','chip phrase cancel','Cancelar');cancel.type='button';cancel.addEventListener('click',()=>targetId?renderPhraseTargets(phraseId):renderQuickPhrases());box.appendChild(cancel);
 }
 function renderPhraseRoles(phraseId,targetId=null){
   const box=$('sayChips');box.innerHTML='';
@@ -2784,15 +2822,19 @@ function renderPhraseRooms(phraseId,targetId=null){
 function choosePresetPhrase(id){
   const M=G.M; if(!M||M.phase!=='discuss'||!G.player.alive)return;
   const p=PRESET_PHRASES.find(x=>x.id===id); if(!p)return;
+  if(p.taskChoice&&!p.target){renderPhraseTasks(id);$('meetStatus').textContent='Escolha uma tarefa que realmente foi concluída.';return}
   if(p.target){renderPhraseTargets(id);$('meetStatus').textContent='Escolha quem deseja mencionar.';return}
   if(p.roleChoice){renderPhraseRoles(id);$('meetStatus').textContent='Escolha a função que deseja mencionar.';return}
   if(p.room){renderPhraseRooms(id);$('meetStatus').textContent='Escolha a sala que deseja mencionar.';return}
   sendPresetPhrase(id,null,null);
 }
-function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
+function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null,extraTargetId=null,taskPicked=null){
   const M=G.M; if(!M||M.phase!=='discuss'||!G.player.alive)return;
   const T=targetId?charById(targetId):null;
-  if(targetId&&(!T||!T.alive||T.isPlayer))return;
+  const phraseDef=PRESET_PHRASES.find(x=>x.id===id);
+  if(targetId&&(!T||(phraseDef?.deadTarget?T.alive:(!T.alive||T.isPlayer))))return;
+  const T2=extraTargetId?charById(extraTargetId):null;
+  if(extraTargetId&&(!T2||!T2.alive||T2.id===targetId))return;
   const rm=roomNamePicked||null;
   let text='',claim={from:G.player.id,kind:'other'};
   switch(id){
@@ -2833,6 +2875,18 @@ function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
     case 'ventAsk': text='Alguém viu alguém entrando ou saindo dos dutos?'; claim={from:G.player.id,kind:'ask'}; break;
     case 'taskCheck': text='Precisamos confirmar quem realmente fez tarefas.'; claim={from:G.player.id,kind:'suspicion'}; break;
     case 'roomBody': if(!rm)return; text=`Confiram o que aconteceu ${inRoom(rm)} com atenção.`; claim={from:G.player.id,kind:'ask'}; break;
+    case 'morphWitness': if(!T||!T2)return; text=`Vi ${T.name} se metamorfando em ${T2.name}.`; claim={from:G.player.id,kind:'metamorph',target:T.id,target2:T2.id,strong:true}; break;
+    case 'taskDoneSelf': if(!taskPicked)return; text=`Eu fiz ${taskPicked}.`; claim={from:G.player.id,kind:'task_claim',target:G.player.id,task:taskPicked,strong:true}; break;
+    case 'taskDoneTarget': if(!T||!taskPicked)return; text=`${T.name} fez ${taskPicked}.`; claim={from:G.player.id,kind:'task_claim',target:T.id,task:taskPicked,strong:true}; break;
+    case 'no': text='Não.'; break; case 'yes': text='Sim.'; break;
+    case 'agree': text='Concordo.'; break; case 'disagree': text='Discordo.'; break;
+    case 'notTrue': text='Isso não é verdade.'; claim={from:G.player.id,kind:'deny'}; break;
+    case 'true': text='Isso é verdade.'; claim={from:G.player.id,kind:'agree'}; break;
+    case 'iWasThere': text='Eu estava!'; claim={from:G.player.id,kind:'alibi',target:G.player.id,room:roomName(G.player.x,G.player.y),time:G.gt,strong:false}; break;
+    case 'iSaw': text='Eu vi!'; claim={from:G.player.id,kind:'sight',strong:false}; break;
+    case 'bodyQuestionDead': if(!T)return; text=`Onde que mataram ${T.name}?`; claim={from:G.player.id,kind:'ask',bodyInquiry:true,target:T.id}; break;
+    case 'bodyWhereAgain': text='Onde foi o corpo?'; claim={from:G.player.id,kind:'ask',bodyInquiry:true}; break;
+    case 'bodyFound': if(!T||!rm)return; text=`Encontrei o corpo de ${T.name} na ${rm}!`; claim={from:G.player.id,kind:'body_report',target:T.id,room:rm,strong:true}; break;
     default: return;
   }
   if(sendSay(text,claim))renderQuickPhrases();
@@ -3164,7 +3218,7 @@ $('btnSkip').addEventListener('click',()=>playerVote('skip'));
 $('btnRole').addEventListener('click',startPlay);
 $('btnCfg').addEventListener('click',openCfg);  $('cfgClose').addEventListener('click',closeCfg);
 $('cfgReset').addEventListener('click',()=>{if(inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby')))return;Object.assign(CFG,CFG_DEF);saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
-$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});$('btnDelayedSection').addEventListener('click',()=>{G.cfgFunctionTab='delayed';buildCfgUI();$('cfgNote').textContent='Ative a função Atrasado e configure o tempo até a eliminação.';Snd.click()});$('btnMetamorphSection').addEventListener('click',()=>{G.cfgFunctionTab='metamorph';buildCfgUI();$('cfgNote').textContent='Configure a chance, quantidade, duração e cooldown da função Metamorfo.';Snd.click()});
+$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});$('btnDelayedSection').addEventListener('click',()=>{G.cfgFunctionTab='delayed';buildCfgUI();$('cfgNote').textContent='Configure a chance, quantidade e tempo até a eliminação da função Atrasado.';Snd.click()});$('btnMetamorphSection').addEventListener('click',()=>{G.cfgFunctionTab='metamorph';buildCfgUI();$('cfgNote').textContent='Configure a chance, quantidade, duração e cooldown da função Metamorfo.';Snd.click()});
 $('btnSay').addEventListener('click',()=>{const i=$('sayIn');sendSay(i.value);i.value=''});
 $('sayIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const i=$('sayIn');sendSay(i.value);i.value=''}});
 $('btnMap').addEventListener('click',toggleMap);
@@ -3261,7 +3315,7 @@ function netUpdateVisualInterpolation(){
     c.netVisualMoving=alpha<1?(!!c.netFromMoving||!!c.netToMoving):!!c.netToMoving;
   }
 }
-const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','delayedEnabled','delayedChance','delayedMax','delayedDuration','metamorphChance','metamorphMax','metamorphDuration','metamorphCooldown','renderDist'];
+const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','delayedChance','delayedMax','delayedDuration','metamorphChance','metamorphMax','metamorphDuration','metamorphCooldown','renderDist'];
 function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
 function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}CFG.metamorphMax=Math.min(CFG.metamorphMax,CFG.impostors);if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
@@ -3293,8 +3347,8 @@ function netRenderRoom(){
   const list=$('roomPlayers');list.innerHTML='';
   (r.players||[]).forEach(p=>{const item=el('div','roomPlayer');const dot=el('i','roomDot');dot.style.background=COLOR_BY[p.color]?.main||'#8792b7';const name=el('strong','',p.name+(p.id===r.hostId?' ★ Host':''));const role=el('span','',p.id===NET.id?'Você':(p.ready?'Pronto':'Conectado'));item.append(dot,name,role);list.append(item)});
   if(r.bots){for(let i=0;i<r.bots;i++){const item=el('div','roomPlayer');const dot=el('i','roomDot');dot.style.background='#9298ad';const bot=r.botRoster?.[i];item.append(dot,el('strong','',bot?.name||('Bot '+(i+1))),el('span','','IA'));list.append(item)}}
-  $('hostRoomConfig').hidden=!NET.isHost||r.status!=='lobby';$('btnCfg').disabled=!NET.isHost||r.status!=='lobby';
-  $('roomLobbyHint').textContent=NET.isHost?'Você é o host. Ajuste a sala e inicie quando houver pelo menos 4 participantes contando os bots.':'Aguardando o host iniciar. Só o host pode alterar configurações ou reiniciar a partida.';
+  $('hostRoomConfig').hidden=!NET.isHost||r.status!=='lobby';$('btnCfg').disabled=false;
+  $('roomLobbyHint').textContent=NET.isHost?'Você é o host. Ajuste a sala e inicie quando houver pelo menos 4 participantes contando os bots.':'Aguardando o host iniciar. Todos podem conversar e consultar as configurações; só o host pode alterá-las ou reiniciar a partida.';
   $('btnStartRoom').hidden=!NET.isHost||r.status!=='lobby';$('btnStartRoom').disabled=!NET.isHost||r.status!=='lobby'||netTotal(r)<4||netTotal(r)>r.size;
   $('btnStartRoom').textContent=r.status==='countdown'?'Contagem em andamento…':'Iniciar partida ('+netTotal(r)+'/'+r.size+')';
   const canAgain=NET.isHost&&r.status==='ended';$('btnAgain').disabled=!!(NET.inRoom&&!canAgain);$('btnAgain').title=NET.inRoom&&!NET.isHost?'Aguardando o host reiniciar a partida':'';
