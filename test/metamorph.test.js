@@ -11,7 +11,7 @@ test('configurações do Metamorfo têm limites, padrão e quantidade limitada a
   assert.deepEqual(cleanSettings({ impostors: 1, metamorphChance: 100, metamorphMax: 3, metamorphDuration: 99, metamorphCooldown: 1 }), {
     kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,
     locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,
-    delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,metamorphChance:100,metamorphMax:1,
+    delayedChance:35,delayedMax:1,delayedDuration:20,metamorphChance:100,metamorphMax:1,
     metamorphDuration:30,metamorphCooldown:5,renderDist:820
   });
   assert.match(server, /metamorphChance:\[0,100\]/);

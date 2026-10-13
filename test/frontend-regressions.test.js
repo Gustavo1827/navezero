@@ -93,14 +93,14 @@ test('culling desenha camadas visuais por sala sem desativar colisões', () => {
 });
 
 
-test('Atrasado tem aba vermelha, ativação, duração limitada e marcação autoritativa', () => {
+test('Atrasado tem aba vermelha, configuração por chance/quantidade, duração limitada e marcação autoritativa', () => {
   assert.match(html, /id="btnDelayedSection"[^>]*>◷ Atrasado/);
   assert.match(html, /id="btnDelayed"/);
-  assert.match(html, /delayedEnabled:\[0,1\]/);
+  assert.doesNotMatch(html, /delayedEnabled/);
   assert.match(html, /delayedDuration:\[5,40\]/);
   assert.match(html, /Tempo para marcar/);
   assert.match(html, /Usa o mesmo cooldown configurado em/);
-  assert.match(html, /if\(CFG\.delayedEnabled&&CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
+  assert.match(html, /if\(CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
   assert.match(html, /function doDelayedMark\(shooter,target\)/);
   assert.match(html, /remaining:CFG\.delayedDuration/);
   assert.match(html, /if\(G\.M\|\|G\.state==='meeting'/);
@@ -108,7 +108,7 @@ test('Atrasado tem aba vermelha, ativação, duração limitada e marcação aut
   assert.match(html, /delayedMarks:\{\.\.\.G\.delayedMarks\}/);
   assert.match(html, /delayedChance:\[0,100\]/);
   assert.match(html, /delayedMax:\[0,3\]/);
-  assert.match(server, /delayedEnabled:\[0,1\]/);
+  assert.doesNotMatch(server, /delayedEnabled/);
   assert.match(server, /delayedChance:\[0,100\]/);
   assert.match(server, /delayedMax:\[0,3\]/);
   assert.match(server, /delayedDuration:\[5,40\]/);
@@ -175,4 +175,26 @@ test('NPCs consideram causas ligadas a funções especiais ao discutir um corpo'
   assert.match(html, /cause==='delayed'[\s\S]*?causada por um Atrasado/);
   assert.match(html, /cause==='sheriff_misfire'[\s\S]*?Xerife tenha errado o disparo/);
   assert.match(html, /um Infiltrado, um Atrasado ou até um disparo de Xerife/);
+});
+
+
+test('botões das funções são translúcidos, codificados por equipe e repetem ao segurar', () => {
+  assert.match(html, /#cfgFunctionTabs button\{background:rgba\(35,111,210,.24\)/);
+  assert.match(html, /#cfgFunctionTabs button\.delayed-tab,#cfgFunctionTabs button\.metamorph-tab\{background:rgba\(210,43,62,.24\)/);
+  assert.match(html, /fnstepper '\+\(\(isDelayed\|\|isMetamorph\)\?'imp-stepper':'crew-stepper'\)/);
+  assert.match(html, /setInterval\(\(\)=>\{if\(!locked&&!button\.disabled\)change\(delta\)\},75\)/);
+});
+
+test('clientes online podem consultar configurações sem poder alterá-las e podem conversar no lobby', () => {
+  assert.match(html, /\$\('btnCfg'\)\.disabled=false/);
+  assert.match(html, /const locked=inGame\(\)\|\|\(typeof NET!=='undefined'&&NET\.inRoom&&\(!NET\.isHost\|\|NET\.room\?\.status!=='lobby'\)\)/);
+  assert.match(html, /Todos podem conversar e consultar as configurações; só o host pode alterá-las/);
+  assert.match(server, /room\.status!=='lobby'\)return error\(ws,'O chat escrito só fica disponível na sala de espera\.'/);
+});
+
+test('frases prontas incluem metamorfose, tarefas, respostas curtas e denúncias de corpo', () => {
+  for (const phrase of ['morphWitness','taskDoneSelf','taskDoneTarget','id:\'no\'','id:\'yes\'','id:\'agree\'','id:\'disagree\'','id:\'notTrue\'','id:\'true\'','id:\'iWasThere\'','id:\'iSaw\'','bodyQuestionDead','bodyWhereAgain','bodyFound']) assert.ok(html.includes(phrase), 'faltando frase pronta: '+phrase);
+  assert.match(html, /Vi \$\{T\.name\} se metamorfando em \$\{T2\.name\}/);
+  assert.match(html, /completed=G\.tasks\.filter/);
+  assert.match(html, /Encontrei o corpo de \$\{T\.name\} na \$\{rm\}!/);
 });

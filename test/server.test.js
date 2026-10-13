@@ -26,11 +26,11 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
 
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:50,sheriffChance:70,sheriffMax:4,delayedEnabled:1,delayedChance:82,delayedMax:3,delayedDuration:40,metamorphChance:100,metamorphMax:3,metamorphDuration:25,metamorphCooldown:55}});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:50,sheriffChance:70,sheriffMax:4,delayedChance:82,delayedMax:3,delayedDuration:40,metamorphChance:100,metamorphMax:3,metamorphDuration:25,metamorphCooldown:55}});
   const created=await onceMessage(host,m=>m.type==='room_state');
   const code=created.room.code;
   assert.match(code,/^[A-Z0-9]{6}$/);assert.equal(created.room.size,4);assert.equal(created.room.bots,3);assert.equal(created.room.players.length+created.room.bots,4);
-  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,50);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(created.room.settings.delayedEnabled,1);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);assert.equal(created.room.settings.metamorphChance,100);assert.equal(created.room.settings.metamorphMax,2);assert.equal(created.room.settings.metamorphDuration,25);assert.equal(created.room.settings.metamorphCooldown,55);
+  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,50);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(Object.hasOwn(created.room.settings,'delayedEnabled'),false);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);assert.equal(created.room.settings.metamorphChance,100);assert.equal(created.room.settings.metamorphMax,2);assert.equal(created.room.settings.metamorphDuration,25);assert.equal(created.room.settings.metamorphCooldown,55);
   assert.equal(created.room.botRoster.length,3);
   const norm=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const allNames=[...created.room.players.map(p=>p.name),...created.room.botRoster.map(b=>b.name)];
@@ -213,17 +213,17 @@ test('código alfanumérico maiúsculo, tamanho fixo e cancelamento da contagem 
 
 test('configurações do Atrasado respeitam limites e valores padrão', () => {
   const settings=cleanSettings({delayedEnabled:7,delayedChance:140,delayedMax:99,delayedDuration:99});
-  assert.equal(settings.delayedEnabled,1);
+  assert.equal(Object.hasOwn(settings,'delayedEnabled'),false);
   assert.equal(settings.delayedChance,100);
   assert.equal(settings.delayedMax,3);
   assert.equal(settings.delayedDuration,40);
   const low=cleanSettings({delayedEnabled:-2,delayedChance:-3,delayedMax:-4,delayedDuration:1});
-  assert.equal(low.delayedEnabled,0);
+  assert.equal(Object.hasOwn(low,'delayedEnabled'),false);
   assert.equal(low.delayedChance,0);
   assert.equal(low.delayedMax,0);
   assert.equal(low.delayedDuration,5);
   const defaults=cleanSettings({});
-  assert.equal(defaults.delayedEnabled,0);
+  assert.equal(Object.hasOwn(defaults,'delayedEnabled'),false);
   assert.equal(defaults.delayedChance,35);
   assert.equal(defaults.delayedMax,1);
   assert.equal(defaults.delayedDuration,20);
