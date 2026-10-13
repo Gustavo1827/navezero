@@ -187,9 +187,14 @@ body.touch #stick{display:block}
 @media(max-width:560px){#roomChatPanel{right:8px;top:auto;bottom:calc(155px + var(--sb));height:min(38vh,330px);width:min(330px,calc(100vw - 16px))}}
 .act2.metamorph{background:#ff5364!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}.metamorph-tab{background:rgba(210,43,62,.24)!important;border-color:rgba(255,105,122,.78)!important;color:#ffe1e5!important}
 .act2.delayed,.delayed-tab{background:#ff5364!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
-.act2.delayed small{display:block;font-size:10px;line-height:1.05}
+.act2.has-ability-ring{position:relative;isolation:isolate;overflow:visible;display:flex;align-items:center;justify-content:center}
+.act2 .ability-icon{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:39px;line-height:1;font-weight:800}
+.act2.sheriff .sheriffGunIcon{position:relative;z-index:1;width:43px;height:31px;flex:none}
+.ability-ring{position:absolute;inset:-5px;width:calc(100% + 10px);height:calc(100% + 10px);z-index:2;pointer-events:none;overflow:visible;transform:rotate(-90deg)}
+.ability-ring[hidden]{display:none}
+.ability-ring-track{fill:none;stroke:rgba(255,255,255,.18);stroke-width:5}
+.ability-ring-progress{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-dasharray:282.743;stroke-dashoffset:282.743;filter:drop-shadow(0 0 1.5px rgba(0,0,0,.8))}
 #actions .row2:first-child{flex-wrap:wrap;justify-content:center;max-width:min(390px,96vw)}
-.act2.locator small{display:block;font-size:10px;line-height:1;margin-top:2px}
 .act2.locator.active{filter:none;outline:3px solid #65d8ff;outline-offset:2px}
 #sabBar{position:absolute;left:50%;top:calc(64px + var(--st));transform:translateX(-50%);max-width:min(440px,70vw);text-align:center;background:#2a0f1e;border:2.5px solid var(--coral);border-radius:14px;padding:3px 14px 1px;font-weight:700;font-size:16px;line-height:1.3;animation:sabpulse 1s ease-in-out infinite;pointer-events:none}
 @keyframes sabpulse{50%{border-color:#7a1b2a}}
@@ -449,7 +454,7 @@ body.touch #stick{display:block}
   <div id="ventPanel" class="panel" hidden><div class="vt">Dentro do duto</div><div class="vs" id="ventHere"></div><div id="ventList"></div><button class="chip exit" id="ventExit">Sair do duto</button></div>
   <div id="sabBar" hidden></div>
   <div id="stick"><i id="knob"></i></div>
-  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden><svg class="sheriffGunIcon" viewBox="0 0 36 25" aria-hidden="true"><path d="M2 4H21L24 7H34V12H24L21 17H14V23H8V15H3Z" fill="currentColor" stroke="#10122a" stroke-width="1.8" stroke-linejoin="round"/><path d="M23 7V3H29V7M15 17L19 11" fill="none" stroke="#10122a" stroke-width="1.8" stroke-linecap="round"/></svg><span class="sheriffButtonLabel">Atirar</span></button><button class="act2 delayed" id="btnDelayed" aria-label="Marcar vítima" title="Atrasado — marcar um Tripulante próximo" hidden>◷<small>Marcar</small></button><button class="act2 metamorph" id="btnMetamorph" aria-label="Metamorfose" title="Metamorfo — copiar aparência de um jogador vivo" hidden>♧<small>Metamorfose</small></button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>⌖<small>Rastrear</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
+  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff has-ability-ring" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden><svg class="sheriffGunIcon" viewBox="0 0 36 25" aria-hidden="true"><path d="M2 4H21L24 7H34V12H24L21 17H14V23H8V15H3Z" fill="currentColor" stroke="#10122a" stroke-width="1.8" stroke-linejoin="round"/><path d="M23 7V3H29V7M15 17L19 11" fill="none" stroke="#10122a" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="ability-ring" viewBox="0 0 100 100" aria-hidden="true" hidden><circle class="ability-ring-track" cx="50" cy="50" r="45"/><circle class="ability-ring-progress" cx="50" cy="50" r="45"/></svg></button><button class="act2 delayed has-ability-ring" id="btnDelayed" aria-label="Marcar vítima" title="Atrasado — marcar um Tripulante próximo" hidden><span class="ability-icon" aria-hidden="true">◷</span><svg class="ability-ring" viewBox="0 0 100 100" aria-hidden="true" hidden><circle class="ability-ring-track" cx="50" cy="50" r="45"/><circle class="ability-ring-progress" cx="50" cy="50" r="45"/></svg></button><button class="act2 metamorph has-ability-ring" id="btnMetamorph" aria-label="Metamorfose" title="Metamorfo — copiar aparência de um jogador vivo" hidden><span class="ability-icon" aria-hidden="true">⧉</span><svg class="ability-ring" viewBox="0 0 100 100" aria-hidden="true" hidden><circle class="ability-ring-track" cx="50" cy="50" r="45"/><circle class="ability-ring-progress" cx="50" cy="50" r="45"/></svg></button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator has-ability-ring" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden><span class="ability-icon" aria-hidden="true">⌖</span><svg class="ability-ring" viewBox="0 0 100 100" aria-hidden="true" hidden><circle class="ability-ring-track" cx="50" cy="50" r="45"/><circle class="ability-ring-progress" cx="50" cy="50" r="45"/></svg></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
 </div>
 
 <div id="deathIntro" hidden aria-live="assertive"><div class="deathCard"><h2>ELIMINADO!</h2><canvas id="deathCv" width="460" height="230" aria-hidden="true"></canvas><p id="deathDesc">Você foi eliminado.</p></div></div>
@@ -971,8 +976,10 @@ function inputVec(){
   return {x,y};
 }
 function updatePlayer(dt){
-  const p=G.player;if(p.morphBubble&&p.morphBubble.remaining>0){p.moving=false;return}
-  const sp=(p.morphBubble&&p.morphBubble.remaining>0?0:(p.speed??CFG.speed))*(p.ghost?2:1)*dt; let v=inputVec();
+  const p=G.player;
+  if(p.morphBubble&&p.morphBubble.remaining>0){p.moving=false;return}
+  // CFG.speed é a fonte autoritativa: uma velocidade zero antiga nunca persiste após a bolha.
+  const sp=CFG.speed*(p.ghost?2:1)*dt; let v=inputVec();
   if(p.ghost&&G.followTarget){const target=charById(G.followTarget);if(target&&target.alive){const dx=target.x-p.x,dy=target.y-p.y,d=Math.hypot(dx,dy);if(d>34)v={x:dx/d,y:dy/d};else v={x:0,y:0}}else G.followTarget=null}
   const moved=(v.x||v.y)?moveChar(p,v.x*sp,v.y*sp):false;
   p.moving=moved; if(moved)p.walk+=dt;
@@ -1854,11 +1861,12 @@ function tryShove(c,dx,dy){if(c.morphBubble&&c.morphBubble.remaining>0)return;if
 
 /* ---------- IA principal ---------- */
 function updateNPCs(dt){
-  G.chars.forEach(ch=>{
-    if(ch.isPlayer||ch.isRemoteHuman||G.over)return;
+  for(const ch of G.chars){
+    if(G.M||G.over||G.state==='meeting')break;
+    if(ch.isPlayer||ch.isRemoteHuman)continue;
     if(ch.alive)updateNPC(ch,dt); else if(ch.ghost)updateGhostNPC(ch,dt);
-  });
-  separateChars();
+  }
+  if(!G.M&&!G.over&&G.state!=='meeting')separateChars();
 }
 function updateGhostNPC(ch,dt){   // Mortos vagam sem colisões; Infiltrados mortos ainda podem sabotar.
   const ai=ch.ai; ch.ghost=true;
@@ -1874,7 +1882,7 @@ function updateNPC(ch,dt){
   const rn=roomName(ch.x,ch.y); if(ai.trail[ai.trail.length-1]!==rn){ai.trail.push(rn);if(ai.trail.length>4)ai.trail.shift()}
   if(!ai.my.length||ai.my[ai.my.length-1].room!==rn){ai.my.push({room:rn,gt:G.gt});if(ai.my.length>14)ai.my.shift()}
   for(const k in ai.susp){const v=ai.susp[k];ai.susp[k]=v>0?Math.max(0,v-.01*dt):Math.min(0,v+.01*dt)}
-  ai.pt-=dt; if(ai.pt<=0){ai.pt=.35;perceive(ch)}
+  ai.pt-=dt; if(ai.pt<=0){ai.pt=.35;perceive(ch);if(G.M||G.over||G.state==='meeting'){ch.moving=false;return}}
   if(ai.reactT>0){ai.reactT-=dt;ch.moving=false;if(ai.reactT<=0)reactToBody(ch);return}
   if(ch.role==='imp'){if(ch.function==='metamorph')metamorphBotThink(ch,dt);if(ch.morphBubble&&ch.morphBubble.remaining>0){ch.moving=false;return}impThink(ch,dt)}
   else if(ch.function==='sheriff')sheriffBotThink(ch,dt);
@@ -1979,16 +1987,31 @@ function perceive(ch){
     }
   }
   const vis=[];
+  const vrSq=vr*vr;
   for(const o of G.chars){
     if(o===ch||!o.alive||o.vent)continue;
-    if(dist(ch,o)<vr&&losClear(ch.x,ch.y,o.x,o.y)){
+    const dx=o.x-ch.x,dy=o.y-ch.y;
+    if(dx*dx+dy*dy<vrSq&&losClear(ch.x,ch.y,o.x,o.y)){
       vis.push(o); const rm=roomName(o.x,o.y); ai.seen[o.id]={room:rm,t:G.t};
       const h=(ai.hist[o.id]=ai.hist[o.id]||[]), l=h[h.length-1];
       if(!l||l.room!==rm||G.gt-l.gt>4){h.push({room:rm,gt:G.gt});if(h.length>16)h.shift()}
     }
   }
-  // Só registra metamorfoses que este NPC realmente viu, respeitando distância e linha de visão.
-  for(const o of vis){if(!o.morphBubble||o.morphBubble.remaining<=0)continue;const eventKey=String(o.id)+':'+String(o.morphBubble.eventId||0);if(!(ai.morphSeen instanceof Set))ai.morphSeen=new Set();if(ai.morphSeen.has(eventKey))continue;ai.morphSeen.add(eventKey);const target=charById(o.morphBubble.targetId||o.disguiseTargetId);const witnessed={id:o.id,targetId:target?.id||null,targetName:target?.name||'alguém',gt:G.gt,room:roomName(o.x,o.y)};ai.morphWitnesses=ai.morphWitnesses||[];ai.morphWitnesses.push(witnessed);if(ai.morphWitnesses.length>5)ai.morphWitnesses.shift();addSusp(ch,o.id,6,'metamorph',{room:witnessed.room,targetId:witnessed.targetId});if(ch.role==='crew'){ai.morphSaw=witnessed;npcSay(ch,`Vi ${o.name} se metamorfando em ${witnessed.targetName}.`);if(!G.M&&!G.over&&G.state==='playing')callMeeting(ch,'metamorph',null);}}
+  // Só registra cada evento de metamorfose uma vez por NPC; o histórico é limitado.
+  for(const o of vis){
+    const bubble=o.morphBubble;if(!bubble||bubble.remaining<=0)continue;
+    if(!(ai.morphSeen instanceof Set))ai.morphSeen=new Set();
+    const eventKey=String(o.id)+':'+String(bubble.eventId||0);if(ai.morphSeen.has(eventKey))continue;
+    ai.morphSeen.add(eventKey);if(ai.morphSeen.size>32)ai.morphSeen.delete(ai.morphSeen.values().next().value);
+    const target=charById(bubble.targetId||o.disguiseTargetId);
+    const witnessed={id:o.id,targetId:target?.id||null,targetName:target?.name||'alguém',gt:G.gt,room:roomName(o.x,o.y)};
+    ai.morphWitnesses=ai.morphWitnesses||[];ai.morphWitnesses.push(witnessed);if(ai.morphWitnesses.length>5)ai.morphWitnesses.shift();
+    addSusp(ch,o.id,6,'metamorph',{room:witnessed.room,targetId:witnessed.targetId});
+    if(ch.role==='crew'){
+      ai.morphSaw=witnessed;npcSay(ch,`Vi ${o.name} se metamorfando em ${witnessed.targetName}.`);
+      if(!G.M&&!G.over&&G.state==='playing'){callMeeting(ch,'metamorph',null);if(G.M||G.over||G.state==='meeting')return}
+    }
+  }
   if(ch.role!=='crew')return;
   // permanecer perto de um corpo sem reportar
   for(const b of G.bodies)for(const o of vis){
@@ -2240,8 +2263,18 @@ function updateMetamorphs(dt){
 }
 function metamorphBotThink(ch,dt){
   if(!ch.alive||ch.role!=='imp'||ch.function!=='metamorph'||ch.vent||G.M||G.over||G.state!=='playing')return;
-  ch.ai.morphThinkT=(ch.ai.morphThinkT||4)-dt;if(ch.ai.morphThinkT>0||ch.disguiseTargetId||ch.morphCd>0)return;
-  ch.ai.morphThinkT=rand(8,16);const targets=G.chars.filter(t=>t.alive&&t!==ch&&t.role!=='imp').map(t=>({t,score:(t.ai?.state==='work'?2:0)+(G.chars.some(w=>w!==ch&&w!==t&&w.alive&&w.role==='crew'&&dist(w,ch)<260&&losClear(w.x,w.y,ch.x,ch.y))?-3:0)+Math.random()})).sort((a,b)=>b.score-a.score);const target=targets[0]?.t;if(target&&dist(ch,target)<420)beginMetamorph(ch,target);
+  const ai=ch.ai;ai.morphThinkT=(ai.morphThinkT||4)-dt;
+  if(ai.morphThinkT>0||ch.disguiseTargetId||ch.morphCd>0||(ch.morphBubble&&ch.morphBubble.remaining>0))return;
+  ai.morphThinkT=rand(8,16);
+  const targets=G.chars.filter(t=>t.alive&&t!==ch&&t.role!=='imp');if(!targets.length)return;
+  const hasWitness=G.chars.some(w=>w!==ch&&w.alive&&w.role==='crew'&&!w.vent&&dist(w,ch)<260&&losClear(w.x,w.y,ch.x,ch.y));
+  let target=null,bestScore=-Infinity;
+  for(const t of targets){
+    const d=dist(ch,t);if(d>=420)continue;
+    const score=(t.ai?.state==='work'?2:0)+(hasWitness?-3:0)+(1-d/420)*.35+Math.random();
+    if(score>bestScore){bestScore=score;target=t}
+  }
+  if(target)beginMetamorph(ch,target);
 }
 function playerMetamorphose(){
   const p=G.player;if(!p||G.state!=='playing'||G.M||G.over||!p.alive||G.role!=='imp'||p.function!=='metamorph'||p.vent||uiBusy())return;
@@ -2407,9 +2440,15 @@ function updateDelayedMarks(dt){
   }
 }
 function startLocator(){
-  if(G.state!=='playing'||!G.player.alive||!G.locator||uiBusy())return;
-  if(G.trackTime>0){G.trackTarget=null;G.trackTime=0;G.trackCd=CFG.locCooldown;Snd.err();toast('Rastreamento cancelado. Cooldown iniciado.');updateButtons();return}
-  if(G.trackCd>0){toast('Localizador recarregando: '+Math.ceil(G.trackCd)+'s');Snd.err();return}
+  const p=G.player;if(G.state!=='playing'||!p?.alive||!G.locator||uiBusy())return;
+  const localTrackTime=NET.inRoom&&!NET.isHost?(p.netTrackTime||0):G.trackTime;
+  const localTrackCd=NET.inRoom&&!NET.isHost?(p.netTrackCd||0):G.trackCd;
+  if(NET.inRoom&&!NET.isHost&&!NET.applying){
+    if(localTrackCd>0&&localTrackTime<=0){toast('Localizador recarregando: '+Math.ceil(localTrackCd)+'s');Snd.err();return}
+    netSend({type:'action',action:'locator'});return;
+  }
+  if(localTrackTime>0){G.trackTarget=null;G.trackTime=0;G.trackCd=CFG.locCooldown;Snd.err();toast('Rastreamento cancelado. Cooldown iniciado.');updateButtons();return}
+  if(localTrackCd>0){toast('Rastreamento recarregando: '+Math.ceil(localTrackCd)+'s');Snd.err();return}
   const LOCATOR_RANGE=250;
   const target=G.chars.filter(c=>c.alive&&c!==G.player&&!c.vent&&dist(G.player,c)<=LOCATOR_RANGE&&losClear(G.player.x,G.player.y,c.x,c.y)).sort((a,b)=>dist(G.player,a)-dist(G.player,b))[0];
   if(!target){toast('Nenhum jogador vivo próximo para localizar. Aproxime-se e tente novamente.');Snd.err();return}
@@ -2963,7 +3002,11 @@ function callMeeting(caller,reason,body){
   }
   G.M={phase:'intro',t:0,clock:0,dur:1.9,caller,reason,body,votes:{},voteAt:{},log:[],msgs:[],mi:0,myVote:null,result:null,cards:{},
     gt0:G.gt,heat:{},claims:[],sel:null,replyQ:[],remarks:0,sayCd:0,said:0,used:new Set(),evid:null};
-  if(evid){evid.text=reasonText(caller,evid.top.id,evid.rs,true); evid.claim=reasonClaim(caller,evid.top.id,evid.rs); G.M.evid=evid}
+  if(evid){
+    // Denúncias de metamorfose já possuem texto e alegação próprios; só evidência genérica tem top/rs.
+    if(evid.top&&evid.rs){evid.text=reasonText(caller,evid.top.id,evid.rs,true);evid.claim=reasonClaim(caller,evid.top.id,evid.rs)}
+    G.M.evid=evid;
+  }
   if(body)G.chars.forEach(o=>{if(o.alive&&!o.isPlayer&&!o.isRemoteHuman&&o.ai&&o.role==='crew')noteBodyEvidence(o,body)});
   buildMeetUI(); Snd.err(); updateSabUI();
 }
@@ -3092,6 +3135,15 @@ function showResult(){
    ===================================================================== */
 let last=performance.now(), toolAcc=0;
 const simActive=()=>(G.state==='playing'||G.state==='task'||G.state==='tool')&&!G.confirmOpen;
+function setAbilityTimer(button,remaining,total,description){
+  const ring=button?.querySelector('.ability-ring');if(!ring)return;
+  const rem=Math.max(0,Number(remaining)||0),dur=Math.max(0,Number(total)||0),progress=dur>0?clamp(rem/dur,0,1):0;
+  ring.hidden=!(rem>0&&dur>0);
+  const circle=ring.querySelector('.ability-ring-progress'),offset=282.743*(1-progress);
+  if(circle&&(!Number.isFinite(button._timerOffset)||Math.abs(offset-button._timerOffset)>.18)){circle.style.strokeDashoffset=String(offset);button._timerOffset=offset}
+  if(description&&button.title!==description)button.title=description;
+  if(description&&button.getAttribute('aria-label')!==description)button.setAttribute('aria-label',description);
+}
 function updateButtons(){
   const p=G.player, can=G.state==='playing'&&(p.alive||ghostCanSab()), imp=G.role==='imp', directKill=imp&&p.function!=='delayed';
   const chatBtn=$('btnRoomChat');if(chatBtn){chatBtn.hidden=true;chatBtn.setAttribute('aria-expanded','false')}
@@ -3108,13 +3160,24 @@ function updateButtons(){
   const kt=G.killCd>0?String(Math.ceil(G.killCd)):'Matar'; if(bk._l!==kt){bk._l=kt;bk.textContent=kt}
   G.sheriffT=sheriff&&can&&!p.vent&&G.sheriffCd<=0?sheriffTargetFor(p):null;
   setCls(bsh,'ready',!!G.sheriffT&&!uiBusy()&&!(typeof NET!=='undefined'&&NET.pendingSheriffShot));
-  const sht=G.sheriffCd>0?String(Math.ceil(G.sheriffCd)):(NET?.pendingSheriffShot?'…':'Atirar');if(bsh._l!==sht){bsh._l=sht;const label=bsh.querySelector('.sheriffButtonLabel');if(label)label.textContent=sht;else bsh.textContent=sht}
-  G.delayedT=delayed&&can&&!p.vent&&G.delayedCd<=0?delayedTargetFor(p):null;const dlab=G.delayedCd>0?String(Math.ceil(G.delayedCd)):(NET?.pendingDelayedMark?'…':'◷ Marcar');if(bdel._l!==dlab){bdel._l=dlab;bdel.innerHTML=dlab==='◷ Marcar'?'◷<small>Marcar</small>':dlab}
+  const sheriffCd=NET.inRoom&&!NET.isHost?(p.netSheriffCd||0):G.sheriffCd;
+  setAbilityTimer(bsh,sheriffCd,CFG.sheriffCooldown,sheriffCd>0?`Xerife — recarga: ${Math.ceil(sheriffCd)}s`:(NET?.pendingSheriffShot?'Xerife — disparo pendente':'Xerife — atirar em um jogador próximo'));
+  const delayedCd=NET.inRoom&&!NET.isHost?(p.netDelayedCd||0):G.delayedCd;
+  G.delayedT=delayed&&can&&!p.vent&&delayedCd<=0?delayedTargetFor(p):null;
+  let ownMarkRemaining=0;for(const id in (G.delayedMarks||{})){const mark=G.delayedMarks[id];if(mark&&mark.killerId===p.id&&Number(mark.remaining)>ownMarkRemaining)ownMarkRemaining=Number(mark.remaining)}
+  const dlab=delayedCd>0?`recarga: ${Math.ceil(delayedCd)}s`:(NET?.pendingDelayedMark?'marcação pendente':'marcar vítima');
+  setAbilityTimer(bdel,ownMarkRemaining||delayedCd,ownMarkRemaining?CFG.delayedDuration:CFG.kill,ownMarkRemaining?`Atrasado — marcação termina em ${Math.ceil(ownMarkRemaining)}s`:`Atrasado — ${dlab}`);
   setCls(bdel,'ready',!!G.delayedT&&!uiBusy()&&!(NET?.pendingDelayedMark));
-  const morphing=!!p.disguiseTargetId;const mlabel=morphing?'Cancelar':(p.morphCd>0?String(Math.ceil(p.morphCd)):'Metamorfose');if(bm._l!==mlabel){bm._l=mlabel;bm.innerHTML=mlabel==='Metamorfose'?'♧<small>Metamorfose</small>':mlabel}setCls(bm,'ready',metamorph&&p.alive&&G.state==='playing'&&(morphing||(p.morphCd<=0&&!(p.morphBubble&&p.morphBubble.remaining>0)))&&!uiBusy()&&!(NET?.pendingMetamorph));
+  const morphing=!!p.disguiseTargetId;
+  setAbilityTimer(bm,morphing?Math.max(0,p.morphTime||0):Math.max(0,p.morphCd||0),morphing?CFG.metamorphDuration:CFG.metamorphCooldown,morphing?`Metamorfo — transformação: ${Math.ceil(Math.max(0,p.morphTime||0))}s restantes`:(p.morphCd>0?`Metamorfo — recarga: ${Math.ceil(p.morphCd)}s`:'Metamorfo — copiar aparência de um jogador vivo'));
+  setCls(bm,'ready',metamorph&&p.alive&&G.state==='playing'&&(morphing||(p.morphCd<=0&&!(p.morphBubble&&p.morphBubble.remaining>0)))&&!uiBusy()&&!(NET?.pendingMetamorph));
   setCls(bs,'ready',imp&&G.state==='playing'&&!uiBusy()&&G.sab.cd<=0);
   const st=G.sab.cd>0?String(Math.ceil(G.sab.cd)):'Sabotar'; if(bs._l!==st){bs._l=st;bs.textContent=st}
-  setCls(br,'ready',!!(can&&nearBody())); setCls(bl,'active',G.trackTime>0); const lt=G.trackTime>0?'Cancelar':(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear');if(bl._l!==lt){bl._l=lt;bl.querySelector('small').textContent=lt;bl._l=lt}
+  setCls(br,'ready',!!(can&&nearBody()));
+  const localTrackTime=NET.inRoom&&!NET.isHost?(p.netTrackTime||0):G.trackTime;
+  const localTrackCd=NET.inRoom&&!NET.isHost?(p.netTrackCd||0):G.trackCd;
+  setCls(bl,'active',localTrackTime>0);
+  setAbilityTimer(bl,localTrackTime>0?localTrackTime:localTrackCd,localTrackTime>0?CFG.locDuration:CFG.locCooldown,localTrackTime>0?`Localizador — rastreamento: ${Math.ceil(localTrackTime)}s restantes`:(localTrackCd>0?`Localizador — recarga: ${Math.ceil(localTrackCd)}s`:'Localizador — rastrear jogador próximo'));
 }
 function update(dt){
   const p=G.player;
@@ -3600,7 +3663,7 @@ function netWithRemotePlayer(ch,fn){
 }
 function netUpdateRemote(dt){
   for(const c of G.chars){if(!c.isRemoteHuman)continue;const inp=NET.remoteInputs.get(c.id)||{x:0,y:0,at:0};if(Date.now()-inp.at>500){inp.x=inp.y=0}
-    if(['playing','task','tool'].includes(G.state)&&c.alive&&!c.vent&&!(c.morphBubble&&c.morphBubble.remaining>0)&&(inp.x||inp.y)){const l=Math.hypot(inp.x,inp.y)||1;const sp=(c.morphBubble&&c.morphBubble.remaining>0?0:(c.speed??CFG.speed))*(c.ghost?2:1)*dt;const moved=moveChar(c,inp.x/l*sp,inp.y/l*sp);c.moving=moved;if(moved)c.walk+=dt;c.face=inp.x?Math.sign(inp.x):c.face}else c.moving=false;
+    if(['playing','task','tool'].includes(G.state)&&c.alive&&!c.vent&&!(c.morphBubble&&c.morphBubble.remaining>0)&&(inp.x||inp.y)){const l=Math.hypot(inp.x,inp.y)||1;const sp=CFG.speed*(c.ghost?2:1)*dt;const moved=moveChar(c,inp.x/l*sp,inp.y/l*sp);c.moving=moved;if(moved)c.walk+=dt;c.face=inp.x?Math.sign(inp.x):c.face}else c.moving=false;
     if(c.netKillCd>0)c.netKillCd=Math.max(0,c.netKillCd-dt);if(c.netSheriffCd>0)c.netSheriffCd=Math.max(0,c.netSheriffCd-dt);if(c.netTrackCd>0)c.netTrackCd=Math.max(0,c.netTrackCd-dt);if(c.netTrackTime>0){const t=G.chars.find(x=>x.id===c.netTrackTarget);c.netTrackTime=Math.max(0,c.netTrackTime-dt);if(!t||!t.alive||c.netTrackTime<=0){c.netTrackTarget=null;c.netTrackTime=0;c.netTrackCd=CFG.locCooldown}};
   }
 }
