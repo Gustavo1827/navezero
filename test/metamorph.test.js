@@ -48,9 +48,12 @@ test('habilidade do Metamorfo copia somente a aparência, sincroniza estado e re
 
 test('NPCs usam Metamorfo e só denunciam bolhas que presenciaram com distância e linha de visão', () => {
   assert.match(html, /function metamorphBotThink\(ch,dt\)/);
-  assert.match(html, /dist\(ch,o\)<vr&&losClear\(ch\.x,ch\.y,o\.x,o\.y\)/);
-  assert.match(html, /o\.morphBubble\.remaining<=0/);
+  assert.match(html, /const dx=o\.x-ch\.x,dy=o\.y-ch\.y;[\s\S]*?dx\*dx\+dy\*dy<vrSq&&losClear\(ch\.x,ch\.y,o\.x,o\.y\)/);
+  assert.match(html, /const bubble=o\.morphBubble;if\(!bubble\|\|bubble\.remaining<=0\)continue/);
   assert.match(html, /callMeeting\(ch,'metamorph',null\)/);
+  assert.match(html, /if\(evid\.top&&evid\.rs\)\{evid\.text=reasonText\(caller,evid\.top\.id,evid\.rs,true\);evid\.claim=reasonClaim\(caller,evid\.top\.id,evid\.rs\)\}/, 'evidência de metamorfose não deve acessar top.id/rs inexistentes');
+  assert.match(html, /ai\.morphSeen\.size>32/);
+  assert.match(html, /if\(G\.M\|\|G\.over\|\|G\.state==='meeting'\)\{ch\.moving=false;return\}/);
   assert.match(html, /Vi \$\{o\.name\} se metamorfando em \$\{witnessed\.targetName\}\./);
   assert.match(html, /if\(claim\.kind==='metamorph'&&T\)/);
   assert.match(html, /pickId=scored\.length&&scored\[0\]\.score>=1\.25\?scored\[0\]\.id:'skip'/);
@@ -62,4 +65,33 @@ test('falas de tarefas e corpos usam fatos observados, sem atribuir visão que o
   assert.match(html, /Eu fiz \$\{recentTask\}/);
   assert.match(html, /Onde que mataram \$\{M\.body\.name\}\?/);
   assert.match(html, /Encontrei o corpo de \$\{M\.body\.name\} \$\{inRoom\(M\.body\.room\)\}!/);
+});
+
+test('botões das habilidades mostram apenas ícones e anel circular sincronizado com a duração restante', () => {
+  for (const id of ['btnSheriff','btnDelayed','btnMetamorph','btnLocator']) {
+    const start=html.indexOf('id=\"'+id+'\"');
+    assert.notEqual(start,-1, 'botão ausente: '+id);
+    const end=html.indexOf('</button>',start);
+    const button=html.slice(start,end);
+    assert.match(button,/class=\"ability-ring\"/,'anel circular ausente: '+id);
+  }
+  assert.match(html, /function setAbilityTimer\(button,remaining,total,description\)/);
+  assert.match(html, /progress=dur>0\?clamp\(rem\/dur,0,1\):0/);
+  assert.match(html, /strokeDashoffset/);
+  assert.match(html, /id=\"btnDelayed\"[^>]*>\s*<span class=\"ability-icon\"[^>]*>◷/);
+  assert.match(html, /id=\"btnMetamorph\"[^>]*>\s*<span class=\"ability-icon\"[^>]*>⧉/);
+  assert.match(html, /id=\"btnLocator\"[^>]*>\s*<span class=\"ability-icon\"[^>]*>⌖/);
+  assert.match(html, /act2\.delayed,\.delayed-tab\{background:#ff5364/);
+  assert.match(html, /act2\.metamorph\{background:#ff5364/);
+});
+
+test('joystick volta à velocidade normal, a bolha bloqueia movimento e o estado é sincronizado online', () => {
+  const playerMove=html.slice(html.indexOf('function updatePlayer(dt)'),html.indexOf('/* ---------- interação ----------'));
+  assert.match(playerMove, /if\(p\.morphBubble&&p\.morphBubble\.remaining>0\)\{p\.moving=false;return\}/);
+  assert.match(playerMove, /const sp=CFG\.speed\*\(p\.ghost\?2:1\)\*dt/);
+  assert.match(html, /if\(ch\.morphBubble&&ch\.morphBubble\.remaining>0\)\{ch\.speed=0;ch\.morphBubble\.remaining=Math\.max\(0,ch\.morphBubble\.remaining-dt\);if\(ch\.morphBubble\.remaining===0\)\{ch\.morphBubble=null;ch\.speed=CFG\.speed/);
+  assert.match(html, /blocked=G\.state!=='playing'[\s\S]*?G\.player\.morphBubble\.remaining>0/);
+  assert.match(html, /c\.alive&&!c\.vent&&!\(c\.morphBubble&&c\.morphBubble\.remaining>0\)[\s\S]*?const sp=CFG\.speed/);
+  assert.match(html, /morphBubble:c\.morphBubble\?\{\.\.\.c\.morphBubble\}:null/);
+  assert.match(html, /command==='metamorphose'[\s\S]*?beginMetamorph\(ch,target\)/);
 });
