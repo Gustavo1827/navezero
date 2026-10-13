@@ -26,8 +26,9 @@ test('bolinhas representam a cor de quem votou e desaparecem antes da ejeção',
   assert.match(html, /d\.style\.background=COLOR_BY\[voter\.color\]\?\.main\|\|chatCol\(voter\)/);
   assert.match(html, /if\(ph==='eject'\)card\.classList\.remove\('pick'\)/);
   assert.match(html, /if\(ph==='eject'\)\{[^}]*card\.dotsEl\.innerHTML=''/s);
-  assert.match(html, /function netPaintMeeting\(sm\)\{[\s\S]*?\$\('voteBreakdown'\)\.textContent='';\$\('voteBreakdown'\)\.hidden=true/);
-  assert.doesNotMatch(html.slice(html.indexOf('function netPaintMeeting(sm){'), html.indexOf('function netSyncCameraAndButtons()')), /sm\.voteBreakdown/);
+  assert.match(html, /function updateSkippedVoteBreakdown\(log\)[\s\S]*?target==='skip'[\s\S]*?Pularam o voto/);
+  assert.match(html, /if\(ph==='result'\)updateSkippedVoteBreakdown\(sm\.log\|\|\[\]\)/);
+  assert.match(html, /updateSkippedVoteBreakdown\(M\.log\)/);
 });
 
 test('Xerife tem configurações limitadas, aba própria e sincronização de sala', () => {
@@ -180,8 +181,9 @@ test('NPCs consideram causas ligadas a funções especiais ao discutir um corpo'
 
 test('botões das funções são translúcidos, codificados por equipe e repetem ao segurar', () => {
   assert.match(html, /#cfgFunctionTabs button\{background:rgba\(35,111,210,.24\)/);
-  assert.match(html, /#cfgFunctionTabs button\.delayed-tab,#cfgFunctionTabs button\.metamorph-tab\{background:rgba\(210,43,62,.24\)/);
-  assert.match(html, /fnstepper '\+\(\(isDelayed\|\|isMetamorph\)\?'imp-stepper':'crew-stepper'\)/);
+  assert.match(html, /#cfgFunctionTabs button\.delayed-tab\{background:rgba\(210,43,62,.24\)/);
+  assert.match(html, /fnstepper '\+\(isDelayed\?'imp-stepper':'crew-stepper'\)/);
+  assert.match(html, /\.act2\.delayed\{background:rgba\(255,83,100,\.34\)!important/);
   assert.match(html, /setInterval\(\(\)=>\{if\(!locked&&!button\.disabled\)change\(delta\)\},75\)/);
 });
 
@@ -192,9 +194,8 @@ test('clientes online podem consultar configurações sem poder alterá-las e po
   assert.match(server, /room\.status!=='lobby'\)return error\(ws,'O chat escrito só fica disponível na sala de espera\.'/);
 });
 
-test('frases prontas incluem metamorfose, tarefas, respostas curtas e denúncias de corpo', () => {
-  for (const phrase of ['morphWitness','taskDoneSelf','taskDoneTarget','id:\'no\'','id:\'yes\'','id:\'agree\'','id:\'disagree\'','id:\'notTrue\'','id:\'true\'','id:\'iWasThere\'','id:\'iSaw\'','bodyQuestionDead','bodyWhereAgain','bodyFound']) assert.ok(html.includes(phrase), 'faltando frase pronta: '+phrase);
-  assert.match(html, /Vi \$\{T\.name\} se metamorfando em \$\{T2\.name\}/);
+test('frases prontas incluem tarefas, respostas curtas e denúncias de corpo', () => {
+  for (const phrase of ['taskDoneSelf','taskDoneTarget','id:\'no\'','id:\'yes\'','id:\'agree\'','id:\'disagree\'','id:\'notTrue\'','id:\'true\'','id:\'iWasThere\'','id:\'iSaw\'','bodyQuestionDead','bodyWhereAgain','bodyFound']) assert.ok(html.includes(phrase), 'faltando frase pronta: '+phrase);
   assert.match(html, /completed=G\.tasks\.filter/);
   assert.match(html, /Encontrei o corpo de \$\{T\.name\} na \$\{rm\}!/);
 });
@@ -207,4 +208,33 @@ test('slider de Infiltrados ajusta limites pela capacidade da sala e steppers In
   assert.match(html, /\.fnstepper\.imp-stepper button\{background:rgba\(210,43,62,\.28\)/);
   assert.match(server, /function cleanSettings\(input=\{\}, roomSize=10\)/);
   assert.match(server, /const maxImpostors=roomSize>=10\?3:\(roomSize>=8\?2:1\)/);
+});
+
+
+test('Metamorfo foi removido por completo do cliente e do servidor', () => {
+  assert.doesNotMatch(html, /metamorph|metamorfo|metamorf|disguiseTargetId|morphBubble/i);
+  assert.doesNotMatch(server, /metamorph|metamorfo|metamorf|morph/i);
+  assert.doesNotMatch(html, /btnMetamorph|metamorphose/);
+});
+
+test('botões e resultado da votação mantêm transparência e mostram quem pulou', () => {
+  assert.match(html, /\.act2\.delayed\{background:rgba\(255,83,100,\.34\)!important/);
+  assert.match(html, /function updateSkippedVoteBreakdown\(log\)/);
+  assert.match(html, /filter\(v=>v&&v\.target==='skip'\)/);
+  assert.match(html, /names\.join\(', '\)/);
+  assert.match(html, /#meet\.vote-reveal #voteBreakdown:not\(\[hidden\]\)/);
+});
+
+test('NPCs reportam corpos vistos, respeitam o cooldown do botão e não revelam sua função no mapa', () => {
+  const body=html.slice(html.indexOf('function reactToBody(ch)'),html.indexOf('/* ---------- dutos',html.indexOf('function reactToBody(ch)')));
+  assert.match(body, /goTo\(ch,\{type:'body',b\}/);
+  assert.doesNotMatch(body, /Math\.random\(\)>\.2/);
+  assert.match(html, /function wantsEmergency\(ch\)[\s\S]*?ch\.emUses<=0\|\|G\.meetCd>0/);
+  assert.match(html, /ai\.emergencyRequested=true/);
+  assert.match(html, /if\(requested&&ch\.alive&&ch\.emUses>0&&G\.meetCd<=0/);
+  assert.match(html, /killCd:CFG\.kill,huntPause:0/);
+  assert.match(html, /ai\.killCd=Math\.max\(ai\.killCd,CFG\.kill\)/);
+  assert.doesNotMatch(html, /Math\.min\(CFG\.kill,14\)/);
+  assert.doesNotMatch(html, /Localizador: vou acompanhar|Localizador: vi/);
+  assert.match(html, /Vou acompanhar \$\{target\.name\}\./);
 });
