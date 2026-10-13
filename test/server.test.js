@@ -125,11 +125,11 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   await onceMessage(peer,m=>m.type==='room_state'&&m.room.status==='ended');
   assert.equal(ended.room.hostId,guest.id);
   send(guest,{type:'rematch'});
-  const restarted=await onceMessage(guest,m=>m.type==='game_start'&&m.rematch===true);
-  await onceMessage(peer,m=>m.type==='game_start'&&m.rematch===true);
-  assert.equal(restarted.room.code,code,'a revanche reutiliza o mesmo código de sala');
-  assert.equal(restarted.room.round,2);assert.equal(restarted.room.bots,3,'a quantidade de bots deve sobreviver à revanche');assert.equal(restarted.room.settings.impostors,2);assert.equal(restarted.room.settings.renderDist,950);assert.equal(restarted.room.settings.sheriffCooldown,50);assert.equal(restarted.room.settings.sheriffChance,85);assert.equal(restarted.room.settings.sheriffMax,2);
-  assert.deepEqual(restarted.room.botRoster,botRosterBefore,'nomes e IDs dos bots devem permanecer estáveis ao reiniciar');
+  const returned=await onceMessage(guest,m=>m.type==='room_state'&&m.room.status==='lobby');
+  await onceMessage(peer,m=>m.type==='room_state'&&m.room.status==='lobby');
+  assert.equal(returned.room.code,code,'o retorno reutiliza o mesmo código de sala');
+  assert.equal(returned.room.bots,3,'a quantidade de bots deve sobreviver ao retorno');assert.equal(returned.room.settings.impostors,2);assert.equal(returned.room.settings.renderDist,950);assert.equal(returned.room.settings.sheriffCooldown,50);assert.equal(returned.room.settings.sheriffChance,85);assert.equal(returned.room.settings.sheriffMax,2);
+  assert.deepEqual(returned.room.botRoster,botRosterBefore,'nomes e IDs dos bots devem permanecer estáveis ao retornar');
 });
 
 test('revanche continua quando a saída do host deixa exatamente três participantes', async t=>{
@@ -148,9 +148,9 @@ test('revanche continua quando a saída do host deixa exatamente três participa
   send(guest,{type:'game_end',winner:'crew',reason:'Fim',snapshot:{...snapshot,seq:5,state:'over',over:true,winner:'crew',endReason:'Fim'}});
   await onceMessage(guest,m=>m.type==='room_state'&&m.room.status==='ended');
   send(guest,{type:'rematch'});
-  const restarted=await onceMessage(guest,m=>m.type==='game_start'&&m.rematch===true);
-  assert.equal(restarted.room.players.length+restarted.room.bots,3);
-  assert.equal(restarted.room.code,code);
+  const returned=await onceMessage(guest,m=>m.type==='room_state'&&m.room.status==='lobby');
+  assert.equal(returned.room.players.length+returned.room.bots,3);
+  assert.equal(returned.room.code,code);
 });
 
 test('último humano saindo invalida a sala mesmo que ainda existam bots', async t=>{

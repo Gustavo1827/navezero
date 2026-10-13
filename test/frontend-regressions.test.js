@@ -151,7 +151,7 @@ test('nomes de bots são baseados no cadastro persistente da sala e persistem no
 });
 
 test('revanche usa a mesma sala e é autorizada somente pelo host', () => {
-  assert.match(server, /if\(m\.type==='rematch'\)\{[\s\S]*?if\(!isHost\)return error\(ws,'Somente o host pode reiniciar a partida\.'\);[\s\S]*?startGame\(room,true,timings\)/);
+  assert.match(server, /if\(m\.type==='rematch'\)\{[\s\S]*?if\(!isHost\)return error\(ws,'Somente o host pode voltar à sala\.'\);[\s\S]*?room\.status='lobby'[\s\S]*?broadcast\(room,\{type:'room_state',room:roomPublic\(room\)\}\)/);
   assert.match(server, /broadcast\(room,\{type:'game_start',room:roomPublic\(room\),round:room\.round,rematch\}/);
   assert.match(html, /NET\.room\?\.code===m\.room\?\.code/);
 });
