@@ -1,45 +1,18 @@
-# Nave Zero Online — correções pontuais e função Metamorfo
+# Nave Zero Online — IA, votação e interface
 
-Este pacote mantém a estrutura do jogo e reúne as correções multiplayer existentes, os ajustes do Xerife e Atrasado, o chat exclusivo da sala de espera, a revanche e a nova função Metamorfo.
+Este pacote continua o jogo existente e preserva as mecânicas não relacionadas a estas correções. A função Metamorfo, suas configurações, botões, ações de IA e mensagens de rede foram removidos.
 
-## Alterações incluídas
+## Ajustes
 
-- **Ícone do Xerife:** substituído por um SVG de arma no estilo visual do jogo.
-- **Atrasado sem eliminação direta:** o botão e o comando genérico de eliminação bloqueiam essa função. O Atrasado continua podendo sabotar e usar apenas a habilidade de marcação.
-- **Cronômetro privado do Atrasado:** o host mantém a marcação autoritativa; os snapshots enviados a cada cliente incluem a contagem regressiva somente para quem fez a marcação. A vítima e os outros jogadores não recebem esses metadados.
-- **Configurações do Atrasado:** chance de 0–100% e quantidade de 0–3; a atribuição fica limitada à quantidade real de Infiltrados. A função é distribuída pela chance configurada e pela quantidade máxima; a opção separada de ativar/desativar foi removida.
-- **Chat escrito apenas na sala de espera:** o botão aparece no lobby e desaparece ao iniciar a contagem/partida. O servidor rejeita mensagens fora da sala de espera; mensagens de até 180 caracteres são sanitizadas, limitadas por taxa e retransmitidas apenas aos membros da mesma sala.
-- **Bots e funções:** bots podem receber Xerife ou Atrasado conforme os limites configurados; Xerifes bots usam a habilidade dentro das condições de suspeita, alcance, linha de visão e cooldown. Bots Atrasados marcam vítimas em vez de eliminá-las diretamente.
-- **Falas contextuais dos bots:** adicionadas frases sobre corpos, jogadores não vistos recentemente, tarefas realmente feitas e suspeitos apoiados pela memória/evidência da IA. Ao discutir um corpo, os NPCs também consideram hipóteses envolvendo Atrasado, Xerife ou Infiltrado conforme as pistas disponíveis.
-- **Nomes únicos e persistentes dos bots:** cada sala tem um cadastro estável de IDs e nomes, sem colisão com nomes humanos na sala; a revanche mantém esse cadastro. A partida offline também reutiliza os nomes enquanto o jogador local mantém o mesmo nome.
-- **Jogar de novo:** o host pode reiniciar a mesma sala e o servidor mantém o código, participantes que ainda estão conectados, quantidade de bots e configurações. O reinício continua passando pela validação e pelo fluxo sincronizado já existente.
-- **Nova função Metamorfo (exclusiva dos Infiltrados):** botão de metamorfose com seletor de jogadores/NPCs vivos e suas cores; copia visualmente a cor, o nome e a aparência do alvo, sem copiar sua função ou habilidades. Pode cancelar pelo mesmo botão ou espera o tempo limite.
-- **Bolha e movimento:** uma bolha oval semitransparente na cor original do Metamorfo aparece ao transformar e ao voltar ao normal; o personagem fica imóvel enquanto a bolha está visível. A duração e o cooldown são controlados no estado da partida.
-- **Sincronização online:** o estado de disfarce, temporizador, bolha e cooldown viajam nos snapshots autoritativos do host; os comandos de iniciar/cancelar são validados pelo host. A habilidade não pode ser iniciada durante reunião, após a morte ou no fim da partida.
-- **Configurações do Metamorfo:** chance de 0–100%, quantidade de 0–3 limitada à quantidade de Infiltrados, duração de 5–30 s e cooldown de 5–60 s; configurações persistem e sincronizam por sala.
-- **NPCs e evidências:** bots Infiltrados com Metamorfo usam a habilidade. NPCs Tripulantes só registram uma metamorfose se a bolha esteve dentro do seu alcance visual e linha de visão; testemunhas podem convocar uma reunião e declarar quem viram se metamorfando em quem. Votos sem suspeita/evidência suficiente agora tendem a pular em vez de acusar um jogador aleatório.
-- **Falas prontas dos jogadores:** adicionadas as frases sobre metamorfose, tarefas concluídas e atribuídas a jogadores, respostas curtas (sim/não, concordo/discordo, verdade/não verdade), declarações “Eu estava!”/“Eu vi!”, perguntas sobre corpos e denúncias com jogador morto e local selecionados. As opções de tarefas são limitadas a tarefas registradas como concluídas.
-- **Xerife:** intervalo para atirar configurável de 50 a 120 segundos. Ao acertar, apenas o Infiltrado morre; ao errar contra um inocente, apenas o Xerife morre. Ao terminar uma reunião, todos os cooldowns de habilidades entram em recarga completa, incluindo eliminação, sabotagem, dutos, Xerife, Atrasado e Localizador.
+- **Botão Atrasado:** preenchimento vermelho translúcido, não apenas borda translúcida.
+- **Resultado da votação:** lista os nomes dos personagens que pularam o voto, tanto no jogo local quanto para clientes conectados. Se ninguém pular, informa isso explicitamente.
+- **NPCs e corpos:** removida a decisão aleatória que fazia alguns NPCs ignorarem corpos que haviam visto. NPCs que presenciam um corpo passam a procurar e reportar o local, inclusive em partidas com Infiltrados controlados por IA.
+- **Reuniões de emergência:** a IA confirma vida, uso restante e cooldown antes de chamar. A decisão de convocar é preservada enquanto o NPC se desloca até o botão, em vez de ser descartada por uma reavaliação diferente ao chegar.
+- **Uso de habilidades:** continuam as regras de cooldown do Xerife, Atrasado, Localizador, eliminação, sabotagem e dutos. O cooldown e a situação da partida são verificados antes de executar ações.
+- **Falas no mapa:** NPCs relatam o que observaram, sem anunciar o nome da função que possuem. Falas relacionadas a rastrear alguém e testemunhar dutos não revelam a função do falante.
+- **Sincronização:** mantidos os controles autoritativos do host, snapshots e encaminhamento de ações existentes; removido o comando de rede da função excluída.
+- **Configuração de Infiltrados:** o limite automático continua relacionado ao tamanho da sala: 4–7 jogadores = 1; 8–9 = até 2; 10 ou mais = até 3.
 
-- **Visual das configurações de funções:** controles translúcidos; funções dos Tripulantes em azul e funções dos Infiltrados em vermelho. Os botões `+` e `−` repetem alterações enquanto ficam pressionados.
-- **Consulta por clientes online:** jogadores que não são host podem abrir e consultar as configurações em modo somente leitura; o chat escrito continua disponível a todos na sala de espera e não pode alterar as configurações.
+## Validação
 
-## Testes executados
-
-- `node --check server.js`
-- `node --check websocket.js`
-- Extração do JavaScript inline de `index.html` e `node --check` do script extraído.
-- `npm test`: **41 testes automatizados aprovados, 0 falhas**. Inclui limites e sincronização das configurações do Metamorfo, estado visual nos snapshots, bloqueios da habilidade, testemunhas com distância/linha de visão, falas contextuais, limites das configurações, chat exclusivo da sala de espera e isolado por sala, privacidade dos cronômetros nos snapshots, regras do Xerife, recarga das habilidades após reunião, hipóteses dos NPCs, nomes dos bots estáveis na revanche e permissões do host para reiniciar, cores e transparência dos botões, repetição ao manter `+`/`−` pressionados, consulta de configurações por clientes e novas frases prontas.
-
-Os testes de WebSocket usam clientes simulados contra o servidor local e verificam os eventos e snapshots. **Não foi executada uma sessão real de navegador em três dispositivos físicos**, então a interação visual, a câmera e o comportamento em rede móvel ainda devem ser conferidos numa partida de teste antes de substituir a versão pública.
-
-## Executar localmente
-
-Requer Node.js 20 ou superior.
-
-```bash
-npm install
-npm start
-```
-
-Abra `http://localhost:8080`. O endpoint `/health` verifica se o servidor está respondendo.
+Execute `npm test` para a suíte automatizada. O pacote também foi preparado para verificação de sintaxe de `server.js`, `websocket.js` e do JavaScript embutido em `index.html`. Os testes automatizados não substituem a validação visual do joystick, dos resultados e de uma partida multiplayer em aparelhos reais.

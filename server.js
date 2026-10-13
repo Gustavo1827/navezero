@@ -13,9 +13,9 @@ const clients = new Map();
 const COLORS = ['vermelho','azul','amarelo','verde','rosa','roxo','laranja','ciano','preto','branco','carmim','banana','caqui','coral','cinza'];
 const LIMITS = {
   kill:[10,60], sab:[10,90], meet:[10,60], speed:[100,280], impVision:[260,900], crewVision:[260,900],
-  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], metamorphChance:[0,100], metamorphMax:[0,3], metamorphDuration:[5,30], metamorphCooldown:[5,60], renderDist:[500,1500]
+  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], renderDist:[500,1500]
 };
-const DEFAULT_SETTINGS = {kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,delayedChance:35,delayedMax:1,delayedDuration:20,metamorphChance:35,metamorphMax:1,metamorphDuration:15,metamorphCooldown:20,renderDist:820};
+const DEFAULT_SETTINGS = {kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,delayedChance:35,delayedMax:1,delayedDuration:20,renderDist:820};
 const BOT_NAMES = ['João','Duda','Lia','Maria','Fernando','Caio','Aurora','Bruno','Iris','Mateus','Nina','Ravi','Bia','Theo','Yasmin','Gael','Luna','Cecília','Miguel','Helena','Enzo','Rafa','Alice','Pedro','Sofia','Lucas','Maya','Noah','Lara','Vitor'];
 const nameKey = value => String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]/g,'');
 function ensureBotRoster(room){
@@ -42,7 +42,6 @@ function cleanSettings(input={}, roomSize=10) {
   }
   const maxImpostors=roomSize>=10?3:(roomSize>=8?2:1);
   out.impostors=Math.min(out.impostors,maxImpostors);
-  out.metamorphMax=Math.min(out.metamorphMax,out.impostors);
   return out;
 }
 const ROOM_CODE_CHARS='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -90,13 +89,13 @@ function personalizeSnapshot(snapshot, recipientId){
   }
   // Marcações são privadas: só o Atrasado que marcou recebe seus cronômetros.
   const privateMarks={};for(const [victimId,mark] of Object.entries(s.delayedMarks||{})){if(mark&&mark.killerId===recipientId)privateMarks[victimId]={victimId, killerId:recipientId, remaining:Math.max(0,Number(mark.remaining)||0)}}s.delayedMarks=privateMarks;
-  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.metamorph=recipient.function==='metamorph';s.selfMorphCd=recipient.morphCd||0;}
+  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;}
   return s;
 }
 function snapshotForNewHost(snapshot, recipientId){
   const s=JSON.parse(JSON.stringify(snapshot));
   const recipient=s.chars?.find(c=>c.id===recipientId);
-  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.metamorph=recipient.function==='metamorph';s.selfMorphCd=recipient.morphCd||0;}
+  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;}
   return s;
 }
 function startGameNow(room, rematch=false){
@@ -222,7 +221,7 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='action'){
     if(isHost||room.status!=='playing')return;
-    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','metamorphose']);if(!allowed.has(action))return;
+    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat']);if(!allowed.has(action))return;
     const host=clients.get(room.hostId);if(!host)return;
     const allowedData={command:action,playerId:c.id};
     for(const k of ['targetId','sabotage','ventId','taskId','stepId','fix','text','claim'])if(m[k]!==undefined)allowedData[k]=m[k];
