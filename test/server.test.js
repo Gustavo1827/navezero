@@ -26,11 +26,11 @@ test('salas, códigos, limite por bots, isolamento de configurações, início e
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
 
   const host=await connect(url,'Host','azul');all.push(host);
-  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:50,sheriffChance:70,sheriffMax:4,delayedEnabled:1,delayedChance:82,delayedMax:3,delayedDuration:40}});
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:3,settings:{speed:210,kill:20,crewVision:440,impostors:2,renderDist:950,sheriffCooldown:50,sheriffChance:70,sheriffMax:4,delayedEnabled:1,delayedChance:82,delayedMax:3,delayedDuration:40,metamorphChance:100,metamorphMax:3,metamorphDuration:25,metamorphCooldown:55}});
   const created=await onceMessage(host,m=>m.type==='room_state');
   const code=created.room.code;
   assert.match(code,/^[A-Z0-9]{6}$/);assert.equal(created.room.size,4);assert.equal(created.room.bots,3);assert.equal(created.room.players.length+created.room.bots,4);
-  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,50);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(created.room.settings.delayedEnabled,1);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);
+  assert.equal(created.room.settings.speed,210);assert.equal(created.room.settings.impostors,2);assert.equal(created.room.settings.renderDist,950);assert.equal(created.room.settings.sheriffCooldown,50);assert.equal(created.room.settings.sheriffChance,70);assert.equal(created.room.settings.sheriffMax,4);assert.equal(created.room.settings.delayedEnabled,1);assert.equal(created.room.settings.delayedChance,82);assert.equal(created.room.settings.delayedMax,3);assert.equal(created.room.settings.delayedDuration,40);assert.equal(created.room.settings.metamorphChance,100);assert.equal(created.room.settings.metamorphMax,2);assert.equal(created.room.settings.metamorphDuration,25);assert.equal(created.room.settings.metamorphCooldown,55);
   assert.equal(created.room.botRoster.length,3);
   const norm=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const allNames=[...created.room.players.map(p=>p.name),...created.room.botRoster.map(b=>b.name)];
@@ -255,4 +255,23 @@ test('chat escrito funciona na sala de espera e só é retransmitido aos partici
   send(hostA,{type:'start_game'});await onceMessage(hostA,m=>m.type==='game_start');await onceMessage(guestA,m=>m.type==='game_start');
   send(guestA,{type:'room_chat',text:'Esta mensagem não deve passar durante a partida'});
   const denied=await onceMessage(guestA,m=>m.type==='room_error');assert.match(denied.message,/sala de espera/i);
+});
+
+
+test('servidor encaminha pedidos de metamorfose ao host da sala', async t=>{
+  const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:25,loadingMs:15});
+  await new Promise(resolve=>app.server.once('listening',resolve));
+  const url=`ws://127.0.0.1:${app.server.address().port}`, all=[];
+  t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+  const host=await connect(url,'Host Meta','azul');all.push(host);
+  send(host,{type:'create_room',name:'Host Meta',color:'azul',size:4,bots:2,settings:{impostors:2,metamorphChance:100,metamorphMax:2,metamorphDuration:15,metamorphCooldown:20}});
+  const created=await onceMessage(host,m=>m.type==='room_state');
+  assert.equal(created.room.settings.metamorphMax,2);
+  const guest=await connect(url,'Convidado Meta','verde');all.push(guest);
+  send(guest,{type:'join_room',code:created.room.code});
+  await onceMessage(guest,m=>m.type==='room_state');
+  send(host,{type:'start_game'});await onceMessage(host,m=>m.type==='game_start');await onceMessage(guest,m=>m.type==='game_start');
+  send(guest,{type:'action',action:'metamorphose',targetId:'bot_test_target'});
+  const command=await onceMessage(host,m=>m.type==='host_command'&&m.command==='metamorphose');
+  assert.equal(command.playerId,guest.id);assert.equal(command.targetId,'bot_test_target');
 });

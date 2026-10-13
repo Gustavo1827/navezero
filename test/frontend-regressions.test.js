@@ -157,7 +157,7 @@ test('revanche usa a mesma sala e é autorizada somente pelo host', () => {
 });
 
 test('falas novas dos bots são condicionadas a corpo, tarefa ou evidência', () => {
-  assert.match(html, /if\(M\.body&&Math\.random\(\)<\.12\)return \{from:ch,text:pickLine\(\['Onde foi o corpo\?'\]\)/);
+  assert.match(html, /if\(M\.body&&Math\.random\(\)<\.12\)return \{from:ch,text:pickLine\(\[`Onde foi o corpo\?`,`Onde que mataram \$\{M\.body\.name\}\?`\]\)/);
   assert.match(html, /Estava fazendo \$\{recentTask\}/);
   assert.match(html, /Não vi \$\{unseenTarget\.name\}/);
   assert.match(html, /Alguém viu \$\{unseenTarget\.name\}/);
