@@ -370,6 +370,7 @@ body.touch #stick{display:block}
   <div class="card">
     <h1 class="logo">Nave Zero</h1>
     <p class="tag">A nave está falhando. Conclua as tarefas antes que seja tarde.</p>
+    <p class="phase" style="margin:-4px 0 8px">Versão 0.2-b</p>
     <canvas id="pv" width="280" height="260"></canvas>
     <div class="field"><label for="nameIn">Seu nome</label><input id="nameIn" maxlength="12" value="Você" autocomplete="off"></div>
     <div class="field"><label id="colLab">Sua cor</label><div id="swatches" role="group" aria-labelledby="colLab"></div></div>
@@ -1922,7 +1923,7 @@ const FIX={
 const ROOM_PREP={'Cafeteria':'na','Enfermaria':'na','Elétrica':'na','Administração':'na','Segurança':'na','Comunicações':'em','Armazém':'no','Reator':'no','Corredor Central':'no','Corredor':'no'};
 const inRoom=n=>(ROOM_PREP[n]||'em')+' '+n;
 const TABLE={x:29,y:6,w:6,h:3};
-const FREEPLAY_COMPUTER={id:'freeplay_pc',room:'cafe',x:32,y:7,w:1,h:1,label:'Computador da Partida Livre'};
+const FREEPLAY_COMPUTER={id:'freeplay_pc',room:'cafe',x:38,y:10,w:1,h:1,label:'Computador da Partida Livre'};
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const charById=id=>G.chars.find(c=>c.id===id);
 const roomName=(x,y)=>{const r=roomAtPx(x,y);return r?r.name:'Corredor'};
@@ -2809,8 +2810,9 @@ function npcStatement(ch,M){
   if(Math.random()<.55)return alibiMsg(ch,M);
   return {from:ch,text:pickLine(NEUTRAL[ai.pers]),claim:null};
 }
+function meetingNPCs(){return G.chars.filter(c=>c.alive&&!c.isPlayer&&!c.isRemoteHuman&&c.ai)}
 function genChat(){
-  const M=G.M, L=[], npcs=G.chars.filter(c=>c.alive&&!c.isPlayer&&!c.isRemoteHuman);
+  const M=G.M, L=[], npcs=meetingNPCs();
   const c=M.caller;
   if(!c.isPlayer&&!c.isRemoteHuman){
     if(M.reason==='body')L.push({from:c,text:`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`,claim:null});
@@ -2819,8 +2821,14 @@ function genChat(){
   }
   const wit=npcs.filter(x=>x!==c&&(x.ai.ventSaw||x.ai.witnessOf||x.ai.controlSaw||x.ai.controlVictimSaw));
   const rest=npcs.filter(x=>x!==c&&!wit.includes(x)).sort((a,b)=>((topSuspect(b)?.s||0)-(topSuspect(a)?.s||0))||String(a.id).localeCompare(String(b.id)));
-  [...wit,...rest].slice(0,5).forEach(ch=>L.push(npcStatement(ch,M)));   // testemunhas e NPCs mais desconfiados falam primeiro
-  if(L.length<2&&npcs.length)L.push({from:pick(npcs),text:'Alguém tem alguma pista?',claim:null});
+  [...wit,...rest].slice(0,5).forEach(ch=>{const msg=npcStatement(ch,M);if(msg&&msg.from&&msg.text)L.push(msg)});   // testemunhas e NPCs mais desconfiados falam primeiro
+  // Garante participação mínima dos NPCs mesmo quando nenhum deles acumulou uma pista forte.
+  const minNpcLines=Math.min(2,npcs.length);
+  for(const ch of npcs){
+    if(L.filter(m=>m&&m.from&&!m.from.isPlayer&&!m.from.isRemoteHuman).length>=minNpcLines)break;
+    if(L.some(m=>m&&m.from===ch))continue;
+    L.push({from:ch,text:pickLine(NEUTRAL[ch.ai.pers]||['Não tenho certeza. Precisamos discutir.']),claim:null});
+  }
   const seenT=new Set(); L.forEach(m=>{if(seenT.has(m.text))m.text=pick(['Eu também: ','Confirmo: ','Pois é: '])+m.text.charAt(0).toLowerCase()+m.text.slice(1); seenT.add(m.text)});   // sem falas idênticas na mesma reunião
   M.msgs=L;
 }
@@ -2897,7 +2905,7 @@ function hear(L,claim){
 }
 function hearAll(claim,fromPlayer){
   const M=G.M, out=[];
-  G.chars.forEach(L=>{if(!L.alive||L.isPlayer||L.isRemoteHuman||L.id===claim.from)return; const r=hear(L,claim); if(r)out.push(r)});
+  meetingNPCs().forEach(L=>{if(L.id===claim.from)return; const r=hear(L,claim); if(r)out.push(r)});
   out.sort((a,b)=>(b.prio-a.prio)+(Math.random()-.5)*.8);
   out.filter(r=>fromPlayer||r.prio>=3).slice(0,fromPlayer?2:1).forEach((r,i)=>{
     if(M.remarks>=10)return; M.remarks++; M.replyQ.push({at:M.clock+1.2+i*1.9+Math.random()*.8,from:r.L,text:r.text});
@@ -2924,7 +2932,7 @@ function handlePlayerMsg(text,claimOverride){
   if(c.kind==='defend'&&c.target)M.heat[c.target]=(M.heat[c.target]||0)-.5;
   hearAll(c,true);
   if(c.kind==='other'&&Math.random()<.5&&M.remarks<10){
-    const L=pick(G.chars.filter(x=>x.alive&&!x.isPlayer&&!x.isRemoteHuman)); if(L){M.remarks++;M.replyQ.push({at:M.clock+1.6,from:L,text:pick(['Pode explicar melhor?','Hmm, não entendi onde você quer chegar.','Isso ajuda em quê?'])})}
+    const L=pick(meetingNPCs()); if(L){M.remarks++;M.replyQ.push({at:M.clock+1.6,from:L,text:pick(['Pode explicar melhor?','Hmm, não entendi onde você quer chegar.','Isso ajuda em quê?'])})}
   }
   return c;
 }
@@ -3139,7 +3147,7 @@ function callMeeting(caller,reason,body){
     const top=topSuspect(caller), rs=top&&bestReason(caller.ai,top.id);
     if(rs)evid={text:'',claim:null,top,rs};
   }
-  G.M={phase:'intro',t:0,clock:0,dur:1.9,caller,reason,body,votes:{},voteAt:{},log:[],msgs:[],mi:0,myVote:null,result:null,cards:{},
+  G.M={phase:'intro',t:0,clock:0,dur:1.9,caller,reason,body,votes:{},voteAt:{},log:[],msgs:[],mi:0,myVote:null,result:null,cards:{},chat:[],
     gt0:G.gt,heat:{},claims:[],sel:null,replyQ:[],remarks:0,sayCd:0,said:0,used:new Set(),evid:null};
   if(evid){evid.text=reasonText(caller,evid.top.id,evid.rs,true); evid.claim=reasonClaim(caller,evid.top.id,evid.rs); G.M.evid=evid}
   if(body)G.chars.forEach(o=>{if(o.alive&&!o.isPlayer&&!o.isRemoteHuman&&o.ai&&o.role==='crew')noteBodyEvidence(o,body)});
@@ -3174,7 +3182,7 @@ function setMeetPhase(ph){
   }else if(ph==='vote'){
     M.replyQ=[];
     $('meetTitle').textContent='Votação'; $('meetDesc').textContent='Escolha quem ejetar ou pule o voto.'; M.dur=CFG.voting;
-    G.chars.filter(c=>c.alive&&!c.isPlayer).forEach(c=>{M.voteAt[c.id]=Math.random()*Math.max(.25,M.dur-.25)});
+    meetingNPCs().forEach(c=>{M.voteAt[c.id]=Math.random()*Math.max(.25,M.dur-.25)});
     $('btnSkip').hidden=!al; $('meetStatus').textContent=al?'Escolha seu voto.':'Você foi eliminado e não pode votar.';
   }else if(ph==='result'){
     M.replyQ=[]; M.dur=5; $('meetTitle').textContent='Votação'; $('meetDesc').textContent='';$('meetStatus').textContent=''; $('btnSkip').hidden=true; showResult();
@@ -3206,7 +3214,7 @@ function updateMeeting(dt){
     }
     if(M.t>=M.dur)setMeetPhase('vote');
   }else if(M.phase==='vote'){
-    G.chars.forEach(c=>{if(c.alive&&!c.isPlayer&&!c.isRemoteHuman&&M.votes[c.id]===undefined&&M.t>=M.voteAt[c.id])castVote(c.id,npcChoose(c))});
+    meetingNPCs().forEach(c=>{if(M.votes[c.id]===undefined&&M.t>=M.voteAt[c.id])castVote(c.id,npcChoose(c))});
     // Votação dura até o final do tempo escolhido, mesmo se todos votarem antes.
     if(M.t>=M.dur){
       const voters=G.chars.filter(c=>c.alive);
@@ -3232,10 +3240,24 @@ function endMeeting(){
   G.cam.x=focus().x-VW/2; G.cam.y=focus().y-VH/2;
   toast(G.player.alive?'Todos voltaram à cantina. Habilidades em recarga.':'Você virou morto. Use o botão de modo para tarefas ou espectador.');
 }
+function appendMeetingMsgVisual(from,text,silent=false){
+  if(!from)return;const p=el('p'); const b=el('b','',from.name+': '); b.style.color=chatCol(from);
+  p.append(b,document.createTextNode(String(text||''))); const box=$('meetChat'); box.appendChild(p); box.scrollTop=box.scrollHeight;
+  if(!silent)Snd.tone(440+rand(0,120),.05,'square',.03);
+}
 function postMsg(from,text){
-  const p=el('p'); const b=el('b','',from.name+': '); b.style.color=chatCol(from);
-  p.append(b,document.createTextNode(text)); const box=$('meetChat'); box.appendChild(p); box.scrollTop=box.scrollHeight;
-  Snd.tone(440+rand(0,120),.05,'square',.03);
+  if(!from)return;const msg=String(text||'');
+  if(G.M){G.M.chat=Array.isArray(G.M.chat)?G.M.chat:[];G.M.chat.push({fromId:from.id,text:msg})}
+  appendMeetingMsgVisual(from,msg,false);
+}
+function syncMeetingChatFromSnapshot(chat){
+  if(!G.M||!Array.isArray(chat))return;
+  const clean=chat.map(m=>({fromId:String(m.fromId||''),text:String(m.text||'').slice(0,180)}));
+  const local=Array.isArray(G.M.chat)?G.M.chat:[];
+  const same=local.length===clean.length&&local.every((m,i)=>String(m.fromId||'')===clean[i].fromId&&String(m.text||'')===clean[i].text);
+  if(same)return;
+  G.M.chat=clean;$('meetChat').innerHTML='';
+  clean.forEach(m=>{const from=charById(m.fromId);if(from)appendMeetingMsgVisual(from,m.text,true)});
 }
 function castVote(voter,target){
   const M=G.M; M.votes[voter]=target; M.log.push({voter,target});
@@ -3318,7 +3340,7 @@ function update(dt){
     updateSab(dt); if(G.over)return;
     updateNPCs(dt);
   }
-  if(G.state==='meeting')updateMeeting(dt);
+  if(G.state==='meeting'&&(!NET.inRoom||NET.isHost))updateMeeting(dt);
   G.fx=Math.max(0,G.fx-dt*1.4);
   if(!p.alive&&(!G.spec||!G.spec.alive))G.spec=G.chars.find(c=>c.alive)||null;
   const f=focus();
@@ -3625,7 +3647,10 @@ function netHandleMessage(m){
   if(m.type==='snapshot'){if(!NET.isHost&&NET.inRoom){netApplySnapshot(m.snapshot);if(NET.revealPending&&G.player&&G.chars.length){NET.revealPending=false;showLocalRoleReveal(true);netHideWait()}}return}
   if(m.type==='host_snapshot'){if(NET.isHost&&NET.inRoom&&m.snapshot){netApplySnapshot(m.snapshot,true);NET.matchImpIds=new Set(G.chars.filter(c=>c.role==='imp').map(c=>c.id));const present=new Set((NET.room?.players||[]).map(p=>p.id));for(const c of G.chars)if(c.role==='imp'&&!present.has(c.id)&&!c.isBot)NET.departedImpIds.add(c.id);netBecomeHost();checkEnd()}return}
   if(m.type==='meeting_chat'){
-    if(NET.inRoom&&!NET.isHost&&!NET.applying&&G.M){const who=charById(m.playerId);if(who){NET.applying=true;try{netOriginalPostMsg(who,m.text)}finally{NET.applying=false}}}return;
+    if(NET.inRoom&&!NET.isHost&&!NET.applying&&G.M){
+      const who=charById(m.playerId),text=String(m.text||'').slice(0,180),last=Array.isArray(G.M.chat)?G.M.chat[G.M.chat.length-1]:null;
+      if(who&&!(last&&String(last.fromId)===String(who.id)&&String(last.text)===text)){NET.applying=true;try{netOriginalPostMsg(who,text)}finally{NET.applying=false}}
+    }return;
   }
   if(m.type==='game_end'){
     // O resultado e o snapshot final são enviados juntos para evitar corridas se o host sair logo após vencer.
@@ -3670,7 +3695,7 @@ function netCaptureSnapshot(){
   const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
   const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
-  const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chatCount:$('meetChat').children.length}:null;
+  const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chat:(G.M.chat||[]).map(m=>({fromId:m.fromId,text:m.text})),chatCount:$('meetChat').children.length}:null;
   return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,delayedMarks:{...G.delayedMarks},sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
 }
 function netApplySnapshot(s,force=false){
@@ -3756,6 +3781,7 @@ function netApplySnapshot(s,force=false){
 }
 function netPaintMeeting(sm){
   const M=G.M;if(!M)return;const ph=sm.phase;
+  syncMeetingChatFromSnapshot(sm.chat||[]);
   $('meetTimer').textContent=Math.max(0,Math.ceil((sm.dur||0)-(sm.t||0)))+'s';
   $('meetingIntro').hidden=ph!=='intro';$('meet').hidden=ph==='intro';
   $('meet').classList.toggle('vote-reveal',ph==='result');
