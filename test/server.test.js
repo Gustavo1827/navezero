@@ -278,3 +278,25 @@ test('canal leve de movimento é retransmitido somente pelo host aos outros joga
   await new Promise(r=>setTimeout(r,80));
   assert.equal(host.messages.some(m=>m.type==='motion'&&m.motion?.seq===99),false,'cliente não-host não pode publicar movimento autoritativo');
 });
+
+test('cosméticos são sanitizados e sincronizados para todos somente no lobby', async t=>{
+  const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:20,loadingMs:10});
+  await new Promise(resolve=>app.server.once('listening',resolve));
+  const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
+  t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+  const host=await connect(url,'Host','azul');all.push(host);
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:2,cosmetics:{hat:'cap_orbital',pet:'drone_pingo',outfit:'tech_vest',visor:'hud_grid'}});
+  const made=await onceMessage(host,m=>m.type==='room_state');const code=made.room.code;
+  assert.deepEqual(made.room.players[0].cosmetics,{hat:'cap_orbital',pet:'drone_pingo',outfit:'tech_vest',visor:'hud_grid'});
+  const guest=await connect(url,'Guest','verde');all.push(guest);
+  send(guest,{type:'join_room',code,cosmetics:{hat:'crown_scrap',pet:'cube_bot',outfit:'command_jacket',visor:'scan_bar'}});
+  await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.length===2);
+  await onceMessage(host,m=>m.type==='room_state'&&m.room.players.length===2);
+  send(guest,{type:'set_cosmetics',cosmetics:{hat:'sprout_solar',pet:'beacon_orb',outfit:'utility_belt',visor:'invalido'}});
+  const synced=await onceMessage(host,m=>m.type==='room_state'&&m.room.players.find(p=>p.id===guest.id)?.cosmetics?.hat==='sprout_solar');
+  assert.deepEqual(synced.room.players.find(p=>p.id===guest.id).cosmetics,{hat:'sprout_solar',pet:'beacon_orb',outfit:'utility_belt',visor:'none'});
+  await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.find(p=>p.id===guest.id)?.cosmetics?.hat==='sprout_solar');
+  send(host,{type:'start_game'});await onceMessage(guest,m=>m.type==='game_start');
+  send(guest,{type:'set_cosmetics',cosmetics:{hat:'none'}});
+  const locked=await onceMessage(guest,m=>m.type==='room_error');assert.match(locked.message,/sala de espera/i);
+});

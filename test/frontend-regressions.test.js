@@ -223,3 +223,19 @@ test('NPCs usam falas contextuais e jogadores mortos veem funções sem revelar 
   assert.match(html, /\.pc\.dead canvas\{filter:grayscale\(1\);opacity:/);
   assert.match(html, /lastSab&&G\.sab\[lastSab\.type\]>0/);
 });
+
+test('cosméticos têm catálogo, categorias, renderização centralizada e sincronização no snapshot', () => {
+  assert.match(html, /id="btnCosmetics"[^>]*>Cosméticos</);
+  for (const label of ['Chapéus','Pets','Roupas','Visores']) assert.match(html, new RegExp(label));
+  assert.match(html, /const DEFAULT_COSMETICS=Object\.freeze\(\{hat:COSMETIC_NONE,pet:COSMETIC_NONE,outfit:COSMETIC_NONE,visor:COSMETIC_NONE\}\)/);
+  assert.match(html, /drawOutfitCosmetic\(c,cosmetics\.outfit\);drawVisorCosmetic\(c,cosmetics\.visor\);drawHatCosmetic\(c,cosmetics\.hat\)/);
+  assert.match(html, /drawPetShape\(c,cosmetics\.pet/);
+  assert.match(html, /function updateCosmeticPets\(dt\)/);
+  assert.match(html, /1-Math\.exp\(-Math\.max\(0,dt\)\*7\)/, 'pet deve seguir com atraso suave');
+  assert.match(html, /c\.cosmetics=randomCosmetics\(\)/, 'NPCs recebem cosméticos uma vez na criação da partida');
+  assert.match(html, /cosmetics:cloneCosmetics\(c\.cosmetics\)/, 'cosméticos precisam viajar no snapshot autoritativo');
+  assert.match(html, /drawChar\(c,\{x:0,y:0,color:ch\.color[^}]*cosmetics:ch\.cosmetics/s, 'reuniões devem reutilizar o renderizador principal');
+  assert.match(html, /drawChar\(c,\{x:-35,y:0,color:caller\.color[^}]*cosmetics:caller\.cosmetics/s, 'introdução de reunião deve manter cosméticos');
+  assert.match(html, /drawBody\(c,\{x:48,y:17,color:v\.color,cosmetics:v\.cosmetics\}\)/, 'morte deve preservar a parte visual aplicável');
+  assert.doesNotMatch(html, /HALF_W[^\n]*cosmetic|boxBlocked[^\n]*cosmetic|CFG\.speed[^\n]*cosmetic/i, 'cosméticos não podem entrar em colisão ou velocidade');
+});
