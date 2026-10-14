@@ -185,6 +185,12 @@ function handle(ws, raw, timings={}){
     if(room.status!=='lobby')return error(ws,'Esta sala não está aguardando início.');
     startGame(room,false,timings);return;
   }
+  if(m.type==='cancel_start'){
+    if(!isHost)return error(ws,'Somente o host pode cancelar o início.');
+    if(!['countdown','loading'].includes(room.status))return;
+    if(invalidateCountdown(room)){sendRoomState(room);broadcast(room,{type:'countdown_cancelled',reason:'Início cancelado pelo host.'})}
+    return;
+  }
   if(m.type==='rematch'){
     if(!isHost)return error(ws,'Somente o host pode reiniciar a partida.');
     if(room.status!=='ended')return error(ws,'A partida ainda não terminou.');
@@ -200,7 +206,7 @@ function handle(ws, raw, timings={}){
     sendRoomState(room);return;
   }
   if(m.type==='state_snapshot'){
-    if(!isHost||room.status!=='playing'||!m.snapshot||typeof m.snapshot!=='object')return;
+    if(!isHost||!['loading','playing'].includes(room.status)||!m.snapshot||typeof m.snapshot!=='object')return;
     room.lastSnapshot=m.snapshot;
     for(const p of room.players){
       if(p.id===c.id)continue;
