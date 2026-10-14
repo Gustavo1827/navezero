@@ -19,14 +19,23 @@ Este pacote mantém a estrutura do jogo e reúne as correções multiplayer exis
 - **Jogar de novo:** o host pode reiniciar a mesma sala e o servidor mantém o código, participantes que ainda estão conectados, quantidade de bots e configurações. O reinício continua passando pela validação e pelo fluxo sincronizado já existente.
 - **Xerife:** intervalo para atirar configurável de 50 a 120 segundos. Ao acertar, apenas o Infiltrado morre; ao errar contra um inocente, apenas o Xerife morre. Ao terminar uma reunião, todos os cooldowns de habilidades entram em recarga completa, incluindo eliminação, sabotagem, dutos, Xerife, Atrasado e Localizador.
 
+## Correção de movimento do Marionetista
+
+- O movimento multiplayer foi ajustado para que, enquanto um jogador controla outro, o vetor de entrada seja aplicado uma única vez ao corpo controlado. O personagem Marionetista espelha a posição/animação resultante, evitando processamento redundante das colisões entre os dois avatares.
+- A vítima possuída não tem mais seu estado de caminhada apagado dependendo da ordem dos personagens na lista de simulação. Quando o joystick volta a zero ou o input expira, a animação e o movimento param no mesmo tick.
+- Os snapshots não interpolam uma transição de posse como se fosse deslocamento normal entre duas posições do mesmo personagem. A troca da relação de controle usa a posição autoritativa correta.
+- O joystick zera também quando perde a captura do ponteiro ou a janela perde foco, prevenindo input travado após interrupções.
+- A aba de configurações **Marionetista** reutiliza o mesmo vermelho da aba **Atrasado**. Os demais botões não foram alterados.
+
 ## Testes executados
 
 - `node --check server.js`
 - `node --check websocket.js`
 - Extração do JavaScript inline de `index.html` e `node --check` do script extraído.
-- `npm test`: **35 testes automatizados aprovados, 0 falhas**. Inclui limites das configurações, funções Engenheiro/Marionetista e limites multiplayer, bloqueio de ações durante controle, privacidade de funções para vivos, exibição para mortos, falas contextuais e memória da IA, chat isolado por sala, regras do Xerife, cooldowns após reunião, nomes de bots estáveis e permissões de host.
-
-Os testes de WebSocket usam clientes simulados contra o servidor local e verificam os eventos e snapshots. **Não foi executada uma sessão real de navegador em três dispositivos físicos**, então a interação visual, a câmera e o comportamento em rede móvel ainda devem ser conferidos numa partida de teste antes de substituir a versão pública.
+- `npm test`: **48 testes automatizados aprovados, 0 falhas**. Inclui verificações específicas de movimento, oito direções, vetores diagonais normalizados, input contínuo, soltura/timeout, ordem dos participantes, estado de posse e cor da aba.
+- Os testes de WebSocket usam clientes simulados contra o servidor local para verificar eventos e snapshots.
+- A frequência de comunicação existente foi mantida: inputs a cada 50 ms e snapshots a cada 150 ms; ela não foi aumentada para mascarar o problema.
+- A lógica real de `netUpdateRemote` foi executada em cenários simulados. Uma partida completa em dispositivos físicos com joystick real não foi executada; esse teste precisa ser feito antes de substituir a versão pública.
 
 ## Executar localmente
 

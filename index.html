@@ -187,7 +187,7 @@ body.touch #stick{display:block}
 #roomChatInput{flex:1;min-width:0;font:600 14px var(--font);color:var(--ink);background:#0a0c26;border:2px solid var(--edge);border-radius:10px;padding:6px 8px;outline:none;user-select:text;-webkit-user-select:text;touch-action:manipulation}
 #roomChatInput:focus-visible{border-color:var(--amber)}
 @media(max-width:560px){#roomChatPanel{right:8px;top:auto;bottom:calc(155px + var(--sb));height:min(38vh,330px);width:min(330px,calc(100vw - 16px))}}
-.act2.engineer{background:#e8f0ff;color:#26345d;box-shadow:0 6px 0 #9baedb,0 8px 0 #10122a;font-size:25px}.act2.engineer small,.act2.marionette small{display:block;font-size:10px;line-height:1.05}.act2.marionette{background:#9c7be8;color:#170d3b;box-shadow:0 6px 0 #6345a9,0 8px 0 #10122a;font-size:25px}.act2.delayed,.delayed-tab{background:rgba(255,53,78,.58)!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
+.act2.engineer{background:#e8f0ff;color:#26345d;box-shadow:0 6px 0 #9baedb,0 8px 0 #10122a;font-size:25px}.act2.engineer small,.act2.marionette small{display:block;font-size:10px;line-height:1.05}.act2.marionette{background:#9c7be8;color:#170d3b;box-shadow:0 6px 0 #6345a9,0 8px 0 #10122a;font-size:25px}.act2.delayed,.delayed-tab,.marionette-tab{background:rgba(255,53,78,.58)!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
 .act2.delayed{font-size:29px!important}
 .act2.sheriff{background:#3c83e8!important;color:#fff!important;box-shadow:0 6px 0 #2055a5,0 8px 0 #10122a!important}
 .act2.sheriff .sheriffGunIcon{width:36px;height:27px}
@@ -494,7 +494,7 @@ body.touch #stick{display:block}
     <h2 id="cfgTitle">Configurações</h2><div class="row" id="cfgTabs"><button class="big" id="cfgTabSettings">Configurações</button><button class="big alt" id="cfgTabFunctions">Funções</button></div>
     <p class="cfgnote" id="cfgNote">Tempos de recarga, em segundos.</p>
     <div id="cfgRows"></div>
-    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">⌖ Localizador</button><button class="big alt" id="btnSheriffSection" type="button">✦ Xerife</button><button class="big alt delayed-tab" id="btnDelayedSection" type="button">◷ Atrasado</button><button class="big alt" id="btnEngineerSection" type="button">🔧 Engenheiro</button><button class="big alt" id="btnMarionetteSection" type="button">✋ Marionetista</button></div></div>
+    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">⌖ Localizador</button><button class="big alt" id="btnSheriffSection" type="button">✦ Xerife</button><button class="big alt delayed-tab" id="btnDelayedSection" type="button">◷ Atrasado</button><button class="big alt" id="btnEngineerSection" type="button">🔧 Engenheiro</button><button class="big alt marionette-tab" id="btnMarionetteSection" type="button">✋ Marionetista</button></div></div>
     <div class="row"><button class="big alt" id="cfgReset">Restaurar padrão</button><button class="big" id="cfgClose">Fechar</button></div>
   </div>
 </div>
@@ -2195,6 +2195,8 @@ function controlTargetFor(ch,maxDist=100){return G.chars.filter(c=>c.alive&&c!==
 function startControl(ch,target){
   if(!ch||!target||!ch.alive||ch.role!=='imp'||ch.function!=='marionette'||ch.vent||ch.controlTargetId||(ch.controlCd||0)>0||G.state!=='playing'||G.M||!target.alive||target.role!=='crew'||target.vent||target.controlledBy||dist(ch,target)>100||!losClear(ch.x,ch.y,target.x,target.y))return false;
   ch.controlReturn={x:ch.x,y:ch.y,face:ch.face};ch.controlTargetId=target.id;ch.controlTime=CFG.marionDuration;target.controlledBy=ch.id;ch.x=target.x;ch.y=target.y;ch.moving=false;target.moving=false;
+  // Zera o último vetor da vítima para que um input enviado antes da posse não reapareça ao soltá-la.
+  if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&target.isRemoteHuman)NET.remoteInputs.set(target.id,{x:0,y:0,at:Date.now()});
   // Os dois agentes abandonam rotas anteriores para evitar movimentos em direções obsoletas.
   if(ch.ai){ch.ai.path=[];ch.ai.goal=null;ch.ai.isGoal=null;ch.ai.state='idle';ch.ai.wait=.25;ch.ai.hunt=null;ch.ai.stuck=0}
   if(target.ai){target.ai.path=[];target.ai.goal=null;target.ai.isGoal=null;target.ai.state='idle';target.ai.wait=.25;target.ai.hunt=null;target.ai.stuck=0;target.ai.controlVictimSaw={id:ch.id,gt:G.gt,room:roomName(target.x,target.y)};addSusp(target,ch.id,4,'controlVictim',{room:roomName(target.x,target.y)})}
@@ -3282,16 +3284,21 @@ cv.addEventListener('pointerdown',e=>{
 });
 // joystick
 const stick=$('stick'), knob=$('knob'); let sid=null;
+function resetStick(pointerId=null){
+  if(pointerId!==null&&sid!==pointerId)return;
+  sid=null;joy.x=0;joy.y=0;knob.style.transform='translate(-50%,-50%)';
+}
 function moveStick(e){
-  const r=stick.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2, R=r.width/2-6;
+  const r=stick.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2, R=Math.max(1,r.width/2-6);
   let dx=e.clientX-cx, dy=e.clientY-cy; const l=Math.hypot(dx,dy); if(l>R){dx=dx/l*R;dy=dy/l*R}
   knob.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
-  const m=Math.hypot(dx,dy); if(m/R<.25){joy.x=joy.y=0}else{joy.x=dx/m;joy.y=dy/m}   // direção normalizada: velocidade máxima constante
+  const m=Math.hypot(dx,dy); if(m/R<.25){joy.x=0;joy.y=0}else{joy.x=dx/m;joy.y=dy/m}   // direção unitária compartilhada por todos os personagens
 }
 stick.addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();sid=e.pointerId;stick.setPointerCapture(sid);moveStick(e)});
 stick.addEventListener('pointermove',e=>{if(e.pointerId===sid)moveStick(e)});
-const endStick=e=>{if(e.pointerId===sid){sid=null;joy.x=joy.y=0;knob.style.transform='translate(-50%,-50%)'}};
-stick.addEventListener('pointerup',endStick); stick.addEventListener('pointercancel',endStick);
+const endStick=e=>resetStick(e.pointerId);
+stick.addEventListener('pointerup',endStick);stick.addEventListener('pointercancel',endStick);stick.addEventListener('lostpointercapture',endStick);
+addEventListener('blur',()=>resetStick());
 addEventListener('touchstart',()=>document.body.classList.add('touch'),{once:true,passive:true});
 
 // seletor de cor
@@ -3475,13 +3482,17 @@ function netApplySnapshot(s,force=false){
     G.chars=s.chars.map(r=>{
       let c=oldChars.get(r.id);const hadOld=!!c;if(!c)c=newChar(r.name,r.color,0,0,r.id===NET.id);
       const oldX=+c.x,oldY=+c.y,oldWalk=+c.walk,oldMoving=!!c.moving,oldAlive=!!c.alive,oldGhost=!!c.ghost,oldVent=c.vent||null;
+      const oldControlTargetId=c.controlTargetId||null,oldControlledBy=c.controlledBy||null;
       const oldVisualX=Number.isFinite(+c.netVisualX)?+c.netVisualX:oldX,oldVisualY=Number.isFinite(+c.netVisualY)?+c.netVisualY:oldY;
       const oldVisualWalk=Number.isFinite(+c.netVisualWalk)?+c.netVisualWalk:oldWalk,oldVisualMoving=typeof c.netVisualMoving==='boolean'?c.netVisualMoving:oldMoving;
       const ai=c.ai;Object.assign(c,r);if(ai)c.ai=ai;else if(!r.isBot&&!r.isRemoteHuman&&!c.isPlayer)c.ai=null;c.isPlayer=c.id===NET.id;c.isRemoteHuman=c.id!==NET.id&&(!!NET.room?.players.some(p=>p.id===c.id)||!!r.isRemoteHuman);c.isBot=!!r.isBot;
       const targetX=Number.isFinite(+r.x)?+r.x:c.x,targetY=Number.isFinite(+r.y)?+r.y:c.y;
       const targetWalk=Number.isFinite(+r.walk)?+r.walk:0, targetMoving=!!r.moving;
       const delta=Math.hypot(targetX-oldX,targetY-oldY);
-      const blend=canBlendClient&&hadOld&&Number.isFinite(oldX)&&Number.isFinite(oldY)&&Number.isFinite(oldWalk)&&delta<=110&&oldVent===(r.vent||null)&&oldAlive===!!r.alive&&oldGhost===!!r.ghost;
+      // Não interpolar entre identidades de controle: ao iniciar/encerrar posse, o
+      // personagem muda de lugar por regra do jogo, não por movimento contínuo.
+      const controlRelationUnchanged=oldControlTargetId===(r.controlTargetId||null)&&oldControlledBy===(r.controlledBy||null);
+      const blend=canBlendClient&&hadOld&&Number.isFinite(oldX)&&Number.isFinite(oldY)&&Number.isFinite(oldWalk)&&delta<=110&&oldVent===(r.vent||null)&&oldAlive===!!r.alive&&oldGhost===!!r.ghost&&controlRelationUnchanged;
       if(blend){
         c.netFromX=oldVisualX;c.netFromY=oldVisualY;c.netToX=targetX;c.netToY=targetY;
         c.netFromWalk=oldVisualWalk;c.netToWalk=targetWalk;c.netFromMoving=oldVisualMoving;c.netToMoving=targetMoving;
@@ -3610,12 +3621,39 @@ function netWithRemotePlayer(ch,fn){
     if(after==='meeting'||after==='over')G.state=after;else G.state=oldState;
   }
 }
+function moveRemoteWithInput(target,inp,dt,canMove){
+  const ix=Number.isFinite(+inp.x)?+inp.x:0,iy=Number.isFinite(+inp.y)?+inp.y:0,mag=Math.hypot(ix,iy);
+  if(!canMove||!target.alive||target.vent||mag<.001){target.moving=false;return false}
+  const sp=CFG.speed*(target.ghost?2:1)*dt;
+  const moved=moveChar(target,ix/mag*sp,iy/mag*sp);target.moving=moved;if(moved)target.walk+=dt;
+  if(ix)target.face=Math.sign(ix);
+  return moved;
+}
 function netUpdateRemote(dt){
-  for(const c of G.chars){if(!c.isRemoteHuman)continue;const inp=NET.remoteInputs.get(c.id)||{x:0,y:0,at:0};if(Date.now()-inp.at>500){inp.x=inp.y=0}
-    if(c.controlledBy){c.moving=false}
-    else if(['playing','task','tool'].includes(G.state)&&c.alive&&!c.vent&&(inp.x||inp.y)){const l=Math.hypot(inp.x,inp.y)||1;const sp=CFG.speed*(c.ghost?2:1)*dt;const moved=moveChar(c,inp.x/l*sp,inp.y/l*sp);c.moving=moved;if(moved)c.walk+=dt;c.face=inp.x?Math.sign(inp.x):c.face}else c.moving=false;
-    if(c.controlTargetId){const t=charById(c.controlTargetId);if(t&&t.alive){if(['playing','task','tool'].includes(G.state)&&!c.vent&&(inp.x||inp.y)){const l=Math.hypot(inp.x,inp.y)||1;const sp=CFG.speed*dt;const moved=moveChar(t,inp.x/l*sp,inp.y/l*sp);t.moving=moved;if(moved)t.walk+=dt;t.face=inp.x?Math.sign(inp.x):t.face}c.x=t.x;c.y=t.y;c.moving=t.moving;c.walk=t.walk;c.face=t.face}}
-    if(c.netKillCd>0)c.netKillCd=Math.max(0,c.netKillCd-dt);if(c.netSheriffCd>0)c.netSheriffCd=Math.max(0,c.netSheriffCd-dt);if(c.netTrackCd>0)c.netTrackCd=Math.max(0,c.netTrackCd-dt);if(c.netTrackTime>0){const t=G.chars.find(x=>x.id===c.netTrackTarget);c.netTrackTime=Math.max(0,c.netTrackTime-dt);if(!t||!t.alive||c.netTrackTime<=0){c.netTrackTarget=null;c.netTrackTime=0;c.netTrackCd=CFG.locCooldown}};
+  const canMove=['playing','task','tool'].includes(G.state),now=Date.now();
+  for(const c of G.chars){
+    if(!c.isRemoteHuman)continue;
+    const cached=NET.remoteInputs.get(c.id)||{x:0,y:0,at:0};
+    const inp=now-(cached.at||0)>500?{x:0,y:0,at:cached.at}:cached;
+    // Cooldowns continuam avançando mesmo enquanto uma vítima está possuída.
+    if(c.netKillCd>0)c.netKillCd=Math.max(0,c.netKillCd-dt);
+    if(c.netSheriffCd>0)c.netSheriffCd=Math.max(0,c.netSheriffCd-dt);
+    if(c.netTrackCd>0)c.netTrackCd=Math.max(0,c.netTrackCd-dt);
+    if(c.netTrackTime>0){const tracked=G.chars.find(x=>x.id===c.netTrackTarget);c.netTrackTime=Math.max(0,c.netTrackTime-dt);if(!tracked||!tracked.alive||c.netTrackTime<=0){c.netTrackTarget=null;c.netTrackTime=0;c.netTrackCd=CFG.locCooldown}}
+    // Uma vítima possuída não processa o input dela. O movimento vem somente do controlador;
+    // pular aqui também impede que a ordem de G.chars apague o estado de animação após movê-la.
+    if(c.controlledBy)continue;
+    if(c.controlTargetId){
+      const t=charById(c.controlTargetId);
+      if(!t||!t.alive||t.controlledBy!==c.id){stopControl(c,'end')}
+      else{
+        // Aplicar o vetor exatamente uma vez no corpo controlado. Antes, o controlador
+        // passava pelo movimento normal antes de mover a vítima; pequenas divergências
+        // podiam separar as colisões, e `moving` antigo sobrevivia quando o joystick zerava.
+        moveRemoteWithInput(t,(!c.vent&&!t.vent)?inp:{x:0,y:0},dt,canMove);
+        c.x=t.x;c.y=t.y;c.moving=t.moving;c.walk=t.walk;c.face=t.face;
+      }
+    }else moveRemoteWithInput(c,inp,dt,canMove);
   }
 }
 function netUpdateInput(){if(!NET.inRoom||!NET.id||!NET.ws||NET.ws.readyState!==WebSocket.OPEN)return;const blocked=G.state!=='playing'||uiBusy()||!!G.mapOpen||!!G.player?.vent||!!G.player?.controlledBy;const v=blocked?{x:0,y:0}:inputVec();netSend({type:'input',x:v.x,y:v.y})}
