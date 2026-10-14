@@ -186,10 +186,59 @@ test('após a reunião, todos os cooldowns de habilidades voltam à recarga comp
   assert.match(html, /G\.meetCd=CFG\.meet; G\.killCd=CFG\.kill; G\.sheriffCd=CFG\.sheriffCooldown; G\.delayedCd=CFG\.kill/);
   assert.match(html, /G\.sab\.cd=CFG\.sab/);
   assert.match(html, /c\.netKillCd=CFG\.kill;c\.netSheriffCd=CFG\.sheriffCooldown;c\.netDelayedCd=CFG\.kill;c\.netTrackTarget=null;c\.netTrackTime=0;c\.netTrackCd=CFG\.locCooldown;c\.ventCd=VENT_CD/);
+  assert.match(html, /c\.engVentCd=CFG\.engCooldown;c\.controlCd=CFG\.marionCooldown/);
 });
 
 test('NPCs consideram causas ligadas a funções especiais ao discutir um corpo', () => {
   assert.match(html, /cause==='delayed'[\s\S]*?causada por um Atrasado/);
   assert.match(html, /cause==='sheriff_misfire'[\s\S]*?Xerife tenha errado o disparo/);
   assert.match(html, /um Infiltrado, um Atrasado ou até um disparo de Xerife/);
+});
+
+test('Engenheiro e Marionetista têm configuração, atribuição e sincronização multiplayer', () => {
+  for (const key of ['engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax']) {
+    assert.match(html, new RegExp("'"+key+"'"));
+    assert.match(server, new RegExp(key+':\\['));
+  }
+  assert.match(html, /engVentDuration:\[10,61\]/);
+  assert.match(html, /engCooldown:\[5,25\]/);
+  assert.match(html, /marionCooldown:\[15,60\]/);
+  assert.match(html, /marionDuration:\[5,30\]/);
+  assert.match(html, /marionMax:\[0,3\]/);
+  assert.match(server, /marionMax:\[0,3\]/);
+  assert.match(html, /id="btnEngineerSection"[^>]*>🔧 Engenheiro/);
+  assert.match(html, /id="btnMarionetteSection"[^>]*>✋ Marionetista/);
+  assert.match(html, /Engenheiro - Pode usar os sustos/);
+  assert.match(html, /Marionetista - Controle Tripulantes e cause confusão na nave\./);
+  assert.match(html, /function startControl\(ch,target\)[\s\S]*?target\.controlledBy=ch\.id/);
+  assert.match(html, /target\.ai\.controlVictimSaw=\{id:ch\.id,gt:G\.gt,room:roomName\(target\.x,target\.y\)\}/);
+  assert.match(html, /if\(ch\.ai\)\{ch\.ai\.path=\[\];ch\.ai\.goal=null;ch\.ai\.isGoal=null/);
+  assert.match(html, /function stopControl\(ch,reason='end'\)[\s\S]*?if\(ch\.vent\|\|target\?\.vent\)[\s\S]*?exitVent\(ch\)/);
+  assert.match(html, /command==='control'[\s\S]*?startControl\(ch,target\)/);
+  assert.match(html, /controlTargetId:c\.controlTargetId\|\|null,controlledBy:c\.controlledBy\|\|null,controlTime:c\.controlTime\|\|0/);
+  assert.match(html, /if\(c\.alive&&c\.function==='engineer'&&c\.vent&&!c\.controlledBy\)[\s\S]*?exitVent\(c\)/);
+  assert.match(html, /function noteEngineerVentSeen\(ch,v,act\)[\s\S]*?addSusp\(o,ch\.id,-1\.2,'clear'/);
+  assert.match(html, /ai\.engineerSaw&&G\.gt-ai\.engineerSaw\.gt<45/);
+  assert.match(html, /\(ai\.vents\|\|\[\]\)\.some\(v=>v\.id===t\.id&&!v\.engineer\)/);
+});
+
+test('NPCs usam falas contextuais e jogadores mortos veem funções sem revelar aos vivos', () => {
+  assert.match(html, /Onde que mataram \${M\.body\.name}\?/);
+  assert.match(html, /Encontrei o corpo de \${M\.body\.name} em \${M\.body\.room}!/);
+  for (const phrase of ['Sim.','Não.','Concordo.','Discordo.','Isso é verdade:','Mentira!','Eu vi!','Não vi','Faltam poucas tarefas, vamos!','Vamos fazer tarefas para vencer!','Mortos, façam as suas tarefas!','Cuidado! Vamos resolver a sabotagem']) {
+    assert.ok(html.includes(phrase), 'fala contextual ausente: '+phrase);
+  }
+  assert.match(html, /\(\(!G\.player\?\.alive\|\|G\.role==='imp'\)&&ch\.role==='imp'\?'#ff6b7e'/);
+  assert.match(html, /if\(!G\.player\.alive\)\{const fl=\{sheriff:'Xerife'.*const roleLine=el\('small','pfunction',fl\+' — '\+ch\.name\)/s);
+  assert.match(html, /if\(!G\.player\.alive&&ch\.role==='imp'\)pn\.style\.color='#ff6b7e'/);
+  assert.match(html, /if\(ai\.controlVictimSaw&&G\.gt-ai\.controlVictimSaw\.gt<45/);
+  assert.match(html, /if\(ai\.controlSaw&&G\.gt-ai\.controlSaw\.gt<35/);
+  assert.match(html, /if\(ai\.ventSaw&&G\.gt-ai\.ventSaw\.gt<45/);
+  assert.match(html, /if\(G\.player\?\.controlledBy\|\|G\.state!=='playing'\|\|uiBusy\(\)\|\|!a\)return/);
+  assert.match(html, /!p\.vent&&!p\.controlledBy\)updatePlayer\(dt\)/);
+  assert.match(html, /if\(ch\.controlTargetId\) \{ c\.restore\(\); return; \}/);
+  assert.match(html, /if\(o===ch\|\|!o\.alive\|\|o\.vent\|\|o\.controlTargetId\)continue/);
+  assert.match(html, /\.pc\.dead\{filter:none;border-color/);
+  assert.match(html, /\.pc\.dead canvas\{filter:grayscale\(1\);opacity:/);
+  assert.match(html, /lastSab&&G\.sab\[lastSab\.type\]>0/);
 });
