@@ -239,3 +239,11 @@ test('cosméticos têm catálogo, categorias, renderização centralizada e sinc
   assert.match(html, /drawBody\(c,\{x:48,y:17,color:v\.color,cosmetics:v\.cosmetics\}\)/, 'morte deve preservar a parte visual aplicável');
   assert.doesNotMatch(html, /HALF_W[^\n]*cosmetic|boxBlocked[^\n]*cosmetic|CFG\.speed[^\n]*cosmetic/i, 'cosméticos não podem entrar em colisão ou velocidade');
 });
+
+test('catálogo de cosméticos abre acima do lobby e permite trocar apenas cores livres', () => {
+  assert.match(html, /#cosmeticsOverlay\{position:fixed;inset:0;z-index:180;/, 'catálogo deve ficar acima do lobby');
+  assert.match(html, /id="lobbyColorSwatches"/, 'catálogo deve conter seletor de cor');
+  assert.match(html, /netSend\(\{type:'set_color',color:color\.id\}\)/, 'troca de cor deve ser sincronizada com o servidor');
+  assert.match(html, /filter\(p=>p\.id!==NET\.id\)\.map\(p=>p\.color\)/, 'cores usadas por outros jogadores devem ficar indisponíveis');
+  assert.match(html, /\{id:'banana',name:'Banana',main:'#fff2a8',dark:'#d9be58'\}/, 'banana deve usar uma tonalidade mais clara');
+});

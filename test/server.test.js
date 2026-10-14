@@ -300,3 +300,33 @@ test('cosméticos são sanitizados e sincronizados para todos somente no lobby',
   send(guest,{type:'set_cosmetics',cosmetics:{hat:'none'}});
   const locked=await onceMessage(guest,m=>m.type==='room_error');assert.match(locked.message,/sala de espera/i);
 });
+
+test('cores podem mudar no lobby, não podem duplicar e ficam travadas durante a partida', async t=>{
+  const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:20,loadingMs:10});
+  await new Promise(resolve=>app.server.once('listening',resolve));
+  const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
+  t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+  const host=await connect(url,'Host','azul');all.push(host);
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:2});
+  const made=await onceMessage(host,m=>m.type==='room_state');const code=made.room.code;
+  const guest=await connect(url,'Guest','verde');all.push(guest);
+  send(guest,{type:'join_room',code,color:'verde'});
+  await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.length===2);
+  await onceMessage(host,m=>m.type==='room_state'&&m.room.players.length===2);
+
+  send(guest,{type:'set_color',color:'rosa'});
+  const changed=await onceMessage(host,m=>m.type==='room_state'&&m.room.players.find(p=>p.id===guest.id)?.color==='rosa');
+  assert.equal(changed.room.players.find(p=>p.id===guest.id).color,'rosa');
+  await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.find(p=>p.id===guest.id)?.color==='rosa');
+
+  send(guest,{type:'set_color',color:'azul'});
+  const duplicate=await onceMessage(guest,m=>m.type==='room_error');
+  assert.match(duplicate.message,/já está em uso/i);
+  assert.equal(rooms.get(code).players.find(p=>p.id===guest.id).color,'rosa');
+
+  send(host,{type:'start_game'});await onceMessage(guest,m=>m.type==='game_start');
+  send(guest,{type:'set_color',color:'amarelo'});
+  const locked=await onceMessage(guest,m=>m.type==='room_error');
+  assert.match(locked.message,/sala de espera/i);
+  assert.equal(rooms.get(code).players.find(p=>p.id===guest.id).color,'rosa');
+});
