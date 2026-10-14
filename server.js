@@ -35,11 +35,13 @@ function ensureBotRoster(room){
 const safeText = (v, max=12, fallback='Tripulante') => String(v ?? '').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,max) || fallback;
 const send = (ws, obj) => { if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify(obj)); };
 const broadcast = (room, obj, exceptId=null) => { for(const p of room.players){ if(p.id===exceptId)continue; const c=clients.get(p.id); if(c)send(c.ws,obj); } };
-function cleanSettings(input={}) {
+function maxImpostorsForCount(count){const n=Math.max(4,Math.min(15,Math.round(Number(count)||4)));return n>=10?3:n>=8?2:1}
+function cleanSettings(input={}, playerCount=15) {
   const out={...DEFAULT_SETTINGS};
   for(const [key,[lo,hi]] of Object.entries(LIMITS)) {
     const n=Number(input[key]); if(Number.isFinite(n))out[key]=Math.min(hi,Math.max(lo,Math.round(n)));
   }
+  out.impostors=Math.min(out.impostors,maxImpostorsForCount(playerCount));
   return out;
 }
 const ROOM_CODE_CHARS='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -145,7 +147,7 @@ function handle(ws, raw, timings={}){
     const size=Math.min(15,Math.max(4,Math.round(Number(m.size)||10)));
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
     const code=makeCode();
-    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings),players:[],lastSnapshot:null,createdAt:Date.now(),countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,botRoster:[],botNameSeq:0};
+    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,createdAt:Date.now(),countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,botRoster:[],botNameSeq:0};
     room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false});
     c.name=room.players[0].name;c.color=room.players[0].color;c.roomCode=code;rooms.set(code,room);
     sendRoomState(room);return;
@@ -176,7 +178,7 @@ function handle(ws, raw, timings={}){
     const humans=room.players.length;
     const bots=Math.min(room.size-humans,Math.max(0,Math.round(Number.isFinite(Number(m.bots))?Number(m.bots):room.bots)));
     if(humans+bots>room.size)return error(ws,'A sala não comporta essa quantidade de bots.');
-    room.bots=bots;room.settings=cleanSettings({...room.settings,...(m.settings&&typeof m.settings==='object'?m.settings:{})});sendRoomState(room);return;
+    room.bots=bots;room.settings=cleanSettings({...room.settings,...(m.settings&&typeof m.settings==='object'?m.settings:{})},room.size);sendRoomState(room);return;
   }
   if(m.type==='start_game'){
     if(!isHost)return error(ws,'Somente o host pode iniciar a partida.');
@@ -215,7 +217,7 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='action'){
     if(isHost||room.status!=='playing')return;
-    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat']);if(!allowed.has(action))return;
+    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','control','control_release','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat']);if(!allowed.has(action))return;
     const host=clients.get(room.hostId);if(!host)return;
     const allowedData={command:action,playerId:c.id};
     for(const k of ['targetId','sabotage','ventId','taskId','stepId','fix','text','claim'])if(m[k]!==undefined)allowedData[k]=m[k];

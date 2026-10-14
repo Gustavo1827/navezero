@@ -1387,7 +1387,7 @@ function newGame(){
     cols.slice(0,14).forEach((c,i)=>{const n=makeNPC(names[i],c.id); n.ai.killCd=Math.min(CFG.kill,14); G.chars.push(n)});
   }
   // Sorteia funções uma única vez no host; os snapshots preservam o resultado para todos.
-  const impostors=shuffle(G.chars.slice()).slice(0,clamp(CFG.impostors,1,3)); G.chars.forEach(c=>{c.role=impostors.includes(c)?'imp':'crew';c.function=null}); G.imps=impostors; G.imp=impostors[0]; G.role=p.role; G.locator=false; G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
+  const impostors=shuffle(G.chars.slice()).slice(0,clamp(CFG.impostors,1,maxImpostorsForPlayers(G.chars.length))); G.chars.forEach(c=>{c.role=impostors.includes(c)?'imp':'crew';c.function=null}); G.imps=impostors; G.imp=impostors[0]; G.role=p.role; G.locator=false; G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
   const eligible=shuffle(G.chars.filter(c=>c.role==='crew')); let locCount=0; for(const ch of eligible){if(locCount>=CFG.locMax)break;if(Math.random()*100<CFG.locChance){ch.function='locator';locCount++}}
   // A chance é verificada uma vez por partida; os Xerifes podem ser humanos ou bots, sempre entre Tripulantes sem outra função. Nenhum Xerife é atribuído com chance ou quantidade zero.
   const sheriffEligible=shuffle(G.chars.filter(c=>c.role==='crew'&&c.function!=='locator'));
@@ -1694,7 +1694,7 @@ function closeMap(){
   if(!G.mapOpen)return;
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
-const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','Escolha 1, 2 ou 3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['engVentDuration','Tempo limite nos dutos','10–60 segundos; 61 representa tempo infinito','s'],['engChance','Chance de existir Engenheiro','Porcentagem de chance de atribuição','%'],['engMax','Quantidade de Engenheiros','Máximo de Engenheiros, limitado aos Tripulantes',''],['engCooldown','Cooldown do duto','Recarga do Engenheiro após sair dos dutos','s'],['marionCooldown','Cooldown de Controlar','Recarga da habilidade do Marionetista','s'],['marionDuration','Tempo limite do controle','Duração máxima do controle de outro jogador','s'],['marionChance','Chance de Marionetistas','Porcentagem de chance de atribuição','%'],['marionMax','Quantidade de Marionetistas','Máximo de Marionetistas, limitado aos Infiltrados','']];
+const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','4–7 jogadores: 1; 8–9 jogadores: 1–2; 10 ou mais: 1–3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['engVentDuration','Tempo limite nos dutos','10–60 segundos; 61 representa tempo infinito','s'],['engChance','Chance de existir Engenheiro','Porcentagem de chance de atribuição','%'],['engMax','Quantidade de Engenheiros','Máximo de Engenheiros, limitado aos Tripulantes',''],['engCooldown','Cooldown do duto','Recarga do Engenheiro após sair dos dutos','s'],['marionCooldown','Cooldown de Controlar','Recarga da habilidade do Marionetista','s'],['marionDuration','Tempo limite do controle','Duração máxima do controle de outro jogador','s'],['marionChance','Chance de Marionetistas','Porcentagem de chance de atribuição','%'],['marionMax','Quantidade de Marionetistas','Máximo de Marionetistas, limitado aos Infiltrados','']];
 function buildCfgUI(){
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
   const locked=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
@@ -1723,10 +1723,11 @@ function buildCfgUI(){
       const wireRepeat=(btn,delta)=>{let delayTimer=null,repeatTimer=null;const stop=()=>{if(delayTimer!==null){clearTimeout(delayTimer);delayTimer=null}if(repeatTimer!==null){clearInterval(repeatTimer);repeatTimer=null}};const canStep=()=>!locked&&(delta<0?CFG[k]>CFG_LIM[k][0]:CFG[k]<CFG_LIM[k][1]);const down=e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();if(!canStep())return;stop();if(btn.setPointerCapture&&e.pointerId!==undefined){try{btn.setPointerCapture(e.pointerId)}catch{}}change(delta);delayTimer=setTimeout(()=>{delayTimer=null;if(!canStep())return;repeatTimer=setInterval(()=>{if(!canStep()){stop();return}change(delta,true)},70)},280)};btn.addEventListener('pointerdown',down);btn.addEventListener('pointerup',stop);btn.addEventListener('pointercancel',stop);btn.addEventListener('lostpointercapture',stop);btn.addEventListener('click',e=>{if(e.detail===0)change(delta)});};
       wireRepeat(minus,-1);wireRepeat(plus,1);stepper.append(minus,number,plus);row.append(top,stepper,el('small','',d));sync();
     }else{
+      const lim=cfgLimitFor(k);if(CFG[k]>lim[1])CFG[k]=lim[1];
       const out=el('b','',CFG[k]+(unit?' '+unit:''));
-      const inp=document.createElement('input'); inp.type='range'; inp.min=CFG_LIM[k][0]; inp.max=CFG_LIM[k][1]; inp.step=1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
+      const inp=document.createElement('input'); inp.type='range'; inp.min=lim[0]; inp.max=lim[1]; inp.step=1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
       inp.disabled=locked;
-      inp.addEventListener('input',()=>{if(locked){inp.value=CFG[k];return}CFG[k]=clamp(+inp.value,CFG_LIM[k][0],CFG_LIM[k][1]);out.textContent=CFG[k]+(unit?' '+unit:'');saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
+      inp.addEventListener('input',()=>{if(locked){inp.value=CFG[k];return}const activeLim=cfgLimitFor(k);CFG[k]=clamp(+inp.value,activeLim[0],activeLim[1]);out.textContent=CFG[k]+(unit?' '+unit:'');saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
       top.append(el('span','',l),out); row.append(top,inp,el('small','',d));
     }
     box.appendChild(row);
@@ -1909,6 +1910,9 @@ updateNPC=function(ch,dt){if(ch.controlledBy)return;const result=updateNPCBaseCo
 const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,renderDist:820};
 const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],engVentDuration:[10,61],engChance:[0,100],engMax:[0,15],engCooldown:[5,25],marionCooldown:[15,60],marionDuration:[5,30],marionChance:[0,100],marionMax:[0,3],renderDist:[500,1500]};
 const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,renderDist:820};
+function maxImpostorsForPlayers(count){const n=Math.max(4,Math.min(15,Math.round(Number(count)||4)));return n>=10?3:n>=8?2:1}
+function configuredPlayerCount(){if(typeof NET!=='undefined'&&NET.inRoom&&NET.room)return Math.max(4,Math.min(15,Number(NET.room.size)||4));return 15}
+function cfgLimitFor(key){return key==='impostors'?[1,maxImpostorsForPlayers(configuredPlayerCount())]:CFG_LIM[key]}
 (function(){try{const j=JSON.parse(localStorage.getItem('nz_cfg')||'{}');for(const k in CFG_LIM){const v=+j[k];if(v>=CFG_LIM[k][0]&&v<=CFG_LIM[k][1])CFG[k]=Math.round(v)}}catch(e){}})();
 function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,delayedEnabled:CFG.delayedEnabled,delayedChance:CFG.delayedChance,delayedMax:CFG.delayedMax,delayedDuration:CFG.delayedDuration,engVentDuration:CFG.engVentDuration,engChance:CFG.engChance,engMax:CFG.engMax,engCooldown:CFG.engCooldown,marionCooldown:CFG.marionCooldown,marionDuration:CFG.marionDuration,marionChance:CFG.marionChance,marionMax:CFG.marionMax,renderDist:CFG.renderDist}))}catch(e){}}
 const inGame=()=>G.state!=='menu';
@@ -2502,7 +2506,7 @@ function startSabotage(type,by){
   G.chars.forEach(o=>{if(o.alive&&!o.isPlayer&&!o.isRemoteHuman&&o.role==='crew'){o.ai.sabs.push({type,gt:G.gt,room:roomName(o.x,o.y)});if(o.ai.sabs.length>4)o.ai.sabs.shift()}});
   G.chars.forEach(o=>{ if(!o.alive||o.isPlayer||o.isRemoteHuman||o.role!=='crew')return; o.ai.incidents++;
     if(by.alive&&o!==by&&dist(o,by)<320&&losClear(o.x,o.y,by.x,by.y))addSusp(o,by.id,1.4,'sabNear',{room:roomName(by.x,by.y)}) });
-  if(type!=='doors'){dispatchFixers(type);const fx=G.chars.find(c=>c.alive&&!c.isPlayer&&!c.isRemoteHuman&&c.ai&&c.ai.fix===type); if(fx)npcSay(fx,'Precisamos resolver essa sabotagem primeiro.')}
+  if(type!=='doors'){dispatchFixers(type);const fx=G.chars.find(c=>c.alive&&!c.isPlayer&&!c.isRemoteHuman&&c.ai&&c.ai.fix===type);if(fx){const sabName={lights:'as luzes',reactor:'o reator',comms:'as comunicações'}[type]||'a sabotagem';npcSay(fx,`Cuidado! Vamos resolver ${sabName}!`)}}
   renderTasks();
   Snd.err(); toast(SAB_TXT[type],3200); updateSabUI(); return true;
 }
@@ -2599,11 +2603,11 @@ function npcStatement(ch,M){
   const ai=ch.ai, P=PERS[ai.pers];
   if(M.body&&ch===M.caller&&Math.random()<.85)return {from:ch,text:`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`,claim:{from:ch.id,kind:'bodyReport',target:M.body.id,room:M.body.room,time:M.body.tKill}};
   if(M.body&&Math.random()<.12)return {from:ch,text:`Onde que mataram ${M.body.name}?`,claim:{from:ch.id,kind:'ask',bodyInquiry:true}};
-  if(G.sab.reactor>0&&Math.random()<.35)return {from:ch,text:`Cuidado! Vamos resolver a sabotagem do reator!`,claim:null};
-  const lastSab=ai.sabs[ai.sabs.length-1];if(lastSab&&G.sab[lastSab.type]>0&&G.gt-lastSab.gt<18&&Math.random()<.22){const sn={lights:'das luzes',comms:'das comunicações',reactor:'do reator',doors:'das portas'}[lastSab.type]||'da nave';return {from:ch,text:`Cuidado! Vamos resolver a sabotagem ${sn}!`,claim:null}}
-  if(ai.controlVictimSaw&&G.gt-ai.controlVictimSaw.gt<45&&Math.random()<.55){const seen=charById(ai.controlVictimSaw.id);if(seen)return {from:ch,text:`${seen.name} me controlou! Acho que é Marionetista.`,claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true}}}
+  if(G.sab.reactor>0&&Math.random()<.35)return {from:ch,text:'Cuidado! Vamos resolver o reator!',claim:null};
+  const lastSab=ai.sabs[ai.sabs.length-1];if(lastSab&&G.sab[lastSab.type]>0&&G.gt-lastSab.gt<18&&Math.random()<.22){const sn={lights:'as luzes',comms:'as comunicações',reactor:'o reator',doors:'as portas'}[lastSab.type]||'a sabotagem';return {from:ch,text:`Cuidado! Vamos resolver ${sn}!`,claim:null}}
+  if(ai.controlVictimSaw&&G.gt-ai.controlVictimSaw.gt<45&&Math.random()<.55){const seen=charById(ai.controlVictimSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Marionetista!`,`${seen.name} me controlou! Acho que é Marionetista.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'marionette'}}}
   if(ai.controlSaw&&G.gt-ai.controlSaw.gt<35&&Math.random()<.22){const seen=charById(ai.controlSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Infiltrado? Eu vi algo estranho durante o controle.`,`${seen.name} é Marionetista? O comportamento durante o controle foi estranho.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:false}}}
-  if(ai.engineerSaw&&G.gt-ai.engineerSaw.gt<45&&Math.random()<.20){const seen=charById(ai.engineerSaw.id);if(seen)return {from:ch,text:`Vi ${seen.name} usando um duto. Deve ser Engenheiro, não Infiltrado.`,claim:{from:ch.id,kind:'defend',target:seen.id}}}
+  if(ai.engineerSaw&&G.gt-ai.engineerSaw.gt<45&&Math.random()<.20){const seen=charById(ai.engineerSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Engenheiro!`,`Vi ${seen.name} usando um duto. Deve ser Engenheiro, não Infiltrado.`]),claim:{from:ch.id,kind:'defend',target:seen.id,role:'engineer'}}}
   if(ai.ventSaw&&G.gt-ai.ventSaw.gt<45&&Math.random()<.16){const seen=charById(ai.ventSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Infiltrado? Eu vi usando um duto.`,`${seen.name} é Engenheiro? Vi essa pessoa usando um duto.`]),claim:{from:ch.id,kind:'suspicion',target:seen.id,vent:true,strong:false}}}
   if(M.body&&Math.random()<.12)return {from:ch,text:pick([`Sim. O corpo de ${M.body.name} foi encontrado ${inRoom(M.body.room)}.`,`Isso é verdade: encontramos ${M.body.name} ${inRoom(M.body.room)}.`]),claim:{from:ch.id,kind:'ask',bodyInquiry:true}};
   const recentTask=ai.state==='work'&&ai.goal?.type==='task'&&!ai.goal.t?.fake?ai.goal.t.name:(ai.lastTaskName&&G.gt-(ai.lastTaskAt||0)<30?ai.lastTaskName:null);
@@ -2650,7 +2654,7 @@ function genChat(){
   const M=G.M, L=[], npcs=G.chars.filter(c=>c.alive&&!c.isPlayer&&!c.isRemoteHuman);
   const c=M.caller;
   if(!c.isPlayer&&!c.isRemoteHuman){
-    if(M.reason==='body')L.push({from:c,text:`Encontrei o corpo de ${M.body.name} ${inRoom(M.body.room)}!`,claim:null});
+    if(M.reason==='body')L.push({from:c,text:`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`,claim:null});
     else if(M.evid)L.push({from:c,text:'Chamei a reunião porque '+M.evid.text.charAt(0).toLowerCase()+M.evid.text.slice(1),claim:M.evid.claim});
     else L.push({from:c,text:'Chamei a reunião. Precisamos conversar.',claim:null});
   }
@@ -2677,16 +2681,16 @@ function hear(L,claim){
       const own=ai.susp[T.id]||0;
       const sawVent=(ai.vents||[]).some(v=>v.id===T.id);
       addSusp(L,T.id,(claim.vent?3.2:(claim.strong?1.8:1))*heard*(own>0?1.25:1)*(own<=-1?.2:1),'claim',{by:sp.id});
-      if(claim.vent&&sawVent){text=pick([`Eu também vi ${T.name} num duto!`,`Confirmo! ${T.name} estava no duto!`]);prio=4}
-      else if(claim.vent&&own<P.thr*.6){text=pick([`Eu não vi isso, mas ${sp.name} parece ter certeza.`,`Se for verdade, ${T.name} é o Infiltrado. Quem mais viu?`]);prio=3}
-      else if(own<=-1){text=`Não concordo, vi ${T.name} fazendo tarefa de verdade.`;prio=3}
-      else if(own>=P.thr*.6){text=pick([`Concordo, eu também desconfio de ${T.name}.`,`É, ${T.name} também me chamou atenção.`]);prio=3}
+      if(claim.vent&&sawVent){text=pick(['Eu vi!',`Eu também vi ${T.name} num duto!`,`Confirmo! ${T.name} estava no duto!`]);prio=4}
+      else if(claim.vent&&own<P.thr*.6){text=pick(['Não vi!',`Eu não vi isso, mas ${sp.name} parece ter certeza.`,`Se for verdade, ${T.name} é o Infiltrado. Quem mais viu?`]);prio=3}
+      else if(own<=-1){text=pick(['Discordo.',`Não concordo, vi ${T.name} fazendo tarefa de verdade.`]);prio=3}
+      else if(own>=P.thr*.6){text=pick(['Concordo.',`Concordo, eu também desconfio de ${T.name}.`,`É, ${T.name} também me chamou atenção.`]);prio=3}
       else if((ai.pers==='cauteloso'||ai.pers==='observador')&&Math.random()<.8){text=pick(['Que evidências você tem?','Onde você viu isso exatamente?','Calma, sem provas é arriscado.']);prio=2}
       else if(ai.pers==='impulsivo'&&Math.random()<.55){text=pick([`Faz sentido, ${T.name} está estranho mesmo.`,`Boa, vamos de ${T.name}!`]);prio=2}
       else if(ai.pers==='desconfiado'&&Math.random()<.45){text=`Pode ser, ${T.name} não me passa confiança.`;prio=2}
       else{text=pick([`Hmm, ${T.name} não me pareceu tão suspeito.`,`Acho cedo para acusar ${T.name}.`,`Não vi nada contra ${T.name}.`]);prio=2}
     }
-  }else if(claim.kind==='bodyReport'&&M.body){text=`Sim. O corpo de ${M.body.name} está ${inRoom(M.body.room)}.`;prio=2}
+  }else if(claim.kind==='bodyReport'&&M.body){text=pick(['Sim.','Isso é verdade.',`Sim. O corpo de ${M.body.name} está ${inRoom(M.body.room)}.`]);prio=2}
   else if(claim.kind==='defend'&&T){
     const own=ai.susp[T.id]||0; if(!imp)addSusp(L,T.id,-.6*heard,'claim');
     if(own>=P.thr*.6){text=`Defender ${T.name} agora? Eu não confio.`;prio=2}
@@ -2698,9 +2702,9 @@ function hear(L,claim){
   }else if(claim.kind==='sight'&&T){
     const time=(claim.near&&M.body)?M.body.tKill:(claim.time!==undefined?claim.time:M.gt0), recs=histNear(ai,T.id,time,8);
     if(recs.length&&claim.room&&!recs.some(r=>r.room===claim.room)){
-      text=`Estranho, eu vi ${T.name} ${inRoom(recs[recs.length-1].room)} nessa hora.`; prio=4; addSusp(L,sp.id,1.4,'contra');
+      text=pick(['Mentira!',`Estranho, eu vi ${T.name} ${inRoom(recs[recs.length-1].room)} nessa hora.`]); prio=4; addSusp(L,sp.id,1.4,'contra');
     }else if(recs.length&&claim.room){
-      text=pick([`Confirmo, também vi ${T.name} ${inRoom(claim.room)}.`,`Sim, ${T.name} estava ${inRoom(claim.room)} mesmo.`]); prio=3;
+      text=pick(['Isso é verdade.','Eu vi!',`Confirmo, também vi ${T.name} ${inRoom(claim.room)}.`,`Sim, ${T.name} estava ${inRoom(claim.room)} mesmo.`]); prio=3;
       if(!imp)addSusp(L,T.id,(claim.near?1.4:.5)*heard,'claim',{by:sp.id});
     }else{
       if(!imp)addSusp(L,T.id,(claim.near?1.2:.5)*heard,'claim',{by:sp.id});
@@ -2711,8 +2715,14 @@ function hear(L,claim){
     if(c){text=`Isso não combina com o que vimos: eu vi ${sp.name} ${inRoom(c)}.`;prio=4;addSusp(L,sp.id,2,'contra')}
   }else if(claim.kind==='ask'&&claim.bodyInquiry&&M.body){
     text=pick([`O corpo foi encontrado ${inRoom(M.body.room)}.`,`Pelo que foi reportado, foi ${inRoom(M.body.room)}.`,`A denúncia indicou ${inRoom(M.body.room)}.`]); prio=2;
+  }else if(claim.kind==='ask'&&claim.role&&T){
+    const sawMarion=(ai.controlSaw?.id===T.id||ai.controlVictimSaw?.id===T.id),sawEngineer=ai.engineerSaw?.id===T.id;
+    if(claim.role==='marionette'&&sawMarion){text=pick(['Sim.','Isso é verdade.','Eu vi!']);prio=4}
+    else if(claim.role==='marionette'&&sawEngineer){text='Não.';prio=3}
+    else if(claim.role==='engineer'&&sawEngineer){text=pick(['Sim.','Isso é verdade.','Eu vi!']);prio=4}
+    else{text='Não vi!';prio=1}
   }else if(claim.kind==='ask'&&Math.random()<.5){
-    text=pick([`Eu estava ${inRoom(myRoomAt(L,M.body?M.body.tKill:M.gt0))}.`,'Não vi nada de estranho.',`Alguém viu algo por perto?`]); prio=1;
+    if(T){const seen=ai.seen[T.id]&&G.gt-(ai.seen[T.id].t||0)<25;text=seen?'Eu vi!':'Não vi!'}else text=pick([`Estava em ${myRoomAt(L,M.body?M.body.tKill:M.gt0)}.`,'Não vi nada de estranho.',`Alguém viu algo por perto?`]); prio=1;
   }else if(claim.kind==='suspicion'){
     const top=topSuspect(L);
     text=top&&top.s>=P.thr*.6?`Também estou de olho em ${charById(top.id)?.name||'alguém'}, mas precisamos confirmar.`:pick(['Quem você viu? Temos algum detalhe?','Suspeita sozinha não basta. Alguém tem uma pista concreta?','Eu não vi o suficiente para acusar alguém ainda.']); prio=2;
@@ -2820,7 +2830,7 @@ function renderPhraseTargets(phraseId){
 function renderPhraseRoles(phraseId,targetId=null){
   const box=$('sayChips');box.innerHTML='';
   const title=el('span','mstatus','Escolha uma função:');title.style.width='100%';box.appendChild(title);
-  const roles=[['crew','Tripulante'],['imp','Infiltrado'],['sheriff','Xerife'],['locator','Localizador']];
+  const roles=[['crew','Tripulante'],['imp','Infiltrado'],['sheriff','Xerife'],['locator','Localizador'],['marionette','Marionetista']];
   for(const [id,label] of roles){
     const b=el('button','chip phrase',label);b.type='button';
     b.addEventListener('click',()=>sendPresetPhrase(phraseId,targetId,null,id));box.appendChild(b);
@@ -2876,7 +2886,7 @@ function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
     case 'roleGuess': if(!T)return; text=`Será que ${T.name} é o Localizador?`; claim={from:G.player.id,kind:'ask',target:T.id}; break;
     case 'roleCrew': if(!T)return; text=`Acho que ${T.name} é inocente.`; claim={from:G.player.id,kind:'defend',target:T.id}; break;
     case 'roleDeny': case 'roleSelf': case 'roleSight': case 'roleGuessPlayer': {
-      const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador'};
+      const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',marionette:'Marionetista'};
       const role=roles[rolePicked];if(!role)return;
       const article=role==='Infiltrado'?'o Infiltrado':role==='Tripulante'?'Tripulante':`o ${role}`;
       if(id==='roleDeny')text=`Não sou ${article}.`;
