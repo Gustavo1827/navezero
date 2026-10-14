@@ -54,11 +54,11 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 
 
 /* ---------- cosméticos ---------- */
-#cosmeticsOverlay{position:fixed;inset:0;z-index:14;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(4,5,18,.82);touch-action:none}
+#cosmeticsOverlay{position:fixed;inset:0;z-index:180;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(4,5,18,.82);touch-action:none}
 .cosmeticsCard{width:min(760px,100%);max-height:94dvh;overflow:auto;text-align:left;background:#11153a;border:3px solid var(--edge);border-radius:24px;padding:16px 18px 18px;box-shadow:0 10px 0 #080a22,0 30px 70px rgba(0,0,0,.65)}
 .cosmeticsHead{display:flex;align-items:center;justify-content:space-between;gap:12px}.cosmeticsHead h2{margin:0;font-size:28px;color:var(--amber)}
 .cosmeticsLayout{display:grid;grid-template-columns:minmax(190px,240px) 1fr;gap:16px;align-items:start}.cosmeticsPreview{background:#0b0e2d;border:2px solid #333d80;border-radius:18px;padding:10px;text-align:center;position:sticky;top:0}
-#cosmeticsPreviewCv{display:block;width:100%;height:auto;max-width:240px;margin:0 auto}#cosmeticsEquipped{font-size:13px;color:var(--ink2);line-height:1.35;min-height:42px}
+#cosmeticsPreviewCv{display:block;width:100%;height:auto;max-width:240px;margin:0 auto}.lobbyColorBlock{margin:9px 0 11px;padding:9px;border:1.5px solid #333d80;border-radius:13px;background:#0e1234}.lobbyColorBlock>strong{display:block;margin-bottom:7px}.lobbyColorSwatches{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}.lobbyColorSwatches .sw{width:30px;height:30px;box-shadow:0 2px 0 #05061a}.lobbyColorSwatches .sw:disabled{opacity:.28;cursor:not-allowed;filter:grayscale(.35)}.lobbyColorHint{display:block;margin-top:6px;font-size:11.5px;color:var(--ink2);line-height:1.25}#cosmeticsEquipped{font-size:13px;color:var(--ink2);line-height:1.35;min-height:42px}
 .cosmeticsTabs{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 10px}.cosmeticsTabs .chip[aria-pressed="true"]{border-color:var(--amber);color:var(--amber);background:#30260f}
 #cosmeticsGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.cosmeticItem{min-width:0;background:#171c4a;border:2px solid #354080;border-radius:14px;padding:7px 5px 6px;color:var(--ink);font:700 13px var(--font);box-shadow:0 3px 0 #090b24}
 .cosmeticItem[aria-pressed="true"]{border-color:var(--amber);background:#343014;box-shadow:0 3px 0 #856114}.cosmeticItem canvas{display:block;width:78px;height:68px;margin:0 auto 2px}.cosmeticNoneMark{height:68px;display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--ink2)}.roomAvatar{width:38px;height:38px;flex:none;display:block}
@@ -444,7 +444,7 @@ body.touch #stick{display:block}
   <div class="cosmeticsCard" role="dialog" aria-modal="true" aria-labelledby="cosmeticsTitle">
     <div class="cosmeticsHead"><h2 id="cosmeticsTitle">Cosméticos</h2><button class="chip" id="btnCosmeticsClose" type="button" aria-label="Fechar cosméticos">✕</button></div>
     <p class="phase">Itens apenas visuais. Não alteram velocidade, colisão, visão, função ou habilidades.</p>
-    <div class="cosmeticsLayout"><aside class="cosmeticsPreview"><canvas id="cosmeticsPreviewCv" width="260" height="220" aria-label="Prévia do personagem"></canvas><strong>Sua aparência</strong><div id="cosmeticsEquipped"></div></aside><section><div id="cosmeticsTabs" class="cosmeticsTabs" aria-label="Categorias"></div><div id="cosmeticsGrid"></div></section></div>
+    <div class="cosmeticsLayout"><aside class="cosmeticsPreview"><canvas id="cosmeticsPreviewCv" width="260" height="220" aria-label="Prévia do personagem"></canvas><strong>Sua aparência</strong><div class="lobbyColorBlock"><strong>Cor</strong><div id="lobbyColorSwatches" class="lobbyColorSwatches" aria-label="Cores disponíveis"></div><small class="lobbyColorHint">Cada jogador usa uma cor diferente. Cosméticos podem se repetir.</small></div><div id="cosmeticsEquipped"></div></aside><section><div id="cosmeticsTabs" class="cosmeticsTabs" aria-label="Categorias"></div><div id="cosmeticsGrid"></div></section></div>
   </div>
 </div>
 
@@ -684,7 +684,7 @@ const COLORS=[
   {id:'preto',name:'Preto',main:'#424857',dark:'#252937'},
   {id:'branco',name:'Branco',main:'#e8ecf3',dark:'#9aa3b8'},
   {id:'carmim',name:'Carmim',main:'#b51f4a',dark:'#74112f'},
-  {id:'banana',name:'Banana',main:'#ffe45c',dark:'#c6a91f'},
+  {id:'banana',name:'Banana',main:'#fff2a8',dark:'#d9be58'},
   {id:'caqui',name:'Caqui',main:'#b8a04a',dark:'#79672a'},
   {id:'coral',name:'Coral',main:'#ff786b',dark:'#b84742'},
   {id:'cinza',name:'Cinza',main:'#8a91a0',dark:'#555b68'},
@@ -3711,7 +3711,7 @@ addEventListener('touchstart',()=>document.body.classList.add('touch'),{once:tru
 // seletor de cor
 (function(){
   const box=$('swatches');
-  COLORS.forEach(c=>{const b=el('button','sw');b.style.background=c.main;b.setAttribute('aria-label',c.name);b.title=c.name;b.setAttribute('aria-pressed',String(c.id===G.cfg.color));
+  COLORS.forEach(c=>{const b=el('button','sw');b.style.background=c.main;b.dataset.playerColor=c.id;b.setAttribute('aria-label',c.name);b.title=c.name;b.setAttribute('aria-pressed',String(c.id===G.cfg.color));
     b.addEventListener('click',()=>{G.cfg.color=c.id;[...box.children].forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');Snd.init();Snd.click()});box.appendChild(b)});
 })();
 
@@ -3722,7 +3722,9 @@ buildStatic(); resize(); requestAnimationFrame(frame);
 let COSMETIC_TAB='hat';
 function drawCosmeticPortrait(cv,char,scale=2.7){const c=cv.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);c.setTransform(scale,0,0,scale,cv.width/2,cv.height*.56);drawChar(c,{x:0,y:0,face:1,walk:(G.t||0)*.25,moving:true,color:char.color||G.cfg.color,cosmetics:cloneCosmetics(char.cosmetics),id:'cosmetic_preview'},false,{portrait:true})}
 function drawLobbyAvatar(cv,p){drawCosmeticPortrait(cv,{color:p.color,cosmetics:p.cosmetics},.95)}
-function renderCosmeticsCatalog(){const overlay=$('cosmeticsOverlay');if(!overlay||overlay.hidden)return;const tabs=$('cosmeticsTabs'),grid=$('cosmeticsGrid');tabs.innerHTML='';grid.innerHTML='';for(const [key,label] of COSMETIC_CATEGORIES){const b=el('button','chip',label);b.type='button';b.setAttribute('aria-pressed',key===COSMETIC_TAB?'true':'false');b.addEventListener('click',()=>{COSMETIC_TAB=key;renderCosmeticsCatalog();Snd.click()});tabs.appendChild(b)}for(const item of COSMETIC_CATALOG[COSMETIC_TAB]){const b=el('button','cosmeticItem');b.type='button';b.setAttribute('aria-pressed',PLAYER_COSMETICS[COSMETIC_TAB]===item.id?'true':'false');if(item.id==='none'){b.appendChild(el('div','cosmeticNoneMark','∅'))}else{const cv=document.createElement('canvas');cv.width=104;cv.height=90;const only=cloneCosmetics(DEFAULT_COSMETICS);only[COSMETIC_TAB]=item.id;drawCosmeticPortrait(cv,{color:G.cfg.color,cosmetics:only},1.55);b.appendChild(cv)}b.appendChild(el('span','',item.name));b.addEventListener('click',()=>{PLAYER_COSMETICS[COSMETIC_TAB]=item.id;savePlayerCosmetics();renderCosmeticsCatalog();if(NET.inRoom&&NET.room?.status==='lobby')netSend({type:'set_cosmetics',cosmetics:cloneCosmetics(PLAYER_COSMETICS)});Snd.click()});grid.appendChild(b)}drawCosmeticPortrait($('cosmeticsPreviewCv'),{color:G.cfg.color,cosmetics:PLAYER_COSMETICS},2.65);$('cosmeticsEquipped').textContent=COSMETIC_CATEGORIES.map(([k,label])=>`${label}: ${cosmeticItemName(k,PLAYER_COSMETICS[k])}`).join(' · ')}
+function syncMenuColorSelection(){document.querySelectorAll('#swatches .sw').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.playerColor===G.cfg.color)))}
+function renderLobbyColorSwatches(){const box=$('lobbyColorSwatches');if(!box)return;box.innerHTML='';const used=new Set((NET.room?.players||[]).filter(p=>p.id!==NET.id).map(p=>p.color));for(const color of COLORS){const b=el('button','sw');b.type='button';b.dataset.playerColor=color.id;b.style.background=color.main;b.setAttribute('aria-label',color.name);b.title=used.has(color.id)?`${color.name} — em uso`:color.name;b.disabled=used.has(color.id);b.setAttribute('aria-pressed',String(color.id===G.cfg.color));b.addEventListener('click',()=>{if(!NET.inRoom||NET.room?.status!=='lobby')return;if(used.has(color.id)){toast('Essa cor já está em uso.');return}if(color.id===G.cfg.color)return;netSend({type:'set_color',color:color.id});Snd.click()});box.appendChild(b)}}
+function renderCosmeticsCatalog(){const overlay=$('cosmeticsOverlay');if(!overlay||overlay.hidden)return;const tabs=$('cosmeticsTabs'),grid=$('cosmeticsGrid');tabs.innerHTML='';grid.innerHTML='';renderLobbyColorSwatches();for(const [key,label] of COSMETIC_CATEGORIES){const b=el('button','chip',label);b.type='button';b.setAttribute('aria-pressed',key===COSMETIC_TAB?'true':'false');b.addEventListener('click',()=>{COSMETIC_TAB=key;renderCosmeticsCatalog();Snd.click()});tabs.appendChild(b)}for(const item of COSMETIC_CATALOG[COSMETIC_TAB]){const b=el('button','cosmeticItem');b.type='button';b.setAttribute('aria-pressed',PLAYER_COSMETICS[COSMETIC_TAB]===item.id?'true':'false');if(item.id==='none'){b.appendChild(el('div','cosmeticNoneMark','∅'))}else{const cv=document.createElement('canvas');cv.width=104;cv.height=90;const only=cloneCosmetics(DEFAULT_COSMETICS);only[COSMETIC_TAB]=item.id;drawCosmeticPortrait(cv,{color:G.cfg.color,cosmetics:only},1.55);b.appendChild(cv)}b.appendChild(el('span','',item.name));b.addEventListener('click',()=>{PLAYER_COSMETICS[COSMETIC_TAB]=item.id;savePlayerCosmetics();renderCosmeticsCatalog();if(NET.inRoom&&NET.room?.status==='lobby')netSend({type:'set_cosmetics',cosmetics:cloneCosmetics(PLAYER_COSMETICS)});Snd.click()});grid.appendChild(b)}drawCosmeticPortrait($('cosmeticsPreviewCv'),{color:G.cfg.color,cosmetics:PLAYER_COSMETICS},2.65);$('cosmeticsEquipped').textContent=COSMETIC_CATEGORIES.map(([k,label])=>`${label}: ${cosmeticItemName(k,PLAYER_COSMETICS[k])}`).join(' · ')}
 function openCosmetics(){if(!NET.inRoom||NET.room?.status!=='lobby'){toast('Os cosméticos podem ser alterados na sala de espera.');return}COSMETIC_TAB='hat';$('cosmeticsOverlay').hidden=false;renderCosmeticsCatalog();Snd.open()}
 function closeCosmetics(){$('cosmeticsOverlay').hidden=true}
 
@@ -3815,6 +3817,7 @@ function netHandleMessage(m){
   if(m.type==='room_state'){
     const wasHost=NET.isHost;NET.room=m.room;NET.inRoom=!!m.room;NET.isHost=!!(m.room&&m.room.hostId===NET.id);
     if(!m.room){NET.inRoom=false;NET.isHost=false;$('roomLobby').hidden=true;return}
+    const ownRoomPlayer=m.room.players?.find(p=>p.id===NET.id);if(ownRoomPlayer){G.cfg.name=ownRoomPlayer.name;G.cfg.color=ownRoomPlayer.color;PLAYER_COSMETICS=cloneCosmetics(ownRoomPlayer.cosmetics);savePlayerCosmetics();$('nameIn').value=ownRoomPlayer.name;syncMenuColorSelection();if(!$('cosmeticsOverlay').hidden)renderCosmeticsCatalog()}
     if(['lobby','countdown'].includes(m.room.status))netShowRoom();else{$('roomLobby').hidden=true;$('menu').hidden=true;if(m.room.status==='loading')netShowLoading()}
     if(m.room.settings){if(NET.isHost&&NET.roomDraftDirty&&m.room.status==='lobby'){if(NET.roomDraft)netApplySettings(NET.roomDraft)}else{NET.roomDraft={...m.room.settings,bots:m.room.bots};NET.roomDraftDirty=false;netApplySettings(m.room.settings)}}
     if(!wasHost&&NET.isHost&&m.room.status!=='lobby'&&m.room.status!=='countdown'&&m.room.status!=='loading')netBecomeHost();

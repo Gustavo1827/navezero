@@ -188,6 +188,13 @@ function handle(ws, raw, timings={}){
     if(humans+bots>room.size)return error(ws,'A sala não comporta essa quantidade de bots.');
     room.bots=bots;room.settings=cleanSettings({...room.settings,...(m.settings&&typeof m.settings==='object'?m.settings:{})},room.size);sendRoomState(room);return;
   }
+  if(m.type==='set_color'){
+    if(room.status!=='lobby')return error(ws,'A cor só pode ser alterada na sala de espera.');
+    const color=String(m.color||'');if(!COLORS.includes(color))return error(ws,'Cor inválida.');
+    const player=room.players.find(p=>p.id===c.id);if(!player)return;
+    if(room.players.some(p=>p.id!==c.id&&p.color===color))return error(ws,'Essa cor já está em uso por outro jogador.');
+    player.color=color;c.color=color;sendRoomState(room);return;
+  }
   if(m.type==='set_cosmetics'){
     if(room.status!=='lobby')return error(ws,'Os cosméticos só podem ser alterados na sala de espera.');
     const player=room.players.find(p=>p.id===c.id);if(!player)return;
