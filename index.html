@@ -1446,6 +1446,23 @@ function removeFreePlayFunction(ch){
   if(ch===G.player){G.locator=false;$('roleName').textContent=roleNameForPlayer(ch)}
   return true;
 }
+function setFreePlayClass(ch,role){
+  if(!G.freePlay||!ch||!['crew','imp'].includes(role))return false;
+  if(ch.role===role)return true;
+  clearFreePlayFunctionState(ch);
+  // Trocar de classe também encerra qualquer estado de duto da classe anterior.
+  if(ch.vent){const v=ventById[ch.vent];ch.vent=null;ch.ventAnim=null;ch.ventMv=0;if(v){ch.x=v.px;ch.y=v.py-OFF_Y}}
+  ch.role=role;ch.function=null;ch.nameCol=role==='imp'?'#ff8a98':'#fff';
+  G.tasks.filter(t=>t.owner===ch.id).forEach(t=>t.fake=role==='imp');
+  G.imps=G.chars.filter(c=>c.role==='imp');G.imp=G.imps[0]||null;
+  if(ch===G.player){
+    G.role=role;G.locator=false;G.trackTarget=null;G.trackTime=0;G.trackCd=0;
+    G.vision=G.visionTarget=(role==='imp'?CFG.impVision:CFG.crewVision);
+    $('tpHead').firstElementChild.textContent=role==='imp'?'Tarefas (falsas)':'Tarefas';
+    $('roleName').textContent=roleNameForPlayer(ch);renderTasks();updateButtons();
+  }
+  checkEnd();return true;
+}
 function freePlayKill(ch){
   if(!G.freePlay||!ch||!ch.alive)return false;
   clearFreePlayFunctionState(ch);killChar(ch);
@@ -1482,6 +1499,11 @@ function openFreePlayFunctionPicker(ch){
   const grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px';
   fns.forEach(([id,label])=>{const b=el('button','mg',label);b.addEventListener('click',()=>{setFreePlayFunction(ch,id);openFreePlayComputer()});grid.appendChild(b)});$('mbody').appendChild(grid);
 }
+function openFreePlayClassPicker(ch){
+  showModal('Alterar classe',`${ch.name} é atualmente ${ch.role==='imp'?'Infiltrado':'Tripulante'}. Escolha a nova classe.`);
+  const grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px';
+  [['crew','Tripulante'],['imp','Infiltrado']].forEach(([id,label])=>{const b=el('button','mg',label);b.disabled=ch.role===id;b.addEventListener('click',()=>{setFreePlayClass(ch,id);if(!G.over)openFreePlayComputer()});grid.appendChild(b)});$('mbody').appendChild(grid);
+}
 function openFreePlayComputer(){
   if(!G.freePlay)return;
   G.state='tool';G.player.moving=false;showModal('Computador — Partida Livre','Ferramentas locais de teste. Nenhuma ação é enviada pela rede.');
@@ -1491,6 +1513,7 @@ function openFreePlayComputer(){
   add('Reviver jogador',()=>showFreePlayPlayerList('revive','Reviver jogador',ch=>{freePlayRevive(ch);openFreePlayComputer()}));
   add('Dar função',()=>showFreePlayPlayerList('function','Dar função',openFreePlayFunctionPicker));
   add('Remover função',()=>showFreePlayPlayerList('function','Remover função',ch=>{removeFreePlayFunction(ch);openFreePlayComputer()}));
+  add('Alterar classe',()=>showFreePlayPlayerList('class','Alterar classe',openFreePlayClassPicker));
   add('Configurações',()=>{closeModalSilent();G.state='playing';openCfg()});
   $('mbody').appendChild(grid);
 }
