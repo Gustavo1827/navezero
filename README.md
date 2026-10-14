@@ -46,3 +46,9 @@ npm start
 ```
 
 Abra `http://localhost:8080`. O endpoint `/health` verifica se o servidor está respondendo.
+
+
+## Cosméticos
+
+Os cosméticos usam artes vetoriais originais do Nave Zero, ajustadas a partir de referências visuais fornecidas apenas para direção de variedade, escala e posicionamento. A lógica de gameplay permanece independente da aparência.
+

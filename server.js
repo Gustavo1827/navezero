@@ -11,6 +11,14 @@ const HTML_FILE = path.join(__dirname, 'index.html');
 const rooms = new Map();
 const clients = new Map();
 const COLORS = ['vermelho','azul','amarelo','verde','rosa','roxo','laranja','ciano','preto','branco','carmim','banana','caqui','coral','cinza'];
+const COSMETIC_ALLOWED={
+  hat:new Set(['none','antenna_lunar','cap_orbital','crown_scrap','sprout_solar','halo_signal','navigator_band']),
+  pet:new Set(['none','drone_pingo','cube_bot','comet_pup','luna_bug','beacon_orb']),
+  outfit:new Set(['none','tech_vest','command_jacket','utility_belt','polar_wrap','explorer_harness']),
+  visor:new Set(['none','hud_grid','prism_strip','data_monocle','star_sticker','scan_bar'])
+};
+const DEFAULT_COSMETICS={hat:'none',pet:'none',outfit:'none',visor:'none'};
+function cleanCosmetics(input={}){const src=input&&typeof input==='object'?input:{};const out={};for(const key of Object.keys(DEFAULT_COSMETICS)){const id=String(src[key]||'none');out[key]=COSMETIC_ALLOWED[key].has(id)?id:'none'}return out}
 const LIMITS = {
   kill:[10,60], sab:[10,90], meet:[10,60], speed:[100,280], impVision:[260,900], crewVision:[260,900],
   discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], engVentDuration:[10,61], engChance:[0,100], engMax:[0,15], engCooldown:[5,25], marionCooldown:[15,60], marionDuration:[5,30], marionChance:[0,100], marionMax:[0,3], renderDist:[500,1500]
@@ -51,7 +59,7 @@ function pickColor(requested, room) {
   if(COLORS.includes(requested) && !used.has(requested))return requested;
   return COLORS.find(c=>!used.has(c)) || COLORS[0];
 }
-function roomPublic(room){ensureBotRoster(room);return {code:room.code,hostId:room.hostId,size:room.size,bots:room.bots,botRoster:room.botRoster.map(b=>({...b})),status:room.status,round:room.round,settings:{...room.settings},players:room.players.map(p=>({id:p.id,name:p.name,color:p.color,ready:!!p.ready}))};}
+function roomPublic(room){ensureBotRoster(room);return {code:room.code,hostId:room.hostId,size:room.size,bots:room.bots,botRoster:room.botRoster.map(b=>({...b})),status:room.status,round:room.round,settings:{...room.settings},players:room.players.map(p=>({id:p.id,name:p.name,color:p.color,ready:!!p.ready,cosmetics:cleanCosmetics(p.cosmetics)}))};}
 function sendRoomState(room){const pub=roomPublic(room);for(const p of room.players){const c=clients.get(p.id);if(c)send(c.ws,{type:'room_state',room:pub,youId:p.id})}}
 function roomFor(client){return client.roomCode?rooms.get(client.roomCode):null}
 function error(ws,message){send(ws,{type:'room_error',message})}
@@ -148,7 +156,7 @@ function handle(ws, raw, timings={}){
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
     const code=makeCode();
     const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,createdAt:Date.now(),countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,botRoster:[],botNameSeq:0};
-    room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false});
+    room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmetics(m.cosmetics)});
     c.name=room.players[0].name;c.color=room.players[0].color;c.roomCode=code;rooms.set(code,room);
     sendRoomState(room);return;
   }
@@ -161,7 +169,7 @@ function handle(ws, raw, timings={}){
     if(!['lobby','countdown','loading'].includes(room.status))return error(ws,'Esta sala já começou ou foi encerrada.');
     if(room.players.length+room.bots>=room.size)return error(ws,'Sala lotada. O host precisa remover bots para liberar uma vaga.');
     const cancelled=invalidateCountdown(room);
-    const player={id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false};
+    const player={id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmetics(m.cosmetics)};
     room.players.push(player);c.name=player.name;c.color=player.color;c.roomCode=code;
     sendRoomState(room);
     if(cancelled)broadcast(room,{type:'countdown_cancelled',reason:'Um jogador entrou. A contagem foi cancelada.'});
@@ -179,6 +187,11 @@ function handle(ws, raw, timings={}){
     const bots=Math.min(room.size-humans,Math.max(0,Math.round(Number.isFinite(Number(m.bots))?Number(m.bots):room.bots)));
     if(humans+bots>room.size)return error(ws,'A sala não comporta essa quantidade de bots.');
     room.bots=bots;room.settings=cleanSettings({...room.settings,...(m.settings&&typeof m.settings==='object'?m.settings:{})},room.size);sendRoomState(room);return;
+  }
+  if(m.type==='set_cosmetics'){
+    if(room.status!=='lobby')return error(ws,'Os cosméticos só podem ser alterados na sala de espera.');
+    const player=room.players.find(p=>p.id===c.id);if(!player)return;
+    player.cosmetics=cleanCosmetics(m.cosmetics);sendRoomState(room);return;
   }
   if(m.type==='start_game'){
     if(!isHost)return error(ws,'Somente o host pode iniciar a partida.');
@@ -282,4 +295,4 @@ if(require.main===module){
   const shutdown=()=>{app.server.close(()=>process.exit(0));setTimeout(()=>process.exit(1),4000).unref()};
   process.on('SIGINT',shutdown);process.on('SIGTERM',shutdown);
 }
-module.exports={createGameServer,rooms,clients,cleanSettings};
+module.exports={createGameServer,rooms,clients,cleanSettings,cleanCosmetics};
