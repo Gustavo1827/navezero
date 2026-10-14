@@ -3536,7 +3536,7 @@ buildStatic(); resize(); requestAnimationFrame(frame);
 /* =====================================================================
    MULTIPLAYER ONLINE — autoridade da sala no host + snapshots/requisições
    ===================================================================== */
-const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,preparedRound:0,revealPending:false,startRequested:false,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,lastSnapshotAt:0,snapshotBlendDuration:.15,inputSeq:0,inputAck:0,reconcileX:0,reconcileY:0};
+const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,motionSeq:0,recvMotionSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,preparedRound:0,revealPending:false,startRequested:false,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,motionTimer:0,lastSnapshotAt:0,lastMotionAt:0,snapshotBlendDuration:.15,inputSeq:0,inputAck:0,reconcileX:0,reconcileY:0};
 function netVisualState(ch){
   // O jogador local usa previsão imediata. Interpolação visual fica apenas para os outros jogadores.
   if(!NET.inRoom||NET.isHost||ch.id===NET.id||G.player?.controlTargetId===ch.id||!Number.isFinite(ch.netVisualX)||!Number.isFinite(ch.netVisualY))return null;
@@ -3574,13 +3574,13 @@ function netConnect(action){
     ws.onopen=()=>{NET.connecting=false;ws.send(JSON.stringify({type:'hello',name:String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante',color:G.cfg.color}))};
     ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}netHandleMessage(m)};
     ws.onerror=()=>{NET.connecting=false;toast('Não foi possível conectar ao servidor multiplayer. Confira o endereço e se o servidor está ligado.',4200)};
-    ws.onclose=()=>{NET.connecting=false;const wasRoom=NET.inRoom;NET.ws=null;NET.id=null;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.remoteInputs.clear();NET.pendingTasks.clear();NET.recvSeq=0;NET.seq=0;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.matchImpIds.clear();NET.departedImpIds.clear();netHideWait();if(wasRoom){$('roomLobby').hidden=true;toast('Conexão com o servidor perdida. A partida online foi desconectada.',4000)}};
+    ws.onclose=()=>{NET.connecting=false;const wasRoom=NET.inRoom;NET.ws=null;NET.id=null;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.remoteInputs.clear();NET.pendingTasks.clear();NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastMotionAt=0;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.matchImpIds.clear();NET.departedImpIds.clear();netHideWait();if(wasRoom){$('roomLobby').hidden=true;toast('Conexão com o servidor perdida. A partida online foi desconectada.',4000)}};
   }catch(e){NET.connecting=false;toast('Falha ao abrir a conexão multiplayer.');}
 }
 function netRoomPayload(){const size=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createSizeIn').value=size;const bots=clamp(Math.round(+$('createBotsIn').value||0),0,size-1);$('createBotsIn').value=bots;return {size,bots,settings:netSettings()}}
 function netCreateRoom(){Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';$('createPanel').hidden=true;netConnect(()=>netSend({type:'create_room',name:G.cfg.name,color:G.cfg.color,...netRoomPayload()}))}
 function netJoinRoom(){const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(!/^[A-Z0-9]{6}$/.test(code)){toast('Digite o código completo de 6 letras maiúsculas ou números.');return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';netConnect(()=>netSend({type:'join_room',code,name:G.cfg.name,color:G.cfg.color}))}
-function netLeaveRoom(){if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;netHideWait();$('roomLobby').hidden=true}
+function netLeaveRoom(){if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;netHideWait();$('roomLobby').hidden=true}
 function netTotal(room=NET.room){return room?(room.players.length+(room.bots||0)):0}
 function netRenderRoom(){
   const r=NET.room;if(!r)return;
@@ -3649,7 +3649,7 @@ function netHandleMessage(m){
   }
   if(m.type==='countdown_cancelled'){NET.startRequested=false;NET.preparedRound=0;NET.revealPending=false;netHideWait();toast(m.reason||'Contagem cancelada.',2400);if(NET.room&&['lobby','countdown'].includes(NET.room.status))netShowRoom();return}
   if(m.type==='game_start'){
-    NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.matchImpIds.clear();NET.departedImpIds.clear();NET.startRequested=false;
+    NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.matchImpIds.clear();NET.departedImpIds.clear();NET.startRequested=false;
     const own=m.room.players.find(p=>p.id===NET.id);if(own){G.cfg.name=own.name;G.cfg.color=own.color;$('nameIn').value=own.name}
     netApplySettings(m.room.settings);
     $('roomLobby').hidden=true;$('joinPanel').hidden=true;$('menu').hidden=true;
@@ -3667,6 +3667,7 @@ function netHandleMessage(m){
     NET.localReadySent=false;NET.ownWasAlive=true;return;
   }
   if(m.type==='host_command'){if(NET.isHost)netHostCommand(m);return}
+  if(m.type==='motion'){if(!NET.isHost&&NET.inRoom)netApplyMotion(m.motion);return}
   if(m.type==='snapshot'){if(!NET.isHost&&NET.inRoom){netApplySnapshot(m.snapshot);if(NET.revealPending&&G.player&&G.chars.length){NET.revealPending=false;showLocalRoleReveal(true);netHideWait()}}return}
   if(m.type==='host_snapshot'){if(NET.isHost&&NET.inRoom&&m.snapshot){netApplySnapshot(m.snapshot,true);NET.matchImpIds=new Set(G.chars.filter(c=>c.role==='imp').map(c=>c.id));const present=new Set((NET.room?.players||[]).map(p=>p.id));for(const c of G.chars)if(c.role==='imp'&&!present.has(c.id)&&!c.isBot)NET.departedImpIds.add(c.id);netBecomeHost();checkEnd()}return}
   if(m.type==='meeting_chat'){
@@ -3720,6 +3721,35 @@ function netCaptureSnapshot(){
   const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
   const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chat:(G.M.chat||[]).map(m=>({fromId:m.fromId,text:m.text})),chatCount:$('meetChat').children.length}:null;
   return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,delayedMarks:{...G.delayedMarks},sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
+}
+function netCaptureMotion(){
+  const q=n=>Math.round((Number(n)||0)*10)/10;
+  return {seq:++NET.motionSeq,chars:G.chars.map(c=>({id:c.id,x:q(c.x),y:q(c.y),face:c.face<0?-1:1,walk:q(c.walk||0),moving:!!c.moving,vent:c.vent||null,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,netInputAck:c.netInputAck||0}))};
+}
+function netApplyMotion(m){
+  if(!m||!Array.isArray(m.chars)||!['playing','task','tool'].includes(G.state))return;
+  const seq=Math.max(0,Math.floor(Number(m.seq)||0));if(seq&&seq<=NET.recvMotionSeq)return;if(seq)NET.recvMotionSeq=seq;
+  const arrival=performance.now(),interval=NET.lastMotionAt>0?clamp((arrival-NET.lastMotionAt)/1000,.025,.09):.04;NET.lastMotionAt=arrival;
+  const byId=new Map((G.chars||[]).map(c=>[c.id,c]));
+  for(const r of m.chars){
+    const c=byId.get(r.id);if(!c)continue;
+    if(c.id===NET.id){const ack=Math.max(0,Number(r.netInputAck)||0);if(ack>NET.inputAck)NET.inputAck=ack;continue}
+    const targetX=Number(r.x),targetY=Number(r.y);if(!Number.isFinite(targetX)||!Number.isFinite(targetY))continue;
+    const fromX=Number.isFinite(c.netVisualX)?c.netVisualX:c.x,fromY=Number.isFinite(c.netVisualY)?c.netVisualY:c.y;
+    const fromWalk=Number.isFinite(c.netVisualWalk)?c.netVisualWalk:(c.walk||0),fromMoving=typeof c.netVisualMoving==='boolean'?c.netVisualMoving:!!c.moving;
+    const oldVent=c.vent||null,oldControlTargetId=c.controlTargetId||null,oldControlledBy=c.controlledBy||null;
+    const newVent=r.vent||null,newControlTargetId=r.controlTargetId||null,newControlledBy=r.controlledBy||null;
+    const discontinuity=oldVent!==newVent||oldControlTargetId!==newControlTargetId||oldControlledBy!==newControlledBy||Math.hypot(targetX-fromX,targetY-fromY)>125;
+    c.x=targetX;c.y=targetY;c.face=r.face<0?-1:1;c.walk=Number.isFinite(+r.walk)?+r.walk:c.walk;c.moving=!!r.moving;c.vent=newVent;c.controlTargetId=newControlTargetId;c.controlledBy=newControlledBy;
+    if(discontinuity){
+      c.netFromX=c.netToX=c.netVisualX=targetX;c.netFromY=c.netToY=c.netVisualY=targetY;
+      c.netFromWalk=c.netToWalk=c.netVisualWalk=c.walk||0;c.netFromMoving=c.netToMoving=c.netVisualMoving=!!c.moving;c.netBlendStart=arrival;c.netBlendDuration=0;
+    }else{
+      c.netFromX=fromX;c.netFromY=fromY;c.netToX=targetX;c.netToY=targetY;
+      c.netFromWalk=fromWalk;c.netToWalk=c.walk||0;c.netFromMoving=fromMoving;c.netToMoving=!!c.moving;
+      c.netBlendStart=arrival;c.netBlendDuration=Math.max(.028,interval*.92);c.netVisualX=fromX;c.netVisualY=fromY;c.netVisualWalk=fromWalk;c.netVisualMoving=fromMoving||!!c.moving;
+    }
+  }
 }
 function netApplySnapshot(s,force=false){
   if(!s||!Array.isArray(s.chars)||(!force&&Number.isFinite(+s.seq)&&+s.seq<NET.recvSeq))return;if(Number.isFinite(+s.seq))NET.recvSeq=+s.seq;NET.applying=true;
@@ -3937,14 +3967,20 @@ function netUpdateRemote(dt){
 function netUpdateInput(){if(!NET.inRoom||!NET.id||!NET.ws||NET.ws.readyState!==WebSocket.OPEN)return;const blocked=G.state!=='playing'||uiBusy()||!!G.mapOpen||!!G.player?.vent||!!G.player?.controlledBy;const v=blocked?{x:0,y:0}:inputVec();const inputSeq=++NET.inputSeq;netSend({type:'input',x:v.x,y:v.y,inputSeq})}
 function netStartSnapshots(){
   if(NET.snapshotTimer)clearInterval(NET.snapshotTimer);
+  if(NET.motionTimer)clearInterval(NET.motionTimer);
   if(NET.inputTimer)clearInterval(NET.inputTimer);
-  // Snapshots completos são caros: 6-7 por segundo são suficientes para sincronizar
-  // o estado sem reconstruir personagens e tarefas excessivamente nos clientes.
+  // O snapshot completo continua em uma frequência moderada porque carrega tarefas,
+  // sabotagens, corpos, reunião e outros estados autoritativos mais pesados.
   NET.snapshotTimer=setInterval(()=>{
     if(NET.inRoom&&NET.isHost&&NET.room&&NET.room.status==='playing'&&G.player&&G.chars.length){const snap=netCaptureSnapshot();netSend({type:'state_snapshot',snapshot:snap})}
   },150);
-  // Enviar comandos de movimento mais frequentemente reduz a latência dos não-hosts.
-  NET.inputTimer=setInterval(()=>{if(NET.inRoom&&!NET.isHost)netUpdateInput()},50);
+  // Posições e animação viajam separadas em um pacote pequeno (~30 Hz). Isso mantém
+  // host, clientes e bots visualmente próximos sem aumentar o custo dos snapshots completos.
+  NET.motionTimer=setInterval(()=>{
+    if(NET.inRoom&&NET.isHost&&NET.room&&NET.room.status==='playing'&&G.player&&G.chars.length&&['playing','task','tool'].includes(G.state))netSend({type:'motion_state',motion:netCaptureMotion()})
+  },33);
+  // Inputs também chegam ao host em ~30 Hz; a previsão local continua imediata no cliente.
+  NET.inputTimer=setInterval(()=>{if(NET.inRoom&&!NET.isHost)netUpdateInput()},33);
 }
 // Client-local simulations are view-only; host owns NPC AI, kills, sabotages, tasks, meetings and victory checks.
 const netOriginalUpdateNPCs=updateNPCs;updateNPCs=function(dt){if(NET.inRoom&&!NET.isHost)return;if(NET.inRoom&&NET.isHost)netUpdateRemote(dt);netOriginalUpdateNPCs(dt)};

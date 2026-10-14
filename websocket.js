@@ -45,6 +45,9 @@ class WebSocketConnection extends EventEmitter {
 class WebSocketServer extends EventEmitter {
   constructor({server,maxPayload=2*1024*1024}={}){super();this.server=server;this.maxPayload=maxPayload;this.clients=new Set();server.on('upgrade',(req,socket,head)=>{
     const key=req.headers['sec-websocket-key'];const version=req.headers['sec-websocket-version'];
+    // Pacotes de movimento são pequenos e frequentes; desabilitar Nagle evita que
+    // eles esperem por outros dados antes de sair do servidor.
+    socket.setNoDelay(true);socket.setKeepAlive(true,30000);
     if(!key||version!=='13'||!String(req.headers.upgrade||'').toLowerCase().includes('websocket')){socket.write('HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n');socket.destroy();return}
     const accept=crypto.createHash('sha1').update(key+GUID).digest('base64');
     socket.write('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: '+accept+'\r\n\r\n');

@@ -217,6 +217,17 @@ function handle(ws, raw, timings={}){
     }
     return;
   }
+  if(m.type==='motion_state'){
+    if(!isHost||room.status!=='playing'||!m.motion||typeof m.motion!=='object'||!Array.isArray(m.motion.chars))return;
+    // Movimento usa um canal leve e descartável. Se a fila de um cliente crescer,
+    // é melhor pular um frame de movimento do que entregar posições antigas depois.
+    for(const p of room.players){
+      if(p.id===c.id)continue;
+      const target=clients.get(p.id);
+      if(target && (target.ws.socket?.writableLength||0)<128*1024)send(target.ws,{type:'motion',motion:m.motion});
+    }
+    return;
+  }
   if(m.type==='input'){
     if(isHost||room.status!=='playing')return;
     const host=clients.get(room.hostId);if(host)send(host.ws,{type:'host_command',command:'input',playerId:c.id,x:Math.max(-1,Math.min(1,Number(m.x)||0)),y:Math.max(-1,Math.min(1,Number(m.y)||0)),inputSeq:Math.max(0,Math.floor(Number(m.inputSeq)||0))});return;
