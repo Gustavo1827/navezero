@@ -768,6 +768,7 @@ function drawOutfitCosmetic(c,id){
     c.restore();
   };
 
+
   if(id==='tech_vest'){
     compactTorso('#e9edf0');
     collar('#d9f0f4');
@@ -800,6 +801,25 @@ function drawOutfitCosmetic(c,id){
     c.fillStyle='#8b6e43';c.strokeStyle='#10122a';c.lineWidth=1.5;rr(c,-9,2,6,5,1.5);c.fill();c.stroke();rr(c,3,2,6,5,1.5);c.fill();c.stroke();
     c.fillStyle='#c9b16b';rr(c,-10,7,20,3,1.4);c.fill();c.stroke();
   }
+  c.restore();
+}
+function drawOutfitLegCosmetic(c,id,walkStep=0){
+  if(!id||id==='none')return;
+  const palette={
+    tech_vest:['#e9edf0','#dce3e8'],
+    command_jacket:['#242633','#d8b55f'],
+    utility_belt:['#3d72aa','#233d61'],
+    polar_wrap:['#eef1ec','#9ca6ae'],
+    explorer_harness:['#50624d','#c9b16b']
+  }[id];
+  if(!palette)return;
+  const [fill,cuff]=palette,leftY=7+walkStep*3,rightY=7-walkStep*3;
+  c.save();c.lineJoin='round';c.lineCap='round';c.fillStyle=fill;c.strokeStyle='#10122a';c.lineWidth=1.75;
+  rr(c,-11,leftY,8,9,3);c.fill();c.stroke();
+  rr(c,3,rightY,8,9,3);c.fill();c.stroke();
+  c.fillStyle=cuff;c.lineWidth=1.35;
+  rr(c,-10.5,leftY+6.2,7,2.5,1.2);c.fill();c.stroke();
+  rr(c,3.5,rightY+6.2,7,2.5,1.2);c.fill();c.stroke();
   c.restore();
 }
 function drawVisorCosmetic(c,id){
@@ -933,7 +953,7 @@ function drawChar(c,ch,showName=true,opts={}){
   c.fillStyle=col.dark;rr(c,-12,5+s*3,10,13,4);c.fill();c.stroke();rr(c,2,5-s*3,10,13,4);c.fill();c.stroke();rr(c,-21,-12,10,20,5);c.fill();c.stroke();
   c.fillStyle=col.main;rr(c,-15,-24,30,34,14);c.fill();c.stroke();c.fillStyle='rgba(0,0,0,.14)';rr(c,-12,2,24,6,3);c.fill();
   c.fillStyle='#bfe9ff';rr(c,1,-18,17,11,5.5);c.fill();c.stroke();c.fillStyle='rgba(255,255,255,.95)';rr(c,4,-16,7,3,1.5);c.fill();
-  drawOutfitCosmetic(c,cosmetics.outfit);drawVisorCosmetic(c,cosmetics.visor);drawHatCosmetic(c,cosmetics.hat);c.restore();
+  drawOutfitLegCosmetic(c,cosmetics.outfit,s);drawOutfitCosmetic(c,cosmetics.outfit);drawVisorCosmetic(c,cosmetics.visor);drawHatCosmetic(c,cosmetics.hat);c.restore();
   const worldPetVisible=ch.alive!==false&&!ch.ghost&&!ch.vent,showPet=opts.portrait||worldPetVisible;
   if(showPet){const petX=Number.isFinite(ch.petX)&&!opts.portrait?ch.petX:vx-(ch.face||1)*27,petY=Number.isFinite(ch.petY)&&!opts.portrait?ch.petY:vy+17;drawPetShape(c,cosmetics.pet,petX,petY,String(ch.id||ch.name||'').length*.7)}
   if(showName&&ch.name){const sp=nameSprite(ch.name,ch.nameCol||'#fff');c.drawImage(sp.cv,vx-sp.w/2,vy-35-sp.asc,sp.w,sp.h)}
