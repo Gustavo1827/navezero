@@ -3147,8 +3147,9 @@ function update(dt){
   const baseVision=G.role==='imp'?CFG.impVision:CFG.crewVision;
   G.visionTarget=!p.alive?Math.max(CFG.impVision,CFG.crewVision):(G.sab.lights>0&&G.role==='crew'?Math.max(110,baseVision*.34):baseVision);
   G.vision+=(G.visionTarget-G.vision)*Math.min(1,dt*4);
-  const fx=NET.inRoom&&!NET.isHost&&Number.isFinite(f.netVisualX)?f.netVisualX:f.x;
-  const fy=NET.inRoom&&!NET.isHost&&Number.isFinite(f.netVisualY)?f.netVisualY:f.y;
+  const useNetVisual=NET.inRoom&&!NET.isHost&&f.id!==NET.id&&Number.isFinite(f.netVisualX)&&Number.isFinite(f.netVisualY);
+  const fx=useNetVisual?f.netVisualX:f.x;
+  const fy=useNetVisual?f.netVisualY:f.y;
   const tx=clamp(fx-VW/2,Math.min(0,(WORLD_W-VW)/2),Math.max(0,WORLD_W-VW)), ty=clamp(fy-VH/2,Math.min(0,(WORLD_H-VH)/2),Math.max(0,WORLD_H-VH));
   const k=Math.min(1,dt*9); G.cam.x+=(tx-G.cam.x)*k; G.cam.y+=(ty-G.cam.y)*k;
   G.action=(G.state==='playing'&&(p.alive||(G.role==='crew'&&p.ghost)))?bestAction():null;
@@ -3312,9 +3313,10 @@ buildStatic(); resize(); requestAnimationFrame(frame);
 /* =====================================================================
    MULTIPLAYER ONLINE — autoridade da sala no host + snapshots/requisições
    ===================================================================== */
-const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,lastSnapshotAt:0,snapshotBlendDuration:.15};
+const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,lastSnapshotAt:0,snapshotBlendDuration:.15,inputSeq:0,inputAck:0,reconcileX:0,reconcileY:0};
 function netVisualState(ch){
-  if(!NET.inRoom||NET.isHost||!Number.isFinite(ch.netVisualX)||!Number.isFinite(ch.netVisualY))return null;
+  // O jogador local usa previsão imediata. Interpolação visual fica apenas para os outros jogadores.
+  if(!NET.inRoom||NET.isHost||ch.id===NET.id||G.player?.controlTargetId===ch.id||!Number.isFinite(ch.netVisualX)||!Number.isFinite(ch.netVisualY))return null;
   return {x:ch.netVisualX,y:ch.netVisualY,walk:Number.isFinite(ch.netVisualWalk)?ch.netVisualWalk:(ch.walk||0),moving:!!ch.netVisualMoving};
 }
 function netUpdateVisualInterpolation(){
@@ -3355,7 +3357,7 @@ function netConnect(action){
 function netRoomPayload(){const size=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createSizeIn').value=size;const bots=clamp(Math.round(+$('createBotsIn').value||0),0,size-1);$('createBotsIn').value=bots;return {size,bots,settings:netSettings()}}
 function netCreateRoom(){Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';$('createPanel').hidden=true;netConnect(()=>netSend({type:'create_room',name:G.cfg.name,color:G.cfg.color,...netRoomPayload()}))}
 function netJoinRoom(){const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(!/^[A-Z0-9]{6}$/.test(code)){toast('Digite o código completo de 6 letras maiúsculas ou números.');return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';netConnect(()=>netSend({type:'join_room',code,name:G.cfg.name,color:G.cfg.color}))}
-function netLeaveRoom(){if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;netHideWait();$('roomLobby').hidden=true}
+function netLeaveRoom(){if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;netHideWait();$('roomLobby').hidden=true}
 function netTotal(room=NET.room){return room?(room.players.length+(room.bots||0)):0}
 function netRenderRoom(){
   const r=NET.room;if(!r)return;
@@ -3411,7 +3413,7 @@ function netHandleMessage(m){
   if(m.type==='loading_start'){NET.room=m.room||NET.room;netShowLoading();return}
   if(m.type==='countdown_cancelled'){netHideWait();toast(m.reason||'Contagem cancelada.',2400);if(NET.room&&['lobby','countdown'].includes(NET.room.status))netShowRoom();return}
   if(m.type==='game_start'){
-    netHideWait();NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;NET.matchImpIds.clear();NET.departedImpIds.clear();
+    netHideWait();NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.matchImpIds.clear();NET.departedImpIds.clear();
     const own=m.room.players.find(p=>p.id===NET.id);if(own){G.cfg.name=own.name;G.cfg.color=own.color;$('nameIn').value=own.name}
     netApplySettings(m.room.settings);
     $('roomLobby').hidden=true;$('joinPanel').hidden=true;$('menu').hidden=true;
@@ -3463,7 +3465,7 @@ function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=
 function netCaptureSnapshot(){
   const st=(G.state==='task'||G.state==='tool')?'playing':G.state;
   if(G.player){G.player.netKillCd=G.killCd;G.player.netDelayedCd=G.delayedCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
-  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0}));
+  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
   const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
   const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chatCount:$('meetChat').children.length}:null;
@@ -3485,14 +3487,36 @@ function netApplySnapshot(s,force=false){
       const oldControlTargetId=c.controlTargetId||null,oldControlledBy=c.controlledBy||null;
       const oldVisualX=Number.isFinite(+c.netVisualX)?+c.netVisualX:oldX,oldVisualY=Number.isFinite(+c.netVisualY)?+c.netVisualY:oldY;
       const oldVisualWalk=Number.isFinite(+c.netVisualWalk)?+c.netVisualWalk:oldWalk,oldVisualMoving=typeof c.netVisualMoving==='boolean'?c.netVisualMoving:oldMoving;
+      const ownPredicted=clientSnapshot&&r.id===NET.id&&hadOld;
+      const predictedX=oldX,predictedY=oldY,predictedWalk=oldWalk,predictedMoving=oldMoving,predictedFace=c.face;
       const ai=c.ai;Object.assign(c,r);if(ai)c.ai=ai;else if(!r.isBot&&!r.isRemoteHuman&&!c.isPlayer)c.ai=null;c.isPlayer=c.id===NET.id;c.isRemoteHuman=c.id!==NET.id&&(!!NET.room?.players.some(p=>p.id===c.id)||!!r.isRemoteHuman);c.isBot=!!r.isBot;
       const targetX=Number.isFinite(+r.x)?+r.x:c.x,targetY=Number.isFinite(+r.y)?+r.y:c.y;
+      // Para o próprio cliente, o snapshot é confirmação autoritativa, não um frame de animação.
+      // Mantemos a posição prevista localmente e acumulamos apenas a diferença que realmente precisa ser reconciliada.
+      if(ownPredicted){
+        const relationSame=oldControlTargetId===(r.controlTargetId||null)&&oldControlledBy===(r.controlledBy||null);
+        const hardStateChanged=oldAlive!==!!r.alive||oldGhost!==!!r.ghost||oldVent!==(r.vent||null)||!relationSame;
+        const errX=targetX-predictedX,errY=targetY-predictedY,err=Math.hypot(errX,errY);
+        const ack=Math.max(0,Number(r.netInputAck)||0);if(ack>NET.inputAck)NET.inputAck=ack;
+        if(hardStateChanged||err>150){c.x=targetX;c.y=targetY;c.walk=Number.isFinite(+r.walk)?+r.walk:predictedWalk;c.moving=!!r.moving;NET.reconcileX=NET.reconcileY=0;}
+        else{
+          c.x=predictedX;c.y=predictedY;c.walk=predictedWalk;c.moving=predictedMoving;c.face=predictedFace;
+          const v=inputVec(),vl=Math.hypot(v.x,v.y);
+          if(vl<.05){NET.reconcileX+=errX;NET.reconcileY+=errY;}
+          else{
+            const ux=v.x/vl,uy=v.y/vl,dot=errX*ux+errY*uy;
+            // Não puxa o jogador para trás por causa de um snapshot naturalmente atrasado.
+            const along=Math.max(0,dot),px=errX-dot*ux,py=errY-dot*uy;
+            NET.reconcileX+=px+ux*along*.35;NET.reconcileY+=py+uy*along*.35;
+          }
+        }
+      }
       const targetWalk=Number.isFinite(+r.walk)?+r.walk:0, targetMoving=!!r.moving;
       const delta=Math.hypot(targetX-oldX,targetY-oldY);
       // Não interpolar entre identidades de controle: ao iniciar/encerrar posse, o
       // personagem muda de lugar por regra do jogo, não por movimento contínuo.
       const controlRelationUnchanged=oldControlTargetId===(r.controlTargetId||null)&&oldControlledBy===(r.controlledBy||null);
-      const blend=canBlendClient&&hadOld&&Number.isFinite(oldX)&&Number.isFinite(oldY)&&Number.isFinite(oldWalk)&&delta<=110&&oldVent===(r.vent||null)&&oldAlive===!!r.alive&&oldGhost===!!r.ghost&&controlRelationUnchanged;
+      const blend=canBlendClient&&!ownPredicted&&hadOld&&Number.isFinite(oldX)&&Number.isFinite(oldY)&&Number.isFinite(oldWalk)&&delta<=110&&oldVent===(r.vent||null)&&oldAlive===!!r.alive&&oldGhost===!!r.ghost&&controlRelationUnchanged;
       if(blend){
         c.netFromX=oldVisualX;c.netFromY=oldVisualY;c.netToX=targetX;c.netToY=targetY;
         c.netFromWalk=oldVisualWalk;c.netToWalk=targetWalk;c.netFromMoving=oldVisualMoving;c.netToMoving=targetMoving;
@@ -3576,7 +3600,7 @@ function netHostCommand(m){
   const ch=G.chars.find(c=>c.id===m.playerId&&c.isRemoteHuman);if(!ch)return;
   const command=m.command||m.action;
   const activePlay=['playing','task','tool'].includes(G.state);
-  if(command==='input'){NET.remoteInputs.set(ch.id,{x:clamp(+m.x||0,-1,1),y:clamp(+m.y||0,-1,1),at:Date.now()});return}
+  if(command==='input'){const inputSeq=Math.max(0,Math.floor(Number(m.inputSeq)||0));NET.remoteInputs.set(ch.id,{x:clamp(+m.x||0,-1,1),y:clamp(+m.y||0,-1,1),at:Date.now(),seq:inputSeq});ch.netInputAck=Math.max(ch.netInputAck||0,inputSeq);return}
   if(ch.controlledBy&&command!=='control_release')return;
   if(command==='control'){const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&ch.alive&&ch.role==='imp'&&ch.function==='marionette'&&!ch.vent&&(ch.controlCd||0)<=0)startControl(ch,target)}
   else if(command==='control_release'){if(ch.controlTargetId)stopControl(ch)}
@@ -3656,7 +3680,7 @@ function netUpdateRemote(dt){
     }else moveRemoteWithInput(c,inp,dt,canMove);
   }
 }
-function netUpdateInput(){if(!NET.inRoom||!NET.id||!NET.ws||NET.ws.readyState!==WebSocket.OPEN)return;const blocked=G.state!=='playing'||uiBusy()||!!G.mapOpen||!!G.player?.vent||!!G.player?.controlledBy;const v=blocked?{x:0,y:0}:inputVec();netSend({type:'input',x:v.x,y:v.y})}
+function netUpdateInput(){if(!NET.inRoom||!NET.id||!NET.ws||NET.ws.readyState!==WebSocket.OPEN)return;const blocked=G.state!=='playing'||uiBusy()||!!G.mapOpen||!!G.player?.vent||!!G.player?.controlledBy;const v=blocked?{x:0,y:0}:inputVec();const inputSeq=++NET.inputSeq;netSend({type:'input',x:v.x,y:v.y,inputSeq})}
 function netStartSnapshots(){
   if(NET.snapshotTimer)clearInterval(NET.snapshotTimer);
   if(NET.inputTimer)clearInterval(NET.inputTimer);
@@ -3670,7 +3694,19 @@ function netStartSnapshots(){
 }
 // Client-local simulations are view-only; host owns NPC AI, kills, sabotages, tasks, meetings and victory checks.
 const netOriginalUpdateNPCs=updateNPCs;updateNPCs=function(dt){if(NET.inRoom&&!NET.isHost)return;if(NET.inRoom&&NET.isHost)netUpdateRemote(dt);netOriginalUpdateNPCs(dt)};
-const netOriginalUpdatePlayer=updatePlayer;updatePlayer=function(dt){if(NET.inRoom&&!NET.isHost)return;netOriginalUpdatePlayer(dt);const p=G.player;if(p&&p.controlTargetId){const target=charById(p.controlTargetId);if(target&&target.alive){target.x=p.x;target.y=p.y;target.moving=p.moving;target.walk=p.walk;target.face=p.face}}};
+const netOriginalUpdatePlayer=updatePlayer;updatePlayer=function(dt){
+  const clientPredicted=NET.inRoom&&!NET.isHost;
+  netOriginalUpdatePlayer(dt);
+  const p=G.player;if(!p)return;
+  if(clientPredicted){
+    // Aplica a correção em pequenas parcelas. A física local continua respondendo ao joystick no mesmo frame.
+    const k=Math.min(1,dt*8),cx=NET.reconcileX*k,cy=NET.reconcileY*k;
+    if(Math.abs(cx)>.01||Math.abs(cy)>.01){moveChar(p,cx,cy);NET.reconcileX-=cx;NET.reconcileY-=cy}
+    if(p.controlTargetId){const target=charById(p.controlTargetId);if(target&&target.alive){target.x=p.x;target.y=p.y;target.moving=p.moving;target.walk=p.walk;target.face=p.face}}
+    return;
+  }
+  if(p.controlTargetId){const target=charById(p.controlTargetId);if(target&&target.alive){target.x=p.x;target.y=p.y;target.moving=p.moving;target.walk=p.walk;target.face=p.face}}
+};
 const netOriginalUpdateSab=updateSab;updateSab=function(dt){if(NET.inRoom&&!NET.isHost)return;netOriginalUpdateSab(dt)};
 const netOriginalUpdateLocator=updateLocator;updateLocator=function(dt){if(NET.inRoom&&!NET.isHost)return;netOriginalUpdateLocator(dt);if(NET.inRoom&&NET.isHost&&G.player){G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd;G.player.netKillCd=G.killCd}};
 const netOriginalUpdateMeeting=updateMeeting;updateMeeting=function(dt){if(NET.inRoom&&!NET.isHost)return;netOriginalUpdateMeeting(dt)};

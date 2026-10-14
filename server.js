@@ -211,7 +211,7 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='input'){
     if(isHost||room.status!=='playing')return;
-    const host=clients.get(room.hostId);if(host)send(host.ws,{type:'host_command',command:'input',playerId:c.id,x:Math.max(-1,Math.min(1,Number(m.x)||0)),y:Math.max(-1,Math.min(1,Number(m.y)||0))});return;
+    const host=clients.get(room.hostId);if(host)send(host.ws,{type:'host_command',command:'input',playerId:c.id,x:Math.max(-1,Math.min(1,Number(m.x)||0)),y:Math.max(-1,Math.min(1,Number(m.y)||0)),inputSeq:Math.max(0,Math.floor(Number(m.inputSeq)||0))});return;
   }
   if(m.type==='action'){
     if(isHost||room.status!=='playing')return;
