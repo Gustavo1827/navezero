@@ -256,3 +256,25 @@ test('chat escrito funciona na sala de espera e só é retransmitido aos partici
   send(guestA,{type:'room_chat',text:'Esta mensagem não deve passar durante a partida'});
   const denied=await onceMessage(guestA,m=>m.type==='room_error');assert.match(denied.message,/sala de espera/i);
 });
+
+test('canal leve de movimento é retransmitido somente pelo host aos outros jogadores', async t=>{
+  const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:15,loadingMs:10});
+  await new Promise(resolve=>app.server.once('listening',resolve));
+  const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
+  t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+  const host=await connect(url,'Host','azul');all.push(host);
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:2});
+  const made=await onceMessage(host,m=>m.type==='room_state');
+  const guest=await connect(url,'Convidado','verde');all.push(guest);
+  send(guest,{type:'join_room',code:made.room.code});await onceMessage(guest,m=>m.type==='room_state');
+  send(host,{type:'start_game'});await onceMessage(host,m=>m.type==='game_start');await onceMessage(guest,m=>m.type==='game_start');
+
+  const motion={seq:7,chars:[{id:host.id,x:120.4,y:88.2,face:1,walk:2.1,moving:true,netInputAck:0},{id:guest.id,x:90,y:88,face:-1,walk:1.2,moving:true,netInputAck:3}]};
+  send(host,{type:'motion_state',motion});
+  const relayed=await onceMessage(guest,m=>m.type==='motion'&&m.motion?.seq===7);
+  assert.deepEqual(relayed.motion,motion);
+
+  send(guest,{type:'motion_state',motion:{seq:99,chars:[]}});
+  await new Promise(r=>setTimeout(r,80));
+  assert.equal(host.messages.some(m=>m.type==='motion'&&m.motion?.seq===99),false,'cliente não-host não pode publicar movimento autoritativo');
+});

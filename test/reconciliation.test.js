@@ -25,3 +25,13 @@ test('reconciliação evita puxar o jogador para trás por snapshot atrasado', (
   assert.match(html, /const k=Math\.min\(1,dt\*8\)/);
 });
 
+
+test('movimento online usa canal leve em ~30 Hz sem aumentar a frequência do snapshot completo', () => {
+  assert.match(html, /function netCaptureMotion\(\)/);
+  assert.match(html, /if\(m\.type==='motion'\)\{if\(!NET\.isHost&&NET\.inRoom\)netApplyMotion\(m\.motion\);return\}/);
+  assert.match(html, /NET\.motionTimer=setInterval\(\(\)=>\{/);
+  assert.match(html, /type:'motion_state',motion:netCaptureMotion\(\)/);
+  assert.match(html, /\},33\);\s*\/\/ Inputs também chegam ao host em ~30 Hz/);
+  assert.match(server, /if\(m\.type==='motion_state'\)/);
+  assert.match(server, /send\(target\.ws,\{type:'motion',motion:m\.motion\}\)/);
+});
