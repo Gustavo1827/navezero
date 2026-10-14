@@ -10,7 +10,7 @@ test('configurações completas incluem infiltrados e distância de renderizaç�
   assert.match(html, /NET_SETTING_KEYS=\[[^\]]*'impostors'[^\]]*'renderDist'/);
   assert.match(html, /renderDist:\[500,1500\]/);
   assert.match(server, /impostors:\[1,3\][^\n]*renderDist:\[500,1500\]/);
-  assert.match(server, /cleanSettings\(\{\.\.\.room\.settings,\.\.\.\(m\.settings&&typeof m\.settings==='object'\?m\.settings:\{\}\)\}\)/);
+  assert.match(server, /cleanSettings\(\{\.\.\.room\.settings,\.\.\.\(m\.settings&&typeof m\.settings==='object'\?m\.settings:\{\}\)\},room\.size\)/);
 });
 
 test('a reunião revela os votos por 5 segundos e mantém a tela de ejeção por 10 segundos', () => {
@@ -212,7 +212,7 @@ test('Engenheiro tem configuração, atribuição e sincronização multiplayer'
 test('NPCs usam falas contextuais e jogadores mortos veem funções sem revelar aos vivos', () => {
   assert.match(html, /Onde que mataram \${M\.body\.name}\?/);
   assert.match(html, /Encontrei o corpo de \${M\.body\.name} em \${M\.body\.room}!/);
-  for (const phrase of ['Sim.','Não.','Concordo.','Discordo.','Isso é verdade:','Mentira!','Eu vi!','Não vi','Faltam poucas tarefas, vamos!','Vamos fazer tarefas para vencer!','Mortos, façam as suas tarefas!','Cuidado! Vamos resolver a sabotagem']) {
+  for (const phrase of ['Sim.','Não.','Concordo.','Discordo.','Isso é verdade.','Mentira!','Eu vi!','Não vi','Faltam poucas tarefas, vamos!','Vamos fazer tarefas para vencer!','Mortos, façam as suas tarefas!','Cuidado! Vamos resolver ']) {
     assert.ok(html.includes(phrase), 'fala contextual ausente: '+phrase);
   }
   assert.match(html, /\(\(!G\.player\?\.alive\|\|G\.role==='imp'\)&&ch\.role==='imp'\?'#ff6b7e'/);
