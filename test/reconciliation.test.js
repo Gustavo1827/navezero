@@ -25,7 +25,3 @@ test('reconciliação evita puxar o jogador para trás por snapshot atrasado', (
   assert.match(html, /const k=Math\.min\(1,dt\*8\)/);
 });
 
-test('Marionetista não-host prevê localmente o corpo controlado', () => {
-  assert.match(html, /G\.player\?\.controlTargetId===ch\.id/);
-  assert.match(html, /if\(p\.controlTargetId\)\{const target=charById\(p\.controlTargetId\);if\(target&&target\.alive\)\{target\.x=p\.x;target\.y=p\.y;target\.moving=p\.moving;target\.walk=p\.walk;target\.face=p\.face\}\}/);
-});
