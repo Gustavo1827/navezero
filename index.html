@@ -747,9 +747,17 @@ function drawOutfitCosmetic(c,id){
     c.quadraticCurveTo(8,-13,0,-12);c.quadraticCurveTo(-8,-13,-13,-11);c.closePath();
   };
   const legShell=(x,shift=0)=>{rr(c,x,4+shift,10,13,4)};
+  // Gola curva: quebra o topo reto/quadrado da roupa e acompanha o pescoço do tripulante.
+  const collar=(fill='#eef1ec',edge='#10122a')=>{
+    c.save();c.fillStyle=fill;c.strokeStyle=edge;c.lineWidth=1.8;
+    c.beginPath();c.moveTo(-12,-11);c.quadraticCurveTo(-8,-14,-4,-13);c.lineTo(0,-7);c.lineTo(-2,-3);c.lineTo(-8,-8);c.quadraticCurveTo(-10,-9,-12,-11);c.closePath();c.fill();c.stroke();
+    c.beginPath();c.moveTo(12,-11);c.quadraticCurveTo(8,-14,4,-13);c.lineTo(0,-7);c.lineTo(2,-3);c.lineTo(8,-8);c.quadraticCurveTo(10,-9,12,-11);c.closePath();c.fill();c.stroke();
+    c.restore();
+  };
   if(id==='tech_vest'){
     // Jaleco de pesquisa: acompanha a curva do tronco e abre sobre as pernas.
     c.fillStyle='#e9edf0';torsoPath();c.fill();c.stroke();
+    collar('#d9f0f4');
     c.fillStyle='#cdd6de';legShell(-12,0);c.fill();c.stroke();legShell(2,0);c.fill();c.stroke();
     c.fillStyle='#d9f0f4';c.beginPath();c.moveTo(-5,-11);c.lineTo(0,-5);c.lineTo(5,-11);c.lineTo(7,-8);c.lineTo(1,-2);c.lineTo(-1,-2);c.lineTo(-7,-8);c.closePath();c.fill();c.stroke();
     c.strokeStyle='#788797';c.lineWidth=1.4;c.beginPath();c.moveTo(0,-3);c.lineTo(0,9);c.stroke();
@@ -758,6 +766,7 @@ function drawOutfitCosmetic(c,id){
   }else if(id==='command_jacket'){
     // Terno de comando: jaqueta ajustada, camisa aparente e gravata curta.
     c.fillStyle='#242633';torsoPath();c.fill();c.stroke();
+    collar('#f3f1e8');
     c.fillStyle='#1b1d29';legShell(-12,0);c.fill();c.stroke();legShell(2,0);c.fill();c.stroke();
     c.fillStyle='#f3f1e8';c.beginPath();c.moveTo(-5,-11);c.lineTo(0,-3);c.lineTo(5,-11);c.lineTo(8,-8);c.lineTo(3,-2);c.lineTo(-3,-2);c.lineTo(-8,-8);c.closePath();c.fill();c.stroke();
     c.fillStyle='#c84f68';c.beginPath();c.moveTo(-1,-3);c.lineTo(2,-3);c.lineTo(3,4);c.lineTo(0,8);c.lineTo(-2,4);c.closePath();c.fill();c.stroke();
@@ -767,6 +776,7 @@ function drawOutfitCosmetic(c,id){
     // Macacão de manutenção: calças e peitilho realmente vestem o personagem.
     c.fillStyle='#315e8f';legShell(-12,-1);c.fill();c.stroke();legShell(2,-1);c.fill();c.stroke();
     c.fillStyle='#3d72aa';rr(c,-11,-5,22,14,5);c.fill();c.stroke();
+    collar('#82a9cb');
     c.fillStyle='#233d61';rr(c,-10,3,20,6,2.5);c.fill();c.stroke();
     c.strokeStyle='#82a9cb';c.lineWidth=2.4;c.beginPath();c.moveTo(-8,-10);c.lineTo(-5,-4);c.moveTo(8,-10);c.lineTo(5,-4);c.stroke();
     c.fillStyle='#d7b45d';c.strokeStyle='#10122a';c.lineWidth=1.7;rr(c,-3,3,6,4,1);c.fill();c.stroke();
@@ -774,6 +784,7 @@ function drawOutfitCosmetic(c,id){
   }else if(id==='polar_wrap'){
     // Traje polar: volume no corpo, gola alta e pernas separadas, sem parecer adesivo.
     c.fillStyle='#eef1ec';torsoPath();c.fill();c.stroke();
+    collar('#323641');
     c.fillStyle='#d5d9d5';legShell(-12,0);c.fill();c.stroke();legShell(2,0);c.fill();c.stroke();
     c.fillStyle='#323641';c.beginPath();c.moveTo(-11,-10);c.quadraticCurveTo(-5,-15,0,-10);c.quadraticCurveTo(5,-15,11,-10);c.lineTo(8,-5);c.quadraticCurveTo(0,-1,-8,-5);c.closePath();c.fill();c.stroke();
     c.fillStyle='#9ca6ae';rr(c,-11,5,22,4,2);c.fill();c.stroke();
@@ -781,6 +792,7 @@ function drawOutfitCosmetic(c,id){
   }else if(id==='explorer_harness'){
     // Colete de campo: base verde ajustada, alças cruzadas e bolsos baixos.
     c.fillStyle='#50624d';rr(c,-13,-9,26,18,6);c.fill();c.stroke();
+    collar('#d4b868');
     c.fillStyle='#40503e';legShell(-12,0);c.fill();c.stroke();legShell(2,0);c.fill();c.stroke();
     c.strokeStyle='#d4b868';c.lineWidth=2.7;c.beginPath();c.moveTo(-9,-10);c.lineTo(4,9);c.moveTo(9,-9);c.lineTo(-3,9);c.stroke();
     c.fillStyle='#8b6e43';c.strokeStyle='#10122a';c.lineWidth=1.8;rr(c,-10,1,7,6,1.8);c.fill();c.stroke();rr(c,4,1,7,6,1.8);c.fill();c.stroke();
