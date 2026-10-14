@@ -240,10 +240,24 @@ test('cosméticos têm catálogo, categorias, renderização centralizada e sinc
   assert.doesNotMatch(html, /HALF_W[^\n]*cosmetic|boxBlocked[^\n]*cosmetic|CFG\.speed[^\n]*cosmetic/i, 'cosméticos não podem entrar em colisão ou velocidade');
 });
 
-test('catálogo de cosméticos abre acima do lobby e permite trocar apenas cores livres', () => {
-  assert.match(html, /#cosmeticsOverlay\{position:fixed;inset:0;z-index:180;/, 'catálogo deve ficar acima do lobby');
-  assert.match(html, /id="lobbyColorSwatches"/, 'catálogo deve conter seletor de cor');
-  assert.match(html, /netSend\(\{type:'set_color',color:color\.id\}\)/, 'troca de cor deve ser sincronizada com o servidor');
-  assert.match(html, /filter\(p=>p\.id!==NET\.id\)\.map\(p=>p\.color\)/, 'cores usadas por outros jogadores devem ficar indisponíveis');
+test('catálogo de cosméticos fica no menu inicial e preserva a regra de cores únicas online', () => {
+  assert.match(html, /id="btnFreePlay"[^>]*>Partida Livre<\/button><button class="chip" id="btnCosmetics"[^>]*>Cosméticos<\/button>/, 'Cosméticos deve usar o mesmo estilo compacto de Partida Livre no menu');
+  assert.doesNotMatch(html, /roomActions[^\n]*id="btnCosmetics"/, 'o botão não deve permanecer na janela do lobby');
+  assert.match(html, /function openCosmetics\(\)\{if\(NET\.inRoom\)\{toast\('A aparência é escolhida na tela inicial/, 'catálogo deve ser aberto antes de entrar na sala');
+  assert.match(html, /id="lobbyColorSwatches"/, 'catálogo deve manter o seletor de cor');
+  assert.match(html, /netSend\(\{type:'set_color',color:color\.id\}\)/, 'a proteção de cor única continua disponível para estado de lobby sincronizado');
+  assert.match(html, /filter\(p=>p\.id!==NET\.id\)\.map\(p=>p\.color\)/, 'cores usadas por outros jogadores continuam detectadas');
   assert.match(html, /\{id:'banana',name:'Banana',main:'#fff2a8',dark:'#d9be58'\}/, 'banana deve usar uma tonalidade mais clara');
+});
+
+test('pets somem em dutos, ficam tristes no corpo e persistem depois de reuniões', () => {
+  assert.match(html, /pet==='none'\|\|ch\.alive===false\|\|ch\.ghost\|\|ch\.vent\|\|\(ch\.ventAnim&&ch\.ventAnim\.kind==='in'\)/, 'seguidor deve ser suspenso ao morrer ou entrar no duto');
+  assert.match(html, /worldPetVisible=ch\.alive!==false&&!ch\.ghost&&!ch\.vent/, 'pet não deve ser desenhado acompanhando morto ou jogador dentro do duto');
+  assert.match(html, /function parkPetAtBody\(body,ch\)/);
+  assert.match(html, /drawPetShape\(c,p\.pet,p\.x,p\.y,p\.phase\|\|0,\{sad:true\}\)/, 'pet estacionado deve usar estado triste');
+  assert.match(html, /addBodyWithPet\(body,v\)/, 'morte comum deve estacionar o pet junto do corpo');
+  assert.match(html, /const deadPets=\(G\.deadPets\|\|\[\]\)\.map/, 'pets deixados no mapa precisam viajar no snapshot multiplayer');
+  assert.match(html, /G\.deadPets=Array\.isArray\(s\.deadPets\)\?s\.deadPets\.map/, 'clientes precisam restaurar pets persistentes do snapshot');
+  const endMeeting=html.slice(html.indexOf('function endMeeting(){'),html.indexOf('function appendMeetingMsgVisual'));
+  assert.doesNotMatch(endMeeting,/deadPets\s*=\s*\[\]/, 'fim da reunião não pode apagar os pets que ficaram no mapa');
 });
