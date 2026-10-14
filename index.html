@@ -3312,7 +3312,7 @@ buildStatic(); resize(); requestAnimationFrame(frame);
 /* =====================================================================
    MULTIPLAYER ONLINE — autoridade da sala no host + snapshots/requisições
    ===================================================================== */
-const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,lastSnapshotAt:0,snapshotBlendDuration:.13,snapshotIntervalEMA:.15,lastHudSig:''};
+const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,lastSnapshotAt:0,snapshotBlendDuration:.15};
 function netVisualState(ch){
   if(!NET.inRoom||NET.isHost||!Number.isFinite(ch.netVisualX)||!Number.isFinite(ch.netVisualY))return null;
   return {x:ch.netVisualX,y:ch.netVisualY,walk:Number.isFinite(ch.netVisualWalk)?ch.netVisualWalk:(ch.walk||0),moving:!!ch.netVisualMoving};
@@ -3355,7 +3355,7 @@ function netConnect(action){
 function netRoomPayload(){const size=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createSizeIn').value=size;const bots=clamp(Math.round(+$('createBotsIn').value||0),0,size-1);$('createBotsIn').value=bots;return {size,bots,settings:netSettings()}}
 function netCreateRoom(){Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';$('createPanel').hidden=true;netConnect(()=>netSend({type:'create_room',name:G.cfg.name,color:G.cfg.color,...netRoomPayload()}))}
 function netJoinRoom(){const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(!/^[A-Z0-9]{6}$/.test(code)){toast('Digite o código completo de 6 letras maiúsculas ou números.');return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';netConnect(()=>netSend({type:'join_room',code,name:G.cfg.name,color:G.cfg.color}))}
-function netLeaveRoom(){if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.13;NET.snapshotIntervalEMA=.15;NET.lastHudSig='';netHideWait();$('roomLobby').hidden=true}
+function netLeaveRoom(){if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;netHideWait();$('roomLobby').hidden=true}
 function netTotal(room=NET.room){return room?(room.players.length+(room.bots||0)):0}
 function netRenderRoom(){
   const r=NET.room;if(!r)return;
@@ -3411,7 +3411,7 @@ function netHandleMessage(m){
   if(m.type==='loading_start'){NET.room=m.room||NET.room;netShowLoading();return}
   if(m.type==='countdown_cancelled'){netHideWait();toast(m.reason||'Contagem cancelada.',2400);if(NET.room&&['lobby','countdown'].includes(NET.room.status))netShowRoom();return}
   if(m.type==='game_start'){
-    netHideWait();NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.13;NET.snapshotIntervalEMA=.15;NET.lastHudSig='';NET.matchImpIds.clear();NET.departedImpIds.clear();
+    netHideWait();NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.lastSnapshotAt=0;NET.snapshotBlendDuration=.15;NET.matchImpIds.clear();NET.departedImpIds.clear();
     const own=m.room.players.find(p=>p.id===NET.id);if(own){G.cfg.name=own.name;G.cfg.color=own.color;$('nameIn').value=own.name}
     netApplySettings(m.room.settings);
     $('roomLobby').hidden=true;$('joinPanel').hidden=true;$('menu').hidden=true;
@@ -3475,16 +3475,8 @@ function netApplySnapshot(s,force=false){
     const oldState=G.state, prevPlayer=G.player, wasAlive=prevPlayer?prevPlayer.alive:true;
     const arrival=performance.now();
     const clientSnapshot=!force&&NET.inRoom&&!NET.isHost;
-    const arrivalGap=NET.lastSnapshotAt>0?clamp((arrival-NET.lastSnapshotAt)/1000,.04,.5):.15;
-    // Suaviza jitter de rede: não usa cada intervalo bruto como duração da animação.
-    // A interpolação termina um pouco antes do próximo snapshot esperado, evitando
-    // a sensação de personagem sempre "correndo atrás" da posição do host.
-    if(clientSnapshot){
-      NET.snapshotIntervalEMA=NET.snapshotIntervalEMA*.82+arrivalGap*.18;
-      NET.snapshotBlendDuration=clamp(NET.snapshotIntervalEMA*.86,.075,.17);
-      NET.lastSnapshotAt=arrival;
-    }
-    const snapshotDuration=clientSnapshot?NET.snapshotBlendDuration:0;
+    const snapshotDuration=NET.lastSnapshotAt>0?clamp((arrival-NET.lastSnapshotAt)/1000,.05,.25):.15;
+    if(clientSnapshot){NET.snapshotBlendDuration=snapshotDuration;NET.lastSnapshotAt=arrival}
     const canBlendClient=clientSnapshot&&['playing','task','tool'].includes(oldState)&&s.state==='playing';
     const oldChars=new Map((G.chars||[]).map(c=>[c.id,c]));
     G.chars=s.chars.map(r=>{
@@ -3533,12 +3525,7 @@ function netApplySnapshot(s,force=false){
       if(s.state==='role'){$('role').hidden=false;$('roleTitle').textContent=G.role==='imp'?'Você é um Infiltrado':'Você é um Tripulante';$('roleMsg').textContent=G.player.function==='engineer'?'Engenheiro - Pode usar os sustos':(G.player.function==='marionette'?'Marionetista - Controle Tripulantes e cause confusão na nave.':(G.player.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(G.player.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(G.player.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(G.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.')))))}
     }
     if(!wasAlive&&G.player.alive){NET.ownWasAlive=true}else if(wasAlive&&!G.player.alive){const corpse=G.bodies.find(b=>String(b.name)===String(G.player.name));const killer=G.chars.find(c=>c.id===(corpse?.killerId||''))||G.imps[0];if(corpse?.cause==='sheriff_misfire'||corpse?.cause==='sheriff_recoil'){toast(corpse.cause==='sheriff_misfire'?'Você foi eliminado após atingir um Tripulante inocente.':'Você foi eliminado pelo disparo do Xerife.',3600)}else if(killer)showDeathIntro(killer,G.player);NET.ownWasAlive=false}
-    $('roleName').textContent=G.player.function==='marionette'?'Infiltrado · Marionetista':(G.player.function==='engineer'?'Tripulante · Engenheiro':(G.role==='imp'?'Infiltrado':(G.player.function==='sheriff'?'Tripulante · Xerife':(G.player.function==='delayed'?'Infiltrado · Atrasado':(G.locator?'Tripulante · Localizador':'Tripulante')))));
-    // Evita reconstruir a lista de tarefas a cada snapshot. Em clientes não-host,
-    // essa operação acontecia 6–7 vezes/s mesmo sem nenhuma tarefa mudar.
-    const hudSig=[G.player.id,G.role,G.player.alive,G.sab.lights>0,G.sab.reactor>0,G.sab.comms>0,G.sab.doors>0,...G.tasks.filter(t=>!t.fake||t.owner===G.player.id).flatMap(t=>[t.id,t.owner,t.done,...(t.steps||[]).map(q=>q.done)])].join('|');
-    if(NET.lastHudSig!==hudSig){NET.lastHudSig=hudSig;renderTasks()}
-    updateSabUI();netSyncCameraAndButtons();
+    $('roleName').textContent=G.player.function==='marionette'?'Infiltrado · Marionetista':(G.player.function==='engineer'?'Tripulante · Engenheiro':(G.role==='imp'?'Infiltrado':(G.player.function==='sheriff'?'Tripulante · Xerife':(G.player.function==='delayed'?'Infiltrado · Atrasado':(G.locator?'Tripulante · Localizador':'Tripulante')))));renderTasks();updateSabUI();netSyncCameraAndButtons();
   }catch(e){console.error('Falha ao aplicar estado online',e)}finally{NET.applying=false}
 }
 function netPaintMeeting(sm){
