@@ -21,21 +21,20 @@ Este pacote mantém a estrutura do jogo e reúne as correções multiplayer exis
 
 ## Correção de movimento do Marionetista
 
-- O movimento multiplayer foi ajustado para que, enquanto um jogador controla outro, o vetor de entrada seja aplicado uma única vez ao corpo controlado. O personagem Marionetista espelha a posição/animação resultante, evitando processamento redundante das colisões entre os dois avatares.
-- A vítima possuída não tem mais seu estado de caminhada apagado dependendo da ordem dos personagens na lista de simulação. Quando o joystick volta a zero ou o input expira, a animação e o movimento param no mesmo tick.
-- Os snapshots não interpolam uma transição de posse como se fosse deslocamento normal entre duas posições do mesmo personagem. A troca da relação de controle usa a posição autoritativa correta.
-- O joystick zera também quando perde a captura do ponteiro ou a janela perde foco, prevenindo input travado após interrupções.
-- A aba de configurações **Marionetista** reutiliza o mesmo vermelho da aba **Atrasado**. Os demais botões não foram alterados.
+- A causa encontrada nesta versão era **sobreposição de interface no celular**, não erro de normalização do vetor. Com quatro ações visíveis, a fileira de botões do Marionetista avançava sobre a área do joystick. Por isso o `pointerdown` do joystick só começava na faixa esquerda que permanecia descoberta.
+- Em telas de até 560 px, as ações do Marionetista agora usam no máximo duas colunas à direita. Em telas extremamente estreitas, passam para uma coluna. Assim, os botões não cobrem a área física do joystick.
+- A mudança é ativada somente enquanto o jogador local é um Marionetista vivo em partida; o layout das outras funções permanece como estava.
+- A lógica existente de direção, velocidade, colisão, previsão local e snapshots não foi reescrita para mascarar o defeito.
+- Os testes específicos do Marionetista presentes na versão recebida foram removidos conforme solicitado. Nenhum teste novo dessa função foi criado.
 
 ## Testes executados
 
 - `node --check server.js`
 - `node --check websocket.js`
 - Extração do JavaScript inline de `index.html` e `node --check` do script extraído.
-- `npm test`: **48 testes automatizados aprovados, 0 falhas**. Inclui verificações específicas de movimento, oito direções, vetores diagonais normalizados, input contínuo, soltura/timeout, ordem dos participantes, estado de posse e cor da aba.
-- Os testes de WebSocket usam clientes simulados contra o servidor local para verificar eventos e snapshots.
-- A frequência de comunicação existente foi mantida: inputs a cada 50 ms e snapshots a cada 150 ms; ela não foi aumentada para mascarar o problema.
-- A lógica real de `netUpdateRemote` foi executada em cenários simulados. Uma partida completa em dispositivos físicos com joystick real não foi executada; esse teste precisa ser feito antes de substituir a versão pública.
+- `npm test`: **38 testes automatizados aprovados, 0 falhas** após a remoção dos testes específicos do Marionetista.
+- Verificação estática do layout móvel: em 320 px de largura a fileira do Marionetista fica separada do joystick; em 360 px a separação é de aproximadamente 46 px.
+- Não foi realizado teste em joystick físico nem partida multiplayer real em dispositivos separados neste ambiente.
 
 ## Executar localmente
 

@@ -196,6 +196,9 @@ body.touch #stick{display:block}
 #cfgRows .fncompact .cfgtop .fnicon{font-size:1.3em;vertical-align:-1px}
 .act2.delayed small{display:block;font-size:10px;line-height:1.05}
 #actions .row2:first-child{flex-wrap:wrap;justify-content:center;max-width:min(390px,96vw)}
+/* No celular, quatro ações do Marionetista cabem em 2 colunas para não cobrir o joystick. */
+@media (max-width:560px){#actions.marionette-controls .row2:first-child{max-width:146px;justify-content:flex-end}}
+@media (max-width:319px){#actions.marionette-controls .row2:first-child{max-width:68px}}
 .act2.locator small{display:block;font-size:10px;line-height:1;margin-top:2px}
 .act2.locator.active{filter:none;outline:3px solid #65d8ff;outline-offset:2px}
 #sabBar{position:absolute;left:50%;top:calc(64px + var(--st));transform:translateX(-50%);max-width:min(440px,70vw);text-align:center;background:#2a0f1e;border:2.5px solid var(--coral);border-radius:14px;padding:3px 14px 1px;font-weight:700;font-size:16px;line-height:1.3;animation:sabpulse 1s ease-in-out infinite;pointer-events:none}
@@ -3106,6 +3109,8 @@ function updateButtons(){
   const p=G.player, can=G.state==='playing'&&(p.alive||ghostCanSab()), imp=G.role==='imp', directKill=imp&&p.function!=='delayed';
   const chatBtn=$('btnRoomChat');if(chatBtn){chatBtn.hidden=true;chatBtn.setAttribute('aria-expanded','false')}
   const bk=$('btnKill'), bsh=$('btnSheriff'), bdel=$('btnDelayed'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator'), be=$('btnEngineerVent'), bc=$('btnControl'), sheriff=G.role==='crew'&&p.function==='sheriff', delayed=G.role==='imp'&&p.function==='delayed', engineer=G.role==='crew'&&p.function==='engineer', marionette=G.role==='imp'&&p.function==='marionette';
+  // O conjunto extra de ações do Marionetista não pode ocupar a área física do joystick em telas estreitas.
+  $('actions').classList.toggle('marionette-controls',marionette&&p.alive&&G.state==='playing');
   const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(directKill&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bdel,!(delayed&&p.alive)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));hv(be,!(G.state==='playing'&&p.alive&&engineer));hv(bc,!(G.state==='playing'&&p.alive&&marionette));
   const ventReady=!!p.vent||((G.sab.comms||0)<=0&&(p.engVentCd||0)<=0&&!!nearestVentFor(p,84));be.disabled=!p.vent&&!ventReady;be.classList.toggle('ready',ventReady);const ventLabel=p.vent?'Sair do duto':((p.engVentCd||0)>0?String(Math.ceil(p.engVentCd)):'Dutar');if(be._l!==ventLabel){be._l=ventLabel;be.innerHTML=ventLabel==='Dutar'?'🔧<small>Dutar</small>':ventLabel==='Sair do duto'?'↗<small>Sair</small>':ventLabel}
   const ctlTarget=controlTargetFor(p,100),ctlLabel=p.controlTargetId?('Controlando '+Math.ceil(p.controlTime)+'s'):((p.controlCd||0)>0?String(Math.ceil(p.controlCd)):(NET?.pendingControl?'…':'Controlar'));bc.disabled=!p.controlTargetId&&(!ctlTarget||(p.controlCd||0)>0);bc.classList.toggle('ready',!!ctlTarget&&!(p.controlCd||0)&&!p.controlTargetId);if(bc._l!==ctlLabel){bc._l=ctlLabel;bc.innerHTML=ctlLabel==='Controlar'?'✋<small>Controlar</small>':ctlLabel}
