@@ -416,7 +416,7 @@ test('distância para ações oferece Curta, Média e Longa e sincroniza no mult
   assert.match(html, /function actionDistancePx\(kind='default'\)/);
   for (const kind of ['kill','sheriff','delayed','parasite','instructor','locator','cleaner','report','control']) assert.match(html, new RegExp(kind+":\\["));
   assert.match(html, /\['actionDistance','Distância para ações'/);
-  assert.match(html, /'actionDistance','renderDist'/);
+  assert.match(html, /'actionDistance','commonTasks','mediumTasks','longTasks','renderDist'/);
   assert.match(server, /actionDistance:\[0,2\]/);
   assert.match(server, /actionDistance:1/);
 });
@@ -437,4 +437,74 @@ test('texto da função para fantasmas é maior e portas sabotadas são redesenh
 test('portas sabotadas bloqueiam a iluminação como paredes e liberam visão ao reabrir', () => {
   assert.match(html, /!isFloor\(tx,ty\)\|\|doorClosedAt\(tx,ty\)/);
   assert.match(html, /function doorClosedAt\(tx,ty\)\{return doors\.some\(d=>d\.closed/);
+});
+
+
+test('tarefas usam categorias configuráveis, comuns compartilhadas e sorteio individual para médias/longas', () => {
+  for (const key of ['commonTasks','mediumTasks','longTasks']) {
+    assert.match(html, new RegExp(key+':\\[0,5\\]'));
+    assert.match(server, new RegExp(key+':\\[0,5\\]'));
+  }
+  assert.match(html, /Tarefas Comuns/);
+  assert.match(html, /Tarefas Médias/);
+  assert.match(html, /Tarefas Longas/);
+  assert.match(html, /category:'common'/);
+  assert.match(html, /category:'medium'/);
+  assert.match(html, /category:'long'/);
+  assert.match(html, /name:'Baixar dados da nave'/);
+  assert.match(html, /const commonTaskTemplates=taskTemplateSelection\(TASK_POOLS\.common,CFG\.commonTasks\)/);
+  assert.match(html, /createTasksFor\(c\.id,commonTaskTemplates\)/);
+  assert.match(html, /taskTemplateSelection\(TASK_POOLS\.medium,CFG\.mediumTasks\)/);
+  assert.match(html, /taskTemplateSelection\(TASK_POOLS\.long,CFG\.longTasks\)/);
+});
+
+test('novas falas dos NPCs dependem de corpo, memória, função observada ou suspeita', () => {
+  assert.match(html, /`Corpo de \$\{M\.body\.name\} em \$\{M\.body\.room\}\.`/);
+  assert.match(html, /`Vamos votar em \$\{suspect\.name\}\.`/);
+  assert.match(html, /Mortos, nos ajudem!/);
+  assert.match(html, /é Marionetista!!!/);
+  assert.match(html, /é Engenheiro!!!/);
+  assert.match(html, /é Faxineiro!!!/);
+  assert.match(html, /Não acho que \$\{T\.name\} seja/);
+  assert.match(html, /pick\(\['Concordo\.','Sim\.'/);
+  assert.match(html, /pick\(\['Discordo\.','Não\.'/);
+  assert.match(html, /'Verdade\.'/);
+  assert.match(html, /'Mentira\.'/);
+});
+
+test('Paramédico libera usos por tarefas, revive uma única vez e sincroniza o corpo exato', () => {
+  assert.match(html, /id="btnParamedic"[^>]*>⛑️<small>Reviver<\/small>/);
+  assert.match(html, /id="btnParamedicSection"[^>]*>⛑️ Paramédico/);
+  for (const key of ['paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses']) {
+    assert.match(html, new RegExp(key+':\\['));
+    assert.match(server, new RegExp(key+':\\['));
+  }
+  assert.match(html, /Paramédico - Reviva Tripulantes por meio de seus corpos\./);
+  assert.match(html, /paramedicEligible=shuffle\(G\.chars\.filter\(c=>c\.role==='crew'&&!c\.function\)\)/);
+  assert.match(html, /Math\.floor\(completedRealTasksFor\(ch\)\/Math\.max\(1,CFG\.paramedicTasksPerUse\)\)/);
+  assert.match(html, /victim&&victim!==medic&&!victim\.alive&&victim\.role==='crew'&&!victim\.revivedOnce/);
+  assert.match(html, /clearRevivedFunctionState\(victim\);victim\.role='crew';victim\.alive=true;victim\.ghost=false;victim\.revivedOnce=true/);
+  assert.match(html, /victim\.x=body\.x;victim\.y=body\.y/);
+  assert.match(html, /G\.bodies=G\.bodies\.filter\(b=>b!==body\)/);
+  assert.match(html, /medic\.paramedicSpent=Math\.max\(0,medic\.paramedicSpent\|\|0\)\+1;medic\.paramedicCd=CFG\.paramedicCooldown/);
+  assert.match(html, /command==='revive_body'[\s\S]*?m\.bodyId[\s\S]*?reviveBody\(ch,body\)/);
+  assert.match(html, /action:'revive_body',bodyId:b\.id/);
+  assert.match(server, /'revive_body'/);
+  assert.match(server, /if\(m\.bodyId!==undefined\)allowedData\.bodyId=m\.bodyId/);
+  assert.match(html, /paramedicBotThink\(ch,dt\)/);
+  assert.match(html, /\['paramedic','⛑️ Paramédico'\]/);
+});
+
+test('conversão do Parasita apaga toda função anterior e vira Infiltrado comum', () => {
+  assert.match(html, /function clearConvertedCrewFunctionState\(target\)[\s\S]*?target\.function=null/);
+  assert.match(html, /clearConvertedCrewFunctionState\(target\);\s*target\.role='imp';target\.function=null/);
+  assert.match(html, /G\.tasks\.filter\(t=>t\.owner===target\.id\)\.forEach\(t=>t\.fake=true\)/);
+  assert.match(html, /if\(G\.parasiteInfections&&Object\.prototype\.hasOwnProperty\.call\(G\.parasiteInfections,c\.id\)\)delete G\.parasiteInfections\[c\.id\]/);
+});
+
+test('reportar, limpar e reviver corpos online usam o ID exato para resolver corridas no host', () => {
+  assert.match(html, /action:'report',bodyId:b\.id/);
+  assert.match(html, /command==='report'[\s\S]*?m\.bodyId!=null\?G\.bodies\.find\(b=>String\(b\.id\)===String\(m\.bodyId\)/);
+  assert.match(html, /action:'clean_body',bodyId:b\.id/);
+  assert.match(html, /action:'revive_body',bodyId:b\.id/);
 });

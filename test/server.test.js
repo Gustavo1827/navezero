@@ -373,3 +373,36 @@ test('ações online do Instrutor retransmitem seleção e ponto ao host', async
   const marked=await onceMessage(host,m=>m.type==='host_command'&&m.command==='instructor_mark'&&m.playerId===guest.id);
   assert.equal(marked.targetId,host.id);assert.equal(marked.x,777.75);assert.equal(marked.y,888.5);
 });
+
+test('Paramédico no servidor respeita limites de configuração e máximo de jogadores', () => {
+  const high=cleanSettings({paramedicChance:180,paramedicMax:15,paramedicCooldown:99,paramedicTasksPerUse:9,paramedicMaxUses:8},6);
+  assert.equal(high.paramedicChance,100);
+  assert.equal(high.paramedicMax,6);
+  assert.equal(high.paramedicCooldown,60);
+  assert.equal(high.paramedicTasksPerUse,5);
+  assert.equal(high.paramedicMaxUses,3);
+  const low=cleanSettings({paramedicChance:-5,paramedicMax:-2,paramedicCooldown:1,paramedicTasksPerUse:0,paramedicMaxUses:0},4);
+  assert.equal(low.paramedicChance,0);
+  assert.equal(low.paramedicMax,0);
+  assert.equal(low.paramedicCooldown,20);
+  assert.equal(low.paramedicTasksPerUse,1);
+  assert.equal(low.paramedicMaxUses,1);
+});
+
+test('ações de corpo online preservam bodyId para o host decidir reportar, limpar ou reviver sem duplicar', async t=>{
+  const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:20,loadingMs:10});
+  await new Promise(resolve=>app.server.once('listening',resolve));
+  const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
+  t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+  const host=await connect(url,'Host','azul');all.push(host);
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:2});
+  const made=await onceMessage(host,m=>m.type==='room_state');const code=made.room.code;
+  const guest=await connect(url,'Paramedico Online','verde');all.push(guest);
+  send(guest,{type:'join_room',code});await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.length===2);await onceMessage(host,m=>m.type==='room_state'&&m.room.players.length===2);
+  send(host,{type:'start_game'});await onceMessage(host,m=>m.type==='game_start');await onceMessage(guest,m=>m.type==='game_start');
+  for(const action of ['report','clean_body','revive_body']){
+    const bodyId=`corpo-${action}`;send(guest,{type:'action',action,bodyId});
+    const cmd=await onceMessage(host,m=>m.type==='host_command'&&m.command===action&&m.playerId===guest.id);
+    assert.equal(cmd.bodyId,bodyId);
+  }
+});

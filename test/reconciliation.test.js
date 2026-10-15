@@ -19,10 +19,13 @@ test('inputs têm sequência e o host devolve ACK nos snapshots', () => {
   assert.match(html, /netInputAck:c\.netInputAck\|\|0/);
 });
 
-test('reconciliação evita puxar o jogador para trás por snapshot atrasado', () => {
-  assert.match(html, /const along=Math\.max\(0,dot\)/);
-  assert.match(html, /NET\.reconcileX\+=px\+ux\*along\*\.35/);
-  assert.match(html, /const k=Math\.min\(1,dt\*8\)/);
+test('reconciliação evita puxões contra paredes e corrige apenas deriva útil durante movimento', () => {
+  assert.match(html, /function netReconcileOwnAuthoritative\(p,targetX,targetY,ack=0,hard=false\)/);
+  assert.match(html, /if\(err<58\)\{NET\.reconcileX\*=\.55;NET\.reconcileY\*=\.55;return\}/);
+  assert.match(html, /if\(perp>1\)\{const cap=Math\.min\(perp,28\),k=cap\/perp;NET\.reconcileX=px\*k;NET\.reconcileY=py\*k/);
+  assert.match(html, /const k=Math\.min\(1,dt\*8\),cx=NET\.reconcileX\*k,cy=NET\.reconcileY\*k/);
+  assert.match(html, /const ax=p\.x-ox,ay=p\.y-oy;NET\.reconcileX-=ax;NET\.reconcileY-=ay/);
+  assert.match(html, /if\(Math\.abs\(cx\)>\.05&&Math\.abs\(ax\)<\.001\)NET\.reconcileX=0/);
 });
 
 
