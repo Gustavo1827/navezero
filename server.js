@@ -21,9 +21,9 @@ const DEFAULT_COSMETICS={hat:'none',pet:'none',outfit:'none',visor:'none'};
 function cleanCosmetics(input={}){const src=input&&typeof input==='object'?input:{};const out={};for(const key of Object.keys(DEFAULT_COSMETICS)){const id=String(src[key]||'none');out[key]=COSMETIC_ALLOWED[key].has(id)?id:'none'}return out}
 const LIMITS = {
   kill:[10,60], sab:[10,90], meet:[10,60], speed:[100,280], impVision:[260,900], crewVision:[260,900],
-  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], obsChance:[0,100], obsMax:[0,15], cleanerChance:[0,100], cleanerMax:[0,15], cleanerCooldown:[10,60], cleanerUses:[1,15], parasiteChance:[0,100], parasiteMax:[0,3], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], engVentDuration:[10,61], engChance:[0,100], engMax:[0,15], engCooldown:[5,25], marionCooldown:[15,60], marionDuration:[5,30], marionChance:[0,100], marionMax:[0,3], renderDist:[500,1500]
+  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], obsChance:[0,100], obsMax:[0,15], instructorChance:[0,100], instructorMax:[0,15], instructorCooldown:[20,60], instructorDuration:[5,15], cleanerChance:[0,100], cleanerMax:[0,15], cleanerCooldown:[10,60], cleanerUses:[1,15], parasiteChance:[0,100], parasiteMax:[0,3], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], engVentDuration:[10,61], engChance:[0,100], engMax:[0,15], engCooldown:[5,25], marionCooldown:[15,60], marionDuration:[5,30], marionChance:[0,100], marionMax:[0,3], renderDist:[500,1500]
 };
-const DEFAULT_SETTINGS = {kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,renderDist:820};
+const DEFAULT_SETTINGS = {kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorDuration:8,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,renderDist:820};
 const BOT_NAMES = ['João','Duda','Lia','Maria','Fernando','Caio','Aurora','Bruno','Iris','Mateus','Nina','Ravi','Bia','Theo','Yasmin','Gael','Luna','Cecília','Miguel','Helena','Enzo','Rafa','Alice','Pedro','Sofia','Lucas','Maya','Noah','Lara','Vitor'];
 const nameKey = value => String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]/g,'');
 function ensureBotRoster(room){
@@ -52,6 +52,7 @@ function cleanSettings(input={}, playerCount=15) {
   out.impostors=Math.min(out.impostors,maxImpostorsForCount(playerCount));
   out.cleanerMax=Math.min(out.cleanerMax,out.impostors);
   out.parasiteMax=Math.min(out.parasiteMax,out.impostors,3);
+  out.instructorMax=Math.min(out.instructorMax,Math.max(0,Math.min(15,playerCount)));
   return out;
 }
 const ROOM_CODE_CHARS='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -95,18 +96,21 @@ function personalizeSnapshot(snapshot, recipientId){
   const recipient=s.chars?.find(c=>c.id===recipientId);
   if(!ended && recipient?.alive!==false){
     const recipientIsImp=recipient?.role==='imp';
-    for(const c of (s.chars||[]))if(c.id!==recipientId && !(recipientIsImp&&c.role==='imp')){c.role='crew';c.function=null}
+    for(const c of (s.chars||[])){if(c.id!==recipientId)c.instructor=false;if(c.id!==recipientId && !(recipientIsImp&&c.role==='imp')){c.role='crew';c.function=null}}
+  }else if(!ended && recipient?.instructor){
+    // Instrutores mortos não recebem as funções dos Tripulantes vivos no snapshot privado.
+    for(const c of (s.chars||[])){if(c.id!==recipientId)c.instructor=false;if(c.alive&&c.role==='crew')c.function=null}
   }
   // Marcações são privadas: só o Atrasado que marcou recebe seus cronômetros.
   const privateMarks={};for(const [victimId,mark] of Object.entries(s.delayedMarks||{})){if(mark&&mark.killerId===recipientId)privateMarks[victimId]={victimId, killerId:recipientId, remaining:Math.max(0,Number(mark.remaining)||0)}}s.delayedMarks=privateMarks;
-  s.parasiteInfections={};
-  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.observer=recipient.function==='observer';s.cleaner=recipient.function==='cleaner';s.parasite=recipient.function==='parasite';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.selfCleanerCd=recipient.cleanCd||0;s.selfCleanerUses=recipient.cleanUses||0;s.selfParasiteReady=recipient.parasiteReady!==false;}
+  s.parasiteInfections={};s.instructorTrails=(s.instructorTrails||[]).filter(t=>String(t.targetId)===String(recipientId));
+  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.observer=recipient.function==='observer';s.cleaner=recipient.function==='cleaner';s.parasite=recipient.function==='parasite';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.selfCleanerCd=recipient.cleanCd||0;s.selfCleanerUses=recipient.cleanUses||0;s.selfParasiteReady=recipient.parasiteReady!==false;s.selfInstructor=!!recipient.instructor;s.selfInstructorCd=recipient.instructorCd||0;s.selfInstructorTargetId=recipient.instructorTargetId||null;}
   return s;
 }
 function snapshotForNewHost(snapshot, recipientId){
   const s=JSON.parse(JSON.stringify(snapshot));
   const recipient=s.chars?.find(c=>c.id===recipientId);
-  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.observer=recipient.function==='observer';s.cleaner=recipient.function==='cleaner';s.parasite=recipient.function==='parasite';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.selfCleanerCd=recipient.cleanCd||0;s.selfCleanerUses=recipient.cleanUses||0;s.selfParasiteReady=recipient.parasiteReady!==false;}
+  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.observer=recipient.function==='observer';s.cleaner=recipient.function==='cleaner';s.parasite=recipient.function==='parasite';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.selfCleanerCd=recipient.cleanCd||0;s.selfCleanerUses=recipient.cleanUses||0;s.selfParasiteReady=recipient.parasiteReady!==false;s.selfInstructor=!!recipient.instructor;s.selfInstructorCd=recipient.instructorCd||0;s.selfInstructorTargetId=recipient.instructorTargetId||null;}
   return s;
 }
 function startGameNow(room, rematch=false){
@@ -257,7 +261,7 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='action'){
     if(isHost||room.status!=='playing')return;
-    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','clean_body','control','control_release','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat']);if(!allowed.has(action))return;
+    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','instructor_mark','clean_body','control','control_release','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat']);if(!allowed.has(action))return;
     const host=clients.get(room.hostId);if(!host)return;
     const allowedData={command:action,playerId:c.id};
     for(const k of ['targetId','sabotage','ventId','taskId','stepId','fix','text','claim'])if(m[k]!==undefined)allowedData[k]=m[k];
