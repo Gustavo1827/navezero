@@ -330,3 +330,16 @@ test('cores podem mudar no lobby, não podem duplicar e ficam travadas durante a
   assert.match(locked.message,/sala de espera/i);
   assert.equal(rooms.get(code).players.find(p=>p.id===guest.id).color,'rosa');
 });
+
+
+test('Faxineiro no servidor nunca excede a quantidade de Infiltrados', () => {
+  assert.equal(cleanSettings({impostors:1,cleanerMax:15},15).cleanerMax,1);
+  assert.equal(cleanSettings({impostors:2,cleanerMax:15},9).cleanerMax,2);
+  assert.equal(cleanSettings({impostors:3,cleanerMax:2},15).cleanerMax,2);
+});
+
+test('Parasita no servidor respeita máximo 3 e nunca excede os Infiltrados', () => {
+  assert.equal(cleanSettings({impostors:1,parasiteMax:3},15).parasiteMax,1);
+  assert.equal(cleanSettings({impostors:2,parasiteMax:3},9).parasiteMax,2);
+  assert.equal(cleanSettings({impostors:3,parasiteMax:3},15).parasiteMax,3);
+});

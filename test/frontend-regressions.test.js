@@ -312,3 +312,32 @@ test('pets somem em dutos, ficam tristes no corpo e persistem depois de reuniõe
   const endMeeting=html.slice(html.indexOf('function endMeeting(){'),html.indexOf('function appendMeetingMsgVisual'));
   assert.doesNotMatch(endMeeting,/deadPets\s*=\s*\[\]/, 'fim da reunião não pode apagar os pets que ficaram no mapa');
 });
+
+
+test('Faxineiro é exclusivamente Infiltrado, usa identidade vermelha e respeita limite de Infiltrados', () => {
+  assert.match(html, /\.act2\.delayed,\.act2\.cleaner,\.delayed-tab,\.cleaner-tab/);
+  assert.match(html, /class="big alt cleaner-tab" id="btnCleanerSection"/);
+  assert.match(html, /if\(key==='cleanerMax'\)return \[0,Math\.max\(0,Math\.min\(CFG\.impostors,CFG_LIM\.cleanerMax\[1\]\)\)\]/);
+  assert.match(html, /if\(k==='impostors'&&CFG\.cleanerMax>CFG\.impostors\)\{CFG\.cleanerMax=CFG\.impostors/);
+  assert.match(html, /cleanerEligible=shuffle\(\[\.\.\.G\.imps\]\.filter\(ch=>ch\.role==='imp'&&!ch\.function\)\)/);
+  assert.match(html, /cleanerLimit=Math\.min\(clamp\(CFG\.cleanerMax,0,CFG\.impostors\),G\.imps\.length,cleanerEligible\.length\)/);
+  assert.match(html, /const crewFns=\['locator','sheriff','observer','engineer'\], impFns=\['delayed','cleaner','marionette'\]/);
+  assert.match(html, /cleaner=G\.role==='imp'&&p\.function==='cleaner'/);
+  assert.match(server, /out\.cleanerMax=Math\.min\(out\.cleanerMax,out\.impostors\)/);
+});
+
+test('Parasita é função de Infiltrado com infecção adiada até o fim da reunião', () => {
+  assert.match(html, /class="act2 parasite" id="btnParasite"[\s\S]*?🦠<small>Infectar<\/small>/);
+  assert.match(html, /class="big alt parasite-tab" id="btnParasiteSection"[\s\S]*?🦠 Parasita/);
+  assert.match(html, /parasiteChance:\[0,100\]/);
+  assert.match(html, /parasiteMax:\[0,3\]/);
+  assert.match(html, /parasiteEligible=shuffle\(\[\.\.\.G\.imps\]\.filter\(ch=>ch\.role==='imp'&&!ch\.function\)\)/);
+  assert.match(html, /function infectTarget\(parasite,target\)[\s\S]*?G\.parasiteInfections\[target\.id\][\s\S]*?parasite\.parasiteReady=false/);
+  assert.match(html, /function resolveParasiteInfections\(\)[\s\S]*?t&&t\.alive&&t\.role==='crew'\)convertToImpostor\(t\)[\s\S]*?parasiteReady=true/);
+  assert.match(html, /if\(ej\)killChar\(ej\);\s*resolveParasiteInfections\(\);\s*G\.bodies=\[\]/);
+  assert.match(html, /target\.role='imp';target\.function=null/);
+  assert.match(html, /G\.tasks\.filter\(t=>t\.owner===target\.id\)\.forEach\(t=>t\.fake=true\)/);
+  assert.match(html, /parasiteBotThink\(ch,dt\)/);
+  assert.match(html, /action:'parasite_infect'/);
+  assert.match(server, /'parasite_infect'/);
+});
