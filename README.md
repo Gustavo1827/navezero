@@ -52,3 +52,10 @@ Abra `http://localhost:8080`. O endpoint `/health` verifica se o servidor está 
 
 Os cosméticos usam artes vetoriais originais do Nave Zero, ajustadas a partir de referências visuais fornecidas apenas para direção de variedade, escala e posicionamento. A lógica de gameplay permanece independente da aparência.
 
+
+## Atualização — tarefas por categoria e falas contextuais
+- Configurações: Tarefas Comuns, Médias e Longas (0–5 cada).
+- Comuns são sorteadas uma vez por partida e compartilhadas por todos; Médias/Longas variam por jogador.
+- Novas tarefas e cadeias de etapas foram integradas às estações existentes do mapa.
+- Diálogo de NPCs recebeu novas respostas curtas, relatos de corpo, hipóteses de função e chamadas de voto ligadas às memórias/evidências do NPC.
+- Mantidos os ajustes anteriores de distância para ações, descrições de funções, texto de função para fantasmas e visibilidade de portas sabotadas.

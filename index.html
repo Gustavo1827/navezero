@@ -202,7 +202,7 @@ body.touch #stick{display:block}
 #roomChatInput{flex:1;min-width:0;font:600 14px var(--font);color:var(--ink);background:#0a0c26;border:2px solid var(--edge);border-radius:10px;padding:6px 8px;outline:none;user-select:text;-webkit-user-select:text;touch-action:manipulation}
 #roomChatInput:focus-visible{border-color:var(--amber)}
 @media(max-width:560px){#roomChatPanel{right:8px;top:auto;bottom:calc(155px + var(--sb));height:min(38vh,330px);width:min(330px,calc(100vw - 16px))}}
-.act2.engineer{background:#e8f0ff;color:#26345d;box-shadow:0 6px 0 #9baedb,0 8px 0 #10122a;font-size:25px}.act2.engineer small,.act2.marionette small{display:block;font-size:10px;line-height:1.05}.act2.marionette{background:#9c7be8;color:#170d3b;box-shadow:0 6px 0 #6345a9,0 8px 0 #10122a;font-size:25px}.act2.delayed,.act2.cleaner,.delayed-tab,.cleaner-tab,.act2.parasite,.parasite-tab,.marionette-tab{background:rgba(255,53,78,.58)!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
+.act2.paramedic{background:#79e8b1;color:#102739;box-shadow:0 6px 0 #3b9f75,0 8px 0 #10122a;font-size:25px}.act2.paramedic small{display:block;font-size:10px;line-height:1.05}.act2.engineer{background:#e8f0ff;color:#26345d;box-shadow:0 6px 0 #9baedb,0 8px 0 #10122a;font-size:25px}.act2.engineer small,.act2.marionette small{display:block;font-size:10px;line-height:1.05}.act2.marionette{background:#9c7be8;color:#170d3b;box-shadow:0 6px 0 #6345a9,0 8px 0 #10122a;font-size:25px}.act2.delayed,.act2.cleaner,.delayed-tab,.cleaner-tab,.act2.parasite,.parasite-tab,.marionette-tab{background:rgba(255,53,78,.58)!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
 .act2.delayed{font-size:29px!important}
 .act2.sheriff{background:#3c83e8!important;color:#fff!important;box-shadow:0 6px 0 #2055a5,0 8px 0 #10122a!important}
 .act2.sheriff .sheriffGunIcon{width:36px;height:27px}
@@ -487,7 +487,7 @@ body.touch #stick{display:block}
   <div id="ventPanel" class="panel" hidden><div class="vt">Dentro do duto</div><div class="vs" id="ventHere"></div><div id="ventList"></div><button class="chip exit" id="ventExit">Sair do duto</button></div>
   <div id="sabBar" hidden></div>
   <div id="stick"><i id="knob"></i></div>
-  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden>🔫<small class="sheriffButtonLabel">Atirar</small></button><button class="act2 delayed" id="btnDelayed" aria-label="Marcar vítima" title="Atrasado — marcar um Tripulante próximo" hidden>🕓<small>Marcar</small></button><button class="act2 cleaner" id="btnCleaner" aria-label="Limpar corpo" title="Faxineiro — limpar um corpo próximo" hidden>🧹<small>Limpar</small></button><button class="act2 parasite" id="btnParasite" aria-label="Infectar Tripulante" title="Parasita — infectar um Tripulante próximo" hidden>🦠<small>Infectar</small></button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>🧭<small>Rastrear</small></button><button class="act2 instructor" id="btnInstructor" aria-label="Trilhar" title="Instrutor — indicar um caminho a um jogador vivo" hidden>↔️<small>Trilhar</small></button><button class="act2 engineer" id="btnEngineerVent" aria-label="Dutar" title="Engenheiro — entrar ou sair dos dutos" hidden>🔧<small>Dutar</small></button><button class="act2 marionette" id="btnControl" aria-label="Controlar" title="Marionetista — controlar um jogador próximo" hidden>✋<small>Controlar</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
+  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden>🔫<small class="sheriffButtonLabel">Atirar</small></button><button class="act2 delayed" id="btnDelayed" aria-label="Marcar vítima" title="Atrasado — marcar um Tripulante próximo" hidden>🕓<small>Marcar</small></button><button class="act2 cleaner" id="btnCleaner" aria-label="Limpar corpo" title="Faxineiro — limpar um corpo próximo" hidden>🧹<small>Limpar</small></button><button class="act2 parasite" id="btnParasite" aria-label="Infectar Tripulante" title="Parasita — infectar um Tripulante próximo" hidden>🦠<small>Infectar</small></button><button class="act2 paramedic" id="btnParamedic" aria-label="Reviver Tripulante" title="Paramédico — reviver um Tripulante morto próximo" hidden>⛑️<small>Reviver</small></button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>🧭<small>Rastrear</small></button><button class="act2 instructor" id="btnInstructor" aria-label="Trilhar" title="Instrutor — indicar um caminho a um jogador vivo" hidden>↔️<small>Trilhar</small></button><button class="act2 engineer" id="btnEngineerVent" aria-label="Dutar" title="Engenheiro — entrar ou sair dos dutos" hidden>🔧<small>Dutar</small></button><button class="act2 marionette" id="btnControl" aria-label="Controlar" title="Marionetista — controlar um jogador próximo" hidden>✋<small>Controlar</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
 </div>
 
 <div id="deathIntro" hidden aria-live="assertive"><div class="deathCard"><h2>ELIMINADO!</h2><canvas id="deathCv" width="460" height="230" aria-hidden="true"></canvas><p id="deathDesc">Você foi eliminado.</p></div></div>
@@ -529,7 +529,7 @@ body.touch #stick{display:block}
     <h2 id="cfgTitle">Configurações</h2><div class="row" id="cfgTabs"><button class="big" id="cfgTabSettings">Configurações</button><button class="big alt" id="cfgTabFunctions">Funções</button></div>
     <p class="cfgnote" id="cfgNote">Tempos de recarga, em segundos.</p>
     <div id="cfgRows"></div>
-    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">🧭 Localizador</button><button class="big alt" id="btnSheriffSection" type="button">🔫 Xerife</button><button class="big alt delayed-tab" id="btnDelayedSection" type="button">🕓 Atrasado</button><button class="big alt" id="btnObserverSection" type="button">👀 Observador</button><button class="big alt" id="btnInstructorSection" type="button">↔️ Instrutor</button><button class="big alt cleaner-tab" id="btnCleanerSection" type="button">🧹 Faxineiro</button><button class="big alt parasite-tab" id="btnParasiteSection" type="button">🦠 Parasita</button><button class="big alt" id="btnEngineerSection" type="button">🔧 Engenheiro</button><button class="big alt marionette-tab" id="btnMarionetteSection" type="button">✋ Marionetista</button></div></div>
+    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">🧭 Localizador</button><button class="big alt" id="btnSheriffSection" type="button">🔫 Xerife</button><button class="big alt delayed-tab" id="btnDelayedSection" type="button">🕓 Atrasado</button><button class="big alt" id="btnObserverSection" type="button">👀 Observador</button><button class="big alt" id="btnInstructorSection" type="button">↔️ Instrutor</button><button class="big alt cleaner-tab" id="btnCleanerSection" type="button">🧹 Faxineiro</button><button class="big alt parasite-tab" id="btnParasiteSection" type="button">🦠 Parasita</button><button class="big alt" id="btnParamedicSection" type="button">⛑️ Paramédico</button><button class="big alt" id="btnEngineerSection" type="button">🔧 Engenheiro</button><button class="big alt marionette-tab" id="btnMarionetteSection" type="button">✋ Marionetista</button></div></div>
     <div class="row"><button class="big alt" id="cfgReset">Restaurar padrão</button><button class="big" id="cfgClose">Fechar</button></div>
   </div>
 </div>
@@ -799,13 +799,10 @@ function drawOutfitCosmetic(c,id){
   // A peça acompanha a cápsula do personagem em vez de parecer um retângulo colado.
   const torso=(fill,edge=fill)=>{
     c.fillStyle=fill;c.strokeStyle='#10122a';c.lineWidth=1.9;
-    c.beginPath();
-    c.moveTo(-12,-5);c.quadraticCurveTo(-10,-7,-7,-7);
-    c.quadraticCurveTo(-3,-5,0,-4);c.quadraticCurveTo(3,-5,7,-7);
-    c.quadraticCurveTo(10,-7,12,-5);
-    c.lineTo(11,5);c.quadraticCurveTo(9,9,5,10);
-    c.quadraticCurveTo(0,11,-5,10);c.quadraticCurveTo(-9,9,-11,5);c.closePath();c.fill();c.stroke();
-    c.strokeStyle=edge;c.lineWidth=1.05;c.beginPath();c.moveTo(-9,7.5);c.quadraticCurveTo(0,9.7,9,7.5);c.stroke();
+    // Contorno ajustado à cápsula do Tripulante: ombros curvos, laterais inclinadas e barra arredondada.
+    c.beginPath();c.moveTo(-13.6,-6.2);c.quadraticCurveTo(-12.7,-8.2,-8.2,-8.4);c.quadraticCurveTo(-3.6,-7.1,0,-4.8);c.quadraticCurveTo(3.6,-7.1,8.2,-8.4);c.quadraticCurveTo(12.7,-8.2,13.6,-6.2);
+    c.quadraticCurveTo(14.1,-1.5,12.8,4.8);c.quadraticCurveTo(11.9,9,7.3,10.1);c.quadraticCurveTo(0,11.9,-7.3,10.1);c.quadraticCurveTo(-11.9,9,-12.8,4.8);c.quadraticCurveTo(-14.1,-1.5,-13.6,-6.2);c.closePath();c.fill();c.stroke();
+    c.strokeStyle=edge;c.lineWidth=1.05;c.beginPath();c.moveTo(-10.5,7.4);c.quadraticCurveTo(0,10.1,10.5,7.4);c.stroke();
   };
   const collar=(fill='#eef1ec',accent='#10122a')=>{
     c.fillStyle=fill;c.strokeStyle='#10122a';c.lineWidth=1.45;
@@ -848,19 +845,14 @@ function drawOutfitCosmetic(c,id){
 }
 function drawOutfitLegCosmetic(c,id,walkStep=0){
   if(!id||id==='none')return;
-  const palette={
-    tech_vest:['#e8edf0','#b8c5ce'],command_jacket:['#292b39','#d9b85e'],utility_belt:['#3d74ad','#223f63'],
-    polar_wrap:['#edf2f1','#9ca8b0'],explorer_harness:['#526650','#cbb36c'],outfit_cadet:['#b83b55','#315f92']
-  }[id];
-  if(!palette)return;
-  const [fill,cuff]=palette,leftY=7+walkStep*3,rightY=7-walkStep*3;
-  c.save();c.lineJoin='round';c.lineCap='round';c.fillStyle=fill;c.strokeStyle='#10122a';c.lineWidth=1.7;
-  // Pernas estreitam na junção com o tronco e arredondam no pé, acompanhando a animação.
-  const leg=(x,y)=>{c.beginPath();c.moveTo(x+1,y);c.quadraticCurveTo(x+4,y-1,x+7,y);c.lineTo(x+8,y+6);c.quadraticCurveTo(x+8,y+9,x+5,y+10);c.quadraticCurveTo(x+1,y+10,x,y+7);c.closePath();c.fill();c.stroke()};
-  leg(-11,leftY);leg(3,rightY);
-  c.fillStyle=cuff;c.strokeStyle='#10122a';c.lineWidth=1.15;
-  rr(c,-10.2,leftY+6.5,7,2.4,1.1);c.fill();c.stroke();rr(c,3.8,rightY+6.5,7,2.4,1.1);c.fill();c.stroke();
-  if(id==='outfit_cadet'){c.fillStyle='#efc85b';c.strokeStyle='rgba(16,18,42,.8)';rr(c,-9.6,leftY+3,5.8,1.5,.7);c.fill();rr(c,4.4,rightY+3,5.8,1.5,.7);c.fill()}
+  const palette={tech_vest:['#e8edf0','#b8c5ce'],command_jacket:['#292b39','#d9b85e'],utility_belt:['#3d74ad','#223f63'],polar_wrap:['#edf2f1','#9ca8b0'],explorer_harness:['#526650','#cbb36c'],outfit_cadet:['#b83b55','#315f92']}[id];
+  if(!palette)return;const [fill,cuff]=palette,leftY=5+walkStep*3,rightY=5-walkStep*3;
+  c.save();c.lineJoin='round';c.lineCap='round';c.fillStyle=fill;c.strokeStyle='#10122a';c.lineWidth=1.45;
+  // Cada perna é recortada dentro do mesmo contorno arredondado do corpo base.
+  const leg=(x,y)=>{c.beginPath();c.roundRect?c.roundRect(x,y,8.8,12.4,3.5):rr(c,x,y,8.8,12.4,3.5);c.fill();c.stroke()};
+  leg(-11.4,leftY);leg(2.6,rightY);
+  c.fillStyle=cuff;c.strokeStyle='#10122a';c.lineWidth=1.05;rr(c,-10.7,leftY+8.2,7.4,2.5,1.2);c.fill();c.stroke();rr(c,3.3,rightY+8.2,7.4,2.5,1.2);c.fill();c.stroke();
+  if(id==='outfit_cadet'){c.fillStyle='#efc85b';rr(c,-10,leftY+5.1,6,1.45,.7);c.fill();rr(c,4,rightY+5.1,6,1.45,.7);c.fill()}
   c.restore();
 }
 function drawVisorCosmetic(c,id){
@@ -1145,7 +1137,7 @@ function drawStationBody(c,s){
    ===================================================================== */
 const G={cfgFunctionTab:'locator',state:'menu',t:0,chars:[],player:null,tasks:[],pin:null,mini:null,tok:0,tool:null,
   cam:{x:0,y:0},vision:820,visionTarget:820,cfg:{name:'Você',color:'azul'},over:false,lastRoom:null,action:null,
-  role:'crew',imp:null,locator:false,observer:false,cleaner:false,parasite:false,parasiteT:null,parasiteInfections:{},instructorTrails:[],instructorTrailSeq:0,instructorCd:0,instructorTargetId:null,cleanerCd:0,cleanerUses:0,cleanerT:null,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,delayedCd:0,delayedT:null,delayedMarks:{},controlTargetId:null,controlTime:0,controlCd:0,bodies:[],deadPets:[],killSplashes:[],sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,freePlay:false,dt:.016};
+  role:'crew',imp:null,locator:false,observer:false,cleaner:false,parasite:false,paramedic:false,paramedicT:null,paramedicCd:0,parasiteInfections:{},instructorTrails:[],instructorTrailSeq:0,instructorCd:0,instructorTargetId:null,cleanerCd:0,cleanerUses:0,cleanerT:null,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,delayedCd:0,delayedT:null,delayedMarks:{},controlTargetId:null,controlTime:0,controlCd:0,bodies:[],deadPets:[],killSplashes:[],sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,freePlay:false,dt:.016};
 const NAME_BUB={};
 const keys=new Set(); const joy={x:0,y:0};
 
@@ -1162,41 +1154,74 @@ const Snd={ctx:null,on:true,
   open(){this.tone(330,.08,'triangle',.07);this.tone(495,.1,'triangle',.07,0,.07)},
   killSting(){if(!this.on||!this.ctx)return; this.tone(980,.12,'sawtooth',.16,-720);this.tone(180,.48,'sawtooth',.22,-120, .08);this.tone(70,.65,'triangle',.18,-35,.12)},
   victimSting(){if(!this.on||!this.ctx)return;this.tone(1250,.09,'sawtooth',.2,-900);this.tone(95,.62,'sawtooth',.24,-55,.06);this.tone(420,.25,'square',.11,-300,.1)},
-  roleFx(kind,phase='use'){if(!this.on||!this.ctx)return;const bank={locator:[620,920],sheriff:[120,70],delayed:[260,150],observer:[740,980],cleaner:[170,110],parasite:[210,430],engineer:[520,760],marionette:[330,220],instructor:[880,1320]};const a=bank[kind]||[440,660],f=phase==='done'?a[1]:a[0];this.tone(f,.12,kind==='sheriff'?'square':'triangle',.07,phase==='done'?120:-60);if(kind==='instructor')this.tone(f*1.25,.18,'sine',.05,80,.05)},
+  roleFx(kind,phase='use'){if(!this.on||!this.ctx)return;const bank={locator:[620,920],sheriff:[120,70],delayed:[260,150],observer:[740,980],cleaner:[170,110],parasite:[210,430],engineer:[520,760],marionette:[330,220],instructor:[880,1320],paramedic:[560,1040]};const a=bank[kind]||[440,660],f=phase==='done'?a[1]:a[0];this.tone(f,.12,kind==='sheriff'?'square':'triangle',.07,phase==='done'?120:-60);if(kind==='instructor')this.tone(f*1.25,.18,'sine',.05,80,.05)},
 };
 
 /* =====================================================================
    TAREFAS
    ===================================================================== */
 const TASK_TEMPLATES=[
-  {key:'wires_elec',name:'Conectar fios',steps:[{st:'wires_elec',game:'wires',label:'Conectar fios'}]},
-  {key:'wires_cafe',name:'Conectar fios',steps:[{st:'wires_cafe',game:'wires',label:'Conectar fios'}]},
-  {key:'wires_stor',name:'Conectar fios',steps:[{st:'wires_stor',game:'wires',label:'Conectar fios'}]},
-  {key:'circuits',name:'Reorganizar circuitos',steps:[{st:'circuits',game:'circuits',label:'Reorganizar circuitos'}]},
-  {key:'code_admin',name:'Inserir código de acesso',steps:[{st:'code_admin',game:'code',label:'Inserir código'}]},
-  {key:'code_cafe',name:'Inserir código de acesso',steps:[{st:'code_cafe',game:'code',label:'Inserir código'}]},
-  {key:'divert',name:'Desviar energia'},
-  {key:'signal',name:'Alinhar sinais de comunicação',steps:[{st:'signal',game:'signal',label:'Alinhar sinais'}]},
-  {key:'unlock',name:'Desbloquear painel',steps:[{st:'unlock',game:'unlock',label:'Desbloquear painel'}]},
-  {key:'refuel',name:'Reabastecer a nave',steps:[
+  // Tarefas comuns: a mesma seleção é entregue a todos os jogadores na partida.
+  {key:'common_wires',category:'common',name:'Reparar fios',steps:[
+    {st:'wires_elec',game:'wires',label:'Reparar fios na Elétrica'},
+    {st:'wires_cafe',game:'wires',label:'Reparar fios na Cafeteria'},
+    {st:'wires_stor',game:'wires',label:'Reparar fios no Armazém'}]},
+  {key:'common_divert',category:'common',name:'Desviar energia para Cafeteria',steps:[
+    {st:'divert',game:'divert',mode:'lever',dest:'pow_cafe',label:'Desviar energia'},
+    {st:'pow_cafe',game:'divert',mode:'accept',dest:'pow_cafe',label:'Aceitar energia'}]},
+  {key:'common_circuit_check',category:'common',name:'Verificar fusíveis',steps:[{st:'circuits',game:'circuits',label:'Verificar fusíveis'}]},
+  {key:'common_lock_check',category:'common',name:'Testar trava de segurança',steps:[{st:'unlock',game:'unlock',label:'Testar trava'}]},
+  {key:'common_badge',category:'common',name:'Confirmar identificação',steps:[{st:'code_cafe',game:'code',label:'Confirmar identificação'}]},
+
+  // Tarefas médias: cada jogador pode receber uma combinação diferente.
+  {key:'medium_code',category:'medium',name:'Inserir código de acesso',steps:[{st:'code_admin',game:'code',label:'Inserir código'}]},
+  {key:'medium_fuel',category:'medium',name:'Encher galão de combustível',steps:[{st:'fuel',game:'fuel',mode:'fill',label:'Encher galão'}]},
+  {key:'medium_signal',category:'medium',name:'Alinhar sinais de comunicação',steps:[{st:'signal',game:'signal',label:'Alinhar sinais'}]},
+  {key:'medium_scan',category:'medium',name:'Executar diagnóstico médico',steps:[{st:'scan',game:'scan',label:'Fazer diagnóstico'}]},
+  {key:'medium_reactor',category:'medium',name:'Ativar componentes do reator',steps:[{st:'reactor',game:'reactor',label:'Ativar componentes'}]},
+  {key:'medium_circuits',category:'medium',name:'Reorganizar circuitos',steps:[{st:'circuits',game:'circuits',label:'Reorganizar circuitos'}]},
+
+  // Tarefas longas: múltiplas etapas em salas coerentes do mapa.
+  {key:'long_download',category:'long',name:'Baixar dados da nave',steps:[
+    {st:'code_cafe',game:'code',label:'Autorizar download'},
+    {st:'signal',game:'signal',label:'Receber dados'},
+    {st:'code_admin',game:'code',label:'Confirmar transferência'}]},
+  {key:'long_refuel',category:'long',name:'Reabastecer o reator',steps:[
     {st:'fuel',game:'fuel',mode:'fill',label:'Encher galão'},
     {st:'fuel_reactor',game:'fuel',mode:'pour',label:'Abastecer o reator'}]},
-  {key:'reactor',name:'Ativar o reator',steps:[{st:'reactor',game:'reactor',label:'Ativar componentes'}]},
-  {key:'scan',name:'Diagnóstico médico',steps:[{st:'scan',game:'scan',label:'Fazer diagnóstico'}]},
+  {key:'long_power_cycle',category:'long',name:'Recalibrar distribuição de energia',steps:[
+    {st:'circuits',game:'circuits',label:'Reorganizar circuito principal'},
+    {st:'divert',game:'divert',mode:'lever',dest:'pow_admin',label:'Enviar energia para Administração'},
+    {st:'pow_admin',game:'divert',mode:'accept',dest:'pow_admin',label:'Confirmar energia'}]},
+  {key:'long_security',category:'long',name:'Auditar sistemas de segurança',steps:[
+    {st:'unlock',game:'unlock',label:'Desbloquear painel'},
+    {st:'code_admin',game:'code',label:'Validar registro'},
+    {st:'wires_stor',game:'wires',label:'Revisar conexão'}]},
+  {key:'long_medical',category:'long',name:'Processar análise de bordo',steps:[
+    {st:'scan',game:'scan',label:'Coletar diagnóstico'},
+    {st:'signal',game:'signal',label:'Sincronizar resultados'},
+    {st:'code_cafe',game:'code',label:'Arquivar análise'}]},
+  {key:'long_reactor_sync',category:'long',name:'Sincronizar núcleo da nave',steps:[
+    {st:'reactor',game:'reactor',label:'Ativar núcleo'},
+    {st:'circuits',game:'circuits',label:'Equalizar circuitos'},
+    {st:'wires_elec',game:'wires',label:'Finalizar conexão'}]},
 ];
+const TASK_POOLS={
+  common:TASK_TEMPLATES.filter(t=>t.category==='common'),
+  medium:TASK_TEMPLATES.filter(t=>t.category==='medium'),
+  long:TASK_TEMPLATES.filter(t=>t.category==='long')
+};
 let TID=0;
 function makeTask(tpl,owner){
-  let steps,name=tpl.name;
-  if(tpl.key==='divert'){
-    const dest=pick(DIVERT_DESTS), room=ROOM_BY_ID[stationById[dest].room].name;
-    steps=[{st:'divert',game:'divert',mode:'lever',dest,label:'Puxar alavanca'},{st:dest,game:'divert',mode:'accept',dest,label:'Aceitar energia'}];
-    name='Desviar energia para '+room;
-  }else steps=tpl.steps.map(s=>({...s}));
-  steps.forEach(s=>s.done=false);
-  return {id:++TID,key:tpl.key,name,steps,owner,done:false};
+  const steps=(tpl.steps||[]).map(s=>({...s,done:false}));
+  return {id:++TID,key:tpl.key,category:tpl.category||'medium',name:tpl.name,steps,owner,done:false};
 }
-function createTasksFor(owner,n){
-  return shuffle(TASK_TEMPLATES.slice()).slice(0,n).map(t=>makeTask(t,owner));
+function taskTemplateSelection(pool,count){return shuffle(pool.slice()).slice(0,clamp(Math.round(Number(count)||0),0,5))}
+function createTasksFor(owner,commonTemplates){
+  const common=(commonTemplates||[]).map(t=>makeTask(t,owner));
+  const medium=taskTemplateSelection(TASK_POOLS.medium,CFG.mediumTasks).map(t=>makeTask(t,owner));
+  const long=taskTemplateSelection(TASK_POOLS.long,CFG.longTasks).map(t=>makeTask(t,owner));
+  return [...common,...medium,...long];
 }
 const nextStep=t=>t.steps.find(s=>!s.done);
 function progress(){
@@ -1239,7 +1264,7 @@ function pendingAt(stationId){
    JOGADOR, MOVIMENTO E COLISÃO
    ===================================================================== */
 function newChar(name,color,tx,ty,isPlayer){
-  return {id:isPlayer?'player':'npc'+Math.random().toString(36).slice(2,7),name,color,x:tx*TILE+TILE/2,y:ty*TILE+TILE/2,face:1,walk:0,moving:false,alive:true,ghost:false,vent:null,ventAnim:null,ventCd:0,ventMv:0,bubble:null,isPlayer,cosmetics:cloneCosmetics(DEFAULT_COSMETICS),petX:undefined,petY:undefined};
+  return {id:isPlayer?'player':'npc'+Math.random().toString(36).slice(2,7),name,color,x:tx*TILE+TILE/2,y:ty*TILE+TILE/2,face:1,walk:0,moving:false,alive:true,ghost:false,vent:null,ventAnim:null,ventCd:0,ventMv:0,bubble:null,isPlayer,cosmetics:cloneCosmetics(DEFAULT_COSMETICS),petX:undefined,petY:undefined,paramedicCd:0,paramedicSpent:0,revivedOnce:false};
 }
 const HALF_W=11,HALF_H=9,OFF_Y=6;
 function boxBlocked(x,y,g){
@@ -1669,15 +1694,17 @@ function offlineBotNames(owner){
 }
 function roleNameForPlayer(p){
   if(!p)return '-';
-  return p.function==='parasite'?'Infiltrado · Parasita':(p.function==='cleaner'?'Infiltrado · Faxineiro':(p.function==='marionette'?'Infiltrado · Marionetista':(p.function==='engineer'?'Tripulante · Engenheiro':(p.function==='delayed'?'Infiltrado · Atrasado':(p.role==='imp'?'Infiltrado':(p.function==='observer'?'Tripulante · Observador':(p.function==='sheriff'?'Tripulante · Xerife':(p.function==='locator'?'Tripulante · Localizador':'Tripulante'))))))));
+  const names={parasite:'Infiltrado · Parasita',cleaner:'Infiltrado · Faxineiro',marionette:'Infiltrado · Marionetista',delayed:'Infiltrado · Atrasado',engineer:'Tripulante · Engenheiro',observer:'Tripulante · Observador',sheriff:'Tripulante · Xerife',locator:'Tripulante · Localizador',paramedic:'Tripulante · Paramédico'};
+  return names[p.function]||(p.role==='imp'?'Infiltrado':'Tripulante');
 }
 function roleMessageForPlayer(p){
   if(!p)return '';
-  return p.function==='parasite'?'Parasita - Contamine a tripulação e transforme Inocentes em Infiltrados.':(p.function==='cleaner'?'Faxineiro - Limpe corpos e suma com as evidências.':(p.function==='engineer'?'Engenheiro - Pode usar os sustos':(p.function==='marionette'?'Marionetista - Controle Tripulantes e cause confusão na nave.':(p.function==='observer'?'Observador - Veja a Tripulação no seu mapa a qualquer momento.':(p.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(p.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(p.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(p.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.'))))))));
+  const messages={parasite:'Parasita - Contamine a tripulação e transforme Inocentes em Infiltrados.',cleaner:'Faxineiro - Limpe corpos e suma com as evidências.',engineer:'Engenheiro - Pode usar os sustos',marionette:'Marionetista - Controle Tripulantes e cause confusão na nave.',observer:'Observador - Veja a Tripulação no seu mapa a qualquer momento.',sheriff:'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.',locator:'Localizador — Rastreie um Tripulante com seu mapa.',delayed:'Atrasado — Mate suas vítimas lentamente.',paramedic:'Paramédico - Reviva Tripulantes por meio de seus corpos.'};
+  return messages[p.function]||(p.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.');
 }
 function showLocalRoleReveal(resetTimer=false){
   const p=G.player;if(!p)return false;
-  G.role=p.role||'crew';G.locator=p.function==='locator';G.observer=p.function==='observer';G.cleaner=p.function==='cleaner';G.parasite=p.function==='parasite';G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
+  G.role=p.role||'crew';G.locator=p.function==='locator';G.observer=p.function==='observer';G.cleaner=p.function==='cleaner';G.parasite=p.function==='parasite';G.paramedic=p.function==='paramedic';G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
   $('tpHead').firstElementChild.textContent=G.role==='imp'?'Tarefas (falsas)':'Tarefas';
   $('roleName').textContent=roleNameForPlayer(p);
@@ -1707,7 +1734,7 @@ function startFreePlay(){
   newGame(false);
 }
 function freePlayFunctionLabel(ch){
-  const base=ch.function?({locator:'Localizador',sheriff:'Xerife',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]||ch.function):(ch.role==='imp'?'Infiltrado':'Tripulante');
+  const base=ch.function?({locator:'Localizador',sheriff:'Xerife',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico'}[ch.function]||ch.function):(ch.role==='imp'?'Infiltrado':'Tripulante');
   return ch.instructor?`${base} + Instrutor ↔️`:base;
 }
 function clearFreePlayFunctionState(ch){
@@ -1721,7 +1748,7 @@ function clearFreePlayFunctionState(ch){
   if(oldFn==='engineer')ch.ventCd=0;
   if(oldFn==='marionette'){ch.controlTargetId=null;ch.controlTime=0;ch.controlCd=0}
   if(oldFn==='delayed')ch.netDelayedCd=0;if(oldFn==='cleaner'){ch.cleanCd=0;ch.cleanUses=CFG.cleanerUses}
-  if(oldFn==='sheriff')ch.netSheriffCd=0;
+  if(oldFn==='sheriff')ch.netSheriffCd=0;if(oldFn==='paramedic'){ch.paramedicCd=0;ch.paramedicSpent=0;}
   if(ch===G.player){
     if(oldFn==='locator'){G.trackTarget=null;G.trackTime=0;G.trackCd=0}
     if(oldFn==='sheriff'){G.sheriffCd=0;G.sheriffT=null}
@@ -1742,10 +1769,10 @@ function setFreePlayFunction(ch,fn){
     if(ch===G.player){G.instructorCd=0;G.instructorTargetId=null;G.followTarget=null;G.ghostMode='free';Snd.roleFx('instructor','done');emitRoleFx(ch.x,ch.y,'instructor',1);toast('↔️ Instrutor ativado na Partida Livre. Você morreu e agora pode criar trilhas.',3600)}
     return true;
   }
-  const crewFns=['locator','sheriff','observer','engineer'], impFns=['delayed','cleaner','marionette'];impFns.push('parasite');
+  const crewFns=['locator','sheriff','observer','engineer'], impFns=['delayed','cleaner','marionette'];crewFns.push('paramedic');impFns.push('parasite');
   if((ch.role==='crew'&&!crewFns.includes(fn))||(ch.role==='imp'&&!impFns.includes(fn)))return false;
   clearFreePlayFunctionState(ch);ch.function=fn;
-  if(ch===G.player){G.locator=fn==='locator';G.observer=fn==='observer';G.cleaner=fn==='cleaner';G.parasite=fn==='parasite';if(G.cleaner)G.cleanerUses=CFG.cleanerUses;$('roleName').textContent=roleNameForPlayer(ch)}
+  if(fn==='paramedic'){ch.paramedicCd=0;ch.paramedicSpent=0}if(ch===G.player){G.locator=fn==='locator';G.observer=fn==='observer';G.cleaner=fn==='cleaner';G.parasite=fn==='parasite';G.paramedic=fn==='paramedic';G.paramedicCd=ch.paramedicCd||0;if(G.cleaner)G.cleanerUses=CFG.cleanerUses;$('roleName').textContent=roleNameForPlayer(ch)}
   return true;
 }
 function removeFreePlayFunction(ch){
@@ -1763,7 +1790,7 @@ function removeFreePlayFunction(ch){
     return true;
   }
   clearFreePlayFunctionState(ch);ch.function=null;
-  if(ch===G.player){G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;$('roleName').textContent=roleNameForPlayer(ch)}
+  if(ch===G.player){G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;G.paramedic=false;$('roleName').textContent=roleNameForPlayer(ch)}
   return true;
 }
 function setFreePlayClass(ch,role){
@@ -1776,7 +1803,7 @@ function setFreePlayClass(ch,role){
   G.tasks.filter(t=>t.owner===ch.id).forEach(t=>t.fake=role==='imp');
   G.imps=G.chars.filter(c=>c.role==='imp');G.imp=G.imps[0]||null;
   if(ch===G.player){
-    G.role=role;G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;G.trackTarget=null;G.trackTime=0;G.trackCd=0;
+    G.role=role;G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;G.paramedic=false;G.trackTarget=null;G.trackTime=0;G.trackCd=0;
     G.vision=G.visionTarget=(role==='imp'?CFG.impVision:CFG.crewVision);
     $('tpHead').firstElementChild.textContent=role==='imp'?'Tarefas (falsas)':'Tarefas';
     $('roleName').textContent=roleNameForPlayer(ch);renderTasks();updateButtons();
@@ -1787,7 +1814,7 @@ function freePlayKill(ch){
   if(!G.freePlay||!ch||!ch.alive)return false;
   clearFreePlayFunctionState(ch);killChar(ch);
   G.bodies=G.bodies.filter(b=>b.id!==ch.id);
-  addBodyWithPet({id:ch.id,name:ch.name,color:ch.color,cosmetics:cloneCosmetics(ch.cosmetics),x:ch.x,y:ch.y,room:roomName(ch.x,ch.y),tKill:G.gt,killerId:G.player?.id||null},ch);
+  addBodyWithPet({id:ch.id,victimId:ch.id,name:ch.name,color:ch.color,cosmetics:cloneCosmetics(ch.cosmetics),x:ch.x,y:ch.y,room:roomName(ch.x,ch.y),tKill:G.gt,killerId:G.player?.id||null},ch);
   checkEnd();return true;
 }
 function freePlayRevive(ch){
@@ -1815,7 +1842,7 @@ function showFreePlayPlayerList(mode,title,onPick){
 }
 function openFreePlayFunctionPicker(ch){
   showModal('Dar função',`${ch.name} é ${ch.role==='imp'?'Infiltrado':'Tripulante'}. Escolha uma função compatível.`);
-  const fns=ch.role==='imp'?[['delayed','🕓 Atrasado'],['cleaner','🧹 Faxineiro'],['parasite','🦠 Parasita'],['marionette','Marionetista']]:[['locator','🧭 Localizador'],['sheriff','🔫 Xerife'],['observer','👀 Observador'],['engineer','Engenheiro'],['instructor','↔️ Instrutor']];
+  const fns=ch.role==='imp'?[['delayed','🕓 Atrasado'],['cleaner','🧹 Faxineiro'],['parasite','🦠 Parasita'],['marionette','Marionetista']]:[['locator','🧭 Localizador'],['sheriff','🔫 Xerife'],['observer','👀 Observador'],['paramedic','⛑️ Paramédico'],['engineer','Engenheiro'],['instructor','↔️ Instrutor']];
   const grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px';
   fns.forEach(([id,label])=>{const b=el('button','mg',label);b.addEventListener('click',()=>{setFreePlayFunction(ch,id);openFreePlayComputer()});grid.appendChild(b)});$('mbody').appendChild(grid);
 }
@@ -1878,21 +1905,27 @@ function newGame(prepareOnline=false){
   const observerEligible=shuffle(G.chars.filter(c=>c.role==='crew'&&!c.function));
   const observerEnabled=CFG.obsMax>0&&CFG.obsChance>0&&Math.random()*100<CFG.obsChance;
   if(observerEnabled){for(const ch of observerEligible.slice(0,clamp(CFG.obsMax,0,15)))ch.function='observer'}
+  const paramedicEligible=shuffle(G.chars.filter(c=>c.role==='crew'&&!c.function));
+  const paramedicEnabled=CFG.paramedicMax>0&&CFG.paramedicChance>0&&Math.random()*100<CFG.paramedicChance;
+  if(paramedicEnabled){for(const ch of paramedicEligible.slice(0,clamp(CFG.paramedicMax,0,configuredPlayerCount()))){ch.function='paramedic';ch.paramedicCd=0;ch.paramedicSpent=0}}
   if(CFG.delayedChance>0&&CFG.delayedMax>0&&Math.random()*100<CFG.delayedChance){const delayedEligible=shuffle([...G.imps].filter(ch=>!ch.function));for(const ch of delayedEligible.slice(0,Math.min(clamp(CFG.delayedMax,0,3),delayedEligible.length)))ch.function='delayed'}
   if(CFG.cleanerChance>0&&CFG.cleanerMax>0&&Math.random()*100<CFG.cleanerChance){const cleanerEligible=shuffle([...G.imps].filter(ch=>ch.role==='imp'&&!ch.function));const cleanerLimit=Math.min(clamp(CFG.cleanerMax,0,CFG.impostors),G.imps.length,cleanerEligible.length);for(const ch of cleanerEligible.slice(0,cleanerLimit)){ch.function='cleaner';ch.cleanCd=0;ch.cleanUses=CFG.cleanerUses}}
   if(CFG.parasiteChance>0&&CFG.parasiteMax>0&&Math.random()*100<CFG.parasiteChance){const parasiteEligible=shuffle([...G.imps].filter(ch=>ch.role==='imp'&&!ch.function));const parasiteLimit=Math.min(clamp(CFG.parasiteMax,0,Math.min(3,CFG.impostors)),G.imps.length,parasiteEligible.length);for(const ch of parasiteEligible.slice(0,parasiteLimit)){ch.function='parasite';ch.parasiteReady=true;ch.parasiteTargetId=null}}
   if(CFG.engChance>0&&CFG.engMax>0&&Math.random()*100<CFG.engChance){const engineers=shuffle(G.chars.filter(ch=>ch.role==='crew'&&!ch.function));for(const ch of engineers.slice(0,Math.min(CFG.engMax,engineers.length)))ch.function='engineer'}
   if(CFG.marionChance>0&&CFG.marionMax>0&&Math.random()*100<CFG.marionChance){const marionettes=shuffle(G.chars.filter(ch=>ch.role==='imp'&&!ch.function));for(const ch of marionettes.slice(0,Math.min(CFG.marionMax,marionettes.length)))ch.function='marionette'}
   if(G.freePlay)G.chars.forEach(ch=>{if(ch.freeDummy){ch.role='crew';ch.function=null;ch.ghost=false;ch.alive=true}});
-  G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.parasite=G.player.function==='parasite';G.sheriffCd=0;G.delayedCd=0;G.cleanerCd=0;G.cleanerUses=G.cleaner?CFG.cleanerUses:0;G.cleanerT=null;G.delayedT=null;G.delayedMarks={}; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
+  G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.parasite=G.player.function==='parasite';G.paramedic=G.player.function==='paramedic';G.paramedicCd=G.player.paramedicCd||0;G.paramedicT=null;G.sheriffCd=0;G.delayedCd=0;G.cleanerCd=0;G.cleanerUses=G.cleaner?CFG.cleanerUses:0;G.cleanerT=null;G.delayedT=null;G.delayedMarks={}; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
   if(G.freePlay){
     placeChar(p,{x:SPAWN.x,y:SPAWN.y});
     G.chars.filter(c=>c.freeDummy).forEach(c=>placeChar(c,freePlayPointForRoom(ROOM_BY_ID[c.freeRoom])));
   }else{const pts=cafePoints(G.chars.length); G.chars.forEach((c,i)=>placeChar(c,pts[i]))}
+  // As Tarefas Comuns são sorteadas uma única vez por partida e copiadas para todos.
+  // Médias e Longas são sorteadas individualmente, variando entre jogadores e partidas.
+  const commonTaskTemplates=taskTemplateSelection(TASK_POOLS.common,CFG.commonTasks);
   G.chars.forEach(c=>{
     if(G.freePlay&&c.freeDummy)return;
-    const ts=createTasksFor(c.id,(c.isPlayer||c.isRemoteHuman)?7:4);
+    const ts=createTasksFor(c.id,commonTaskTemplates);
     if(c.role==='imp')ts.forEach(t=>t.fake=true);
     G.tasks.push(...ts);
   });
@@ -2089,7 +2122,7 @@ function drawWorld(c,cx,cy,vw,vh,o){
     ch.nameCol=o.reveal?(ch.role==='imp'?'#ff6b7e':'#7fe9b5'):((!G.player?.alive||G.role==='imp')&&ch.role==='imp'?'#ff6b7e':'#fff');
     if(ch.controlTargetId) { c.restore(); return; }
     drawChar(c,ch,o.chars!==false);
-    if(G.player&&!G.player.alive){const hideCrewFn=!!(G.player.instructor&&ch.alive&&ch.role==='crew');const fn=hideCrewFn?'Tripulante':({sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]||(ch.role==='imp'?'Infiltrado':'Tripulante'));c.font='800 16px "Baloo 2",sans-serif';c.textAlign='center';c.lineJoin='round';c.lineWidth=3;c.strokeStyle='rgba(8,9,28,.95)';c.strokeText(fn,ch.x,ch.y-74);c.fillStyle=ch.role==='imp'?'#ff6b7e':'#7fe9b5';c.fillText(fn,ch.x,ch.y-74)}
+    if(G.player&&!G.player.alive){const hideCrewFn=!!(G.player.instructor&&ch.alive&&ch.role==='crew');const fn=hideCrewFn?'Tripulante':({sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico'}[ch.function]||(ch.role==='imp'?'Infiltrado':'Tripulante'));c.font='800 16px "Baloo 2",sans-serif';c.textAlign='center';c.lineJoin='round';c.lineWidth=3;c.strokeStyle='rgba(8,9,28,.95)';c.strokeText(fn,ch.x,ch.y-74);c.fillStyle=ch.role==='imp'?'#ff6b7e':'#7fe9b5';c.fillText(fn,ch.x,ch.y-74)}
     const privateMark=G.delayedMarks&&G.delayedMarks[ch.id];
     if(ch.alive&&G.player&&privateMark&&privateMark.killerId===G.player.id){const timer=String(Math.ceil(Math.max(0,Number(privateMark.remaining)||0)))+'s';c.save();c.font='800 13px "Baloo 2",sans-serif';c.textAlign='center';c.lineJoin='round';c.lineWidth=3;c.strokeStyle='rgba(8,9,28,.95)';c.strokeText(timer,ch.x,ch.y-72);c.fillStyle='#ff5364';c.fillText(timer,ch.x,ch.y-72);c.restore()}
     if(ch.bubble&&ch.bubble.until>G.t){const sp=bubbleSprite(ch.bubble.text); c.drawImage(sp.cv,ch.x-sp.w/2,ch.y-66-sp.h,sp.w,sp.h)}
@@ -2200,13 +2233,13 @@ function closeMap(){
   if(!G.mapOpen)return;
   G.mapOpen=false; document.body.classList.remove('observer-map-lock'); $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
-const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','4–7 jogadores: 1; 8–9 jogadores: 1–2; 10 ou mais: 1–3',''],['actionDistance','Distância para ações','Alcance comum para matar, localizar, trilhar e outras habilidades de proximidade',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['obsChance','Chance de existir Observador','Porcentagem de chance de a função Observador existir na partida','%'],['obsMax','Quantidade de Observadores','Máximo de Observadores atribuídos aos Tripulantes',''],['instructorChance','Chance de Instrutores','Chance de um Tripulante morto despertar como Instrutor','%'],['instructorMax','Quantidade de Instrutores','Máximo de Instrutores por partida, limitado ao máximo de jogadores',''],['instructorCooldown','Recarga da trilha','Tempo até poder criar outra trilha','s'],['instructorDuration','Duração da trilha','Tempo que a trilha branca permanece visível','s'],['cleanerChance','Chance de existir Faxineiro','Porcentagem de chance de a função Faxineiro existir na partida','%'],['cleanerMax','Quantidade de Faxineiros','Máximo de Faxineiros, limitado aos Infiltrados',''],['cleanerCooldown','Tempo de recarga para limpar','Tempo entre limpezas de corpos','s'],['cleanerUses','Usos da habilidade de limpar','Quantidade máxima de corpos que cada Faxineiro pode limpar',''],['parasiteChance','Chance de Parasitas na partida','Chance de a função Parasita existir na partida','%'],['parasiteMax','Quantidade de Parasitas','Máximo de Parasitas, limitado aos Infiltrados e a 3',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['engVentDuration','Tempo limite nos dutos','10–60 segundos; 61 representa tempo infinito','s'],['engChance','Chance de existir Engenheiro','Porcentagem de chance de atribuição','%'],['engMax','Quantidade de Engenheiros','Máximo de Engenheiros, limitado aos Tripulantes',''],['engCooldown','Cooldown do duto','Recarga do Engenheiro após sair dos dutos','s'],['marionCooldown','Cooldown de Controlar','Recarga da habilidade do Marionetista','s'],['marionDuration','Tempo limite do controle','Duração máxima do controle de outro jogador','s'],['marionChance','Chance de Marionetistas','Porcentagem de chance de atribuição','%'],['marionMax','Quantidade de Marionetistas','Máximo de Marionetistas, limitado aos Infiltrados','']];
+const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','4–7 jogadores: 1; 8–9 jogadores: 1–2; 10 ou mais: 1–3',''],['actionDistance','Distância para ações','Alcance comum para matar, localizar, trilhar e outras habilidades de proximidade',''],['commonTasks','Tarefas Comuns','Quantidade de tarefas simples iguais para todos os Tripulantes',''],['mediumTasks','Tarefas Médias','Quantidade de tarefas intermediárias sorteadas para cada jogador',''],['longTasks','Tarefas Longas','Quantidade de tarefas demoradas sorteadas para cada jogador',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['obsChance','Chance de existir Observador','Porcentagem de chance de a função Observador existir na partida','%'],['obsMax','Quantidade de Observadores','Máximo de Observadores atribuídos aos Tripulantes',''],['instructorChance','Chance de Instrutores','Chance de um Tripulante morto despertar como Instrutor','%'],['instructorMax','Quantidade de Instrutores','Máximo de Instrutores por partida, limitado ao máximo de jogadores',''],['instructorCooldown','Recarga da trilha','Tempo até poder criar outra trilha','s'],['instructorDuration','Duração da trilha','Tempo que a trilha branca permanece visível','s'],['cleanerChance','Chance de existir Faxineiro','Porcentagem de chance de a função Faxineiro existir na partida','%'],['cleanerMax','Quantidade de Faxineiros','Máximo de Faxineiros, limitado aos Infiltrados',''],['cleanerCooldown','Tempo de recarga para limpar','Tempo entre limpezas de corpos','s'],['cleanerUses','Usos da habilidade de limpar','Quantidade máxima de corpos que cada Faxineiro pode limpar',''],['parasiteChance','Chance de Parasitas na partida','Chance de a função Parasita existir na partida','%'],['parasiteMax','Quantidade de Parasitas','Máximo de Parasitas, limitado aos Infiltrados e a 3',''],['paramedicChance','Porcentagem de ser Paramédico','Chance de a função Paramédico existir na partida','%'],['paramedicMax','Quantidade de Paramédicos','Máximo de Paramédicos, limitado ao máximo de jogadores',''],['paramedicCooldown','Recarga para reviver','Tempo de recarga após uma ressurreição','s'],['paramedicTasksPerUse','Tarefas necessárias por uso','Tarefas completas exigidas para liberar cada uso',''],['paramedicMaxUses','Quantidade máxima de usos liberáveis','Máximo de usos que tarefas podem liberar por partida',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['engVentDuration','Tempo limite nos dutos','10–60 segundos; 61 representa tempo infinito','s'],['engChance','Chance de existir Engenheiro','Porcentagem de chance de atribuição','%'],['engMax','Quantidade de Engenheiros','Máximo de Engenheiros, limitado aos Tripulantes',''],['engCooldown','Cooldown do duto','Recarga do Engenheiro após sair dos dutos','s'],['marionCooldown','Cooldown de Controlar','Recarga da habilidade do Marionetista','s'],['marionDuration','Tempo limite do controle','Duração máxima do controle de outro jogador','s'],['marionChance','Chance de Marionetistas','Porcentagem de chance de atribuição','%'],['marionMax','Quantidade de Marionetistas','Máximo de Marionetistas, limitado aos Infiltrados','']];
 function buildCfgUI(){
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
   const locked=(inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
-  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnObserverSection').classList.toggle('alt',G.cfgFunctionTab!=='observer');$('btnInstructorSection').classList.toggle('alt',G.cfgFunctionTab!=='instructor');$('btnCleanerSection').classList.toggle('alt',G.cfgFunctionTab!=='cleaner');$('btnParasiteSection').classList.toggle('alt',G.cfgFunctionTab!=='parasite');$('btnEngineerSection').classList.toggle('alt',G.cfgFunctionTab!=='engineer');$('btnMarionetteSection').classList.toggle('alt',G.cfgFunctionTab!=='marionette');
+  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnObserverSection').classList.toggle('alt',G.cfgFunctionTab!=='observer');$('btnInstructorSection').classList.toggle('alt',G.cfgFunctionTab!=='instructor');$('btnCleanerSection').classList.toggle('alt',G.cfgFunctionTab!=='cleaner');$('btnParasiteSection').classList.toggle('alt',G.cfgFunctionTab!=='parasite');$('btnParamedicSection').classList.toggle('alt',G.cfgFunctionTab!=='paramedic');$('btnEngineerSection').classList.toggle('alt',G.cfgFunctionTab!=='engineer');$('btnMarionetteSection').classList.toggle('alt',G.cfgFunctionTab!=='marionette');
   if(G.cfgPage==='functions'){
-    const descriptions={locator:['🧭 Localizador','Rastreia no mapa um jogador vivo próximo por tempo limitado.'],sheriff:['🔫 Xerife','Pode atirar em jogadores: acerta o Infiltrado ou morre se errar.'],delayed:['🕓 Atrasado','Marca um Tripulante próximo para ser eliminado depois de alguns segundos.'],observer:['👀 Observador','Vê a posição dos jogadores vivos no mapa enquanto as Comunicações funcionam.'],instructor:['↔️ Instrutor','Após morrer, pode criar uma trilha para orientar um jogador vivo próximo.'],cleaner:['🧹 Faxineiro','Infiltrado que remove corpos próximos e apaga essa evidência.'],parasite:['🦠 Parasita','Infiltrado que infecta um Tripulante para convertê-lo após a reunião.'],engineer:['🔧 Engenheiro','Tripulante capaz de usar dutos por tempo limitado.'],marionette:['✋ Marionetista','Infiltrado que controla temporariamente um Tripulante próximo.']};
+    const descriptions={locator:['🧭 Localizador','Rastreia no mapa um jogador vivo próximo por tempo limitado.'],sheriff:['🔫 Xerife','Pode atirar em jogadores: acerta o Infiltrado ou morre se errar.'],delayed:['🕓 Atrasado','Marca um Tripulante próximo para ser eliminado depois de alguns segundos.'],observer:['👀 Observador','Vê a posição dos jogadores vivos no mapa enquanto as Comunicações funcionam.'],instructor:['↔️ Instrutor','Após morrer, pode criar uma trilha para orientar um jogador vivo próximo.'],cleaner:['🧹 Faxineiro','Infiltrado que remove corpos próximos e apaga essa evidência.'],parasite:['🦠 Parasita','Infiltrado que infecta um Tripulante para convertê-lo após a reunião.'],paramedic:['⛑️ Paramédico','Tripulante que libera usos ao concluir tarefas e revive Tripulantes mortos por meio dos corpos.'],engineer:['🔧 Engenheiro','Tripulante capaz de usar dutos por tempo limitado.'],marionette:['✋ Marionetista','Infiltrado que controla temporariamente um Tripulante próximo.']};
     const d=descriptions[G.cfgFunctionTab];if(d){const info=el('div','fnDescription');info.append(el('b','',d[0]),document.createTextNode(' — '+d[1]));box.appendChild(info)}
   }
   if(G.cfgPage==='functions'&&G.cfgFunctionTab==='delayed'){
@@ -2216,15 +2249,15 @@ function buildCfgUI(){
     box.appendChild(cooldownRow);
   }
   CFG_ROWS.forEach(([k,l,d,unit])=>{
-    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedChance','delayedMax','delayedDuration'], observerKeys=['obsChance','obsMax'], instructorKeys=['instructorChance','instructorMax','instructorCooldown','instructorDuration'], cleanerKeys=['cleanerChance','cleanerMax','cleanerCooldown','cleanerUses'], parasiteKeys=['parasiteChance','parasiteMax'], engineerKeys=['engVentDuration','engChance','engMax','engCooldown'], marionetteKeys=['marionCooldown','marionDuration','marionChance','marionMax'];
-    const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isDelayed=delayedKeys.includes(k),isObserver=observerKeys.includes(k),isInstructor=instructorKeys.includes(k),isCleaner=cleanerKeys.includes(k),isParasite=parasiteKeys.includes(k),isEngineer=engineerKeys.includes(k),isMarionette=marionetteKeys.includes(k),isFn=isLocator||isSheriff||isDelayed||isObserver||isInstructor||isCleaner||isParasite||isEngineer||isMarionette;
+    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedChance','delayedMax','delayedDuration'], observerKeys=['obsChance','obsMax'], instructorKeys=['instructorChance','instructorMax','instructorCooldown','instructorDuration'], cleanerKeys=['cleanerChance','cleanerMax','cleanerCooldown','cleanerUses'], parasiteKeys=['parasiteChance','parasiteMax'], paramedicKeys=['paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses'], engineerKeys=['engVentDuration','engChance','engMax','engCooldown'], marionetteKeys=['marionCooldown','marionDuration','marionChance','marionMax'];
+    const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isDelayed=delayedKeys.includes(k),isObserver=observerKeys.includes(k),isInstructor=instructorKeys.includes(k),isCleaner=cleanerKeys.includes(k),isParasite=parasiteKeys.includes(k),isParamedic=paramedicKeys.includes(k),isEngineer=engineerKeys.includes(k),isMarionette=marionetteKeys.includes(k),isFn=isLocator||isSheriff||isDelayed||isObserver||isInstructor||isCleaner||isParasite||isParamedic||isEngineer||isMarionette;
     if((G.cfgPage==='functions')!==isFn)return;
-    if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='locator'&&!isLocator)||(G.cfgFunctionTab==='sheriff'&&!isSheriff)||(G.cfgFunctionTab==='delayed'&&!isDelayed)||(G.cfgFunctionTab==='observer'&&!isObserver)||(G.cfgFunctionTab==='instructor'&&!isInstructor)||(G.cfgFunctionTab==='cleaner'&&!isCleaner)||(G.cfgFunctionTab==='parasite'&&!isParasite)||(G.cfgFunctionTab==='engineer'&&!isEngineer)||(G.cfgFunctionTab==='marionette'&&!isMarionette)))return;
+    if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='locator'&&!isLocator)||(G.cfgFunctionTab==='sheriff'&&!isSheriff)||(G.cfgFunctionTab==='delayed'&&!isDelayed)||(G.cfgFunctionTab==='observer'&&!isObserver)||(G.cfgFunctionTab==='instructor'&&!isInstructor)||(G.cfgFunctionTab==='cleaner'&&!isCleaner)||(G.cfgFunctionTab==='parasite'&&!isParasite)||(G.cfgFunctionTab==='paramedic'&&!isParamedic)||(G.cfgFunctionTab==='engineer'&&!isEngineer)||(G.cfgFunctionTab==='marionette'&&!isMarionette)))return;
     const row=el('div','cfgrow'+(isFn?' fncompact':'')), top=el('div','cfgtop');
     if(isFn){
       const showCfgValue=()=>CFG[k]+(unit?' '+unit:'');
       const value=el('b','',showCfgValue());
-      const icon=el('span','fnicon',isDelayed?'🕓':isSheriff?'🔫':isObserver?'👀':isInstructor?'↔️':isCleaner?'🧹':isParasite?'🦠':isEngineer?'🔧':isMarionette?'✋':'🧭'); top.append(icon,el('span','',l),value);
+      const icon=el('span','fnicon',isDelayed?'🕓':isSheriff?'🔫':isObserver?'👀':isInstructor?'↔️':isCleaner?'🧹':isParasite?'🦠':isParamedic?'⛑️':isEngineer?'🔧':isMarionette?'✋':'🧭'); top.append(icon,el('span','',l),value);
       const stepper=el('div','fnstepper');
       const minus=el('button','','−'), number=el('output','',String(CFG[k])), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label','Diminuir '+l.toLowerCase()); plus.setAttribute('aria-label','Aumentar '+l.toLowerCase()); number.setAttribute('aria-label',l);
@@ -2250,7 +2283,7 @@ function buildCfgUI(){
   });
 }
 function setCfgPage(page){
-  G.cfgPage=page==='functions'?'functions':'settings';if(!['locator','sheriff','delayed','observer','instructor','cleaner','parasite','engineer','marionette'].includes(G.cfgFunctionTab))G.cfgFunctionTab='locator';
+  G.cfgPage=page==='functions'?'functions':'settings';if(!['locator','sheriff','delayed','observer','instructor','cleaner','parasite','paramedic','engineer','marionette'].includes(G.cfgFunctionTab))G.cfgFunctionTab='locator';
   $('cfgTitle').textContent=G.cfgPage==='functions'?'Funções':'Configurações';
   $('cfgTabSettings').classList.toggle('alt',G.cfgPage!=='settings');
   $('cfgTabFunctions').classList.toggle('alt',G.cfgPage!=='functions');
@@ -2483,7 +2516,7 @@ function updateNPC(ch,dt){
   if(ch.controlledBy)return;
   if(ch.role==='crew'&&G.state==='playing'&&G.gt>20&&ch.ai&&G.gt>(ch.ai.nextTaskEncourage||45)&&Math.random()<dt*.015){const left=G.tasks.filter(t=>!t.fake&&!t.done).length;ch.ai.nextTaskEncourage=G.gt+rand(25,55);if(left>0){if(left<=5)npcSay(ch,'Faltam poucas tarefas, vamos!');else if(Math.random()<.5)npcSay(ch,'Vamos fazer tarefas para vencer!');else npcSay(ch,'Mortos, façam as suas tarefas!')}}
   const ai=ch.ai;
-  const cleanerBusy=ch.function==='cleaner'&&ch.role==='imp'&&cleanerBotThink(ch,dt);const parasiteBusy=ch.function==='parasite'&&ch.role==='imp'&&parasiteBotThink(ch,dt);
+  const paramedicBusy=ch.function==='paramedic'&&ch.role==='crew'&&paramedicBotThink(ch,dt);const cleanerBusy=ch.function==='cleaner'&&ch.role==='imp'&&cleanerBotThink(ch,dt);const parasiteBusy=ch.function==='parasite'&&ch.role==='imp'&&parasiteBotThink(ch,dt);
   if(ch.function==='marionette'&&ch.role==='imp'&&ch.alive&&!ch.controlTargetId&&(ch.controlCd||0)<=0&&G.state==='playing'&&!G.M&&Math.random()<dt*.08){const target=controlTargetFor(ch,130);if(target&&!hasWitness(ch,target))startControl(ch,target)}
   if(ch.vent){ventUpdate(ch,dt);return}
   const rn=roomName(ch.x,ch.y); if(ai.trail[ai.trail.length-1]!==rn){ai.trail.push(rn);if(ai.trail.length>4)ai.trail.shift()}
@@ -2491,6 +2524,7 @@ function updateNPC(ch,dt){
   for(const k in ai.susp){const v=ai.susp[k];ai.susp[k]=v>0?Math.max(0,v-.01*dt):Math.min(0,v+.01*dt)}
   ai.pt-=dt; if(ai.pt<=0){ai.pt=.35;perceive(ch)}
   if(ai.reactT>0){ai.reactT-=dt;ch.moving=false;if(ai.reactT<=0)reactToBody(ch);return}
+  if(paramedicBusy)return;
   if(ch.role==='imp'){if(!cleanerBusy&&!parasiteBusy)impThink(ch,dt)}
   else if(ch.function==='sheriff')sheriffBotThink(ch,dt);
   if(G.over)return;
@@ -2503,7 +2537,8 @@ function updateNPC(ch,dt){
         if(!G.bodies.includes(g.b)){ai.state='idle';ai.wait=.3;break}
         if(dist(ch,g.b)<95&&losClear(ch.x,ch.y,g.b.x,g.b.y)){ch.moving=false;callMeeting(ch,'body',g.b);return}
       }
-      if(g.type==='clean_body'){if(!G.bodies.includes(g.b)){ai.state='idle';ai.wait=.3;break}if(dist(ch,g.b)<100&&losClear(ch.x,ch.y,g.b.x,g.b.y)){ch.moving=false;cleanBody(ch,g.b);return}}
+      if(g.type==='clean_body'){if(!G.bodies.includes(g.b)){ai.state='idle';ai.wait=.3;break}if(dist(ch,g.b)<actionDistancePx('cleaner')&&losClear(ch.x,ch.y,g.b.x,g.b.y)){ch.moving=false;cleanBody(ch,g.b);return}}
+      if(g.type==='revive_body'){if(!G.bodies.includes(g.b)){ai.state='idle';ai.wait=.3;break}if(validReviveBodyFor(ch,g.b)){ch.moving=false;reviveBody(ch,g.b);return}}
       if(followPath(ch,dt))onArrive(ch);
       break;
     }
@@ -2514,17 +2549,17 @@ function updateNPC(ch,dt){
 const updateNPCBaseControl=updateNPC;
 updateNPC=function(ch,dt){if(ch.controlledBy)return;const result=updateNPCBaseControl(ch,dt);if(ch.controlTargetId){const target=charById(ch.controlTargetId);if(target&&target.alive){target.x=ch.x;target.y=ch.y;target.moving=ch.moving;target.walk=ch.walk;target.face=ch.face;target.vent=ch.vent||null;if(ch.ventAnim)target.ventAnim={...ch.ventAnim}}}return result};
 /* ---------- configurações, personalidades e memória de suspeita ---------- */
-const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorDuration:8,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,actionDistance:1,renderDist:820};
-const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],obsChance:[0,100],obsMax:[0,15],instructorChance:[0,100],instructorMax:[0,15],instructorCooldown:[20,60],instructorDuration:[5,15],cleanerChance:[0,100],cleanerMax:[0,15],cleanerCooldown:[10,60],cleanerUses:[1,15],parasiteChance:[0,100],parasiteMax:[0,3],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],engVentDuration:[10,61],engChance:[0,100],engMax:[0,15],engCooldown:[5,25],marionCooldown:[15,60],marionDuration:[5,30],marionChance:[0,100],marionMax:[0,3],actionDistance:[0,2],renderDist:[500,1500]};
-const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorDuration:8,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,actionDistance:1,renderDist:820};
+const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorDuration:8,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,paramedicChance:0,paramedicMax:1,paramedicCooldown:30,paramedicTasksPerUse:3,paramedicMaxUses:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
+const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],obsChance:[0,100],obsMax:[0,15],instructorChance:[0,100],instructorMax:[0,15],instructorCooldown:[20,60],instructorDuration:[5,15],cleanerChance:[0,100],cleanerMax:[0,15],cleanerCooldown:[10,60],cleanerUses:[1,15],parasiteChance:[0,100],parasiteMax:[0,3],paramedicChance:[0,100],paramedicMax:[0,15],paramedicCooldown:[20,60],paramedicTasksPerUse:[1,5],paramedicMaxUses:[1,3],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],engVentDuration:[10,61],engChance:[0,100],engMax:[0,15],engCooldown:[5,25],marionCooldown:[15,60],marionDuration:[5,30],marionChance:[0,100],marionMax:[0,3],actionDistance:[0,2],commonTasks:[0,5],mediumTasks:[0,5],longTasks:[0,5],renderDist:[500,1500]};
+const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorDuration:8,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,paramedicChance:0,paramedicMax:1,paramedicCooldown:30,paramedicTasksPerUse:3,paramedicMaxUses:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
 function maxImpostorsForPlayers(count){const n=Math.max(4,Math.min(15,Math.round(Number(count)||4)));return n>=10?3:n>=8?2:1}
 function configuredPlayerCount(){if(typeof NET!=='undefined'&&NET.inRoom&&NET.room)return Math.max(4,Math.min(15,Number(NET.room.size)||4));return 15}
-function cfgLimitFor(key){if(key==='impostors')return [1,maxImpostorsForPlayers(configuredPlayerCount())];if(key==='instructorMax')return [0,Math.max(0,Math.min(configuredPlayerCount(),15))];if(key==='cleanerMax')return [0,Math.max(0,Math.min(CFG.impostors,CFG_LIM.cleanerMax[1]))];if(key==='parasiteMax')return [0,Math.max(0,Math.min(CFG.impostors,3))];return CFG_LIM[key]}
+function cfgLimitFor(key){if(key==='impostors')return [1,maxImpostorsForPlayers(configuredPlayerCount())];if(key==='instructorMax'||key==='paramedicMax')return [0,Math.max(0,Math.min(configuredPlayerCount(),15))];if(key==='cleanerMax')return [0,Math.max(0,Math.min(CFG.impostors,CFG_LIM.cleanerMax[1]))];if(key==='parasiteMax')return [0,Math.max(0,Math.min(CFG.impostors,3))];return CFG_LIM[key]}
 const ACTION_DISTANCE_LABELS=['Curta','Média','Longa'];
-function actionDistancePx(kind='default'){const lv=clamp(Math.round(Number(CFG.actionDistance)||0),0,2);const maps={kill:[64,72,96],sheriff:[68,84,112],delayed:[68,84,112],parasite:[74,92,122],instructor:[78,100,132],locator:[180,250,330],cleaner:[80,100,130],report:[80,100,130],control:[80,100,130]};return (maps[kind]||[80,100,130])[lv]}
+function actionDistancePx(kind='default'){const lv=clamp(Math.round(Number(CFG.actionDistance)||0),0,2);const maps={kill:[64,72,96],sheriff:[68,84,112],delayed:[68,84,112],parasite:[74,92,122],instructor:[78,100,132],locator:[180,250,330],cleaner:[80,100,130],paramedic:[80,100,130],report:[80,100,130],control:[80,100,130]};return (maps[kind]||[80,100,130])[lv]}
 (function(){try{const j=JSON.parse(localStorage.getItem('nz_cfg')||'{}');for(const k in CFG_LIM){const v=+j[k];if(v>=CFG_LIM[k][0]&&v<=CFG_LIM[k][1])CFG[k]=Math.round(v)}}catch(e){}})();
 CFG.cleanerMax=Math.min(CFG.cleanerMax,CFG.impostors);CFG.parasiteMax=Math.min(CFG.parasiteMax,CFG.impostors,3);
-function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,obsChance:CFG.obsChance,obsMax:CFG.obsMax,instructorChance:CFG.instructorChance,instructorMax:CFG.instructorMax,instructorCooldown:CFG.instructorCooldown,instructorDuration:CFG.instructorDuration,cleanerChance:CFG.cleanerChance,cleanerMax:CFG.cleanerMax,cleanerCooldown:CFG.cleanerCooldown,cleanerUses:CFG.cleanerUses,parasiteChance:CFG.parasiteChance,parasiteMax:CFG.parasiteMax,delayedEnabled:CFG.delayedEnabled,delayedChance:CFG.delayedChance,delayedMax:CFG.delayedMax,delayedDuration:CFG.delayedDuration,engVentDuration:CFG.engVentDuration,engChance:CFG.engChance,engMax:CFG.engMax,engCooldown:CFG.engCooldown,marionCooldown:CFG.marionCooldown,marionDuration:CFG.marionDuration,marionChance:CFG.marionChance,marionMax:CFG.marionMax,actionDistance:CFG.actionDistance,renderDist:CFG.renderDist}))}catch(e){}}
+function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,obsChance:CFG.obsChance,obsMax:CFG.obsMax,instructorChance:CFG.instructorChance,instructorMax:CFG.instructorMax,instructorCooldown:CFG.instructorCooldown,instructorDuration:CFG.instructorDuration,cleanerChance:CFG.cleanerChance,cleanerMax:CFG.cleanerMax,cleanerCooldown:CFG.cleanerCooldown,cleanerUses:CFG.cleanerUses,parasiteChance:CFG.parasiteChance,parasiteMax:CFG.parasiteMax,paramedicChance:CFG.paramedicChance,paramedicMax:CFG.paramedicMax,paramedicCooldown:CFG.paramedicCooldown,paramedicTasksPerUse:CFG.paramedicTasksPerUse,paramedicMaxUses:CFG.paramedicMaxUses,delayedEnabled:CFG.delayedEnabled,delayedChance:CFG.delayedChance,delayedMax:CFG.delayedMax,delayedDuration:CFG.delayedDuration,engVentDuration:CFG.engVentDuration,engChance:CFG.engChance,engMax:CFG.engMax,engCooldown:CFG.engCooldown,marionCooldown:CFG.marionCooldown,marionDuration:CFG.marionDuration,marionChance:CFG.marionChance,marionMax:CFG.marionMax,actionDistance:CFG.actionDistance,commonTasks:CFG.commonTasks,mediumTasks:CFG.mediumTasks,longTasks:CFG.longTasks,renderDist:CFG.renderDist}))}catch(e){}}
 const inGame=()=>G.state!=='menu';
 const uiBusy=()=>G.cfgOpen||G.confirmOpen;
 const PERS={
@@ -2537,18 +2572,18 @@ const FAKE_STS=[...new Set(TASK_TEMPLATES.flatMap(t=>(t.steps||[]).map(s=>s.st))
 
 function makeNPC(name,color){
   const c=newChar(name,color,0,0,false);
-  c.emUses=1;c.netDelayedCd=0;c.netSheriffCd=0;c.cleanCd=0;c.cleanUses=0;c.parasiteReady=true;c.parasiteTargetId=null;
+  c.emUses=1;c.netDelayedCd=0;c.netSheriffCd=0;c.cleanCd=0;c.cleanUses=0;c.parasiteReady=true;c.parasiteTargetId=null;c.paramedicCd=0;c.paramedicSpent=0;c.revivedOnce=false;
   c.ai={state:'idle',path:[],goal:null,isGoal:null,pathVer:0,wait:rand(0,25)/10,work:0,workMax:1,stuck:0,pt:Math.random()*.3,
     reactT:0,bodySeen:null,ignore:new Set(),seen:{},trail:[],speed:CFG.speed*(0.88+Math.random()*.18),wanderP:.15+Math.random()*.25,skipW:.5+Math.random()*1.3,
     killCd:14,huntPause:0,hunt:null,huntT:1,repT:0,sabT:3,fix:null,witnessOf:null,lastVote:null,
     pers:pick(Object.keys(PERS)),susp:{},reasons:{},hist:{},my:[],ling:{},follow:{},scanT:{},incidents:0,nextEm:0,
-    vents:[],ventSaw:null,cleanSaw:null,cleanMysteries:[],observerMap:{},alerted:new Set(),ventHops:0,ventT:0,ventStay:0,sayT:0,bodiesFound:[],sabs:[],heard:[],avoid:null};
+    vents:[],ventSaw:null,cleanSaw:null,cleanMysteries:[],reviveSaw:null,observerMap:{},alerted:new Set(),ventHops:0,ventT:0,ventStay:0,sayT:0,bodiesFound:[],sabs:[],heard:[],avoid:null};
   return c;
 }
 function resetAI(c){
   const ai=c.ai; ai.state='idle'; ai.path=[]; ai.goal=null; ai.wait=rand(5,30)/10; ai.reactT=0; ai.bodySeen=null;
   ai.hunt=null; ai.witnessOf=null; ai.fix=null; ai.ignore=new Set(); ai.killCd=Math.max(ai.killCd,Math.min(CFG.kill,12)); ai.huntPause=3; ai.stuck=0;
-  ai.ling={}; ai.follow={}; ai.scanT={}; ai.incidents=0; ai.ventSaw=null; ai.cleanSaw=null; ai.cleanMysteries=[]; ai.observerMap={}; ai.alerted=new Set(); ai.reactT=0;
+  ai.ling={}; ai.follow={}; ai.scanT={}; ai.incidents=0; ai.ventSaw=null; ai.cleanSaw=null; ai.cleanMysteries=[]; ai.reviveSaw=null; ai.observerMap={}; ai.alerted=new Set(); ai.reactT=0;
 }
 const DIRECT=['kill','vent','clean','linger','nearBody','fake','follow','sabNear','contra'];
 function addSusp(ch,id,w,type,info){
@@ -2602,6 +2637,7 @@ function perceive(ch){
   if(!ai.reactT){
     for(const b of G.bodies){
       if(ai.ignore.has(b.id))continue;
+      if(ch.function==='paramedic'&&validReviveBodyFor(ch,b,Math.max(R,actionDistancePx('paramedic'))))continue;
       if(dist(ch,b)<R&&losClear(ch.x,ch.y,b.x,b.y)){ai.bodySeen=b;ai.reactT=ai.witnessOf?.5:rand(5,12)/10;break}
     }
   }
@@ -3004,6 +3040,7 @@ function drawKillSplashes(c){
   }
 }
 function killChar(c){
+  if(G.parasiteInfections&&Object.prototype.hasOwnProperty.call(G.parasiteInfections,c.id))delete G.parasiteInfections[c.id];
   c.alive=false; c.ghost=true; c.moving=false;
   if(c.isPlayer){G.ghostMode='free';G.followTarget=null;G.spec=null;G.action=null}
   else if(c.ai){const ai=c.ai; ai.ghostT=rand(120,220)/10; ai.hunt=null; ai.path=[]; ai.state='idle'; ai.fix=null}
@@ -3012,7 +3049,7 @@ function killChar(c){
 function doKill(k,v){
   if(!k||!v||!k.alive||k.role!=='imp'||k.function==='delayed'||!v.alive||v.role==='imp'||k===v||k.vent||v.vent)return;   // só o impostor vivo elimina tripulantes vivos
   spawnKillSplash(k,v);killChar(v);
-  const body={id:v.id,name:v.name,color:v.color,cosmetics:cloneCosmetics(v.cosmetics),x:v.x,y:v.y,room:roomName(v.x,v.y),tKill:G.gt,killerId:k.id}; addBodyWithPet(body,v);
+  const body={id:v.id,victimId:v.id,name:v.name,color:v.color,cosmetics:cloneCosmetics(v.cosmetics),x:v.x,y:v.y,room:roomName(v.x,v.y),tKill:G.gt,killerId:k.id}; addBodyWithPet(body,v);
   k.x=v.x; k.y=v.y;
   const wr=G.sab.lights>0?170:460;
   G.chars.forEach(o=>{if(o.alive&&!o.isPlayer&&!o.isRemoteHuman&&o.role==='crew'&&dist(o,v)<wr&&losClear(o.x,o.y,v.x,v.y)){o.ai.witnessOf=k;addSusp(o,k.id,6,'kill',{room:body.room})}});
@@ -3047,12 +3084,22 @@ function infectTarget(parasite,target){if(parasite===G.player){emitRoleFx(parasi
   if(parasite===G.player)toast(`${target.name} foi infectado. A transformação ocorrerá ao fim da próxima reunião.`,2800);
   return true;
 }
+function clearConvertedCrewFunctionState(target){
+  if(!target)return;
+  if(target.controlledBy){const controller=charById(target.controlledBy);if(controller?.controlTargetId===target.id)stopControl(controller)}
+  if(target.controlTargetId)stopControl(target);
+  target.function=null;target.instructor=false;target.instructorCd=0;target.instructorTargetId=null;target.instructorPoint=null;target.instructorOrigin=null;
+  target.netSheriffCd=0;target.netDelayedCd=0;target.netTrackTarget=null;target.netTrackTime=0;target.netTrackCd=0;target.cleanCd=0;target.cleanUses=0;
+  target.paramedicCd=0;target.paramedicSpent=0;target.engVentTime=0;target.engVentCd=0;target.controlCd=0;target.controlTime=0;
+  G.instructorTrails=(G.instructorTrails||[]).filter(t=>String(t.ownerId)!==String(target.id));
+}
 function convertToImpostor(target){
   if(!target||!target.alive||target.role!=='crew')return false;
+  clearConvertedCrewFunctionState(target);
   target.role='imp';target.function=null;target.nameCol='#ff6b7e';target.parasiteReady=false;target.parasiteTargetId=null;
   G.tasks.filter(t=>t.owner===target.id).forEach(t=>t.fake=true);G.imps=G.chars.filter(c=>c.role==='imp');G.imp=G.imps[0]||null;
   if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.matchImpIds instanceof Set)NET.matchImpIds.add(target.id);
-  if(target===G.player){G.role='imp';G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;G.vision=G.visionTarget=CFG.impVision;$('tpHead').firstElementChild.textContent='Tarefas (falsas)';$('roleName').textContent='Infiltrado';toast('A infecção se completou. Você agora é um Infiltrado.',3600)}
+  if(target===G.player){G.role='imp';G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;G.paramedic=false;G.paramedicT=null;G.paramedicCd=0;G.trackTarget=null;G.trackTime=0;G.trackCd=0;G.sheriffT=null;G.vision=G.visionTarget=CFG.impVision;$('tpHead').firstElementChild.textContent='Tarefas (falsas)';$('roleName').textContent='Infiltrado';toast('A infecção se completou. Você agora é um Infiltrado comum.',3600)}
   return true;
 }
 function resolveParasiteInfections(){
@@ -3066,6 +3113,55 @@ function playerInfect(){
 function parasiteBotThink(ch,dt){
   if(!ch.alive||ch.role!=='imp'||ch.function!=='parasite'||ch.vent||G.M||G.over||ch.parasiteReady===false)return false;
   const t=parasiteTargetFor(ch,actionDistancePx('parasite'));if(!t)return false;if(Math.random()<Math.min(1,dt*5)){infectTarget(ch,t);if(ch.ai){ch.ai.hunt=null;ch.ai.path=[];ch.ai.wait=.5}return true}return false;
+}
+
+function bodyVictim(body){
+  if(!body)return null;
+  const explicit=body.victimId!=null?charById(body.victimId):null;if(explicit)return explicit;
+  const byId=charById(body.id);if(byId&&!byId.alive)return byId;
+  return G.chars.find(c=>!c.alive&&c.name===body.name&&c.color===body.color)||null;
+}
+function completedRealTasksFor(ch){return G.tasks.filter(t=>t.owner===ch.id&&!t.fake&&t.done).length}
+function paramedicUnlockedUses(ch){if(!ch)return 0;return Math.min(CFG.paramedicMaxUses,Math.floor(completedRealTasksFor(ch)/Math.max(1,CFG.paramedicTasksPerUse)))}
+function paramedicAvailableUses(ch){return Math.max(0,paramedicUnlockedUses(ch)-Math.max(0,ch?.paramedicSpent||0))}
+function validReviveBodyFor(medic,body,range=actionDistancePx('paramedic')){
+  if(!medic||!body||G.over||G.M||!medic.alive||medic.ghost||medic.role!=='crew'||medic.function!=='paramedic'||medic.vent||(medic.paramedicCd||0)>0||paramedicAvailableUses(medic)<=0)return false;
+  if(!G.bodies.includes(body)||dist(medic,body)>range||!losClear(medic.x,medic.y,body.x,body.y))return false;
+  const victim=bodyVictim(body);return !!(victim&&victim!==medic&&!victim.alive&&victim.role==='crew'&&!victim.revivedOnce);
+}
+function paramedicBodyFor(medic,range=actionDistancePx('paramedic')){let best=null,bd=range;for(const b of G.bodies){const d=dist(medic,b);if(d<=bd&&validReviveBodyFor(medic,b,range)){best=b;bd=d}}return best}
+function noteParamedicEvidence(medic,victim,body){
+  const room=body.room||roomName(body.x,body.y),now=G.gt;
+  for(const o of G.chars){if(!o.alive||o===medic||o===victim||o.isPlayer||o.isRemoteHuman||!o.ai||o.role!=='crew')continue;const R=(G.sab.lights>0?170:340);if(dist(o,body)<R&&losClear(o.x,o.y,body.x,body.y)&&dist(o,medic)<R){o.ai.reviveSaw={medicId:medic.id,victimId:victim.id,room,gt:now};addSusp(o,medic.id,-1.4,'clear',{room});npcSay(o,pick([`${victim.name} voltou!`,`${medic.name} reviveu ${victim.name}!`]))}}
+}
+function clearRevivedFunctionState(victim){
+  victim.function=null;victim.instructor=false;victim.instructorCd=0;victim.instructorTargetId=null;victim.instructorPoint=null;victim.instructorOrigin=null;victim.netSheriffCd=0;victim.netDelayedCd=0;victim.netTrackTarget=null;victim.netTrackTime=0;victim.netTrackCd=0;victim.cleanCd=0;victim.cleanUses=0;victim.parasiteReady=true;victim.parasiteTargetId=null;victim.paramedicCd=0;victim.paramedicSpent=0;victim.engVentTime=0;victim.engVentCd=0;victim.controlTargetId=null;victim.controlledBy=null;victim.controlTime=0;victim.controlCd=0;
+  G.instructorTrails=(G.instructorTrails||[]).filter(t=>String(t.ownerId)!==String(victim.id));
+}
+function reviveBody(medic,body){
+  if(!validReviveBodyFor(medic,body))return false;const victim=bodyVictim(body);if(!victim)return false;
+  noteParamedicEvidence(medic,victim,body);
+  G.bodies=G.bodies.filter(b=>b!==body);G.deadPets=(G.deadPets||[]).filter(p=>String(p.ownerId)!==String(victim.id));
+  if(G.parasiteInfections&&Object.prototype.hasOwnProperty.call(G.parasiteInfections,victim.id))delete G.parasiteInfections[victim.id];
+  clearRevivedFunctionState(victim);victim.role='crew';victim.alive=true;victim.ghost=false;victim.revivedOnce=true;victim.vent=null;victim.ventAnim=null;victim.ventMv=0;victim.bubble=null;victim.x=body.x;victim.y=body.y;victim.moving=false;victim.nameCol='#fff';victim.petX=victim.petY=undefined;
+  G.tasks.filter(t=>t.owner===victim.id).forEach(t=>t.fake=false);if(victim.ai)resetAI(victim);
+  medic.paramedicSpent=Math.max(0,medic.paramedicSpent||0)+1;medic.paramedicCd=CFG.paramedicCooldown;
+  for(const c of G.chars){if(c.ai){if(c.ai.bodySeen===body)c.ai.bodySeen=null;if(c.ai.goal&&(c.ai.goal.type==='body'||c.ai.goal.type==='revive_body')&&c.ai.goal.b===body){c.ai.goal=null;c.ai.path=[];c.ai.state='idle';c.ai.wait=.25}}}
+  if(victim===G.player){G.role='crew';G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;G.paramedic=false;G.followTarget=null;G.ghostMode='tasks';G.spec=null;G.vision=G.visionTarget=CFG.crewVision;$('tpHead').firstElementChild.textContent='Tarefas';$('roleName').textContent='Tripulante';toast('Você foi revivido como Tripulante comum.',3200)}
+  if(medic===G.player){G.paramedicCd=medic.paramedicCd;emitRoleFx(body.x,body.y,'paramedic');Snd.roleFx('paramedic','done');toast(`${victim.name} foi revivido.`,2400)}
+  checkEnd();return true;
+}
+function playerRevive(){
+  const p=G.player;if(!p||p.controlledBy||p.vent||G.state!=='playing'||G.M||uiBusy()||!p.alive||p.role!=='crew'||p.function!=='paramedic')return;
+  if(paramedicAvailableUses(p)<=0){const done=completedRealTasksFor(p),next=Math.min(CFG.paramedicMaxUses,Math.floor(done/CFG.paramedicTasksPerUse)+1)*CFG.paramedicTasksPerUse;toast(paramedicUnlockedUses(p)>=CFG.paramedicMaxUses?'Você já liberou e usou todos os usos desta partida.':`Complete ${Math.max(0,next-done)} tarefa(s) para liberar outro uso.`);Snd.err();return}
+  if((p.paramedicCd||0)>0){toast('Reviver recarregando: '+Math.ceil(p.paramedicCd)+'s');Snd.err();return}
+  const b=paramedicBodyFor(p);if(!b){toast('Nenhum Tripulante morto válido próximo.');Snd.err();return}if(reviveBody(p,b))Snd.click();else Snd.err();
+}
+function paramedicBotThink(ch,dt){
+  if(!ch?.alive||ch.role!=='crew'||ch.function!=='paramedic'||ch.vent||G.M||G.over||(ch.paramedicCd||0)>0||paramedicAvailableUses(ch)<=0)return false;
+  const near=paramedicBodyFor(ch);if(near){reviveBody(ch,near);return true}
+  const candidates=G.bodies.map(b=>({b,v:bodyVictim(b)})).filter(x=>x.v&&!x.v.alive&&x.v.role==='crew'&&!x.v.revivedOnce).sort((a,b)=>dist(ch,a.b)-dist(ch,b.b));if(!candidates.length)return false;
+  const body=candidates[0].b;if(ch.ai?.goal?.type==='revive_body'&&ch.ai.goal.b===body)return false;const bt={x:clamp(Math.floor(body.x/TILE),0,COLS-1),y:clamp(Math.floor((body.y+OFF_Y)/TILE),0,ROWS-1)};goTo(ch,{type:'revive_body',b:body},(x,y)=>Math.abs(x-bt.x)+Math.abs(y-bt.y)<=1);return false;
 }
 
 function cleanerBodyFor(ch,range=actionDistancePx('cleaner')){
@@ -3090,7 +3186,7 @@ function noteCleanerEvidence(cleaner,body){
 function cleanBody(cleaner,body){if(cleaner===G.player){emitRoleFx(body?.x,body?.y,'cleaner');Snd.roleFx('cleaner','use');}
   if(!cleaner||!body||G.over||G.M||!['playing','task','tool'].includes(G.state)||!cleaner.alive||cleaner.role!=='imp'||cleaner.function!=='cleaner'||cleaner.vent)return false;
   const cd=cleaner===G.player?G.cleanerCd:(cleaner.cleanCd||0),uses=cleaner===G.player?G.cleanerUses:(cleaner.cleanUses||0);
-  if(cd>0||uses<=0||!G.bodies.includes(body)||dist(cleaner,body)>100||!losClear(cleaner.x,cleaner.y,body.x,body.y))return false;
+  if(cd>0||uses<=0||!G.bodies.includes(body)||dist(cleaner,body)>actionDistancePx('cleaner')||!losClear(cleaner.x,cleaner.y,body.x,body.y))return false;
   noteCleanerEvidence(cleaner,body);
   G.bodies=G.bodies.filter(b=>b!==body);
   for(const c of G.chars){if(c.ai){if(c.ai.bodySeen===body)c.ai.bodySeen=null;if(c.ai.goal?.type==='body'&&c.ai.goal.b===body){c.ai.goal=null;c.ai.path=[];c.ai.state='idle';c.ai.wait=.35}}}
@@ -3117,7 +3213,7 @@ function sheriffTargetFor(shooter){
   return best;
 }
 function addSheriffBody(ch,killerId,cause){
-  addBodyWithPet({id:'body_'+String(ch.id)+'_'+Math.round(G.gt*1000),name:ch.name,color:ch.color,cosmetics:cloneCosmetics(ch.cosmetics),x:ch.x,y:ch.y,room:roomName(ch.x,ch.y),tKill:G.gt,killerId:killerId??null,cause},ch);
+  addBodyWithPet({id:'body_'+String(ch.id)+'_'+Math.round(G.gt*1000),victimId:ch.id,name:ch.name,color:ch.color,cosmetics:cloneCosmetics(ch.cosmetics),x:ch.x,y:ch.y,room:roomName(ch.x,ch.y),tKill:G.gt,killerId:killerId??null,cause},ch);
 }
 function doSheriffShot(shooter,target){if(shooter===G.player){emitRoleFx(shooter?.x,shooter?.y,'sheriff');Snd.roleFx('sheriff','use');}
   if(!shooter||!target||G.over||!['playing','task','tool'].includes(G.state)||G.M||!shooter.alive||shooter.role!=='crew'||shooter.function!=='sheriff'||shooter.vent||target===shooter||!target.alive||target.vent)return false;
@@ -3179,7 +3275,7 @@ function updateDelayedMarks(dt){
     mark.remaining=Math.max(0,(Number(mark.remaining)||0)-dt);
     if(mark.remaining>0)continue;
     const killer=charById(mark.killerId)||G.imps?.[0]||victim;
-    spawnKillSplash(killer,victim);killChar(victim);addBodyWithPet({id:'delayed_'+String(victim.id)+'_'+Math.round(G.gt*1000),name:victim.name,color:victim.color,cosmetics:cloneCosmetics(victim.cosmetics),x:victim.x,y:victim.y,room:roomName(victim.x,victim.y),tKill:G.gt,killerId:killer.id,cause:'delayed'},victim);
+    spawnKillSplash(killer,victim);killChar(victim);addBodyWithPet({id:'delayed_'+String(victim.id)+'_'+Math.round(G.gt*1000),victimId:victim.id,name:victim.name,color:victim.color,cosmetics:cloneCosmetics(victim.cosmetics),x:victim.x,y:victim.y,room:roomName(victim.x,victim.y),tKill:G.gt,killerId:killer.id,cause:'delayed'},victim);
     delete G.delayedMarks[id];
     if(victim.isPlayer){showDeathIntro(killer,victim);toast('A marcação terminou. Você foi eliminado.',3600);Snd.victimSting()}
     checkEnd();if(G.over){G.delayedMarks={};return}
@@ -3334,15 +3430,16 @@ function alibiMsg(ch,M,room){
 }
 function npcStatement(ch,M){
   const ai=ch.ai, P=PERS[ai.pers];
-  if(M.body&&ch===M.caller&&Math.random()<.85)return {from:ch,text:`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`,claim:{from:ch.id,kind:'bodyReport',target:M.body.id,room:M.body.room,time:M.body.tKill}};
+  if(M.body&&ch===M.caller&&Math.random()<.85)return {from:ch,text:pickLine([`Corpo de ${M.body.name} em ${M.body.room}.`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`]),claim:{from:ch.id,kind:'bodyReport',target:M.body.id,room:M.body.room,time:M.body.tKill}};
   if(M.body&&Math.random()<.12)return {from:ch,text:`Onde que mataram ${M.body.name}?`,claim:{from:ch.id,kind:'ask',bodyInquiry:true}};
   if(G.sab.reactor>0&&Math.random()<.35)return {from:ch,text:'Cuidado! Vamos resolver o reator!',claim:null};
   const lastSab=ai.sabs[ai.sabs.length-1];if(lastSab&&G.sab[lastSab.type]>0&&G.gt-lastSab.gt<18&&Math.random()<.22){if(lastSab.type==='doors')return {from:ch,text:'As portas estão travadas. Temos que esperar abrir!',claim:null};const sn={lights:'as luzes',comms:'as comunicações',reactor:'o reator'}[lastSab.type]||'a sabotagem';return {from:ch,text:`Cuidado! Vamos resolver ${sn}!`,claim:null}}
-  if(ai.controlVictimSaw&&G.gt-ai.controlVictimSaw.gt<45&&Math.random()<.55){const seen=charById(ai.controlVictimSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Marionetista!`,`${seen.name} me controlou! Acho que é Marionetista.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'marionette'}}}
+  if(ai.controlVictimSaw&&G.gt-ai.controlVictimSaw.gt<45&&Math.random()<.55){const seen=charById(ai.controlVictimSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Marionetista!!!`,`${seen.name} me controlou! Acho que é Marionetista.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'marionette'}}}
   if(ai.controlSaw&&G.gt-ai.controlSaw.gt<35&&Math.random()<.22){const seen=charById(ai.controlSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Infiltrado? Eu vi algo estranho durante o controle.`,`${seen.name} é Marionetista? O comportamento durante o controle foi estranho.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:false}}}
-  if(ai.engineerSaw&&G.gt-ai.engineerSaw.gt<45&&Math.random()<.20){const seen=charById(ai.engineerSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Engenheiro!`,`Vi ${seen.name} a entrar em um duto!`]),claim:{from:ch.id,kind:'defend',target:seen.id,role:'engineer'}}}
+  if(ai.engineerSaw&&G.gt-ai.engineerSaw.gt<45&&Math.random()<.20){const seen=charById(ai.engineerSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Engenheiro!!!`,`Vi ${seen.name} a entrar em um duto!`]),claim:{from:ch.id,kind:'defend',target:seen.id,role:'engineer'}}}
   if(ai.ventSaw&&G.gt-ai.ventSaw.gt<45&&Math.random()<.16){const seen=charById(ai.ventSaw.id);if(seen)return {from:ch,text:pick([`Vi ${seen.name} a entrar em um duto!`,`${seen.name} é Infiltrado? Eu vi essa pessoa entrando em um duto.`]),claim:{from:ch.id,kind:'suspicion',target:seen.id,vent:true,strong:false}}}
-  if(ai.cleanSaw&&G.gt-ai.cleanSaw.gt<60&&Math.random()<.65){const seen=charById(ai.cleanSaw.id);if(seen&&seen.alive)return {from:ch,text:pick([`Vi ${seen.name} perto do corpo quando ele desapareceu. Pode ser Faxineiro.`,`O corpo sumiu quando ${seen.name} estava ali. Isso foi muito suspeito.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'cleaner'}}}
+  if(ai.reviveSaw&&G.gt-ai.reviveSaw.gt<75&&Math.random()<.65){const medic=charById(ai.reviveSaw.medicId),victim=charById(ai.reviveSaw.victimId);if(medic&&victim)return {from:ch,text:pick([`${medic.name} é Paramédico!!! Eu vi ${medic.name} reviver ${victim.name}.`,`Vi ${medic.name} trazer ${victim.name} de volta. É Paramédico.`]),claim:{from:ch.id,kind:'defend',target:medic.id,role:'paramedic'}}}
+  if(ai.cleanSaw&&G.gt-ai.cleanSaw.gt<60&&Math.random()<.65){const seen=charById(ai.cleanSaw.id);if(seen&&seen.alive)return {from:ch,text:pick([`${seen.name} é Faxineiro!!! Eu vi o corpo desaparecer perto dessa pessoa.`,`Vi ${seen.name} perto do corpo quando ele desapareceu. Pode ser Faxineiro.`,`O corpo sumiu quando ${seen.name} estava ali. Isso foi muito suspeito.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'cleaner'}}}
   const cleanMyst=(ai.cleanMysteries||[]).filter(e=>G.gt-e.gt<90);if(cleanMyst.length&&Math.random()<.5){const e=cleanMyst[cleanMyst.length-1];return {from:ch,text:pick([`Eu tinha visto um corpo ${inRoom(e.room)} e depois ele sumiu. Pode existir um Faxineiro.`,`Um corpo desapareceu ${inRoom(e.room)}. Isso parece trabalho de Faxineiro.`]),claim:{from:ch.id,kind:'theory',role:'cleaner'}}}
   if(ch.function==='observer'&&(G.sab.comms||0)<=0){const recs=Object.entries(ai.observerMap||{}).filter(([id,r])=>r&&G.gt-r.t<35&&charById(id)?.alive);if(recs.length&&Math.random()<.24){const [id,r]=pick(recs),seen=charById(id);if(seen)return {from:ch,text:`Pelo mapa de Observador, vi ${seen.name} ${inRoom(r.room)} pouco antes da reunião.`,claim:{from:ch.id,kind:'sight',target:seen.id,room:r.room,time:r.t,strong:false,role:'observer'}}}}
   if(M.body&&Math.random()<.12)return {from:ch,text:pick([`Sim. O corpo de ${M.body.name} foi encontrado ${inRoom(M.body.room)}.`,`Isso é verdade: encontramos ${M.body.name} ${inRoom(M.body.room)}.`]),claim:{from:ch.id,kind:'ask',bodyInquiry:true}};
@@ -3356,7 +3453,7 @@ function npcStatement(ch,M){
     const suspect=charById(knownTop.id),rs=bestReason(ai,knownTop.id);
     if(suspect){
       if(rs)return {from:ch,text:reasonText(ch,knownTop.id,rs,knownTop.s>=P.thr),claim:reasonClaim(ch,knownTop.id,rs)};
-      return {from:ch,text:pickLine([`Suspeito de ${suspect.name}.`,`${suspect.name} é suspeito.`,`${suspect.name} é Infiltrado?`,`Estou desconfiando de ${suspect.name}.`]),claim:{from:ch.id,kind:'accuse',target:suspect.id,strong:knownTop.s>=P.thr}};
+      return {from:ch,text:pickLine(knownTop.s>=P.thr?[`Vamos votar em ${suspect.name}.`,`Suspeito de ${suspect.name}.`,`${suspect.name} é suspeito.`]:[`Suspeito de ${suspect.name}.`,`${suspect.name} é suspeito.`,`${suspect.name} é Infiltrado?`,`Estou desconfiando de ${suspect.name}.`]),claim:{from:ch.id,kind:'accuse',target:suspect.id,strong:knownTop.s>=P.thr}};
     }
   }
   const recentSeen=Object.entries(ai.seen||{}).map(([id,rec])=>({id,rec})).filter(x=>x.rec&&x.rec.room&&G.gt-(Number(x.rec.t)||0)<30&&charById(x.id)?.alive);
@@ -3394,6 +3491,7 @@ function npcStatement(ch,M){
   if(G.sab.reactor>0&&Math.random()<.5)return {from:ch,text:pickLine(['Precisamos resolver essa sabotagem primeiro.','O reator está em perigo, melhor votar rápido e consertar!']),claim:null};
   if(sb&&G.gt-sb.gt<160&&Math.random()<.35){const T={lights:'as luzes apagaram',comms:'as comunicações caíram',reactor:'o reator entrou em alerta',doors:'as portas travaram'}[sb.type]; return {from:ch,text:pickLine([`Eu estava ${inRoom(sb.room)} quando ${T}.`,`Quando ${T}, eu estava ${inRoom(sb.room)} fazendo tarefa.`]),claim:null}}
   if(Math.random()<.55)return alibiMsg(ch,M);
+  if(G.chars.some(x=>!x.alive)&&Math.random()<.16)return {from:ch,text:'Mortos, nos ajudem!',claim:null};
   return {from:ch,text:pickLine(NEUTRAL[ai.pers]),claim:null};
 }
 function meetingNPCs(){return G.chars.filter(c=>c.alive&&!c.isPlayer&&!c.isRemoteHuman&&c.ai)}
@@ -3401,7 +3499,7 @@ function genChat(){
   const M=G.M, L=[], npcs=meetingNPCs();
   const c=M.caller;
   if(!c.isPlayer&&!c.isRemoteHuman){
-    if(M.reason==='body')L.push({from:c,text:`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`,claim:null});
+    if(M.reason==='body')L.push({from:c,text:pickLine([`Corpo de ${M.body.name} em ${M.body.room}.`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`]),claim:null});
     else if(M.evid)L.push({from:c,text:'Chamei a reunião porque '+M.evid.text.charAt(0).toLowerCase()+M.evid.text.slice(1),claim:M.evid.claim});
     else L.push({from:c,text:'Chamei a reunião. Precisamos conversar.',claim:null});
   }
@@ -3435,10 +3533,10 @@ function hear(L,claim){
       const own=ai.susp[T.id]||0;
       const sawVent=(ai.vents||[]).some(v=>v.id===T.id);
       addSusp(L,T.id,(claim.vent?3.2:(claim.strong?1.8:1))*heard*(own>0?1.25:1)*(own<=-1?.2:1),'claim',{by:sp.id});
-      if(claim.vent&&sawVent){text=pick(['Eu vi!',`Eu também vi ${T.name} num duto!`,`Confirmo! ${T.name} estava no duto!`]);prio=4}
+      if(claim.vent&&sawVent){text=pick(['Sim.','Verdade.',`Eu também vi ${T.name} num duto!`,`Confirmo! ${T.name} estava no duto!`]);prio=4}
       else if(claim.vent&&own<P.thr*.6){text=pick(['Não vi!',`Eu não vi isso, mas ${sp.name} parece ter certeza.`,`Se for verdade, ${T.name} é o Infiltrado. Quem mais viu?`]);prio=3}
-      else if(own<=-1){text=pick(['Discordo.',`Não concordo, vi ${T.name} fazendo tarefa de verdade.`]);prio=3}
-      else if(own>=P.thr*.6){text=pick(['Concordo.',`Concordo, eu também desconfio de ${T.name}.`,`É, ${T.name} também me chamou atenção.`]);prio=3}
+      else if(own<=-1){text=pick(['Discordo.','Não.',`Não concordo, vi ${T.name} fazendo tarefa de verdade.`]);prio=3}
+      else if(own>=P.thr*.6){text=pick(['Concordo.','Sim.',`Concordo, eu também desconfio de ${T.name}.`,`É, ${T.name} também me chamou atenção.`]);prio=3}
       else if((ai.pers==='cauteloso'||ai.pers==='observador')&&Math.random()<.8){text=pick(['Que evidências você tem?','Onde você viu isso exatamente?','Calma, sem provas é arriscado.']);prio=2}
       else if(ai.pers==='impulsivo'&&Math.random()<.55){text=pick([`Faz sentido, ${T.name} está estranho mesmo.`,`Boa, vamos de ${T.name}!`]);prio=2}
       else if(ai.pers==='desconfiado'&&Math.random()<.45){text=`Pode ser, ${T.name} não me passa confiança.`;prio=2}
@@ -3456,9 +3554,9 @@ function hear(L,claim){
   }else if(claim.kind==='sight'&&T){
     const time=(claim.near&&M.body)?M.body.tKill:(claim.time!==undefined?claim.time:M.gt0), recs=histNear(ai,T.id,time,8);
     if(recs.length&&claim.room&&!recs.some(r=>r.room===claim.room)){
-      text=pick(['Mentira!',`Estranho, eu vi ${T.name} ${inRoom(recs[recs.length-1].room)} nessa hora.`]); prio=4; addSusp(L,sp.id,1.4,'contra');
+      text=pick(['Mentira.',`Estranho, eu vi ${T.name} ${inRoom(recs[recs.length-1].room)} nessa hora.`]); prio=4; addSusp(L,sp.id,1.4,'contra');
     }else if(recs.length&&claim.room){
-      text=pick(['Isso é verdade.','Eu vi!',`Confirmo, também vi ${T.name} ${inRoom(claim.room)}.`,`Sim, ${T.name} estava ${inRoom(claim.room)} mesmo.`]); prio=3;
+      text=pick(['Verdade.','Isso é verdade.','Eu vi!',`Confirmo, também vi ${T.name} ${inRoom(claim.room)}.`,`Sim, ${T.name} estava ${inRoom(claim.room)} mesmo.`]); prio=3;
       if(!imp)addSusp(L,T.id,(claim.near?1.4:.5)*heard,'claim',{by:sp.id});
     }else{
       if(!imp)addSusp(L,T.id,(claim.near?1.2:.5)*heard,'claim',{by:sp.id});
@@ -3470,11 +3568,15 @@ function hear(L,claim){
   }else if(claim.kind==='ask'&&claim.bodyInquiry&&M.body){
     text=pick([`O corpo foi encontrado ${inRoom(M.body.room)}.`,`Pelo que foi reportado, foi ${inRoom(M.body.room)}.`,`A denúncia indicou ${inRoom(M.body.room)}.`]); prio=2;
   }else if(claim.kind==='ask'&&claim.role&&T){
-    const sawMarion=(ai.controlSaw?.id===T.id||ai.controlVictimSaw?.id===T.id),sawEngineer=ai.engineerSaw?.id===T.id,sawCleaner=ai.cleanSaw?.id===T.id;
-    if(claim.role==='marionette'&&sawMarion){text=pick(['Sim.','Isso é verdade.','Eu vi!']);prio=4}
-    else if(claim.role==='marionette'&&sawEngineer){text='Não.';prio=3}
-    else if(claim.role==='engineer'&&sawEngineer){text=pick(['Sim.','Isso é verdade.','Eu vi!']);prio=4}
-    else if(claim.role==='cleaner'&&sawCleaner){text=pick(['Sim.','Isso é verdade.','Vi o corpo desaparecer perto dessa pessoa.']);prio=4}
+    const sawMarion=(ai.controlSaw?.id===T.id||ai.controlVictimSaw?.id===T.id),sawEngineer=ai.engineerSaw?.id===T.id,sawCleaner=ai.cleanSaw?.id===T.id,sawParamedic=ai.reviveSaw?.medicId===T.id;
+    const roleNames={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',delayed:'Atrasado',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico'};
+    const guessedRole=roleNames[claim.role]||'essa função';
+    if(claim.role==='marionette'&&sawMarion){text=pick(['Sim.','Verdade.','Isso é verdade.','Eu vi!']);prio=4}
+    else if(claim.role==='marionette'&&sawEngineer){text=`Não acho que ${T.name} seja Marionetista. Eu vi ${T.name} usando o duto como Engenheiro.`;prio=3}
+    else if(claim.role==='engineer'&&sawEngineer){text=pick(['Sim.','Verdade.','Isso é verdade.','Eu vi!']);prio=4}
+    else if(claim.role==='paramedic'&&sawParamedic){text=pick(['Sim.','Verdade.','Eu vi essa pessoa reviver um Tripulante.']);prio=4}
+    else if(claim.role==='cleaner'&&sawCleaner){text=pick(['Sim.','Verdade.','Isso é verdade.','Vi o corpo desaparecer perto dessa pessoa.']);prio=4}
+    else if((ai.engineerSaw?.id===T.id&&claim.role!=='engineer')||(ai.cleanSaw?.id===T.id&&claim.role!=='cleaner')||(sawParamedic&&claim.role!=='paramedic')||(sawMarion&&claim.role!=='marionette')){text=`Não acho que ${T.name} seja ${guessedRole}.`;prio=3}
     else if(claim.role==='observer'&&T.function==='observer'&&L.ghost){text='Sim.';prio=1}
     else{text='Não vi!';prio=1}
   }else if(claim.kind==='ask'&&Math.random()<.5){
@@ -3822,11 +3924,11 @@ function endMeeting(){
   if(checkEnd())return;
   // Ao terminar qualquer reunião, todas as habilidades com cooldown entram em recarga completa.
   const pts=cafePoints(G.chars.length); G.chars.filter(c=>c.alive).forEach((c,i)=>placeChar(c,pts[i]));
-  G.meetCd=CFG.meet; G.killCd=CFG.kill; G.sheriffCd=CFG.sheriffCooldown; G.delayedCd=CFG.kill; G.cleanerCd=CFG.cleanerCooldown;
+  G.meetCd=CFG.meet; G.killCd=CFG.kill; G.sheriffCd=CFG.sheriffCooldown; G.delayedCd=CFG.kill; G.cleanerCd=CFG.cleanerCooldown; G.paramedicCd=CFG.paramedicCooldown;if(G.player)G.player.paramedicCd=G.paramedicCd;
   G.sab.cd=CFG.sab;
   G.trackTarget=null;G.trackTime=0;G.trackCd=CFG.locCooldown;G.fixT=0;
   G.chars.forEach(c=>{
-    c.netKillCd=CFG.kill;c.netSheriffCd=CFG.sheriffCooldown;c.netDelayedCd=CFG.kill;if(c.function==='cleaner')c.cleanCd=CFG.cleanerCooldown;c.netTrackTarget=null;c.netTrackTime=0;c.netTrackCd=CFG.locCooldown;c.ventCd=VENT_CD;c.engVentCd=CFG.engCooldown;c.controlCd=CFG.marionCooldown;
+    c.netKillCd=CFG.kill;c.netSheriffCd=CFG.sheriffCooldown;c.netDelayedCd=CFG.kill;if(c.function==='cleaner')c.cleanCd=CFG.cleanerCooldown;c.netTrackTarget=null;c.netTrackTime=0;c.netTrackCd=CFG.locCooldown;c.ventCd=VENT_CD;c.engVentCd=CFG.engCooldown;c.controlCd=CFG.marionCooldown;if(c.function==='paramedic')c.paramedicCd=CFG.paramedicCooldown;
     if(c.ai){resetAI(c);c.ai.killCd=CFG.kill;c.ai.sabT=CFG.sab}
   });
   G.cam.x=focus().x-VW/2; G.cam.y=focus().y-VH/2;
@@ -3895,16 +3997,16 @@ const simActive=()=>(G.state==='playing'||G.state==='task'||G.state==='tool')&&!
 function updateButtons(){
   const p=G.player, can=G.state==='playing'&&(p.alive||ghostCanSab()), imp=G.role==='imp', directKill=imp&&p.function!=='delayed';
   const chatBtn=$('btnRoomChat');if(chatBtn){chatBtn.hidden=true;chatBtn.setAttribute('aria-expanded','false')}
-  const bk=$('btnKill'), bsh=$('btnSheriff'), bdel=$('btnDelayed'), bcl=$('btnCleaner'), bp=$('btnParasite'), bi=$('btnInstructor'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator'), be=$('btnEngineerVent'), bc=$('btnControl'), sheriff=G.role==='crew'&&p.function==='sheriff', delayed=G.role==='imp'&&p.function==='delayed', cleaner=G.role==='imp'&&p.function==='cleaner', parasite=G.role==='imp'&&p.function==='parasite', engineer=G.role==='crew'&&p.function==='engineer', marionette=G.role==='imp'&&p.function==='marionette';
+  const bk=$('btnKill'), bsh=$('btnSheriff'), bdel=$('btnDelayed'), bcl=$('btnCleaner'), bp=$('btnParasite'), bpa=$('btnParamedic'), bi=$('btnInstructor'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator'), be=$('btnEngineerVent'), bc=$('btnControl'), sheriff=G.role==='crew'&&p.function==='sheriff', delayed=G.role==='imp'&&p.function==='delayed', cleaner=G.role==='imp'&&p.function==='cleaner', parasite=G.role==='imp'&&p.function==='parasite', paramedic=G.role==='crew'&&p.function==='paramedic', engineer=G.role==='crew'&&p.function==='engineer', marionette=G.role==='imp'&&p.function==='marionette';
   // O conjunto extra de ações do Marionetista não pode ocupar a área física do joystick em telas estreitas.
   $('actions').classList.toggle('marionette-controls',marionette&&p.alive&&G.state==='playing');
-  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(directKill&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bdel,!(delayed&&p.alive)); hv(bcl,!(cleaner&&p.alive)); hv(bp,!(parasite&&p.alive)); hv(bi,!(G.state==='playing'&&!p.alive&&!!p.instructor)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));hv(be,!(G.state==='playing'&&p.alive&&engineer));hv(bc,!(G.state==='playing'&&p.alive&&marionette));
+  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(directKill&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bdel,!(delayed&&p.alive)); hv(bcl,!(cleaner&&p.alive)); hv(bp,!(parasite&&p.alive)); hv(bpa,!(paramedic&&p.alive)); hv(bi,!(G.state==='playing'&&!p.alive&&!!p.instructor)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));hv(be,!(G.state==='playing'&&p.alive&&engineer));hv(bc,!(G.state==='playing'&&p.alive&&marionette));
   const ventReady=!!p.vent||((G.sab.comms||0)<=0&&(p.engVentCd||0)<=0&&!!nearestVentFor(p,84));be.disabled=!p.vent&&!ventReady;be.classList.toggle('ready',ventReady);const ventLabel=p.vent?'Sair do duto':((p.engVentCd||0)>0?String(Math.ceil(p.engVentCd)):'Dutar');if(be._l!==ventLabel){be._l=ventLabel;be.innerHTML=ventLabel==='Dutar'?'🔧<small>Dutar</small>':ventLabel==='Sair do duto'?'↗<small>Sair</small>':ventLabel}
   const ctlTarget=controlTargetFor(p,actionDistancePx('control')),ctlLabel=p.controlTargetId?('Controlando '+Math.ceil(p.controlTime)+'s'):((p.controlCd||0)>0?String(Math.ceil(p.controlCd)):(NET?.pendingControl?'…':'Controlar'));bc.disabled=!p.controlTargetId&&(!ctlTarget||(p.controlCd||0)>0);bc.classList.toggle('ready',!!ctlTarget&&!(p.controlCd||0)&&!p.controlTargetId);if(bc._l!==ctlLabel){bc._l=ctlLabel;bc.innerHTML=ctlLabel==='Controlar'?'✋<small>Controlar</small>':ctlLabel}
   const gh=$('btnGhost'), showGh=!p.alive&&G.role==='crew'; hv(gh,!showGh);
   const fb=$('btnFollow'); hv(fb,!(G.state==='playing'&&!p.alive&&!p.instructor)); if(!fb.hidden){const t=G.followTarget&&charById(G.followTarget);fb.innerHTML=t&&t.alive?'Seguindo<br>'+t.name:'Seguir<br>jogador';fb.title=t&&t.alive?'Toque para trocar de alvo; toque duas vezes para cancelar':'Toque para começar a seguir';}
   const gl='Modo: '+(G.ghostMode==='spec'?'Espectador':'Tarefas'); if(gh._l!==gl){gh._l=gl;gh.textContent=gl}
-  const rl=p.alive?(p.function==='parasite'?'Infiltrado · Parasita':(p.function==='cleaner'?'Infiltrado · Faxineiro':(p.function==='marionette'?'Infiltrado · Marionetista':(p.function==='engineer'?'Tripulante · Engenheiro':(p.function==='delayed'?'Infiltrado · Atrasado':(imp?'Infiltrado':(p.function==='observer'?'Tripulante · Observador':(p.function==='sheriff'?'Tripulante · Xerife':'Tripulante')))))))):(imp?'Infiltrado (morto)':(p.instructor?'Instrutor ↔️':(G.ghostMode==='spec'?'Espectador':'Tripulante (morto)'))); const rn=$('roleName'); if(rn._l!==rl){rn._l=rl;rn.textContent=rl}
+  const rl=p.alive?roleNameForPlayer(p):(imp?'Infiltrado (morto)':(p.instructor?'Instrutor ↔️':(G.ghostMode==='spec'?'Espectador':'Tripulante (morto)'))); const rn=$('roleName'); if(rn._l!==rl){rn._l=rl;rn.textContent=rl}
   const lab=(p.alive||ghostActs())?'Usar':'Trocar'; if(ub._l!==lab){ub._l=lab;ub.textContent=lab}
   G.killT=null;
   if(directKill&&can&&G.killCd<=0&&!p.vent){let bd=actionDistancePx('kill');for(const v of G.chars){if(!v.alive||v.role==='imp'||v.id===p.controlTargetId)continue;const d=dist(p,v);if(d<bd){bd=d;G.killT=v}}}
@@ -3916,12 +4018,13 @@ function updateButtons(){
   G.delayedT=delayed&&can&&!p.vent&&G.delayedCd<=0?delayedTargetFor(p):null;const dlab=G.delayedCd>0?String(Math.ceil(G.delayedCd)):(NET?.pendingDelayedMark?'…':'🕓 Marcar');setCls(bdel,'cooldown-label',G.delayedCd>0);if(bdel._l!==dlab){bdel._l=dlab;bdel.innerHTML=dlab==='🕓 Marcar'?'🕓<small>Marcar</small>':dlab}
   setCls(bdel,'ready',!!G.delayedT&&!uiBusy()&&!(NET?.pendingDelayedMark));
   G.cleanerT=cleaner&&can&&!p.vent&&G.cleanerCd<=0&&G.cleanerUses>0?cleanerBodyFor(p,actionDistancePx('cleaner')):null;const clab=G.cleanerUses<=0?'0 usos':(G.cleanerCd>0?String(Math.ceil(G.cleanerCd)):'🧹 Limpar');setCls(bcl,'cooldown-label',G.cleanerCd>0||G.cleanerUses<=0);if(bcl._l!==clab){bcl._l=clab;bcl.innerHTML=clab==='🧹 Limpar'?`🧹<small>Limpar (${G.cleanerUses})</small>`:clab}setCls(bcl,'ready',!!G.cleanerT&&!uiBusy());
+  G.paramedicCd=p.paramedicCd||G.paramedicCd||0;const pav=paramedicAvailableUses(p),pun=paramedicUnlockedUses(p),pdone=completedRealTasksFor(p);G.paramedicT=paramedic&&can&&!p.vent&&G.paramedicCd<=0&&pav>0?paramedicBodyFor(p,actionDistancePx('paramedic')):null;const pal=G.paramedicCd>0?String(Math.ceil(G.paramedicCd)):(pav>0?'⛑️ Reviver':(pun>=CFG.paramedicMaxUses?'0 usos':`${pdone%CFG.paramedicTasksPerUse}/${CFG.paramedicTasksPerUse}`));setCls(bpa,'cooldown-label',G.paramedicCd>0||pav<=0);if(bpa._l!==pal){bpa._l=pal;bpa.innerHTML=pal==='⛑️ Reviver'?`⛑️<small>Reviver (${pav})</small>`:pal}bpa.disabled=!G.paramedicT||uiBusy()||G.paramedicCd>0||pav<=0;setCls(bpa,'ready',!!G.paramedicT&&!bpa.disabled);
   G.parasiteT=parasite&&can&&!p.vent&&p.parasiteReady!==false?parasiteTargetFor(p,actionDistancePx('parasite')):null;const plab=p.parasiteReady===false?'Usado':'🦠 Infectar';setCls(bp,'cooldown-label',p.parasiteReady===false);if(bp._l!==plab){bp._l=plab;bp.innerHTML=plab==='🦠 Infectar'?'🦠<small>Infectar</small>':plab}bp.disabled=!G.parasiteT||uiBusy()||p.parasiteReady===false;setCls(bp,'ready',!!G.parasiteT&&!uiBusy()&&p.parasiteReady!==false);
   setCls(bs,'ready',imp&&G.state==='playing'&&!uiBusy()&&G.sab.cd<=0);
   const st=G.sab.cd>0?String(Math.ceil(G.sab.cd)):'Sabotar';setCls(bs,'cooldown-label',G.sab.cd>0);if(bs._l!==st){bs._l=st;bs.textContent=st}
   setCls(br,'ready',!!(can&&nearBody())); setCls(bl,'active',G.trackTime>0); const lt=G.trackTime>0?String(Math.ceil(G.trackTime)):(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear');setCls(bl,'cooldown-label',G.trackTime>0||G.trackCd>0);if(bl._l!==lt){bl._l=lt;bl.querySelector('small').textContent=lt;bl._l=lt}
   if(!bi.hidden){const it=charById(p.instructorTargetId||G.instructorTargetId),cd=p.instructorCd||G.instructorCd||0,nearby=!it&&instructorSelectableTargets(p).length>0,lab=cd>0?String(Math.ceil(cd)):(it&&it.alive?'Marcar ponto':'Trilhar');bi.disabled=(G.sab.comms||0)>0||cd>0||(!it&&!nearby);setCls(bi,'ready',!bi.disabled);if(bi._l!==lab){bi._l=lab;bi.innerHTML=lab==='Trilhar'?'↔️<small>Trilhar</small>':lab==='Marcar ponto'?'↔️<small>Marcar ponto</small>':lab}}
-  if(p.controlledBy){[bk,bsh,bdel,bcl,bp,bi,bs,br,bl,be,bc,ub,fb].forEach(e=>{if(e)hv(e,true)});$('ventPanel').hidden=true}
+  if(p.controlledBy){[bk,bsh,bdel,bcl,bp,bpa,bi,bs,br,bl,be,bc,ub,fb].forEach(e=>{if(e)hv(e,true)});$('ventPanel').hidden=true}
 }
 function update(dt){
   const p=G.player;
@@ -3931,7 +4034,7 @@ function update(dt){
   if(NET.inRoom&&!NET.isHost)netUpdateVisualInterpolation();
   const observerMapLock=!!(G.mapOpen&&p.alive&&p.role==='crew'&&p.function==='observer'); if(G.state==='playing'&&(p.alive||ghostActs())&&!uiBusy()&&!observerMapLock&&!p.vent&&!p.controlledBy)updatePlayer(dt); else p.moving=false;
   if(simActive()){
-    G.gt+=dt; G.killCd=Math.max(0,G.killCd-dt); G.sheriffCd=Math.max(0,G.sheriffCd-dt); G.delayedCd=Math.max(0,G.delayedCd-dt);G.cleanerCd=Math.max(0,G.cleanerCd-dt);if(G.player){G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses}G.chars.forEach(c=>{if(c.isRemoteHuman){c.netDelayedCd=Math.max(0,(c.netDelayedCd||0)-dt);c.cleanCd=Math.max(0,(c.cleanCd||0)-dt)}}); G.meetCd=Math.max(0,G.meetCd-dt); updateLocator(dt);updateDelayedMarks(dt);if(G.over)return;
+    G.gt+=dt; G.killCd=Math.max(0,G.killCd-dt); G.sheriffCd=Math.max(0,G.sheriffCd-dt); G.delayedCd=Math.max(0,G.delayedCd-dt);G.cleanerCd=Math.max(0,G.cleanerCd-dt);if(G.player){G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses}G.chars.forEach(c=>{if(c.paramedicCd>0)c.paramedicCd=Math.max(0,c.paramedicCd-dt);if(c.isRemoteHuman){c.netDelayedCd=Math.max(0,(c.netDelayedCd||0)-dt);c.cleanCd=Math.max(0,(c.cleanCd||0)-dt)}});if(G.player){G.paramedicCd=G.player.paramedicCd||0} G.meetCd=Math.max(0,G.meetCd-dt); updateLocator(dt);updateDelayedMarks(dt);if(G.over)return;
     updateSab(dt); if(G.over)return;
     if(!NET.inRoom||NET.isHost)updateInstructor(dt);
     updateNPCs(dt);
@@ -4023,14 +4126,14 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>keys.delete(e.code));
 addEventListener('blur',()=>keys.clear());
 $('btnUse').addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();const p=G.player,a=G.action;if(!p.alive&&!(a&&a.type==='freecomputer')&&!(G.role==='crew'&&p.ghost&&a&&a.type==='task')){toast('Morto só pode realizar tarefas permitidas.');return;}doInteract(a)});
-$('btnKill').addEventListener('pointerdown',e=>{e.preventDefault();playerKill()});$('btnSheriff').addEventListener('pointerdown',e=>{e.preventDefault();playerSheriffShot()});$('btnDelayed').addEventListener('pointerdown',e=>{e.preventDefault();playerDelayedMark()});$('btnCleaner').addEventListener('pointerdown',e=>{e.preventDefault();playerCleanBody()});$('btnEngineerVent').addEventListener('pointerdown',e=>{e.preventDefault();playerEngineerVent()});$('btnControl').addEventListener('pointerdown',e=>{e.preventDefault();playerControl()});
+$('btnKill').addEventListener('pointerdown',e=>{e.preventDefault();playerKill()});$('btnSheriff').addEventListener('pointerdown',e=>{e.preventDefault();playerSheriffShot()});$('btnDelayed').addEventListener('pointerdown',e=>{e.preventDefault();playerDelayedMark()});$('btnCleaner').addEventListener('pointerdown',e=>{e.preventDefault();playerCleanBody()});$('btnParamedic').addEventListener('pointerdown',e=>{e.preventDefault();playerRevive()});$('btnEngineerVent').addEventListener('pointerdown',e=>{e.preventDefault();playerEngineerVent()});$('btnControl').addEventListener('pointerdown',e=>{e.preventDefault();playerControl()});
 $('btnSab').addEventListener('pointerdown',e=>{e.preventDefault();playerSab()});
 $('btnReport').addEventListener('pointerdown',e=>{e.preventDefault();playerReport()});$('btnInstructor').addEventListener('pointerdown',e=>{e.preventDefault();playerInstructorAction()});$('btnParasite').addEventListener('pointerdown',e=>{e.preventDefault();playerInfect()});$('btnLocator').addEventListener('pointerdown',e=>{e.preventDefault();startLocator()});
 $('btnSkip').addEventListener('click',()=>playerVote('skip'));
 $('btnRole').addEventListener('click',startPlay);
 $('btnCfg').addEventListener('click',openCfg);  $('cfgClose').addEventListener('click',closeCfg);
-$('cfgReset').addEventListener('click',()=>{if((inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby')))return;Object.assign(CFG,CFG_DEF);CFG.cleanerMax=Math.min(CFG.cleanerMax,CFG.impostors);CFG.parasiteMax=Math.min(CFG.parasiteMax,CFG.impostors,3);saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
-$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});$('btnDelayedSection').addEventListener('click',()=>{G.cfgFunctionTab='delayed';buildCfgUI();$('cfgNote').textContent='Ative a função Atrasado e configure o tempo até a eliminação.';Snd.click()});$('btnObserverSection').addEventListener('click',()=>{G.cfgFunctionTab='observer';buildCfgUI();$('cfgNote').textContent='Configure a chance de existir Observador e a quantidade máxima de Observadores.';Snd.click()});$('btnInstructorSection').addEventListener('click',()=>{G.cfgFunctionTab='instructor';buildCfgUI();$('cfgNote').textContent='Configure a chance, quantidade, recarga e duração das trilhas do Instrutor após a morte.';Snd.click()});$('btnCleanerSection').addEventListener('click',()=>{G.cfgFunctionTab='cleaner';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade, recarga e usos do Faxineiro.';Snd.click()});$('btnParasiteSection').addEventListener('click',()=>{G.cfgFunctionTab='parasite';buildCfgUI();$('cfgNote').textContent='Configure chance e quantidade da função Parasita.';Snd.click()});$('btnEngineerSection').addEventListener('click',()=>{G.cfgFunctionTab='engineer';buildCfgUI();$('cfgNote').textContent='Configure o tempo nos dutos, chance, quantidade e cooldown do Engenheiro.';Snd.click()});$('btnMarionetteSection').addEventListener('click',()=>{G.cfgFunctionTab='marionette';buildCfgUI();$('cfgNote').textContent='Configure cooldown, duração e distribuição do Marionetista.';Snd.click()});
+$('cfgReset').addEventListener('click',()=>{if((inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby')))return;Object.assign(CFG,CFG_DEF);CFG.cleanerMax=Math.min(CFG.cleanerMax,CFG.impostors);CFG.parasiteMax=Math.min(CFG.parasiteMax,CFG.impostors,3);CFG.paramedicMax=Math.min(CFG.paramedicMax,configuredPlayerCount());saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
+$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});$('btnDelayedSection').addEventListener('click',()=>{G.cfgFunctionTab='delayed';buildCfgUI();$('cfgNote').textContent='Ative a função Atrasado e configure o tempo até a eliminação.';Snd.click()});$('btnObserverSection').addEventListener('click',()=>{G.cfgFunctionTab='observer';buildCfgUI();$('cfgNote').textContent='Configure a chance de existir Observador e a quantidade máxima de Observadores.';Snd.click()});$('btnInstructorSection').addEventListener('click',()=>{G.cfgFunctionTab='instructor';buildCfgUI();$('cfgNote').textContent='Configure a chance, quantidade, recarga e duração das trilhas do Instrutor após a morte.';Snd.click()});$('btnCleanerSection').addEventListener('click',()=>{G.cfgFunctionTab='cleaner';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade, recarga e usos do Faxineiro.';Snd.click()});$('btnParasiteSection').addEventListener('click',()=>{G.cfgFunctionTab='parasite';buildCfgUI();$('cfgNote').textContent='Configure chance e quantidade da função Parasita.';Snd.click()});$('btnParamedicSection').addEventListener('click',()=>{G.cfgFunctionTab='paramedic';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade, recarga, tarefas por uso e limite de usos do Paramédico.';Snd.click()});$('btnEngineerSection').addEventListener('click',()=>{G.cfgFunctionTab='engineer';buildCfgUI();$('cfgNote').textContent='Configure o tempo nos dutos, chance, quantidade e cooldown do Engenheiro.';Snd.click()});$('btnMarionetteSection').addEventListener('click',()=>{G.cfgFunctionTab='marionette';buildCfgUI();$('cfgNote').textContent='Configure cooldown, duração e distribuição do Marionetista.';Snd.click()});
 $('btnSay').addEventListener('click',()=>{const i=$('sayIn');sendSay(i.value);i.value=''});
 $('sayIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const i=$('sayIn');sendSay(i.value);i.value=''}});
 $('btnMap').addEventListener('click',toggleMap);
@@ -4124,7 +4227,7 @@ function closeCosmetics(){$('cosmeticsOverlay').hidden=true}
 /* =====================================================================
    MULTIPLAYER ONLINE — autoridade da sala no host + snapshots/requisições
    ===================================================================== */
-const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,motionSeq:0,recvMotionSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,preparedRound:0,revealPending:false,startRequested:false,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,motionTimer:0,lastSnapshotAt:0,lastMotionAt:0,snapshotBlendDuration:.15,inputSeq:0,inputAck:0,reconcileX:0,reconcileY:0};
+const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,motionSeq:0,recvMotionSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,preparedRound:0,revealPending:false,startRequested:false,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,motionTimer:0,lastSnapshotAt:0,lastMotionAt:0,snapshotBlendDuration:.15,inputSeq:0,inputAck:0,reconcileX:0,reconcileY:0,authX:null,authY:null};
 function netVisualState(ch){
   // O jogador local usa previsão imediata. Interpolação visual fica apenas para os outros jogadores.
   if(!NET.inRoom||NET.isHost||ch.id===NET.id||G.player?.controlTargetId===ch.id||!Number.isFinite(ch.netVisualX)||!Number.isFinite(ch.netVisualY))return null;
@@ -4145,9 +4248,9 @@ function netUpdateVisualInterpolation(){
     c.netVisualMoving=alpha<1?(!!c.netFromMoving||!!c.netToMoving):!!c.netToMoving;
   }
 }
-const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorDuration','cleanerChance','cleanerMax','cleanerCooldown','cleanerUses','parasiteChance','parasiteMax','delayedEnabled','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','actionDistance','renderDist'];
+const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorDuration','cleanerChance','cleanerMax','cleanerCooldown','cleanerUses','parasiteChance','parasiteMax','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','delayedEnabled','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','actionDistance','commonTasks','mediumTasks','longTasks','renderDist'];
 function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
-function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}const cappedCleaner=Math.min(CFG.cleanerMax,CFG.impostors);if(CFG.cleanerMax!==cappedCleaner){CFG.cleanerMax=cappedCleaner;changed=true}const cappedParasite=Math.min(CFG.parasiteMax,CFG.impostors,3);if(CFG.parasiteMax!==cappedParasite){CFG.parasiteMax=cappedParasite;changed=true}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
+function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}const cappedCleaner=Math.min(CFG.cleanerMax,CFG.impostors);if(CFG.cleanerMax!==cappedCleaner){CFG.cleanerMax=cappedCleaner;changed=true}const cappedParasite=Math.min(CFG.parasiteMax,CFG.impostors,3);if(CFG.parasiteMax!==cappedParasite){CFG.parasiteMax=cappedParasite;changed=true}const cappedParamedic=Math.min(CFG.paramedicMax,configuredPlayerCount(),15);if(CFG.paramedicMax!==cappedParamedic){CFG.paramedicMax=cappedParamedic;changed=true}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
 if($('serverUrlIn'))$('serverUrlIn').value=netDefaultUrl();
 function netSend(o){if(NET.ws&&NET.ws.readyState===WebSocket.OPEN){try{NET.ws.send(JSON.stringify(o));return true}catch(e){}}return false}
@@ -4280,7 +4383,7 @@ function netEnsureRoomDraft(){if(!NET.room)return null;if(!NET.roomDraft)NET.roo
 function netNoteRoomSetting(key,value){
   if(!NET.inRoom||!NET.isHost||!NET.room||NET.room.status!=='lobby'||!NET_SETTING_KEYS.includes(key))return;
   const baseLim=CFG_LIM[key];if(!baseLim||!Number.isFinite(+value))return;
-  const d=netEnsureRoomDraft();const lim=key==='cleanerMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,baseLim[1]))]:key==='parasiteMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,3))]:baseLim;d[key]=clamp(Math.round(+value),lim[0],lim[1]);if(key==='impostors'){if(Number(d.cleanerMax)>d.impostors)d.cleanerMax=d.impostors;if(Number(d.parasiteMax)>d.impostors)d.parasiteMax=d.impostors;}NET.roomDraftDirty=true;
+  const d=netEnsureRoomDraft();const roomMax=Math.max(1,Math.min(15,Number(NET.room?.size)||configuredPlayerCount()));const lim=key==='cleanerMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,baseLim[1]))]:key==='parasiteMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,3))]:key==='paramedicMax'?[0,roomMax]:baseLim;d[key]=clamp(Math.round(+value),lim[0],lim[1]);if(key==='impostors'){if(Number(d.cleanerMax)>d.impostors)d.cleanerMax=d.impostors;if(Number(d.parasiteMax)>d.impostors)d.parasiteMax=d.impostors;}if(Number(d.paramedicMax)>roomMax)d.paramedicMax=roomMax;NET.roomDraftDirty=true;
   const field={speed:'roomSpeedIn',kill:'roomKillIn',sab:'roomSabIn',meet:'roomMeetIn',discussion:'roomDiscussionIn',voting:'roomVotingIn',crewVision:'roomCrewVisionIn'}[key];if(field&&$(field)&&document.activeElement!==$(field))$(field).value=d[key];
 }
 function netNoteRoomControl(key,value){
@@ -4295,7 +4398,7 @@ function netRoomSettingsFromControls(){
   const draft=NET.roomDraft||NET.room?.settings||netSettings();
   const bots=clamp(Math.round(Number(draft.bots??NET.room?.bots??$('roomBotsIn').value)||0),0,Math.max(0,fixedSize-players));
   const settings={...netSettings()};
-  for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];const n=Number(draft[k]??CFG[k]);if(lim&&Number.isFinite(n))settings[k]=clamp(Math.round(n),lim[0],lim[1])}settings.cleanerMax=Math.min(settings.cleanerMax,settings.impostors);settings.parasiteMax=Math.min(settings.parasiteMax,settings.impostors,3);
+  for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];const n=Number(draft[k]??CFG[k]);if(lim&&Number.isFinite(n))settings[k]=clamp(Math.round(n),lim[0],lim[1])}settings.cleanerMax=Math.min(settings.cleanerMax,settings.impostors);settings.parasiteMax=Math.min(settings.parasiteMax,settings.impostors,3);settings.paramedicMax=Math.min(settings.paramedicMax,fixedSize,15);
   return {bots,settings};
 }
 function netApplyRoomToCFG(){if(NET.room?.settings)netApplySettings(NET.room.settings)}
@@ -4308,17 +4411,35 @@ function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=
 function netCaptureSnapshot(){if(G.player){G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses}
   const st=(G.state==='task'||G.state==='tool')?'playing':G.state;
   if(G.player){G.player.netKillCd=G.killCd;G.player.netDelayedCd=G.delayedCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
-  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0,parasiteReady:c.parasiteReady!==false,parasiteTargetId:c.parasiteTargetId||null,instructor:!!c.instructor,instructorCd:c.instructorCd||0,instructorTargetId:c.instructorTargetId||null,cosmetics:cloneCosmetics(c.cosmetics)}));
+  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0,parasiteReady:c.parasiteReady!==false,parasiteTargetId:c.parasiteTargetId||null,paramedicCd:c.paramedicCd||0,paramedicSpent:c.paramedicSpent||0,revivedOnce:!!c.revivedOnce,instructor:!!c.instructor,instructorCd:c.instructorCd||0,instructorTargetId:c.instructorTargetId||null,cosmetics:cloneCosmetics(c.cosmetics)}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
-  const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,cosmetics:cloneCosmetics(b.cosmetics),x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
+  const bodies=G.bodies.map(b=>({id:b.id,victimId:b.victimId??b.id,name:b.name,color:b.color,cosmetics:cloneCosmetics(b.cosmetics),x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
   const deadPets=(G.deadPets||[]).map(p=>({id:p.id,ownerId:p.ownerId,pet:p.pet,x:p.x,y:p.y,face:p.face||1,phase:p.phase||0,sad:true}));
   const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chat:(G.M.chat||[]).map(m=>({fromId:m.fromId,text:m.text})),chatCount:$('meetChat').children.length}:null;
-  return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,deadPets,killSplashes:(G.killSplashes||[]).map(s=>({...s})),instructorTrails:(G.instructorTrails||[]).map(t=>({id:t.id,ownerId:t.ownerId,targetId:t.targetId,points:(t.points||[]).map(p=>({x:p.x,y:p.y})),t:t.t,max:t.max})),delayedMarks:{...G.delayedMarks},parasiteInfections:{...(G.parasiteInfections||{})},sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,observer:G.observer,cleaner:G.cleaner,parasite:G.parasite,selfParasiteReady:G.player?.parasiteReady!==false,selfInstructor:!!G.player?.instructor,selfInstructorCd:G.player?.instructorCd||0,selfInstructorTargetId:G.player?.instructorTargetId||null,selfCleanerCd:G.cleanerCd,selfCleanerUses:G.cleanerUses,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
+  return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,deadPets,killSplashes:(G.killSplashes||[]).map(s=>({...s})),instructorTrails:(G.instructorTrails||[]).map(t=>({id:t.id,ownerId:t.ownerId,targetId:t.targetId,points:(t.points||[]).map(p=>({x:p.x,y:p.y})),t:t.t,max:t.max})),delayedMarks:{...G.delayedMarks},parasiteInfections:{...(G.parasiteInfections||{})},sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,observer:G.observer,cleaner:G.cleaner,parasite:G.parasite,paramedic:G.paramedic,selfParamedicCd:G.player?.paramedicCd||0,selfParamedicSpent:G.player?.paramedicSpent||0,selfParasiteReady:G.player?.parasiteReady!==false,selfInstructor:!!G.player?.instructor,selfInstructorCd:G.player?.instructorCd||0,selfInstructorTargetId:G.player?.instructorTargetId||null,selfCleanerCd:G.cleanerCd,selfCleanerUses:G.cleanerUses,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
 }
 function netCaptureMotion(){
   const q=n=>Math.round((Number(n)||0)*10)/10;
   return {seq:++NET.motionSeq,chars:G.chars.map(c=>({id:c.id,x:q(c.x),y:q(c.y),face:c.face<0?-1:1,walk:q(c.walk||0),moving:!!c.moving,vent:c.vent||null,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,netInputAck:c.netInputAck||0}))};
 }
+function netReconcileOwnAuthoritative(p,targetX,targetY,ack=0,hard=false){
+  if(!p||!Number.isFinite(targetX)||!Number.isFinite(targetY))return;
+  if(ack>NET.inputAck)NET.inputAck=ack;NET.authX=targetX;NET.authY=targetY;
+  const errX=targetX-p.x,errY=targetY-p.y,err=Math.hypot(errX,errY);
+  if(hard||err>175){p.x=targetX;p.y=targetY;NET.reconcileX=NET.reconcileY=0;return}
+  const v=inputVec(),vl=Math.hypot(v.x,v.y);
+  // Pequenas diferenças enquanto há input são atraso normal entre previsão local e host.
+  // Não corrigimos a componente para trás/para frente contra uma parede: isso era a causa do "grudar".
+  if(vl>.05){
+    const ux=v.x/vl,uy=v.y/vl,dot=errX*ux+errY*uy,px=errX-dot*ux,py=errY-dot*uy,perp=Math.hypot(px,py);
+    if(err<58){NET.reconcileX*=.55;NET.reconcileY*=.55;return}
+    if(perp>1){const cap=Math.min(perp,28),k=cap/perp;NET.reconcileX=px*k;NET.reconcileY=py*k}else{NET.reconcileX*=.5;NET.reconcileY*=.5}
+    return;
+  }
+  // Sem input, converge ao host sem teletransportar e sem acumular snapshots antigos.
+  const cap=Math.min(err,90),k=err>0?cap/err:0;NET.reconcileX=errX*k;NET.reconcileY=errY*k;
+}
+
 function netApplyMotion(m){
   if(!m||!Array.isArray(m.chars)||!['playing','task','tool'].includes(G.state))return;
   const seq=Math.max(0,Math.floor(Number(m.seq)||0));if(seq&&seq<=NET.recvMotionSeq)return;if(seq)NET.recvMotionSeq=seq;
@@ -4326,7 +4447,7 @@ function netApplyMotion(m){
   const byId=new Map((G.chars||[]).map(c=>[c.id,c]));
   for(const r of m.chars){
     const c=byId.get(r.id);if(!c)continue;
-    if(c.id===NET.id){const ack=Math.max(0,Number(r.netInputAck)||0);if(ack>NET.inputAck)NET.inputAck=ack;continue}
+    if(c.id===NET.id){const ack=Math.max(0,Number(r.netInputAck)||0),tx=Number(r.x),ty=Number(r.y);if(Number.isFinite(tx)&&Number.isFinite(ty))netReconcileOwnAuthoritative(c,tx,ty,ack,false);else if(ack>NET.inputAck)NET.inputAck=ack;continue}
     const targetX=Number(r.x),targetY=Number(r.y);if(!Number.isFinite(targetX)||!Number.isFinite(targetY))continue;
     const fromX=Number.isFinite(c.netVisualX)?c.netVisualX:c.x,fromY=Number.isFinite(c.netVisualY)?c.netVisualY:c.y;
     const fromWalk=Number.isFinite(c.netVisualWalk)?c.netVisualWalk:(c.walk||0),fromMoving=typeof c.netVisualMoving==='boolean'?c.netVisualMoving:!!c.moving;
@@ -4369,20 +4490,9 @@ function netApplySnapshot(s,force=false){
       if(ownPredicted){
         const relationSame=oldControlTargetId===(r.controlTargetId||null)&&oldControlledBy===(r.controlledBy||null);
         const hardStateChanged=oldAlive!==!!r.alive||oldGhost!==!!r.ghost||oldVent!==(r.vent||null)||!relationSame;
-        const errX=targetX-predictedX,errY=targetY-predictedY,err=Math.hypot(errX,errY);
-        const ack=Math.max(0,Number(r.netInputAck)||0);if(ack>NET.inputAck)NET.inputAck=ack;
-        if(hardStateChanged||err>150){c.x=targetX;c.y=targetY;c.walk=Number.isFinite(+r.walk)?+r.walk:predictedWalk;c.moving=!!r.moving;NET.reconcileX=NET.reconcileY=0;}
-        else{
-          c.x=predictedX;c.y=predictedY;c.walk=predictedWalk;c.moving=predictedMoving;c.face=predictedFace;
-          const v=inputVec(),vl=Math.hypot(v.x,v.y);
-          if(vl<.05){NET.reconcileX+=errX;NET.reconcileY+=errY;}
-          else{
-            const ux=v.x/vl,uy=v.y/vl,dot=errX*ux+errY*uy;
-            // Não puxa o jogador para trás por causa de um snapshot naturalmente atrasado.
-            const along=Math.max(0,dot),px=errX-dot*ux,py=errY-dot*uy;
-            NET.reconcileX+=px+ux*along*.35;NET.reconcileY+=py+uy*along*.35;
-          }
-        }
+        const ack=Math.max(0,Number(r.netInputAck)||0);
+        c.x=predictedX;c.y=predictedY;c.walk=predictedWalk;c.moving=predictedMoving;c.face=predictedFace;
+        netReconcileOwnAuthoritative(c,targetX,targetY,ack,hardStateChanged);
       }
       const targetWalk=Number.isFinite(+r.walk)?+r.walk:0, targetMoving=!!r.moving;
       const delta=Math.hypot(targetX-oldX,targetY-oldY);
@@ -4410,7 +4520,7 @@ function netApplySnapshot(s,force=false){
     G.instructorTrails=Array.isArray(s.instructorTrails)?s.instructorTrails.map(t=>({...t,points:(t.points||[]).map(p=>({...p}))})):[];for(const tr of G.instructorTrails){if(!INSTRUCTOR_SEEN_TRAILS.has(tr.id)){INSTRUCTOR_SEEN_TRAILS.add(tr.id);const end=tr.points?.[tr.points.length-1];if(end){Snd.roleFx('instructor','done');toast('↔️ Um Instrutor marcou um caminho para você.',2400)}}}
     G.delayedMarks=s.delayedMarks&&typeof s.delayedMarks==='object'?{...s.delayedMarks}:{};G.parasiteInfections=s.parasiteInfections&&typeof s.parasiteInfections==='object'?{...s.parasiteInfections}:{};
     if(s.cfg)netApplySettings(s.cfg);G.sab={...s.sab};const doorsChanged=doors.some((d,i)=>d.closed!==!!s.doors[i]);doors.forEach((d,i)=>{d.closed=!!s.doors[i]});if(doorsChanged){rebuildWalk();G.walkVer++}
-    G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;G.delayedCd=s.selfDelayedCd??G.player.netDelayedCd??s.delayedCd??G.delayedCd;G.player.netDelayedCd=G.delayedCd;NET.pendingSheriffShot=false;NET.pendingDelayedMark=false;NET.pendingControl=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.observer=!!(s.observer||G.player.function==='observer');G.cleaner=!!(s.cleaner||G.player.function==='cleaner');G.parasite=!!(s.parasite||G.player.function==='parasite');G.player.parasiteReady=s.selfParasiteReady??G.player.parasiteReady??true;G.player.instructor=!!(s.selfInstructor??G.player.instructor);G.player.instructorCd=s.selfInstructorCd??G.player.instructorCd??0;G.player.instructorTargetId=Object.prototype.hasOwnProperty.call(s,'selfInstructorTargetId')?s.selfInstructorTargetId:(G.player.instructorTargetId??null);G.instructorCd=G.player.instructorCd;G.instructorTargetId=G.player.instructorTargetId;G.cleanerCd=s.selfCleanerCd??G.player.cleanCd??G.cleanerCd;G.cleanerUses=s.selfCleanerUses??G.player.cleanUses??G.cleanerUses;G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){if(!G.player.controlledBy){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}else $('ventPanel').hidden=true}
+    G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;G.delayedCd=s.selfDelayedCd??G.player.netDelayedCd??s.delayedCd??G.delayedCd;G.player.netDelayedCd=G.delayedCd;NET.pendingSheriffShot=false;NET.pendingDelayedMark=false;NET.pendingControl=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.observer=!!(s.observer||G.player.function==='observer');G.cleaner=!!(s.cleaner||G.player.function==='cleaner');G.parasite=!!(s.parasite||G.player.function==='parasite');G.paramedic=!!(s.paramedic||G.player.function==='paramedic');G.player.paramedicCd=s.selfParamedicCd??G.player.paramedicCd??0;G.player.paramedicSpent=s.selfParamedicSpent??G.player.paramedicSpent??0;G.paramedicCd=G.player.paramedicCd;G.player.parasiteReady=s.selfParasiteReady??G.player.parasiteReady??true;G.player.instructor=!!(s.selfInstructor??G.player.instructor);G.player.instructorCd=s.selfInstructorCd??G.player.instructorCd??0;G.player.instructorTargetId=Object.prototype.hasOwnProperty.call(s,'selfInstructorTargetId')?s.selfInstructorTargetId:(G.player.instructorTargetId??null);G.instructorCd=G.player.instructorCd;G.instructorTargetId=G.player.instructorTargetId;G.cleanerCd=s.selfCleanerCd??G.player.cleanCd??G.cleanerCd;G.cleanerUses=s.selfCleanerUses??G.player.cleanUses??G.cleanerUses;G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){if(!G.player.controlledBy){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}else $('ventPanel').hidden=true}
     if(s.state==='meeting'){
       const sm=s.meeting;if(sm){const caller=charById(sm.callerId)||G.player;const body=sm.bodyId?G.bodies.find(b=>String(b.id)===String(sm.bodyId)):null;if(!G.M||oldState!=='meeting')callMeeting(caller,sm.reason,body);if(G.M){G.M.caller=caller;G.M.body=body;G.M.phase=sm.phase;G.M.t=sm.t;G.M.clock=sm.clock;G.M.dur=sm.dur;G.M.votes={...sm.votes};G.M.voteAt={...sm.voteAt};G.M.log=sm.log||[];G.M.result=(sm.phase==='result'||sm.phase==='eject')?{eject:sm.ejectId?charById(sm.ejectId):null,counts:sm.counts||{},skipN:sm.skipN||0,headline:sm.ejectHeadline||''}:null;G.M.resultHeadline=sm.resultHeadline||'';netPaintMeeting(sm)}}
       G.state='meeting';$('role').hidden=true;$('end').hidden=true;
@@ -4423,8 +4533,8 @@ function netApplySnapshot(s,force=false){
       if(s.state==='playing'){$('role').hidden=true;$('end').hidden=true;$('menu').hidden=true;$('hud').hidden=false}
       if(s.state==='role'){if(Number.isFinite(+s.roleT))G.roleT=+s.roleT;showLocalRoleReveal(false)}
     }
-    if(!wasAlive&&G.player.alive){NET.ownWasAlive=true}else if(wasAlive&&!G.player.alive){const corpse=G.bodies.find(b=>String(b.name)===String(G.player.name));const killer=G.chars.find(c=>c.id===(corpse?.killerId||''))||G.imps[0];if(corpse?.cause==='sheriff_misfire'||corpse?.cause==='sheriff_recoil'){toast(corpse.cause==='sheriff_misfire'?'Você foi eliminado após atingir um Tripulante inocente.':'Você foi eliminado pelo disparo do Xerife.',3600)}else if(killer)showDeathIntro(killer,G.player);NET.ownWasAlive=false}
-    $('roleName').textContent=G.player.function==='cleaner'?'Infiltrado · Faxineiro':(G.player.function==='marionette'?'Infiltrado · Marionetista':(G.player.function==='engineer'?'Tripulante · Engenheiro':(G.role==='imp'?'Infiltrado':(G.player.function==='observer'?'Tripulante · Observador':(G.player.function==='sheriff'?'Tripulante · Xerife':(G.player.function==='delayed'?'Infiltrado · Atrasado':(G.locator?'Tripulante · Localizador':'Tripulante')))))));renderTasks();updateSabUI();netSyncCameraAndButtons();
+    if(!wasAlive&&G.player.alive){NET.ownWasAlive=true;G.ghostMode='tasks';G.followTarget=null;G.spec=null;G.role=G.player.role||'crew';G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);toast('Você foi revivido como Tripulante comum.',3200)}else if(wasAlive&&!G.player.alive){const corpse=G.bodies.find(b=>String(b.name)===String(G.player.name));const killer=G.chars.find(c=>c.id===(corpse?.killerId||''))||G.imps[0];if(corpse?.cause==='sheriff_misfire'||corpse?.cause==='sheriff_recoil'){toast(corpse.cause==='sheriff_misfire'?'Você foi eliminado após atingir um Tripulante inocente.':'Você foi eliminado pelo disparo do Xerife.',3600)}else if(killer)showDeathIntro(killer,G.player);NET.ownWasAlive=false}
+    $('roleName').textContent=roleNameForPlayer(G.player);renderTasks();updateSabUI();netSyncCameraAndButtons();
   }catch(e){console.error('Falha ao aplicar estado online',e)}finally{NET.applying=false}
 }
 function netPaintMeeting(sm){
@@ -4509,10 +4619,12 @@ function netHostCommand(m){
       // Se houver atraso maior, usamos a posição do host em vez de rejeitar a trilha inteira.
       const x=clamp(hasPoint&&drift<=INSTRUCTOR_NET_POINT_TOLERANCE?rx:ch.x,0,WORLD_W),y=clamp(hasPoint&&drift<=INSTRUCTOR_NET_POINT_TOLERANCE?ry:ch.y,0,WORLD_H);createInstructorTrail(ch,target,x,y)
     }
+  }else if(command==='revive_body'){
+    const body=m.bodyId!=null?G.bodies.find(b=>String(b.id)===String(m.bodyId)):null;if(activePlay&&!G.M&&ch.alive&&ch.role==='crew'&&ch.function==='paramedic'&&!ch.vent&&body)reviveBody(ch,body);
   }else if(command==='clean_body'){
     const body=m.bodyId!=null?G.bodies.find(b=>String(b.id)===String(m.bodyId)):cleanerBodyFor(ch,actionDistancePx('cleaner'));if(activePlay&&!G.M&&ch.alive&&ch.role==='imp'&&ch.function==='cleaner'&&!ch.vent&&body)cleanBody(ch,body);
   }else if(command==='report'){
-    if(activePlay&&ch.alive&&!ch.vent){const b=G.bodies.find(b=>dist(ch,b)<actionDistancePx('report')&&losClear(ch.x,ch.y,b.x,b.y));if(b)callMeeting(ch,'body',b)}
+    if(activePlay&&ch.alive&&!ch.vent){const b=m.bodyId!=null?G.bodies.find(b=>String(b.id)===String(m.bodyId)&&dist(ch,b)<actionDistancePx('report')&&losClear(ch.x,ch.y,b.x,b.y)):G.bodies.find(b=>dist(ch,b)<actionDistancePx('report')&&losClear(ch.x,ch.y,b.x,b.y));if(b)callMeeting(ch,'body',b)}
   }else if(command==='emergency'){
     // O host verifica também a distância para impedir ativações remotas ou duplicadas.
     if(activePlay&&ch.alive&&!ch.vent&&stationDist(TABLE,ch)<=62&&ch.emUses>0&&G.meetCd<=0&&!sabotageActive())callMeeting(ch,'emergency');
@@ -4535,12 +4647,12 @@ function netHostCommand(m){
   }
 }
 function netWithRemotePlayer(ch,fn){
-  const oldPlayer=G.player,oldRole=G.role,oldLocator=G.locator,oldObserver=G.observer,oldCleaner=G.cleaner,oldParasite=G.parasite,oldCleanerCd=G.cleanerCd,oldCleanerUses=G.cleanerUses,oldTrack={target:G.trackTarget,time:G.trackTime,cd:G.trackCd},oldKill=G.killCd,oldState=G.state;
+  const oldPlayer=G.player,oldRole=G.role,oldLocator=G.locator,oldObserver=G.observer,oldCleaner=G.cleaner,oldParasite=G.parasite,oldParamedic=G.paramedic,oldParamedicCd=G.paramedicCd,oldCleanerCd=G.cleanerCd,oldCleanerUses=G.cleanerUses,oldTrack={target:G.trackTarget,time:G.trackTime,cd:G.trackCd},oldKill=G.killCd,oldState=G.state;
   if(oldPlayer){oldPlayer.netTrackTarget=G.trackTarget;oldPlayer.netTrackTime=G.trackTime;oldPlayer.netTrackCd=G.trackCd;oldPlayer.netKillCd=G.killCd}
-  G.player=ch;G.role=ch.role;G.locator=ch.function==='locator';G.observer=ch.function==='observer';G.cleaner=ch.function==='cleaner';G.parasite=ch.function==='parasite';G.cleanerCd=ch.cleanCd||0;G.cleanerUses=ch.cleanUses||0;G.trackTarget=ch.netTrackTarget||null;G.trackTime=ch.netTrackTime||0;G.trackCd=ch.netTrackCd||0;G.killCd=ch.netKillCd||0;if(G.state==='task'||G.state==='tool')G.state='playing';
+  G.player=ch;G.role=ch.role;G.locator=ch.function==='locator';G.observer=ch.function==='observer';G.cleaner=ch.function==='cleaner';G.parasite=ch.function==='parasite';G.paramedic=ch.function==='paramedic';G.paramedicCd=ch.paramedicCd||0;G.cleanerCd=ch.cleanCd||0;G.cleanerUses=ch.cleanUses||0;G.trackTarget=ch.netTrackTarget||null;G.trackTime=ch.netTrackTime||0;G.trackCd=ch.netTrackCd||0;G.killCd=ch.netKillCd||0;if(G.state==='task'||G.state==='tool')G.state='playing';
   try{fn()}finally{
-    ch.netTrackTarget=G.trackTarget;ch.netTrackTime=G.trackTime;ch.netTrackCd=G.trackCd;ch.netKillCd=G.killCd;ch.cleanCd=G.cleanerCd;ch.cleanUses=G.cleanerUses;
-    const after=G.state;G.player=oldPlayer;G.role=oldRole;G.locator=oldLocator;G.observer=oldObserver;G.cleaner=oldCleaner;G.parasite=oldParasite;G.cleanerCd=oldCleanerCd;G.cleanerUses=oldCleanerUses;G.trackTarget=oldTrack.target;G.trackTime=oldTrack.time;G.trackCd=oldTrack.cd;G.killCd=oldKill;
+    ch.netTrackTarget=G.trackTarget;ch.netTrackTime=G.trackTime;ch.netTrackCd=G.trackCd;ch.netKillCd=G.killCd;ch.cleanCd=G.cleanerCd;ch.cleanUses=G.cleanerUses;ch.paramedicCd=G.paramedicCd;
+    const after=G.state;G.player=oldPlayer;G.role=oldRole;G.locator=oldLocator;G.observer=oldObserver;G.cleaner=oldCleaner;G.parasite=oldParasite;G.paramedic=oldParamedic;G.paramedicCd=oldParamedicCd;G.cleanerCd=oldCleanerCd;G.cleanerUses=oldCleanerUses;G.trackTarget=oldTrack.target;G.trackTime=oldTrack.time;G.trackCd=oldTrack.cd;G.killCd=oldKill;
     if(after==='meeting'||after==='over')G.state=after;else G.state=oldState;
   }
 }
@@ -4609,7 +4721,7 @@ const netOriginalUpdatePlayer=updatePlayer;updatePlayer=function(dt){
   if(clientPredicted){
     // Aplica a correção em pequenas parcelas. A física local continua respondendo ao joystick no mesmo frame.
     const k=Math.min(1,dt*8),cx=NET.reconcileX*k,cy=NET.reconcileY*k;
-    if(Math.abs(cx)>.01||Math.abs(cy)>.01){moveChar(p,cx,cy);NET.reconcileX-=cx;NET.reconcileY-=cy}
+    if(Math.abs(cx)>.01||Math.abs(cy)>.01){const ox=p.x,oy=p.y;moveChar(p,cx,cy);const ax=p.x-ox,ay=p.y-oy;NET.reconcileX-=ax;NET.reconcileY-=ay;if(Math.abs(cx)>.05&&Math.abs(ax)<.001)NET.reconcileX=0;if(Math.abs(cy)>.05&&Math.abs(ay)<.001)NET.reconcileY=0}
     if(p.controlTargetId){const target=charById(p.controlTargetId);if(target&&target.alive){target.x=p.x;target.y=p.y;target.moving=p.moving;target.walk=p.walk;target.face=p.face}}
     return;
   }
@@ -4623,8 +4735,9 @@ const netOriginalEndGame=endGame;endGame=function(winner,msg){if(NET.inRoom&&!NE
 const netOriginalStartPlay=startPlay;startPlay=function(){if(NET.inRoom&&!NET.isHost){if(!NET.localReadySent){NET.localReadySent=true;netSend({type:'ready'})}G.roleT=999999;return}netOriginalStartPlay()};
 const netOriginalPlayerKill=playerKill;playerKill=function(){if(NET.inRoom&&!NET.isHost){const t=G.killT;if(t)netSend({type:'action',action:'kill',targetId:t.id});return}netOriginalPlayerKill()};
 const netOriginalPlayerInfect=playerInfect;playerInfect=function(){if(NET.inRoom&&!NET.isHost){const t=G.parasiteT||parasiteTargetFor(G.player,actionDistancePx('parasite'));if(t&&G.player?.parasiteReady!==false){emitRoleFx(G.player.x,G.player.y,'parasite');Snd.roleFx('parasite','use');netSend({type:'action',action:'parasite_infect',targetId:t.id})}return}netOriginalPlayerInfect()};
-const netOriginalPlayerCleanBody=playerCleanBody;playerCleanBody=function(){if(NET.inRoom&&!NET.isHost){const b=G.cleanerT||nearBody();if(b){emitRoleFx(b.x,b.y,'cleaner');Snd.roleFx('cleaner','use');netSend({type:'action',action:'clean_body',bodyId:b.id})}return}netOriginalPlayerCleanBody()};
-const netOriginalPlayerReport=playerReport;playerReport=function(){if(NET.inRoom&&!NET.isHost){netSend({type:'action',action:'report'});return}netOriginalPlayerReport()};
+const netOriginalPlayerCleanBody=playerCleanBody;playerCleanBody=function(){if(NET.inRoom&&!NET.isHost){const b=G.cleanerT||cleanerBodyFor(G.player,actionDistancePx('cleaner'));if(b){emitRoleFx(b.x,b.y,'cleaner');Snd.roleFx('cleaner','use');netSend({type:'action',action:'clean_body',bodyId:b.id})}return}netOriginalPlayerCleanBody()};
+const netOriginalPlayerRevive=playerRevive;playerRevive=function(){if(NET.inRoom&&!NET.isHost){const p=G.player,b=G.paramedicT||paramedicBodyFor(p,actionDistancePx('paramedic'));if(b&&p&&paramedicAvailableUses(p)>0&&(p.paramedicCd||0)<=0){Snd.roleFx('paramedic','use');netSend({type:'action',action:'revive_body',bodyId:b.id})}return}netOriginalPlayerRevive()};
+const netOriginalPlayerReport=playerReport;playerReport=function(){if(NET.inRoom&&!NET.isHost){const b=nearBody();if(b)netSend({type:'action',action:'report',bodyId:b.id});else{toast('Nenhum corpo por perto.');Snd.err()}return}netOriginalPlayerReport()};
 const netOriginalPlayerSab=playerSab;playerSab=function(){if(NET.inRoom&&!NET.isHost){if(G.role==='imp')openTool({tool:'sab'});return}netOriginalPlayerSab()};
 const netOriginalStartLocator=startLocator;startLocator=function(){if(NET.inRoom&&!NET.isHost){emitRoleFx(G.player.x,G.player.y,'locator');Snd.roleFx('locator','use');netSend({type:'action',action:'locator'});return}netOriginalStartLocator()};
 const netOriginalStartSabotage=startSabotage;startSabotage=function(type,by){if(NET.inRoom&&!NET.isHost&&!NET.applying){netSend({type:'action',action:'sabotage',sabotage:type});return true}return netOriginalStartSabotage(type,by)};
