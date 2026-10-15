@@ -50,20 +50,40 @@ test('Xerife tem configurações limitadas, aba própria e sincronização de sa
   assert.match(html, /sheriffEligible\.slice\(0,clamp\(CFG\.sheriffMax,0,15\)\)/);
 });
 
+
+
+test('Observador usa o mapa dos vivos, some em Comunicações e bloqueia movimento enquanto consulta', () => {
+  assert.match(html, /obsChance:\[0,100\]/);
+  assert.match(html, /obsMax:\[0,15\]/);
+  assert.match(server, /obsChance:\[0,100\]/);
+  assert.match(server, /obsMax:\[0,15\]/);
+  assert.match(html, /const observerEnabled=CFG\.obsMax>0&&CFG\.obsChance>0&&Math\.random\(\)\*100<CFG\.obsChance/);
+  assert.match(html, /observerEligible\.slice\(0,clamp\(CFG\.obsMax,0,15\)\)/);
+  assert.match(html, /const observerAlive=!!\(G\.player\?\.alive&&G\.player\?\.role==='crew'&&G\.player\?\.function==='observer'\)/);
+  assert.match(html, /const commsDown=\(G\.sab\.comms\|\|0\)>0/);
+  assert.match(html, /const showAll=!G\.player\.alive\|\|\(observerAlive&&!commsDown\)/);
+  assert.match(html, /const showChars=!\(observerAlive&&commsDown\)/);
+  assert.match(html, /const observerMapLock=!!\(G\.mapOpen&&p\.alive&&p\.role==='crew'&&p\.function==='observer'\)/);
+  assert.match(html, /body\.observer-map-lock #stick\{[^}]*transform:translateY\(88px\)[^}]*pointer-events:none/);
+  assert.match(html, /document\.body\.classList\.add\('observer-map-lock'\)/);
+  assert.match(html, /document\.body\.classList\.remove\('observer-map-lock'\)/);
+  assert.match(server, /s\.observer=recipient\.function==='observer'/);
+});
 test('disparo do Xerife é validado pelo host e respeita alcance, linha de visão e cooldown', () => {
   assert.match(html, /command==='sheriff_shoot'[\s\S]*?activePlay&&!G\.M&&ch\.alive&&ch\.role==='crew'&&ch\.function==='sheriff'[\s\S]*?dist\(ch,target\)<=84&&losClear/);
   assert.match(server, /'sheriff_shoot'/);
-  assert.match(html, /function doSheriffShot\(shooter,target\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(target\);addSheriffBody\(target,shooter\.id,'sheriff_hit'\)/);
+  assert.match(html, /function doSheriffShot\(shooter,target\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(target\);parkPetAtBody/);
+  assert.doesNotMatch(html.slice(html.indexOf('function doSheriffShot(shooter,target)'),html.indexOf('function playerSheriffShot()')), /addSheriffBody\(/, 'disparos do Xerife não criam corpo físico');
   const shotBody=html.slice(html.indexOf('function doSheriffShot(shooter,target)'),html.indexOf('function playerSheriffShot()'));
   assert.doesNotMatch(shotBody.slice(shotBody.indexOf("if(target.role==='imp')"),shotBody.indexOf('}else{')), /killChar\(shooter\)/, 'o Xerife sobrevive ao acertar um Infiltrado');
-  assert.match(shotBody, /killChar\(shooter\);addSheriffBody\(shooter,shooter\.id,'sheriff_misfire'\)/, 'ao errar, somente o Xerife morre');
+  assert.match(shotBody, /killChar\(shooter\);parkPetAtBody/, 'ao errar, somente o Xerife morre e não deixa corpo físico');
   assert.match(html, /if\(shooter===G\.player\)G\.sheriffCd=CFG\.sheriffCooldown;else shooter\.netSheriffCd=CFG\.sheriffCooldown/);
 });
 
 
-test('frases prontas permitem alegar ou suspeitar das quatro funções', () => {
+test('frases prontas permitem alegar ou suspeitar das funções de tripulante', () => {
   for (const id of ['roleDeny','roleSelf','roleSight','roleGuessPlayer']) assert.match(html, new RegExp("id:'"+id+"'"));
-  for (const role of ['Tripulante','Infiltrado','Xerife','Localizador']) assert.match(html, new RegExp(role));
+  for (const role of ['Tripulante','Infiltrado','Xerife','Localizador','Observador']) assert.match(html, new RegExp(role));
   assert.match(html, /function renderPhraseRoles\(phraseId,targetId=null\)/);
   assert.match(html, /Vi alguém com a função de \$\{role\}/);
 });
@@ -74,6 +94,7 @@ test('descrições das funções e classes usam exatamente os textos solicitados
   assert.match(html, /Mate a tripulação e sabote a nave\./);
   assert.match(html, /Faça suas tarefas e encontre o Infiltrado\./);
   assert.match(html, /Atrasado — Mate suas vítimas lentamente\./);
+  assert.match(html, /Observador - Veja a Tripulação no seu mapa a qualquer momento\./);
 });
 
 test('cliente não marca tarefa concluída antes da confirmação autoritativa do host', () => {
@@ -98,7 +119,7 @@ test('culling desenha camadas visuais por sala sem desativar colisões', () => {
 
 
 test('Atrasado tem aba vermelha, ativação, duração limitada e marcação autoritativa', () => {
-  assert.match(html, /id="btnDelayedSection"[^>]*>◷ Atrasado/);
+  assert.match(html, /id="btnDelayedSection"[^>]*>🕓 Atrasado/);
   assert.match(html, /id="btnDelayed"/);
   assert.match(html, /delayedEnabled:\[0,1\]/);
   assert.match(html, /delayedDuration:\[5,40\]/);
@@ -137,8 +158,11 @@ test('ajustes atuais: cooldowns maiores e uniformes, votos pulados identificados
   assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Atrasado'/);
 });
 
-test('ícone do Xerife é uma arma e Atrasado não recebe eliminação direta', () => {
-  assert.match(html, /id="btnSheriff"[\s\S]*?sheriffGunIcon[\s\S]*?<path d="M2 4H21L24 7H34V12H24L21 17H14V23H8V15H3Z"/);
+test('ícones das funções usam os emojis definidos e Atrasado não recebe eliminação direta', () => {
+  assert.match(html, /id="btnSheriff"[^>]*>🔫/);
+  assert.match(html, /id="btnDelayed"[^>]*>🕓/);
+  assert.match(html, /id="btnLocator"[^>]*>🧭/);
+  assert.match(html, /id="btnObserverSection"[^>]*>👀 Observador/);
   assert.match(html, /const p=G\.player, can=[^;]*directKill=imp&&p\.function!=='delayed'/);
   assert.match(html, /function playerKill\(\)[\s\S]*?G\.player\.function==='delayed'/);
   assert.match(html, /k\.role!=='imp'\|\|k\.function==='delayed'/);
@@ -183,9 +207,9 @@ test('falas novas dos bots são condicionadas a corpo, tarefa ou evidência', ()
 
 
 test('após a reunião, todos os cooldowns de habilidades voltam à recarga completa', () => {
-  assert.match(html, /G\.meetCd=CFG\.meet; G\.killCd=CFG\.kill; G\.sheriffCd=CFG\.sheriffCooldown; G\.delayedCd=CFG\.kill/);
+  assert.match(html, /G\.meetCd=CFG\.meet; G\.killCd=CFG\.kill; G\.sheriffCd=CFG\.sheriffCooldown; G\.delayedCd=CFG\.kill; G\.cleanerCd=CFG\.cleanerCooldown/);
   assert.match(html, /G\.sab\.cd=CFG\.sab/);
-  assert.match(html, /c\.netKillCd=CFG\.kill;c\.netSheriffCd=CFG\.sheriffCooldown;c\.netDelayedCd=CFG\.kill;c\.netTrackTarget=null;c\.netTrackTime=0;c\.netTrackCd=CFG\.locCooldown;c\.ventCd=VENT_CD/);
+  assert.match(html, /c\.netKillCd=CFG\.kill;c\.netSheriffCd=CFG\.sheriffCooldown;c\.netDelayedCd=CFG\.kill;if\(c\.function==='cleaner'\)c\.cleanCd=CFG\.cleanerCooldown;c\.netTrackTarget=null;c\.netTrackTime=0;c\.netTrackCd=CFG\.locCooldown;c\.ventCd=VENT_CD/);
   assert.match(html, /c\.engVentCd=CFG\.engCooldown/);
 });
 
@@ -193,6 +217,33 @@ test('NPCs consideram causas ligadas a funções especiais ao discutir um corpo'
   assert.match(html, /cause==='delayed'[\s\S]*?causada por um Atrasado/);
   assert.match(html, /cause==='sheriff_misfire'[\s\S]*?Xerife tenha errado o disparo/);
   assert.match(html, /um Infiltrado, um Atrasado ou até um disparo de Xerife/);
+});
+
+test('Faxineiro tem configuração, atribuição, limpeza autoritativa e memória dos NPCs', () => {
+  for (const key of ['cleanerChance','cleanerMax','cleanerCooldown','cleanerUses']) {
+    assert.match(html, new RegExp("'"+key+"'"));
+    assert.match(server, new RegExp(key+':\\['));
+  }
+  assert.match(html, /cleanerCooldown:\[10,60\]/);
+  assert.match(html, /cleanerUses:\[1,15\]/);
+  assert.match(html, /id="btnCleanerSection"[^>]*>🧹 Faxineiro/);
+  assert.match(html, /id="btnCleaner"[^>]*>🧹/);
+  assert.match(html, /Faxineiro - Limpe corpos e suma com as evidências\./);
+  assert.match(html, /const cleanerEnabled|CFG\.cleanerChance>0&&CFG\.cleanerMax>0/);
+  assert.match(html, /function cleanBody\(cleaner,body\)[\s\S]*?G\.bodies=G\.bodies\.filter\(b=>b!==body\)/);
+  assert.match(html, /cleaner\.cleanUses=Math\.max\(0,\(cleaner\.cleanUses\|\|0\)-1\)/);
+  assert.match(html, /cleaner\.cleanCd=CFG\.cleanerCooldown/);
+  assert.match(html, /command==='clean_body'[\s\S]*?cleanBody\(ch,body\)/);
+  assert.match(server, /'clean_body'/);
+  assert.match(server, /s\.cleaner=recipient\.function==='cleaner'/);
+  assert.match(html, /ai\.cleanSaw/);
+  assert.match(html, /Pode existir um Faxineiro|parece trabalho de Faxineiro|parece coisa de Faxineiro/);
+});
+
+test('NPC Observador usa posições do mapa e Comunicações interrompe novas leituras', () => {
+  assert.match(html, /ch\.function==='observer'&&\(G\.sab\.comms\|\|0\)<=0/);
+  assert.match(html, /ai\.observerMap\[o\.id\]=\{room:rm,t:G\.gt\}/);
+  assert.match(html, /Pelo mapa de Observador, vi \$\{seen\.name\}/);
 });
 
 test('Engenheiro tem configuração, atribuição e sincronização multiplayer', () => {
