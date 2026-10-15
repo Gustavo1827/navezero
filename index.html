@@ -1660,7 +1660,8 @@ function startFreePlay(){
   newGame(false);
 }
 function freePlayFunctionLabel(ch){
-  return ch.function?({locator:'Localizador',sheriff:'Xerife',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]||ch.function):(ch.role==='imp'?'Infiltrado':'Tripulante');
+  const base=ch.function?({locator:'Localizador',sheriff:'Xerife',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]||ch.function):(ch.role==='imp'?'Infiltrado':'Tripulante');
+  return ch.instructor?`${base} + Instrutor ↔️`:base;
 }
 function clearFreePlayFunctionState(ch){
   if(!ch)return;
@@ -1683,6 +1684,17 @@ function clearFreePlayFunctionState(ch){
 }
 function setFreePlayFunction(ch,fn){
   if(!G.freePlay||!ch)return false;
+  // Instrutor é uma função pós-morte e pode coexistir com outra função de Tripulante.
+  if(fn==='instructor'){
+    if(ch.role!=='crew')return false;
+    ch.instructor=true;ch.instructorCd=0;ch.instructorTargetId=null;ch.instructorPoint=null;
+    // Evita que a chance normal tente sortear a função durante esta morte forçada.
+    if(ch.alive)killChar(ch);else {ch.ghost=true;ch.moving=false}
+    G.bodies=G.bodies.filter(b=>String(b.id)!==String(ch.id));
+    G.deadPets=G.deadPets.filter(p=>String(p.ownerId)!==String(ch.id));
+    if(ch===G.player){G.instructorCd=0;G.instructorTargetId=null;G.followTarget=null;G.ghostMode='free';Snd.roleFx('instructor','done');emitRoleFx(ch.x,ch.y,'instructor',1);toast('↔️ Instrutor ativado na Partida Livre. Você morreu e agora pode criar trilhas.',3600)}
+    return true;
+  }
   const crewFns=['locator','sheriff','observer','engineer'], impFns=['delayed','cleaner','marionette'];impFns.push('parasite');
   if((ch.role==='crew'&&!crewFns.includes(fn))||(ch.role==='imp'&&!impFns.includes(fn)))return false;
   clearFreePlayFunctionState(ch);ch.function=fn;
@@ -1691,6 +1703,18 @@ function setFreePlayFunction(ch,fn){
 }
 function removeFreePlayFunction(ch){
   if(!G.freePlay||!ch)return false;
+  // Se houver Instrutor, removê-lo primeiro preserva qualquer função que o Tripulante já tinha em vida.
+  if(ch.instructor){
+    ch.instructor=false;ch.instructorCd=0;ch.instructorTargetId=null;ch.instructorPoint=null;
+    G.instructorTrails=G.instructorTrails.filter(t=>String(t.ownerId)!==String(ch.id));
+    if(!ch.alive){
+      ch.alive=true;ch.ghost=false;ch.moving=false;ch.vent=null;ch.ventAnim=null;ch.ventMv=0;ch.bubble=null;
+      G.bodies=G.bodies.filter(b=>String(b.id)!==String(ch.id));G.deadPets=G.deadPets.filter(p=>String(p.ownerId)!==String(ch.id));
+      if(ch.ai)resetAI(ch);
+    }
+    if(ch===G.player){G.instructorCd=0;G.instructorTargetId=null;G.ghostMode='tasks';G.followTarget=null;G.spec=null;G.role=ch.role;G.vision=G.visionTarget=CFG.crewVision;Snd.roleFx('instructor','done');emitRoleFx(ch.x,ch.y,'instructor',.8);toast('Instrutor removido. Você voltou à vida.',2600);$('roleName').textContent=roleNameForPlayer(ch)}
+    return true;
+  }
   clearFreePlayFunctionState(ch);ch.function=null;
   if(ch===G.player){G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;$('roleName').textContent=roleNameForPlayer(ch)}
   return true;
@@ -1744,7 +1768,7 @@ function showFreePlayPlayerList(mode,title,onPick){
 }
 function openFreePlayFunctionPicker(ch){
   showModal('Dar função',`${ch.name} é ${ch.role==='imp'?'Infiltrado':'Tripulante'}. Escolha uma função compatível.`);
-  const fns=ch.role==='imp'?[['delayed','🕓 Atrasado'],['cleaner','🧹 Faxineiro'],['parasite','🦠 Parasita'],['marionette','Marionetista']]:[['locator','🧭 Localizador'],['sheriff','🔫 Xerife'],['observer','👀 Observador'],['engineer','Engenheiro']];
+  const fns=ch.role==='imp'?[['delayed','🕓 Atrasado'],['cleaner','🧹 Faxineiro'],['parasite','🦠 Parasita'],['marionette','Marionetista']]:[['locator','🧭 Localizador'],['sheriff','🔫 Xerife'],['observer','👀 Observador'],['engineer','Engenheiro'],['instructor','↔️ Instrutor']];
   const grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px';
   fns.forEach(([id,label])=>{const b=el('button','mg',label);b.addEventListener('click',()=>{setFreePlayFunction(ch,id);openFreePlayComputer()});grid.appendChild(b)});$('mbody').appendChild(grid);
 }
@@ -2292,7 +2316,18 @@ function tryShove(c,dx,dy){if(!boxBlocked(c.x+dx,c.y))c.x+=dx; if(!boxBlocked(c.
 const ROLE_FX=[];const INSTRUCTOR_SEEN_TRAILS=new Set();
 function emitRoleFx(x,y,kind='generic',life=.7){if(!Number.isFinite(x)||!Number.isFinite(y))return;ROLE_FX.push({x,y,kind,t:life,max:life});if(ROLE_FX.length>28)ROLE_FX.splice(0,ROLE_FX.length-28)}
 function updateRoleFx(dt){for(const f of ROLE_FX)f.t-=dt;for(let i=ROLE_FX.length-1;i>=0;i--)if(ROLE_FX[i].t<=0)ROLE_FX.splice(i,1)}
-function drawRoleFx(c){for(const f of ROLE_FX){const k=1-f.t/f.max,r=12+k*34;c.save();c.globalAlpha=Math.max(0,f.t/f.max)*.7;c.strokeStyle=f.kind==='instructor'?'#fff':(f.kind==='cleaner'||f.kind==='parasite'||f.kind==='sheriff'||f.kind==='delayed'||f.kind==='marionette'?'#ff6478':'#7de6ff');c.lineWidth=3;c.beginPath();c.arc(f.x,f.y,r,0,Math.PI*2);c.stroke();c.restore()}}
+function drawRoleFx(c){for(const f of ROLE_FX){const k=1-f.t/f.max,r=12+k*34,red=['cleaner','parasite','sheriff','delayed','marionette'].includes(f.kind),col=f.kind==='instructor'?'#fff':(red?'#ff6478':'#7de6ff');c.save();c.translate(f.x,f.y);c.globalAlpha=Math.max(0,f.t/f.max)*.72;c.strokeStyle=col;c.fillStyle=col;c.lineWidth=3;c.shadowColor=col;c.shadowBlur=8;c.beginPath();c.arc(0,0,r,0,Math.PI*2);c.stroke();
+  // Marcas simples e distintas por função: leves, sem sprites ou partículas persistentes.
+  if(f.kind==='locator'){c.beginPath();c.moveTo(-r*.55,0);c.lineTo(r*.55,0);c.moveTo(0,-r*.55);c.lineTo(0,r*.55);c.stroke()}
+  else if(f.kind==='sheriff'){c.beginPath();c.moveTo(-r*.62,0);c.lineTo(r*.62,0);c.stroke();c.beginPath();c.arc(r*.28,0,4+k*2,0,Math.PI*2);c.fill()}
+  else if(f.kind==='delayed'){c.beginPath();c.arc(0,0,r*.42,-Math.PI/2,Math.PI*1.2);c.stroke();c.beginPath();c.moveTo(0,0);c.lineTo(0,-r*.34);c.moveTo(0,0);c.lineTo(r*.25,r*.08);c.stroke()}
+  else if(f.kind==='observer'){c.beginPath();c.ellipse(0,0,r*.62,r*.32,0,0,Math.PI*2);c.stroke();c.beginPath();c.arc(0,0,4+k*3,0,Math.PI*2);c.fill()}
+  else if(f.kind==='cleaner'){c.beginPath();c.moveTo(-r*.48,r*.34);c.lineTo(r*.22,-r*.36);c.moveTo(-r*.18,r*.48);c.lineTo(r*.5,-r*.2);c.stroke()}
+  else if(f.kind==='parasite'){for(let i=0;i<6;i++){const a=i*Math.PI/3;c.beginPath();c.moveTo(Math.cos(a)*r*.25,Math.sin(a)*r*.25);c.lineTo(Math.cos(a)*r*.58,Math.sin(a)*r*.58);c.stroke()}c.beginPath();c.arc(0,0,r*.24,0,Math.PI*2);c.fill()}
+  else if(f.kind==='engineer'){c.beginPath();c.rect(-r*.42,-r*.22,r*.84,r*.44);c.stroke();c.beginPath();c.moveTo(-r*.22,0);c.lineTo(r*.22,0);c.stroke()}
+  else if(f.kind==='marionette'){c.beginPath();c.moveTo(-r*.35,-r*.45);c.lineTo(-r*.18,r*.12);c.moveTo(r*.35,-r*.45);c.lineTo(r*.18,r*.12);c.moveTo(-r*.18,r*.12);c.lineTo(0,r*.45);c.lineTo(r*.18,r*.12);c.stroke()}
+  else if(f.kind==='instructor'){c.setLineDash([7,6]);c.beginPath();c.moveTo(-r*.55,0);c.lineTo(r*.55,0);c.stroke();c.setLineDash([]);c.beginPath();c.moveTo(r*.55,0);c.lineTo(r*.34,-r*.18);c.moveTo(r*.55,0);c.lineTo(r*.34,r*.18);c.stroke()}
+  c.restore()}}
 function instructorCount(){return G.chars.reduce((n,c)=>n+(c.instructor?1:0),0)}
 function maybeActivateInstructor(ch){
   if(!ch||ch.alive||ch.role!=='crew'||ch.instructor||CFG.instructorChance<=0||CFG.instructorMax<=0)return false;
