@@ -508,3 +508,10 @@ test('reportar, limpar e reviver corpos online usam o ID exato para resolver cor
   assert.match(html, /action:'clean_body',bodyId:b\.id/);
   assert.match(html, /action:'revive_body',bodyId:b\.id/);
 });
+
+test('configurações da sala do host persistem localmente ao fechar/salvar o menu', () => {
+  assert.match(html, /function saveCfg\(force=false\)\{if\(!force&&typeof NET!=='undefined'&&NET\.inRoom\)return/);
+  assert.match(html, /localStorage\.setItem\('nz_cfg'/);
+  assert.match(html, /function netSaveRoomSettings\(\)[\s\S]*?netApplySettings\(cfg\.settings\);saveCfg\(true\);netSend/);
+  assert.match(html, /const netOriginalCloseCfg=closeCfg;closeCfg=function\(\)\{const shouldSave=NET\.inRoom&&NET\.isHost&&NET\.room\?\.status==='lobby';if\(shouldSave\)netSaveRoomSettings\(\)/);
+});
