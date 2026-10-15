@@ -368,3 +368,10 @@ test('habilidades especiais possuem efeitos sonoros e visuais leves personalizad
     assert.match(html, new RegExp(`roleFx\\('${role}'`));
   }
 });
+
+test('Instrutor pode ser aplicado e removido pelo computador da Partida Livre', () => {
+  assert.match(html, /\['instructor','↔️ Instrutor'\]/, 'Instrutor deve aparecer no seletor de funções de Tripulante');
+  assert.match(html, /if\(fn==='instructor'\)[\s\S]*?ch\.instructor=true[\s\S]*?if\(ch\.alive\)killChar\(ch\)/, 'adicionar Instrutor deve matar o personagem imediatamente');
+  assert.match(html, /if\(ch\.instructor\)[\s\S]*?ch\.instructor=false[\s\S]*?ch\.alive=true;ch\.ghost=false/, 'remover Instrutor deve reviver o personagem');
+  assert.match(html, /return ch\.instructor\?`\$\{base\} \+ Instrutor ↔️`:/, 'o computador deve indicar Instrutor sem apagar a função-base do Tripulante');
+});
