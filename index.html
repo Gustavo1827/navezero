@@ -200,7 +200,7 @@ body.touch #stick{display:block}
 #roomChatInput{flex:1;min-width:0;font:600 14px var(--font);color:var(--ink);background:#0a0c26;border:2px solid var(--edge);border-radius:10px;padding:6px 8px;outline:none;user-select:text;-webkit-user-select:text;touch-action:manipulation}
 #roomChatInput:focus-visible{border-color:var(--amber)}
 @media(max-width:560px){#roomChatPanel{right:8px;top:auto;bottom:calc(155px + var(--sb));height:min(38vh,330px);width:min(330px,calc(100vw - 16px))}}
-.act2.engineer{background:#e8f0ff;color:#26345d;box-shadow:0 6px 0 #9baedb,0 8px 0 #10122a;font-size:25px}.act2.engineer small,.act2.marionette small{display:block;font-size:10px;line-height:1.05}.act2.marionette{background:#9c7be8;color:#170d3b;box-shadow:0 6px 0 #6345a9,0 8px 0 #10122a;font-size:25px}.act2.delayed,.delayed-tab,.marionette-tab{background:rgba(255,53,78,.58)!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
+.act2.engineer{background:#e8f0ff;color:#26345d;box-shadow:0 6px 0 #9baedb,0 8px 0 #10122a;font-size:25px}.act2.engineer small,.act2.marionette small{display:block;font-size:10px;line-height:1.05}.act2.marionette{background:#9c7be8;color:#170d3b;box-shadow:0 6px 0 #6345a9,0 8px 0 #10122a;font-size:25px}.act2.delayed,.act2.cleaner,.delayed-tab,.cleaner-tab,.act2.parasite,.parasite-tab,.marionette-tab{background:rgba(255,53,78,.58)!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
 .act2.delayed{font-size:29px!important}
 .act2.sheriff{background:#3c83e8!important;color:#fff!important;box-shadow:0 6px 0 #2055a5,0 8px 0 #10122a!important}
 .act2.sheriff .sheriffGunIcon{width:36px;height:27px}
@@ -479,7 +479,7 @@ body.touch #stick{display:block}
   <div id="ventPanel" class="panel" hidden><div class="vt">Dentro do duto</div><div class="vs" id="ventHere"></div><div id="ventList"></div><button class="chip exit" id="ventExit">Sair do duto</button></div>
   <div id="sabBar" hidden></div>
   <div id="stick"><i id="knob"></i></div>
-  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden>🔫<small class="sheriffButtonLabel">Atirar</small></button><button class="act2 delayed" id="btnDelayed" aria-label="Marcar vítima" title="Atrasado — marcar um Tripulante próximo" hidden>🕓<small>Marcar</small></button><button class="act2 cleaner" id="btnCleaner" aria-label="Limpar corpo" title="Faxineiro — limpar um corpo próximo" hidden>🧹<small>Limpar</small></button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>🧭<small>Rastrear</small></button><button class="act2 engineer" id="btnEngineerVent" aria-label="Dutar" title="Engenheiro — entrar ou sair dos dutos" hidden>🔧<small>Dutar</small></button><button class="act2 marionette" id="btnControl" aria-label="Controlar" title="Marionetista — controlar um jogador próximo" hidden>✋<small>Controlar</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
+  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden>🔫<small class="sheriffButtonLabel">Atirar</small></button><button class="act2 delayed" id="btnDelayed" aria-label="Marcar vítima" title="Atrasado — marcar um Tripulante próximo" hidden>🕓<small>Marcar</small></button><button class="act2 cleaner" id="btnCleaner" aria-label="Limpar corpo" title="Faxineiro — limpar um corpo próximo" hidden>🧹<small>Limpar</small></button><button class="act2 parasite" id="btnParasite" aria-label="Infectar Tripulante" title="Parasita — infectar um Tripulante próximo" hidden>🦠<small>Infectar</small></button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>🧭<small>Rastrear</small></button><button class="act2 engineer" id="btnEngineerVent" aria-label="Dutar" title="Engenheiro — entrar ou sair dos dutos" hidden>🔧<small>Dutar</small></button><button class="act2 marionette" id="btnControl" aria-label="Controlar" title="Marionetista — controlar um jogador próximo" hidden>✋<small>Controlar</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
 </div>
 
 <div id="deathIntro" hidden aria-live="assertive"><div class="deathCard"><h2>ELIMINADO!</h2><canvas id="deathCv" width="460" height="230" aria-hidden="true"></canvas><p id="deathDesc">Você foi eliminado.</p></div></div>
@@ -521,7 +521,7 @@ body.touch #stick{display:block}
     <h2 id="cfgTitle">Configurações</h2><div class="row" id="cfgTabs"><button class="big" id="cfgTabSettings">Configurações</button><button class="big alt" id="cfgTabFunctions">Funções</button></div>
     <p class="cfgnote" id="cfgNote">Tempos de recarga, em segundos.</p>
     <div id="cfgRows"></div>
-    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">🧭 Localizador</button><button class="big alt" id="btnSheriffSection" type="button">🔫 Xerife</button><button class="big alt delayed-tab" id="btnDelayedSection" type="button">🕓 Atrasado</button><button class="big alt" id="btnObserverSection" type="button">👀 Observador</button><button class="big alt" id="btnCleanerSection" type="button">🧹 Faxineiro</button><button class="big alt" id="btnEngineerSection" type="button">🔧 Engenheiro</button><button class="big alt marionette-tab" id="btnMarionetteSection" type="button">✋ Marionetista</button></div></div>
+    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">🧭 Localizador</button><button class="big alt" id="btnSheriffSection" type="button">🔫 Xerife</button><button class="big alt delayed-tab" id="btnDelayedSection" type="button">🕓 Atrasado</button><button class="big alt" id="btnObserverSection" type="button">👀 Observador</button><button class="big alt cleaner-tab" id="btnCleanerSection" type="button">🧹 Faxineiro</button><button class="big alt parasite-tab" id="btnParasiteSection" type="button">🦠 Parasita</button><button class="big alt" id="btnEngineerSection" type="button">🔧 Engenheiro</button><button class="big alt marionette-tab" id="btnMarionetteSection" type="button">✋ Marionetista</button></div></div>
     <div class="row"><button class="big alt" id="cfgReset">Restaurar padrão</button><button class="big" id="cfgClose">Fechar</button></div>
   </div>
 </div>
@@ -1096,7 +1096,7 @@ function drawStationBody(c,s){
    ===================================================================== */
 const G={cfgFunctionTab:'locator',state:'menu',t:0,chars:[],player:null,tasks:[],pin:null,mini:null,tok:0,tool:null,
   cam:{x:0,y:0},vision:820,visionTarget:820,cfg:{name:'Você',color:'azul'},over:false,lastRoom:null,action:null,
-  role:'crew',imp:null,locator:false,observer:false,cleaner:false,cleanerCd:0,cleanerUses:0,cleanerT:null,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,delayedCd:0,delayedT:null,delayedMarks:{},controlTargetId:null,controlTime:0,controlCd:0,bodies:[],deadPets:[],sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,freePlay:false,dt:.016};
+  role:'crew',imp:null,locator:false,observer:false,cleaner:false,parasite:false,parasiteT:null,parasiteInfections:{},cleanerCd:0,cleanerUses:0,cleanerT:null,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,delayedCd:0,delayedT:null,delayedMarks:{},controlTargetId:null,controlTime:0,controlCd:0,bodies:[],deadPets:[],sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,freePlay:false,dt:.016};
 const NAME_BUB={};
 const keys=new Set(); const joy={x:0,y:0};
 
@@ -1619,15 +1619,15 @@ function offlineBotNames(owner){
 }
 function roleNameForPlayer(p){
   if(!p)return '-';
-  return p.function==='cleaner'?'Infiltrado · Faxineiro':(p.function==='marionette'?'Infiltrado · Marionetista':(p.function==='engineer'?'Tripulante · Engenheiro':(p.function==='delayed'?'Infiltrado · Atrasado':(p.role==='imp'?'Infiltrado':(p.function==='observer'?'Tripulante · Observador':(p.function==='sheriff'?'Tripulante · Xerife':(p.function==='locator'?'Tripulante · Localizador':'Tripulante')))))));
+  return p.function==='parasite'?'Infiltrado · Parasita':(p.function==='cleaner'?'Infiltrado · Faxineiro':(p.function==='marionette'?'Infiltrado · Marionetista':(p.function==='engineer'?'Tripulante · Engenheiro':(p.function==='delayed'?'Infiltrado · Atrasado':(p.role==='imp'?'Infiltrado':(p.function==='observer'?'Tripulante · Observador':(p.function==='sheriff'?'Tripulante · Xerife':(p.function==='locator'?'Tripulante · Localizador':'Tripulante'))))))));
 }
 function roleMessageForPlayer(p){
   if(!p)return '';
-  return p.function==='cleaner'?'Faxineiro - Limpe corpos e suma com as evidências.':(p.function==='engineer'?'Engenheiro - Pode usar os sustos':(p.function==='marionette'?'Marionetista - Controle Tripulantes e cause confusão na nave.':(p.function==='observer'?'Observador - Veja a Tripulação no seu mapa a qualquer momento.':(p.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(p.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(p.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(p.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.')))))));
+  return p.function==='parasite'?'Parasita - Contamine a tripulação e transforme Inocentes em Infiltrados.':(p.function==='cleaner'?'Faxineiro - Limpe corpos e suma com as evidências.':(p.function==='engineer'?'Engenheiro - Pode usar os sustos':(p.function==='marionette'?'Marionetista - Controle Tripulantes e cause confusão na nave.':(p.function==='observer'?'Observador - Veja a Tripulação no seu mapa a qualquer momento.':(p.function==='sheriff'?'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.':(p.function==='locator'?'Localizador — Rastreie um Tripulante com seu mapa.':(p.function==='delayed'?'Atrasado — Mate suas vítimas lentamente.':(p.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.'))))))));
 }
 function showLocalRoleReveal(resetTimer=false){
   const p=G.player;if(!p)return false;
-  G.role=p.role||'crew';G.locator=p.function==='locator';G.observer=p.function==='observer';G.cleaner=p.function==='cleaner';G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
+  G.role=p.role||'crew';G.locator=p.function==='locator';G.observer=p.function==='observer';G.cleaner=p.function==='cleaner';G.parasite=p.function==='parasite';G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
   $('tpHead').firstElementChild.textContent=G.role==='imp'?'Tarefas (falsas)':'Tarefas';
   $('roleName').textContent=roleNameForPlayer(p);
@@ -1657,7 +1657,7 @@ function startFreePlay(){
   newGame(false);
 }
 function freePlayFunctionLabel(ch){
-  return ch.function?({locator:'Localizador',sheriff:'Xerife',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]||ch.function):(ch.role==='imp'?'Infiltrado':'Tripulante');
+  return ch.function?({locator:'Localizador',sheriff:'Xerife',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]||ch.function):(ch.role==='imp'?'Infiltrado':'Tripulante');
 }
 function clearFreePlayFunctionState(ch){
   if(!ch)return;
@@ -1680,16 +1680,16 @@ function clearFreePlayFunctionState(ch){
 }
 function setFreePlayFunction(ch,fn){
   if(!G.freePlay||!ch)return false;
-  const crewFns=['locator','sheriff','observer','engineer'], impFns=['delayed','cleaner','marionette'];
+  const crewFns=['locator','sheriff','observer','engineer'], impFns=['delayed','cleaner','marionette'];impFns.push('parasite');
   if((ch.role==='crew'&&!crewFns.includes(fn))||(ch.role==='imp'&&!impFns.includes(fn)))return false;
   clearFreePlayFunctionState(ch);ch.function=fn;
-  if(ch===G.player){G.locator=fn==='locator';G.observer=fn==='observer';G.cleaner=fn==='cleaner';if(G.cleaner)G.cleanerUses=CFG.cleanerUses;$('roleName').textContent=roleNameForPlayer(ch)}
+  if(ch===G.player){G.locator=fn==='locator';G.observer=fn==='observer';G.cleaner=fn==='cleaner';G.parasite=fn==='parasite';if(G.cleaner)G.cleanerUses=CFG.cleanerUses;$('roleName').textContent=roleNameForPlayer(ch)}
   return true;
 }
 function removeFreePlayFunction(ch){
   if(!G.freePlay||!ch)return false;
   clearFreePlayFunctionState(ch);ch.function=null;
-  if(ch===G.player){G.locator=false;G.observer=false;G.cleaner=false;$('roleName').textContent=roleNameForPlayer(ch)}
+  if(ch===G.player){G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;$('roleName').textContent=roleNameForPlayer(ch)}
   return true;
 }
 function setFreePlayClass(ch,role){
@@ -1702,7 +1702,7 @@ function setFreePlayClass(ch,role){
   G.tasks.filter(t=>t.owner===ch.id).forEach(t=>t.fake=role==='imp');
   G.imps=G.chars.filter(c=>c.role==='imp');G.imp=G.imps[0]||null;
   if(ch===G.player){
-    G.role=role;G.locator=false;G.observer=false;G.cleaner=false;G.trackTarget=null;G.trackTime=0;G.trackCd=0;
+    G.role=role;G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;G.trackTarget=null;G.trackTime=0;G.trackCd=0;
     G.vision=G.visionTarget=(role==='imp'?CFG.impVision:CFG.crewVision);
     $('tpHead').firstElementChild.textContent=role==='imp'?'Tarefas (falsas)':'Tarefas';
     $('roleName').textContent=roleNameForPlayer(ch);renderTasks();updateButtons();
@@ -1741,7 +1741,7 @@ function showFreePlayPlayerList(mode,title,onPick){
 }
 function openFreePlayFunctionPicker(ch){
   showModal('Dar função',`${ch.name} é ${ch.role==='imp'?'Infiltrado':'Tripulante'}. Escolha uma função compatível.`);
-  const fns=ch.role==='imp'?[['delayed','🕓 Atrasado'],['cleaner','🧹 Faxineiro'],['marionette','Marionetista']]:[['locator','🧭 Localizador'],['sheriff','🔫 Xerife'],['observer','👀 Observador'],['engineer','Engenheiro']];
+  const fns=ch.role==='imp'?[['delayed','🕓 Atrasado'],['cleaner','🧹 Faxineiro'],['parasite','🦠 Parasita'],['marionette','Marionetista']]:[['locator','🧭 Localizador'],['sheriff','🔫 Xerife'],['observer','👀 Observador'],['engineer','Engenheiro']];
   const grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px';
   fns.forEach(([id,label])=>{const b=el('button','mg',label);b.addEventListener('click',()=>{setFreePlayFunction(ch,id);openFreePlayComputer()});grid.appendChild(b)});$('mbody').appendChild(grid);
 }
@@ -1769,7 +1769,7 @@ function newGame(prepareOnline=false){
   TID=0; doors.forEach(d=>d.closed=false); rebuildWalk(); G.walkVer++;
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); G.killT=null; $('ventPanel').hidden=true; VENT_DEFS.forEach(v=>v.flash=0);
   G.over=false; G.followTarget=null; G.tasks=[]; G.pin=null; G.bodies=[]; G.deadPets=[]; G.M=null; G.spec=null; G.fx=0; G.fixT=0; G.gt=0;
-  G.sab={lights:0,reactor:0,comms:0,doors:0,cd:CFG.sab}; G.killCd=Math.min(CFG.kill,15); G.sheriffCd=0;G.sheriffT=null;G.delayedCd=0;G.delayedT=null;G.delayedMarks={}; G.meetCd=CFG.meet; G.cfgOpen=false; $('settings').hidden=true; G.vision=G.visionTarget=CFG.crewVision;
+  G.sab={lights:0,reactor:0,comms:0,doors:0,cd:CFG.sab}; G.parasiteInfections={}; G.killCd=Math.min(CFG.kill,15); G.sheriffCd=0;G.sheriffT=null;G.delayedCd=0;G.delayedT=null;G.delayedMarks={}; G.meetCd=CFG.meet; G.cfgOpen=false; $('settings').hidden=true; G.vision=G.visionTarget=CFG.crewVision;
   const online=!!(typeof NET!=='undefined'&&NET.inRoom&&NET.room&&(NET.room.status==='playing'||prepareOnline));
   const p=newChar(G.cfg.name,G.cfg.color,0,0,true); p.emUses=1; if(online)p.id=NET.id;const ownRoom=online?NET.room.players.find(q=>q.id===NET.id):null;p.cosmetics=cloneCosmetics(ownRoom?.cosmetics||PLAYER_COSMETICS); G.player=p;
   const cols=shuffle(COLORS.filter(c=>c.id!==G.cfg.color));
@@ -1805,11 +1805,12 @@ function newGame(prepareOnline=false){
   const observerEnabled=CFG.obsMax>0&&CFG.obsChance>0&&Math.random()*100<CFG.obsChance;
   if(observerEnabled){for(const ch of observerEligible.slice(0,clamp(CFG.obsMax,0,15)))ch.function='observer'}
   if(CFG.delayedChance>0&&CFG.delayedMax>0&&Math.random()*100<CFG.delayedChance){const delayedEligible=shuffle([...G.imps].filter(ch=>!ch.function));for(const ch of delayedEligible.slice(0,Math.min(clamp(CFG.delayedMax,0,3),delayedEligible.length)))ch.function='delayed'}
-  if(CFG.cleanerChance>0&&CFG.cleanerMax>0&&Math.random()*100<CFG.cleanerChance){const cleanerEligible=shuffle([...G.imps].filter(ch=>!ch.function));for(const ch of cleanerEligible.slice(0,Math.min(clamp(CFG.cleanerMax,0,15),cleanerEligible.length))){ch.function='cleaner';ch.cleanCd=0;ch.cleanUses=CFG.cleanerUses}}
+  if(CFG.cleanerChance>0&&CFG.cleanerMax>0&&Math.random()*100<CFG.cleanerChance){const cleanerEligible=shuffle([...G.imps].filter(ch=>ch.role==='imp'&&!ch.function));const cleanerLimit=Math.min(clamp(CFG.cleanerMax,0,CFG.impostors),G.imps.length,cleanerEligible.length);for(const ch of cleanerEligible.slice(0,cleanerLimit)){ch.function='cleaner';ch.cleanCd=0;ch.cleanUses=CFG.cleanerUses}}
+  if(CFG.parasiteChance>0&&CFG.parasiteMax>0&&Math.random()*100<CFG.parasiteChance){const parasiteEligible=shuffle([...G.imps].filter(ch=>ch.role==='imp'&&!ch.function));const parasiteLimit=Math.min(clamp(CFG.parasiteMax,0,Math.min(3,CFG.impostors)),G.imps.length,parasiteEligible.length);for(const ch of parasiteEligible.slice(0,parasiteLimit)){ch.function='parasite';ch.parasiteReady=true;ch.parasiteTargetId=null}}
   if(CFG.engChance>0&&CFG.engMax>0&&Math.random()*100<CFG.engChance){const engineers=shuffle(G.chars.filter(ch=>ch.role==='crew'&&!ch.function));for(const ch of engineers.slice(0,Math.min(CFG.engMax,engineers.length)))ch.function='engineer'}
   if(CFG.marionChance>0&&CFG.marionMax>0&&Math.random()*100<CFG.marionChance){const marionettes=shuffle(G.chars.filter(ch=>ch.role==='imp'&&!ch.function));for(const ch of marionettes.slice(0,Math.min(CFG.marionMax,marionettes.length)))ch.function='marionette'}
   if(G.freePlay)G.chars.forEach(ch=>{if(ch.freeDummy){ch.role='crew';ch.function=null;ch.ghost=false;ch.alive=true}});
-  G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.sheriffCd=0;G.delayedCd=0;G.cleanerCd=0;G.cleanerUses=G.cleaner?CFG.cleanerUses:0;G.cleanerT=null;G.delayedT=null;G.delayedMarks={}; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
+  G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.parasite=G.player.function==='parasite';G.sheriffCd=0;G.delayedCd=0;G.cleanerCd=0;G.cleanerUses=G.cleaner?CFG.cleanerUses:0;G.cleanerT=null;G.delayedT=null;G.delayedMarks={}; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
   if(G.freePlay){
     placeChar(p,{x:SPAWN.x,y:SPAWN.y});
@@ -2013,7 +2014,7 @@ function drawWorld(c,cx,cy,vw,vh,o){
     ch.nameCol=o.reveal?(ch.role==='imp'?'#ff6b7e':'#7fe9b5'):((!G.player?.alive||G.role==='imp')&&ch.role==='imp'?'#ff6b7e':'#fff');
     if(ch.controlTargetId) { c.restore(); return; }
     drawChar(c,ch,o.chars!==false);
-    if(G.player&&!G.player.alive){const fn={sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]||(ch.role==='imp'?'Infiltrado':'Tripulante');const label=fn+' — '+ch.name;c.font='800 12px "Baloo 2",sans-serif';c.textAlign='center';c.lineJoin='round';c.lineWidth=3;c.strokeStyle='rgba(8,9,28,.95)';c.strokeText(label,ch.x,ch.y-54);c.fillStyle=ch.role==='imp'?'#ff6b7e':'#7fe9b5';c.fillText(label,ch.x,ch.y-54)}
+    if(G.player&&!G.player.alive){const fn={sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]||(ch.role==='imp'?'Infiltrado':'Tripulante');const label=fn+' — '+ch.name;c.font='800 12px "Baloo 2",sans-serif';c.textAlign='center';c.lineJoin='round';c.lineWidth=3;c.strokeStyle='rgba(8,9,28,.95)';c.strokeText(label,ch.x,ch.y-54);c.fillStyle=ch.role==='imp'?'#ff6b7e':'#7fe9b5';c.fillText(label,ch.x,ch.y-54)}
     const privateMark=G.delayedMarks&&G.delayedMarks[ch.id];
     if(ch.alive&&G.player&&privateMark&&privateMark.killerId===G.player.id){const timer=String(Math.ceil(Math.max(0,Number(privateMark.remaining)||0)))+'s';c.save();c.font='800 13px "Baloo 2",sans-serif';c.textAlign='center';c.lineJoin='round';c.lineWidth=3;c.strokeStyle='rgba(8,9,28,.95)';c.strokeText(timer,ch.x,ch.y-72);c.fillStyle='#ff5364';c.fillText(timer,ch.x,ch.y-72);c.restore()}
     if(ch.bubble&&ch.bubble.until>G.t){const sp=bubbleSprite(ch.bubble.text); c.drawImage(sp.cv,ch.x-sp.w/2,ch.y-66-sp.h,sp.w,sp.h)}
@@ -2114,11 +2115,11 @@ function closeMap(){
   if(!G.mapOpen)return;
   G.mapOpen=false; document.body.classList.remove('observer-map-lock'); $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
-const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','4–7 jogadores: 1; 8–9 jogadores: 1–2; 10 ou mais: 1–3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['obsChance','Chance de existir Observador','Porcentagem de chance de a função Observador existir na partida','%'],['obsMax','Quantidade de Observadores','Máximo de Observadores atribuídos aos Tripulantes',''],['cleanerChance','Chance de existir Faxineiro','Porcentagem de chance de a função Faxineiro existir na partida','%'],['cleanerMax','Quantidade de Faxineiros','Máximo de Faxineiros, limitado aos Infiltrados',''],['cleanerCooldown','Tempo de recarga para limpar','Tempo entre limpezas de corpos','s'],['cleanerUses','Usos da habilidade de limpar','Quantidade máxima de corpos que cada Faxineiro pode limpar',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['engVentDuration','Tempo limite nos dutos','10–60 segundos; 61 representa tempo infinito','s'],['engChance','Chance de existir Engenheiro','Porcentagem de chance de atribuição','%'],['engMax','Quantidade de Engenheiros','Máximo de Engenheiros, limitado aos Tripulantes',''],['engCooldown','Cooldown do duto','Recarga do Engenheiro após sair dos dutos','s'],['marionCooldown','Cooldown de Controlar','Recarga da habilidade do Marionetista','s'],['marionDuration','Tempo limite do controle','Duração máxima do controle de outro jogador','s'],['marionChance','Chance de Marionetistas','Porcentagem de chance de atribuição','%'],['marionMax','Quantidade de Marionetistas','Máximo de Marionetistas, limitado aos Infiltrados','']];
+const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','4–7 jogadores: 1; 8–9 jogadores: 1–2; 10 ou mais: 1–3',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['obsChance','Chance de existir Observador','Porcentagem de chance de a função Observador existir na partida','%'],['obsMax','Quantidade de Observadores','Máximo de Observadores atribuídos aos Tripulantes',''],['cleanerChance','Chance de existir Faxineiro','Porcentagem de chance de a função Faxineiro existir na partida','%'],['cleanerMax','Quantidade de Faxineiros','Máximo de Faxineiros, limitado aos Infiltrados',''],['cleanerCooldown','Tempo de recarga para limpar','Tempo entre limpezas de corpos','s'],['cleanerUses','Usos da habilidade de limpar','Quantidade máxima de corpos que cada Faxineiro pode limpar',''],['parasiteChance','Chance de Parasitas na partida','Chance de a função Parasita existir na partida','%'],['parasiteMax','Quantidade de Parasitas','Máximo de Parasitas, limitado aos Infiltrados e a 3',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['engVentDuration','Tempo limite nos dutos','10–60 segundos; 61 representa tempo infinito','s'],['engChance','Chance de existir Engenheiro','Porcentagem de chance de atribuição','%'],['engMax','Quantidade de Engenheiros','Máximo de Engenheiros, limitado aos Tripulantes',''],['engCooldown','Cooldown do duto','Recarga do Engenheiro após sair dos dutos','s'],['marionCooldown','Cooldown de Controlar','Recarga da habilidade do Marionetista','s'],['marionDuration','Tempo limite do controle','Duração máxima do controle de outro jogador','s'],['marionChance','Chance de Marionetistas','Porcentagem de chance de atribuição','%'],['marionMax','Quantidade de Marionetistas','Máximo de Marionetistas, limitado aos Infiltrados','']];
 function buildCfgUI(){
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
   const locked=(inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
-  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnObserverSection').classList.toggle('alt',G.cfgFunctionTab!=='observer');$('btnCleanerSection').classList.toggle('alt',G.cfgFunctionTab!=='cleaner');$('btnEngineerSection').classList.toggle('alt',G.cfgFunctionTab!=='engineer');$('btnMarionetteSection').classList.toggle('alt',G.cfgFunctionTab!=='marionette');
+  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnObserverSection').classList.toggle('alt',G.cfgFunctionTab!=='observer');$('btnCleanerSection').classList.toggle('alt',G.cfgFunctionTab!=='cleaner');$('btnParasiteSection').classList.toggle('alt',G.cfgFunctionTab!=='parasite');$('btnEngineerSection').classList.toggle('alt',G.cfgFunctionTab!=='engineer');$('btnMarionetteSection').classList.toggle('alt',G.cfgFunctionTab!=='marionette');
   if(G.cfgPage==='functions'&&G.cfgFunctionTab==='delayed'){
     const cooldownRow=el('div','cfgrow fncompact'),top=el('div','cfgtop');
     top.append(el('span','','🕓 Tempo para marcar'),el('b','',CFG.kill+' s'));
@@ -2126,41 +2127,42 @@ function buildCfgUI(){
     box.appendChild(cooldownRow);
   }
   CFG_ROWS.forEach(([k,l,d,unit])=>{
-    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedChance','delayedMax','delayedDuration'], observerKeys=['obsChance','obsMax'], cleanerKeys=['cleanerChance','cleanerMax','cleanerCooldown','cleanerUses'], engineerKeys=['engVentDuration','engChance','engMax','engCooldown'], marionetteKeys=['marionCooldown','marionDuration','marionChance','marionMax'];
-    const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isDelayed=delayedKeys.includes(k),isObserver=observerKeys.includes(k),isCleaner=cleanerKeys.includes(k),isEngineer=engineerKeys.includes(k),isMarionette=marionetteKeys.includes(k),isFn=isLocator||isSheriff||isDelayed||isObserver||isCleaner||isEngineer||isMarionette;
+    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedChance','delayedMax','delayedDuration'], observerKeys=['obsChance','obsMax'], cleanerKeys=['cleanerChance','cleanerMax','cleanerCooldown','cleanerUses'], parasiteKeys=['parasiteChance','parasiteMax'], engineerKeys=['engVentDuration','engChance','engMax','engCooldown'], marionetteKeys=['marionCooldown','marionDuration','marionChance','marionMax'];
+    const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isDelayed=delayedKeys.includes(k),isObserver=observerKeys.includes(k),isCleaner=cleanerKeys.includes(k),isParasite=parasiteKeys.includes(k),isEngineer=engineerKeys.includes(k),isMarionette=marionetteKeys.includes(k),isFn=isLocator||isSheriff||isDelayed||isObserver||isCleaner||isParasite||isEngineer||isMarionette;
     if((G.cfgPage==='functions')!==isFn)return;
-    if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='locator'&&!isLocator)||(G.cfgFunctionTab==='sheriff'&&!isSheriff)||(G.cfgFunctionTab==='delayed'&&!isDelayed)||(G.cfgFunctionTab==='observer'&&!isObserver)||(G.cfgFunctionTab==='cleaner'&&!isCleaner)||(G.cfgFunctionTab==='engineer'&&!isEngineer)||(G.cfgFunctionTab==='marionette'&&!isMarionette)))return;
+    if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='locator'&&!isLocator)||(G.cfgFunctionTab==='sheriff'&&!isSheriff)||(G.cfgFunctionTab==='delayed'&&!isDelayed)||(G.cfgFunctionTab==='observer'&&!isObserver)||(G.cfgFunctionTab==='cleaner'&&!isCleaner)||(G.cfgFunctionTab==='parasite'&&!isParasite)||(G.cfgFunctionTab==='engineer'&&!isEngineer)||(G.cfgFunctionTab==='marionette'&&!isMarionette)))return;
     const row=el('div','cfgrow'+(isFn?' fncompact':'')), top=el('div','cfgtop');
     if(isFn){
       const showCfgValue=()=>CFG[k]+(unit?' '+unit:'');
       const value=el('b','',showCfgValue());
-      const icon=el('span','fnicon',isDelayed?'🕓':isSheriff?'🔫':isObserver?'👀':isCleaner?'🧹':isEngineer?'🔧':isMarionette?'✋':'🧭'); top.append(icon,el('span','',l),value);
+      const icon=el('span','fnicon',isDelayed?'🕓':isSheriff?'🔫':isObserver?'👀':isCleaner?'🧹':isParasite?'🦠':isEngineer?'🔧':isMarionette?'✋':'🧭'); top.append(icon,el('span','',l),value);
       const stepper=el('div','fnstepper');
       const minus=el('button','','−'), number=el('output','',String(CFG[k])), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label','Diminuir '+l.toLowerCase()); plus.setAttribute('aria-label','Aumentar '+l.toLowerCase()); number.setAttribute('aria-label',l);
-      const sync=()=>{number.textContent=String(CFG[k]);value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=CFG_LIM[k][0];plus.disabled=locked||CFG[k]>=CFG_LIM[k][1]};
-      const change=(delta,silent=false)=>{if(locked)return;CFG[k]=clamp(CFG[k]+delta,CFG_LIM[k][0],CFG_LIM[k][1]);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);if(!silent)Snd.click()};
-      const wireRepeat=(btn,delta)=>{let delayTimer=null,repeatTimer=null;const stop=()=>{if(delayTimer!==null){clearTimeout(delayTimer);delayTimer=null}if(repeatTimer!==null){clearInterval(repeatTimer);repeatTimer=null}};const canStep=()=>!locked&&(delta<0?CFG[k]>CFG_LIM[k][0]:CFG[k]<CFG_LIM[k][1]);const down=e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();if(!canStep())return;stop();if(btn.setPointerCapture&&e.pointerId!==undefined){try{btn.setPointerCapture(e.pointerId)}catch{}}change(delta);delayTimer=setTimeout(()=>{delayTimer=null;if(!canStep())return;repeatTimer=setInterval(()=>{if(!canStep()){stop();return}change(delta,true)},70)},280)};btn.addEventListener('pointerdown',down);btn.addEventListener('pointerup',stop);btn.addEventListener('pointercancel',stop);btn.addEventListener('lostpointercapture',stop);btn.addEventListener('click',e=>{if(e.detail===0)change(delta)});};
+      const activeLim=()=>cfgLimitFor(k);{const lim=activeLim();CFG[k]=clamp(CFG[k],lim[0],lim[1])}
+      const sync=()=>{const lim=activeLim();number.textContent=String(CFG[k]);value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=lim[0];plus.disabled=locked||CFG[k]>=lim[1]};
+      const change=(delta,silent=false)=>{if(locked)return;const lim=activeLim();CFG[k]=clamp(CFG[k]+delta,lim[0],lim[1]);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);if(!silent)Snd.click()};
+      const wireRepeat=(btn,delta)=>{let delayTimer=null,repeatTimer=null;const stop=()=>{if(delayTimer!==null){clearTimeout(delayTimer);delayTimer=null}if(repeatTimer!==null){clearInterval(repeatTimer);repeatTimer=null}};const canStep=()=>{const lim=activeLim();return !locked&&(delta<0?CFG[k]>lim[0]:CFG[k]<lim[1])};const down=e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();if(!canStep())return;stop();if(btn.setPointerCapture&&e.pointerId!==undefined){try{btn.setPointerCapture(e.pointerId)}catch{}}change(delta);delayTimer=setTimeout(()=>{delayTimer=null;if(!canStep())return;repeatTimer=setInterval(()=>{if(!canStep()){stop();return}change(delta,true)},70)},280)};btn.addEventListener('pointerdown',down);btn.addEventListener('pointerup',stop);btn.addEventListener('pointercancel',stop);btn.addEventListener('lostpointercapture',stop);btn.addEventListener('click',e=>{if(e.detail===0)change(delta)});};
       wireRepeat(minus,-1);wireRepeat(plus,1);stepper.append(minus,number,plus);row.append(top,stepper,el('small','',d));sync();
     }else{
       const lim=cfgLimitFor(k);if(CFG[k]>lim[1])CFG[k]=lim[1];
       const out=el('b','',CFG[k]+(unit?' '+unit:''));
       const inp=document.createElement('input'); inp.type='range'; inp.min=lim[0]; inp.max=lim[1]; inp.step=1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
       inp.disabled=locked;
-      inp.addEventListener('input',()=>{if(locked){inp.value=CFG[k];return}const activeLim=cfgLimitFor(k);CFG[k]=clamp(+inp.value,activeLim[0],activeLim[1]);out.textContent=CFG[k]+(unit?' '+unit:'');saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
+      inp.addEventListener('input',()=>{if(locked){inp.value=CFG[k];return}const activeLim=cfgLimitFor(k);CFG[k]=clamp(+inp.value,activeLim[0],activeLim[1]);if(k==='impostors'&&CFG.cleanerMax>CFG.impostors){CFG.cleanerMax=CFG.impostors;if(typeof netNoteRoomSetting==='function')netNoteRoomSetting('cleanerMax',CFG.cleanerMax)}if(k==='impostors'&&CFG.parasiteMax>CFG.impostors){CFG.parasiteMax=CFG.impostors;if(typeof netNoteRoomSetting==='function')netNoteRoomSetting('parasiteMax',CFG.parasiteMax)}out.textContent=CFG[k]+(unit?' '+unit:'');saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
       top.append(el('span','',l),out); row.append(top,inp,el('small','',d));
     }
     box.appendChild(row);
   });
 }
 function setCfgPage(page){
-  G.cfgPage=page==='functions'?'functions':'settings';if(!['locator','sheriff','delayed','observer','cleaner','engineer','marionette'].includes(G.cfgFunctionTab))G.cfgFunctionTab='locator';
+  G.cfgPage=page==='functions'?'functions':'settings';if(!['locator','sheriff','delayed','observer','cleaner','parasite','engineer','marionette'].includes(G.cfgFunctionTab))G.cfgFunctionTab='locator';
   $('cfgTitle').textContent=G.cfgPage==='functions'?'Funções':'Configurações';
   $('cfgTabSettings').classList.toggle('alt',G.cfgPage!=='settings');
   $('cfgTabFunctions').classList.toggle('alt',G.cfgPage!=='functions');
   buildCfgUI();
   const lk=(inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));$('cfgReset').disabled=lk;$('cfgNote').classList.toggle('lock',lk);
-  $('cfgNote').textContent=lk?(inGame()?'Bloqueado durante a partida. Para alterar, saia do jogo e volte ao menu principal.':'Somente o host pode editar as configurações antes de iniciar a partida.'): (G.cfgPage==='functions'?(G.cfgFunctionTab==='sheriff'?'Configure o alcance temporal e a distribuição da função Xerife.':G.cfgFunctionTab==='delayed'?'Ative a função Atrasado e configure o tempo até a eliminação.':G.cfgFunctionTab==='observer'?'Configure a chance de existir Observador e a quantidade máxima de Observadores.':G.cfgFunctionTab==='cleaner'?'Configure chance, quantidade, recarga e usos do Faxineiro.':'Configure os limites e os tempos da função especial Localizador.'):(typeof NET!=='undefined'&&NET.inRoom?'Configure os parâmetros desta sala. As alterações serão salvas ao fechar este menu.':'Configure os tempos em segundos. Discussão e votação são independentes e valem em todas as reuniões.'));
+  $('cfgNote').textContent=lk?(inGame()?'Bloqueado durante a partida. Para alterar, saia do jogo e volte ao menu principal.':'Somente o host pode editar as configurações antes de iniciar a partida.'): (G.cfgPage==='functions'?(G.cfgFunctionTab==='sheriff'?'Configure o alcance temporal e a distribuição da função Xerife.':G.cfgFunctionTab==='delayed'?'Ative a função Atrasado e configure o tempo até a eliminação.':G.cfgFunctionTab==='observer'?'Configure a chance de existir Observador e a quantidade máxima de Observadores.':G.cfgFunctionTab==='cleaner'?'Configure chance, quantidade, recarga e usos do Faxineiro.':G.cfgFunctionTab==='parasite'?'Configure chance e quantidade da função Parasita.':'Configure os limites e os tempos da função especial Localizador.'):(typeof NET!=='undefined'&&NET.inRoom?'Configure os parâmetros desta sala. As alterações serão salvas ao fechar este menu.':'Configure os tempos em segundos. Discussão e votação são independentes e valem em todas as reuniões.'));
 }
 function openCfg(){setCfgPage('settings');$('cfgTabs').hidden=false;G.cfgOpen=true;joy.x=joy.y=0;if(G.player)G.player.moving=false;$('settings').hidden=false;Snd.init();Snd.open()}
 function openFunctions(){openCfg();setCfgPage('functions')}
@@ -2301,7 +2303,7 @@ function updateNPC(ch,dt){
   if(ch.controlledBy)return;
   if(ch.role==='crew'&&G.state==='playing'&&G.gt>20&&ch.ai&&G.gt>(ch.ai.nextTaskEncourage||45)&&Math.random()<dt*.015){const left=G.tasks.filter(t=>!t.fake&&!t.done).length;ch.ai.nextTaskEncourage=G.gt+rand(25,55);if(left>0){if(left<=5)npcSay(ch,'Faltam poucas tarefas, vamos!');else if(Math.random()<.5)npcSay(ch,'Vamos fazer tarefas para vencer!');else npcSay(ch,'Mortos, façam as suas tarefas!')}}
   const ai=ch.ai;
-  const cleanerBusy=ch.function==='cleaner'&&ch.role==='imp'&&cleanerBotThink(ch,dt);
+  const cleanerBusy=ch.function==='cleaner'&&ch.role==='imp'&&cleanerBotThink(ch,dt);const parasiteBusy=ch.function==='parasite'&&ch.role==='imp'&&parasiteBotThink(ch,dt);
   if(ch.function==='marionette'&&ch.role==='imp'&&ch.alive&&!ch.controlTargetId&&(ch.controlCd||0)<=0&&G.state==='playing'&&!G.M&&Math.random()<dt*.08){const target=controlTargetFor(ch,130);if(target&&!hasWitness(ch,target))startControl(ch,target)}
   if(ch.vent){ventUpdate(ch,dt);return}
   const rn=roomName(ch.x,ch.y); if(ai.trail[ai.trail.length-1]!==rn){ai.trail.push(rn);if(ai.trail.length>4)ai.trail.shift()}
@@ -2309,7 +2311,7 @@ function updateNPC(ch,dt){
   for(const k in ai.susp){const v=ai.susp[k];ai.susp[k]=v>0?Math.max(0,v-.01*dt):Math.min(0,v+.01*dt)}
   ai.pt-=dt; if(ai.pt<=0){ai.pt=.35;perceive(ch)}
   if(ai.reactT>0){ai.reactT-=dt;ch.moving=false;if(ai.reactT<=0)reactToBody(ch);return}
-  if(ch.role==='imp'){if(!cleanerBusy)impThink(ch,dt)}
+  if(ch.role==='imp'){if(!cleanerBusy&&!parasiteBusy)impThink(ch,dt)}
   else if(ch.function==='sheriff')sheriffBotThink(ch,dt);
   if(G.over)return;
   switch(ai.state){
@@ -2332,14 +2334,15 @@ function updateNPC(ch,dt){
 const updateNPCBaseControl=updateNPC;
 updateNPC=function(ch,dt){if(ch.controlledBy)return;const result=updateNPCBaseControl(ch,dt);if(ch.controlTargetId){const target=charById(ch.controlTargetId);if(target&&target.alive){target.x=ch.x;target.y=ch.y;target.moving=ch.moving;target.walk=ch.walk;target.face=ch.face;target.vent=ch.vent||null;if(ch.ventAnim)target.ventAnim={...ch.ventAnim}}}return result};
 /* ---------- configurações, personalidades e memória de suspeita ---------- */
-const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,renderDist:820};
-const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],obsChance:[0,100],obsMax:[0,15],cleanerChance:[0,100],cleanerMax:[0,15],cleanerCooldown:[10,60],cleanerUses:[1,15],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],engVentDuration:[10,61],engChance:[0,100],engMax:[0,15],engCooldown:[5,25],marionCooldown:[15,60],marionDuration:[5,30],marionChance:[0,100],marionMax:[0,3],renderDist:[500,1500]};
-const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,renderDist:820};
+const CFG={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,renderDist:820};
+const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],obsChance:[0,100],obsMax:[0,15],cleanerChance:[0,100],cleanerMax:[0,15],cleanerCooldown:[10,60],cleanerUses:[1,15],parasiteChance:[0,100],parasiteMax:[0,3],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],engVentDuration:[10,61],engChance:[0,100],engMax:[0,15],engCooldown:[5,25],marionCooldown:[15,60],marionDuration:[5,30],marionChance:[0,100],marionMax:[0,3],renderDist:[500,1500]};
+const CFG_DEF={kill:25,sab:30,meet:20,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,renderDist:820};
 function maxImpostorsForPlayers(count){const n=Math.max(4,Math.min(15,Math.round(Number(count)||4)));return n>=10?3:n>=8?2:1}
 function configuredPlayerCount(){if(typeof NET!=='undefined'&&NET.inRoom&&NET.room)return Math.max(4,Math.min(15,Number(NET.room.size)||4));return 15}
-function cfgLimitFor(key){return key==='impostors'?[1,maxImpostorsForPlayers(configuredPlayerCount())]:CFG_LIM[key]}
+function cfgLimitFor(key){if(key==='impostors')return [1,maxImpostorsForPlayers(configuredPlayerCount())];if(key==='cleanerMax')return [0,Math.max(0,Math.min(CFG.impostors,CFG_LIM.cleanerMax[1]))];if(key==='parasiteMax')return [0,Math.max(0,Math.min(CFG.impostors,3))];return CFG_LIM[key]}
 (function(){try{const j=JSON.parse(localStorage.getItem('nz_cfg')||'{}');for(const k in CFG_LIM){const v=+j[k];if(v>=CFG_LIM[k][0]&&v<=CFG_LIM[k][1])CFG[k]=Math.round(v)}}catch(e){}})();
-function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,obsChance:CFG.obsChance,obsMax:CFG.obsMax,cleanerChance:CFG.cleanerChance,cleanerMax:CFG.cleanerMax,cleanerCooldown:CFG.cleanerCooldown,cleanerUses:CFG.cleanerUses,delayedEnabled:CFG.delayedEnabled,delayedChance:CFG.delayedChance,delayedMax:CFG.delayedMax,delayedDuration:CFG.delayedDuration,engVentDuration:CFG.engVentDuration,engChance:CFG.engChance,engMax:CFG.engMax,engCooldown:CFG.engCooldown,marionCooldown:CFG.marionCooldown,marionDuration:CFG.marionDuration,marionChance:CFG.marionChance,marionMax:CFG.marionMax,renderDist:CFG.renderDist}))}catch(e){}}
+CFG.cleanerMax=Math.min(CFG.cleanerMax,CFG.impostors);CFG.parasiteMax=Math.min(CFG.parasiteMax,CFG.impostors,3);
+function saveCfg(){if(typeof NET!=='undefined'&&NET.inRoom)return;try{localStorage.setItem('nz_cfg',JSON.stringify({kill:CFG.kill,sab:CFG.sab,meet:CFG.meet,speed:CFG.speed,impVision:CFG.impVision,crewVision:CFG.crewVision,impostors:CFG.impostors,discussion:CFG.discussion,voting:CFG.voting,locMax:CFG.locMax,locChance:CFG.locChance,locCooldown:CFG.locCooldown,locDuration:CFG.locDuration,sheriffCooldown:CFG.sheriffCooldown,sheriffChance:CFG.sheriffChance,sheriffMax:CFG.sheriffMax,obsChance:CFG.obsChance,obsMax:CFG.obsMax,cleanerChance:CFG.cleanerChance,cleanerMax:CFG.cleanerMax,cleanerCooldown:CFG.cleanerCooldown,cleanerUses:CFG.cleanerUses,parasiteChance:CFG.parasiteChance,parasiteMax:CFG.parasiteMax,delayedEnabled:CFG.delayedEnabled,delayedChance:CFG.delayedChance,delayedMax:CFG.delayedMax,delayedDuration:CFG.delayedDuration,engVentDuration:CFG.engVentDuration,engChance:CFG.engChance,engMax:CFG.engMax,engCooldown:CFG.engCooldown,marionCooldown:CFG.marionCooldown,marionDuration:CFG.marionDuration,marionChance:CFG.marionChance,marionMax:CFG.marionMax,renderDist:CFG.renderDist}))}catch(e){}}
 const inGame=()=>G.state!=='menu';
 const uiBusy=()=>G.cfgOpen||G.confirmOpen;
 const PERS={
@@ -2352,7 +2355,7 @@ const FAKE_STS=[...new Set(TASK_TEMPLATES.flatMap(t=>(t.steps||[]).map(s=>s.st))
 
 function makeNPC(name,color){
   const c=newChar(name,color,0,0,false);
-  c.emUses=1;c.netDelayedCd=0;c.netSheriffCd=0;c.cleanCd=0;c.cleanUses=0;
+  c.emUses=1;c.netDelayedCd=0;c.netSheriffCd=0;c.cleanCd=0;c.cleanUses=0;c.parasiteReady=true;c.parasiteTargetId=null;
   c.ai={state:'idle',path:[],goal:null,isGoal:null,pathVer:0,wait:rand(0,25)/10,work:0,workMax:1,stuck:0,pt:Math.random()*.3,
     reactT:0,bodySeen:null,ignore:new Set(),seen:{},trail:[],speed:CFG.speed*(0.88+Math.random()*.18),wanderP:.15+Math.random()*.25,skipW:.5+Math.random()*1.3,
     killCd:14,huntPause:0,hunt:null,huntT:1,repT:0,sabT:3,fix:null,witnessOf:null,lastVote:null,
@@ -2700,7 +2703,7 @@ function hasWitness(k,v){
 function pickVictim(ch){
   let best=null,bd=1e9;
   for(const v of G.chars){
-    if(!v.alive||v===ch||v.id===ch.controlTargetId||v.role==='imp'||(ch.function==='delayed'&&G.delayedMarks[v.id]))continue;
+    if(!v.alive||v===ch||v.id===ch.controlTargetId||v.role==='imp'||(ch.function==='delayed'&&G.delayedMarks[v.id])||(ch.function==='parasite'&&G.parasiteInfections?.[v.id]))continue;
     if(v.isPlayer&&(G.state!=='playing'||uiBusy()))continue;
     const d=dist(ch,v); if(d>1100||d>=bd)continue;
     // NPCs Infiltrados podem perseguir vítimas sem exigir isolamento exagerado.
@@ -2827,6 +2830,37 @@ function showDeathIntro(k,v){
 }
 
 function nearBody(){return G.bodies.find(b=>dist(G.player,b)<100&&losClear(G.player.x,G.player.y,b.x,b.y))}
+
+function parasiteTargetFor(ch,range=92){
+  if(!ch||!ch.alive||ch.role!=='imp'||ch.function!=='parasite'||ch.vent||ch.parasiteReady===false)return null;
+  let best=null,bd=range;for(const t of G.chars){if(t===ch||!t.alive||t.role!=='crew'||t.vent||G.parasiteInfections?.[t.id])continue;const d=dist(ch,t);if(d<=bd&&losClear(ch.x,ch.y,t.x,t.y)){best=t;bd=d}}return best;
+}
+function infectTarget(parasite,target){
+  if(!parasite||!target||!parasite.alive||parasite.role!=='imp'||parasite.function!=='parasite'||parasite.parasiteReady===false||parasite.vent||!target.alive||target.role!=='crew'||target.vent||G.M||dist(parasite,target)>92||!losClear(parasite.x,parasite.y,target.x,target.y)||G.parasiteInfections?.[target.id])return false;
+  G.parasiteInfections=G.parasiteInfections||{};G.parasiteInfections[target.id]={targetId:target.id,parasiteId:parasite.id};parasite.parasiteReady=false;parasite.parasiteTargetId=target.id;
+  if(parasite===G.player)toast(`${target.name} foi infectado. A transformação ocorrerá ao fim da próxima reunião.`,2800);
+  return true;
+}
+function convertToImpostor(target){
+  if(!target||!target.alive||target.role!=='crew')return false;
+  target.role='imp';target.function=null;target.nameCol='#ff6b7e';target.parasiteReady=false;target.parasiteTargetId=null;
+  G.tasks.filter(t=>t.owner===target.id).forEach(t=>t.fake=true);G.imps=G.chars.filter(c=>c.role==='imp');G.imp=G.imps[0]||null;
+  if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.matchImpIds instanceof Set)NET.matchImpIds.add(target.id);
+  if(target===G.player){G.role='imp';G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;G.vision=G.visionTarget=CFG.impVision;$('tpHead').firstElementChild.textContent='Tarefas (falsas)';$('roleName').textContent='Infiltrado';toast('A infecção se completou. Você agora é um Infiltrado.',3600)}
+  return true;
+}
+function resolveParasiteInfections(){
+  const pending=G.parasiteInfections||{};for(const rec of Object.values(pending)){const t=charById(rec.targetId);if(t&&t.alive&&t.role==='crew')convertToImpostor(t)}G.parasiteInfections={};
+  for(const c of G.chars){if(c.function==='parasite'&&c.role==='imp'){c.parasiteReady=true;c.parasiteTargetId=null}}
+}
+function playerInfect(){
+  const p=G.player;if(!p||p.controlledBy||p.vent||G.state!=='playing'||G.M||uiBusy()||!p.alive||p.role!=='imp'||p.function!=='parasite'||p.parasiteReady===false)return;
+  const t=G.parasiteT||parasiteTargetFor(p);if(!t){Snd.err();return}if(infectTarget(p,t))Snd.click();
+}
+function parasiteBotThink(ch,dt){
+  if(!ch.alive||ch.role!=='imp'||ch.function!=='parasite'||ch.vent||G.M||G.over||ch.parasiteReady===false)return false;
+  const t=parasiteTargetFor(ch,96);if(!t)return false;if(Math.random()<Math.min(1,dt*5)){infectTarget(ch,t);if(ch.ai){ch.ai.hunt=null;ch.ai.path=[];ch.ai.wait=.5}return true}return false;
+}
 
 function cleanerBodyFor(ch,range=100){
   if(!ch)return null;let best=null,bd=range;
@@ -3347,7 +3381,7 @@ function renderPhraseTargets(phraseId){
 function renderPhraseRoles(phraseId,targetId=null){
   const box=$('sayChips');box.innerHTML='';
   const title=el('span','mstatus','Escolha uma função:');title.style.width='100%';box.appendChild(title);
-  const roles=[['crew','Tripulante'],['imp','Infiltrado'],['sheriff','Xerife'],['locator','Localizador'],['observer','Observador'],['cleaner','Faxineiro'],['delayed','Atrasado'],['engineer','Engenheiro'],['marionette','Marionetista']];
+  const roles=[['crew','Tripulante'],['imp','Infiltrado'],['sheriff','Xerife'],['locator','Localizador'],['observer','Observador'],['cleaner','Faxineiro'],['parasite','Parasita'],['delayed','Atrasado'],['engineer','Engenheiro'],['marionette','Marionetista']];
   for(const [id,label] of roles){
     const b=el('button','chip phrase',label);b.type='button';
     b.addEventListener('click',()=>sendPresetPhrase(phraseId,targetId,null,id));box.appendChild(b);
@@ -3405,7 +3439,7 @@ function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
     case 'roleGuess': if(!T)return; text=`Será que ${T.name} é o Localizador?`; claim={from:G.player.id,kind:'ask',target:T.id}; break;
     case 'roleCrew': if(!T)return; text=`Acho que ${T.name} é inocente.`; claim={from:G.player.id,kind:'defend',target:T.id}; break;
     case 'roleDeny': case 'roleSelf': case 'roleSight': case 'roleGuessPlayer': {
-      const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',engineer:'Engenheiro',marionette:'Marionetista'};
+      const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista'};
       const role=roles[rolePicked];if(!role)return;
       const article=role==='Infiltrado'?'o Infiltrado':role==='Tripulante'?'Tripulante':`o ${role}`;
       if(id==='roleDeny')text=`Não sou ${article}.`;
@@ -3514,7 +3548,7 @@ function buildMeetUI(){
     c.setTransform(1.65,0,0,1.65,50,47); drawChar(c,{x:0,y:0,color:ch.color,face:1,walk:0,moving:false,cosmetics:ch.cosmetics,id:ch.id},false,{portrait:true});
     const pv=el('span','pv',ch.alive?'':'Eliminado'), dots=el('span','dots'), pn=el('span','pn',ch.name);
     if(!G.player.alive&&ch.role==='imp')pn.style.color='#ff6b7e';
-    if(!G.player.alive){const fl={sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]|| (ch.role==='imp'?'Infiltrado':'Tripulante');const roleLine=el('small','pfunction',fl+' — '+ch.name);b.append(cv,roleLine,pn,pv,dots)}else b.append(cv,pn,pv,dots); b.pvEl=pv; b.dotsEl=dots;
+    if(!G.player.alive){const fl={sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista'}[ch.function]|| (ch.role==='imp'?'Infiltrado':'Tripulante');const roleLine=el('small','pfunction',fl+' — '+ch.name);b.append(cv,roleLine,pn,pv,dots)}else b.append(cv,pn,pv,dots); b.pvEl=pv; b.dotsEl=dots;
     b.addEventListener('click',()=>cardClick(ch.id)); grid.appendChild(b); M.cards[ch.id]=b;
   });
   renderMeetingIntro();
@@ -3573,6 +3607,7 @@ function updateMeeting(dt){
 function endMeeting(){
   const M=G.M, ej=M.result?.eject||null; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject','vote-reveal'); $('meetingIntro').hidden=true; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent=''; $('skipVoteDots').hidden=true; $('skipVoteDots').innerHTML=''; $('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML=''); $('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'));
   if(ej)killChar(ej);
+  resolveParasiteInfections();
   G.bodies=[]; G.M=null; G.state='playing';
   if(checkEnd())return;
   // Ao terminar qualquer reunião, todas as habilidades com cooldown entram em recarga completa.
@@ -3650,16 +3685,16 @@ const simActive=()=>(G.state==='playing'||G.state==='task'||G.state==='tool')&&!
 function updateButtons(){
   const p=G.player, can=G.state==='playing'&&(p.alive||ghostCanSab()), imp=G.role==='imp', directKill=imp&&p.function!=='delayed';
   const chatBtn=$('btnRoomChat');if(chatBtn){chatBtn.hidden=true;chatBtn.setAttribute('aria-expanded','false')}
-  const bk=$('btnKill'), bsh=$('btnSheriff'), bdel=$('btnDelayed'), bcl=$('btnCleaner'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator'), be=$('btnEngineerVent'), bc=$('btnControl'), sheriff=G.role==='crew'&&p.function==='sheriff', delayed=G.role==='imp'&&p.function==='delayed', cleaner=G.role==='imp'&&p.function==='cleaner', engineer=G.role==='crew'&&p.function==='engineer', marionette=G.role==='imp'&&p.function==='marionette';
+  const bk=$('btnKill'), bsh=$('btnSheriff'), bdel=$('btnDelayed'), bcl=$('btnCleaner'), bp=$('btnParasite'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator'), be=$('btnEngineerVent'), bc=$('btnControl'), sheriff=G.role==='crew'&&p.function==='sheriff', delayed=G.role==='imp'&&p.function==='delayed', cleaner=G.role==='imp'&&p.function==='cleaner', parasite=G.role==='imp'&&p.function==='parasite', engineer=G.role==='crew'&&p.function==='engineer', marionette=G.role==='imp'&&p.function==='marionette';
   // O conjunto extra de ações do Marionetista não pode ocupar a área física do joystick em telas estreitas.
   $('actions').classList.toggle('marionette-controls',marionette&&p.alive&&G.state==='playing');
-  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(directKill&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bdel,!(delayed&&p.alive)); hv(bcl,!(cleaner&&p.alive)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));hv(be,!(G.state==='playing'&&p.alive&&engineer));hv(bc,!(G.state==='playing'&&p.alive&&marionette));
+  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(directKill&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bdel,!(delayed&&p.alive)); hv(bcl,!(cleaner&&p.alive)); hv(bp,!(parasite&&p.alive)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));hv(be,!(G.state==='playing'&&p.alive&&engineer));hv(bc,!(G.state==='playing'&&p.alive&&marionette));
   const ventReady=!!p.vent||((G.sab.comms||0)<=0&&(p.engVentCd||0)<=0&&!!nearestVentFor(p,84));be.disabled=!p.vent&&!ventReady;be.classList.toggle('ready',ventReady);const ventLabel=p.vent?'Sair do duto':((p.engVentCd||0)>0?String(Math.ceil(p.engVentCd)):'Dutar');if(be._l!==ventLabel){be._l=ventLabel;be.innerHTML=ventLabel==='Dutar'?'🔧<small>Dutar</small>':ventLabel==='Sair do duto'?'↗<small>Sair</small>':ventLabel}
   const ctlTarget=controlTargetFor(p,100),ctlLabel=p.controlTargetId?('Controlando '+Math.ceil(p.controlTime)+'s'):((p.controlCd||0)>0?String(Math.ceil(p.controlCd)):(NET?.pendingControl?'…':'Controlar'));bc.disabled=!p.controlTargetId&&(!ctlTarget||(p.controlCd||0)>0);bc.classList.toggle('ready',!!ctlTarget&&!(p.controlCd||0)&&!p.controlTargetId);if(bc._l!==ctlLabel){bc._l=ctlLabel;bc.innerHTML=ctlLabel==='Controlar'?'✋<small>Controlar</small>':ctlLabel}
   const gh=$('btnGhost'), showGh=!p.alive&&G.role==='crew'; hv(gh,!showGh);
   const fb=$('btnFollow'); hv(fb,!(G.state==='playing'&&!p.alive)); if(!fb.hidden){const t=G.followTarget&&charById(G.followTarget);fb.innerHTML=t&&t.alive?'Seguindo<br>'+t.name:'Seguir<br>jogador';fb.title=t&&t.alive?'Toque para trocar de alvo; toque duas vezes para cancelar':'Toque para começar a seguir';}
   const gl='Modo: '+(G.ghostMode==='spec'?'Espectador':'Tarefas'); if(gh._l!==gl){gh._l=gl;gh.textContent=gl}
-  const rl=p.alive?(p.function==='cleaner'?'Infiltrado · Faxineiro':(p.function==='marionette'?'Infiltrado · Marionetista':(p.function==='engineer'?'Tripulante · Engenheiro':(p.function==='delayed'?'Infiltrado · Atrasado':(imp?'Infiltrado':(p.function==='observer'?'Tripulante · Observador':(p.function==='sheriff'?'Tripulante · Xerife':'Tripulante'))))))):(imp?'Infiltrado (morto)':(G.ghostMode==='spec'?'Espectador':'Tripulante (morto)')); const rn=$('roleName'); if(rn._l!==rl){rn._l=rl;rn.textContent=rl}
+  const rl=p.alive?(p.function==='parasite'?'Infiltrado · Parasita':(p.function==='cleaner'?'Infiltrado · Faxineiro':(p.function==='marionette'?'Infiltrado · Marionetista':(p.function==='engineer'?'Tripulante · Engenheiro':(p.function==='delayed'?'Infiltrado · Atrasado':(imp?'Infiltrado':(p.function==='observer'?'Tripulante · Observador':(p.function==='sheriff'?'Tripulante · Xerife':'Tripulante')))))))):(imp?'Infiltrado (morto)':(G.ghostMode==='spec'?'Espectador':'Tripulante (morto)')); const rn=$('roleName'); if(rn._l!==rl){rn._l=rl;rn.textContent=rl}
   const lab=(p.alive||ghostActs())?'Usar':'Trocar'; if(ub._l!==lab){ub._l=lab;ub.textContent=lab}
   G.killT=null;
   if(directKill&&can&&G.killCd<=0&&!p.vent){let bd=72;for(const v of G.chars){if(!v.alive||v.role==='imp'||v.id===p.controlTargetId)continue;const d=dist(p,v);if(d<bd){bd=d;G.killT=v}}}
@@ -3671,10 +3706,11 @@ function updateButtons(){
   G.delayedT=delayed&&can&&!p.vent&&G.delayedCd<=0?delayedTargetFor(p):null;const dlab=G.delayedCd>0?String(Math.ceil(G.delayedCd)):(NET?.pendingDelayedMark?'…':'🕓 Marcar');setCls(bdel,'cooldown-label',G.delayedCd>0);if(bdel._l!==dlab){bdel._l=dlab;bdel.innerHTML=dlab==='🕓 Marcar'?'🕓<small>Marcar</small>':dlab}
   setCls(bdel,'ready',!!G.delayedT&&!uiBusy()&&!(NET?.pendingDelayedMark));
   G.cleanerT=cleaner&&can&&!p.vent&&G.cleanerCd<=0&&G.cleanerUses>0?cleanerBodyFor(p,100):null;const clab=G.cleanerUses<=0?'0 usos':(G.cleanerCd>0?String(Math.ceil(G.cleanerCd)):'🧹 Limpar');setCls(bcl,'cooldown-label',G.cleanerCd>0||G.cleanerUses<=0);if(bcl._l!==clab){bcl._l=clab;bcl.innerHTML=clab==='🧹 Limpar'?`🧹<small>Limpar (${G.cleanerUses})</small>`:clab}setCls(bcl,'ready',!!G.cleanerT&&!uiBusy());
+  G.parasiteT=parasite&&can&&!p.vent&&p.parasiteReady!==false?parasiteTargetFor(p,92):null;const plab=p.parasiteReady===false?'Usado':'🦠 Infectar';setCls(bp,'cooldown-label',p.parasiteReady===false);if(bp._l!==plab){bp._l=plab;bp.innerHTML=plab==='🦠 Infectar'?'🦠<small>Infectar</small>':plab}bp.disabled=!G.parasiteT||uiBusy()||p.parasiteReady===false;setCls(bp,'ready',!!G.parasiteT&&!uiBusy()&&p.parasiteReady!==false);
   setCls(bs,'ready',imp&&G.state==='playing'&&!uiBusy()&&G.sab.cd<=0);
   const st=G.sab.cd>0?String(Math.ceil(G.sab.cd)):'Sabotar';setCls(bs,'cooldown-label',G.sab.cd>0);if(bs._l!==st){bs._l=st;bs.textContent=st}
   setCls(br,'ready',!!(can&&nearBody())); setCls(bl,'active',G.trackTime>0); const lt=G.trackTime>0?String(Math.ceil(G.trackTime)):(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear');setCls(bl,'cooldown-label',G.trackTime>0||G.trackCd>0);if(bl._l!==lt){bl._l=lt;bl.querySelector('small').textContent=lt;bl._l=lt}
-  if(p.controlledBy){[bk,bsh,bdel,bcl,bs,br,bl,be,bc,ub,fb].forEach(e=>{if(e)hv(e,true)});$('ventPanel').hidden=true}
+  if(p.controlledBy){[bk,bsh,bdel,bcl,bp,bs,br,bl,be,bc,ub,fb].forEach(e=>{if(e)hv(e,true)});$('ventPanel').hidden=true}
 }
 function update(dt){
   const p=G.player;
@@ -3775,12 +3811,12 @@ addEventListener('blur',()=>keys.clear());
 $('btnUse').addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();const p=G.player,a=G.action;if(!p.alive&&!(a&&a.type==='freecomputer')&&!(G.role==='crew'&&p.ghost&&a&&a.type==='task')){toast('Morto só pode realizar tarefas permitidas.');return;}doInteract(a)});
 $('btnKill').addEventListener('pointerdown',e=>{e.preventDefault();playerKill()});$('btnSheriff').addEventListener('pointerdown',e=>{e.preventDefault();playerSheriffShot()});$('btnDelayed').addEventListener('pointerdown',e=>{e.preventDefault();playerDelayedMark()});$('btnCleaner').addEventListener('pointerdown',e=>{e.preventDefault();playerCleanBody()});$('btnEngineerVent').addEventListener('pointerdown',e=>{e.preventDefault();playerEngineerVent()});$('btnControl').addEventListener('pointerdown',e=>{e.preventDefault();playerControl()});
 $('btnSab').addEventListener('pointerdown',e=>{e.preventDefault();playerSab()});
-$('btnReport').addEventListener('pointerdown',e=>{e.preventDefault();playerReport()});$('btnLocator').addEventListener('pointerdown',e=>{e.preventDefault();startLocator()});
+$('btnReport').addEventListener('pointerdown',e=>{e.preventDefault();playerReport()});$('btnParasite').addEventListener('pointerdown',e=>{e.preventDefault();playerInfect()});$('btnLocator').addEventListener('pointerdown',e=>{e.preventDefault();startLocator()});
 $('btnSkip').addEventListener('click',()=>playerVote('skip'));
 $('btnRole').addEventListener('click',startPlay);
 $('btnCfg').addEventListener('click',openCfg);  $('cfgClose').addEventListener('click',closeCfg);
-$('cfgReset').addEventListener('click',()=>{if((inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby')))return;Object.assign(CFG,CFG_DEF);saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
-$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});$('btnDelayedSection').addEventListener('click',()=>{G.cfgFunctionTab='delayed';buildCfgUI();$('cfgNote').textContent='Ative a função Atrasado e configure o tempo até a eliminação.';Snd.click()});$('btnObserverSection').addEventListener('click',()=>{G.cfgFunctionTab='observer';buildCfgUI();$('cfgNote').textContent='Configure a chance de existir Observador e a quantidade máxima de Observadores.';Snd.click()});$('btnCleanerSection').addEventListener('click',()=>{G.cfgFunctionTab='cleaner';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade, recarga e usos do Faxineiro.';Snd.click()});$('btnEngineerSection').addEventListener('click',()=>{G.cfgFunctionTab='engineer';buildCfgUI();$('cfgNote').textContent='Configure o tempo nos dutos, chance, quantidade e cooldown do Engenheiro.';Snd.click()});$('btnMarionetteSection').addEventListener('click',()=>{G.cfgFunctionTab='marionette';buildCfgUI();$('cfgNote').textContent='Configure cooldown, duração e distribuição do Marionetista.';Snd.click()});
+$('cfgReset').addEventListener('click',()=>{if((inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby')))return;Object.assign(CFG,CFG_DEF);CFG.cleanerMax=Math.min(CFG.cleanerMax,CFG.impostors);CFG.parasiteMax=Math.min(CFG.parasiteMax,CFG.impostors,3);saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
+$('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});$('btnDelayedSection').addEventListener('click',()=>{G.cfgFunctionTab='delayed';buildCfgUI();$('cfgNote').textContent='Ative a função Atrasado e configure o tempo até a eliminação.';Snd.click()});$('btnObserverSection').addEventListener('click',()=>{G.cfgFunctionTab='observer';buildCfgUI();$('cfgNote').textContent='Configure a chance de existir Observador e a quantidade máxima de Observadores.';Snd.click()});$('btnCleanerSection').addEventListener('click',()=>{G.cfgFunctionTab='cleaner';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade, recarga e usos do Faxineiro.';Snd.click()});$('btnParasiteSection').addEventListener('click',()=>{G.cfgFunctionTab='parasite';buildCfgUI();$('cfgNote').textContent='Configure chance e quantidade da função Parasita.';Snd.click()});$('btnEngineerSection').addEventListener('click',()=>{G.cfgFunctionTab='engineer';buildCfgUI();$('cfgNote').textContent='Configure o tempo nos dutos, chance, quantidade e cooldown do Engenheiro.';Snd.click()});$('btnMarionetteSection').addEventListener('click',()=>{G.cfgFunctionTab='marionette';buildCfgUI();$('cfgNote').textContent='Configure cooldown, duração e distribuição do Marionetista.';Snd.click()});
 $('btnSay').addEventListener('click',()=>{const i=$('sayIn');sendSay(i.value);i.value=''});
 $('sayIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const i=$('sayIn');sendSay(i.value);i.value=''}});
 $('btnMap').addEventListener('click',toggleMap);
@@ -3895,9 +3931,9 @@ function netUpdateVisualInterpolation(){
     c.netVisualMoving=alpha<1?(!!c.netFromMoving||!!c.netToMoving):!!c.netToMoving;
   }
 }
-const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','cleanerChance','cleanerMax','cleanerCooldown','cleanerUses','delayedEnabled','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','renderDist'];
+const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','cleanerChance','cleanerMax','cleanerCooldown','cleanerUses','parasiteChance','parasiteMax','delayedEnabled','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','renderDist'];
 function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
-function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
+function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){const v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(CFG[k]!==v){CFG[k]=v;changed=true}}}const cappedCleaner=Math.min(CFG.cleanerMax,CFG.impostors);if(CFG.cleanerMax!==cappedCleaner){CFG.cleanerMax=cappedCleaner;changed=true}const cappedParasite=Math.min(CFG.parasiteMax,CFG.impostors,3);if(CFG.parasiteMax!==cappedParasite){CFG.parasiteMax=cappedParasite;changed=true}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
 if($('serverUrlIn'))$('serverUrlIn').value=netDefaultUrl();
 function netSend(o){if(NET.ws&&NET.ws.readyState===WebSocket.OPEN){try{NET.ws.send(JSON.stringify(o));return true}catch(e){}}return false}
@@ -3951,7 +3987,7 @@ function netBecomeHost(){
     // Um host que acabou de sair permanece marcado como remoto até player_left removê-lo.
     if(c.isBot){if(!c.ai){const fresh=makeNPC(c.name,c.color);c.ai=fresh.ai}resetAI(c);c.ai.killCd=Math.min(CFG.kill,14)}
   });
-  G.player=G.chars.find(c=>c.id===NET.id)||G.player;if(G.player){G.player.isPlayer=true;G.role=G.player.role;G.cfg.name=G.player.name;G.cfg.color=G.player.color;G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.player.netKillCd=G.killCd}
+  G.player=G.chars.find(c=>c.id===NET.id)||G.player;if(G.player){G.player.isPlayer=true;G.role=G.player.role;G.cfg.name=G.player.name;G.cfg.color=G.player.color;G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.parasite=G.player.function==='parasite';G.player.netKillCd=G.killCd}
   toast('Você agora é o host da sala.',3200);
 }
 function netHandleMessage(m){
@@ -4026,8 +4062,8 @@ function netHandleMessage(m){
 function netEnsureRoomDraft(){if(!NET.room)return null;if(!NET.roomDraft)NET.roomDraft={...(NET.room.settings||netSettings()),bots:NET.room.bots};return NET.roomDraft}
 function netNoteRoomSetting(key,value){
   if(!NET.inRoom||!NET.isHost||!NET.room||NET.room.status!=='lobby'||!NET_SETTING_KEYS.includes(key))return;
-  const lim=CFG_LIM[key];if(!lim||!Number.isFinite(+value))return;
-  const d=netEnsureRoomDraft();d[key]=clamp(Math.round(+value),lim[0],lim[1]);NET.roomDraftDirty=true;
+  const baseLim=CFG_LIM[key];if(!baseLim||!Number.isFinite(+value))return;
+  const d=netEnsureRoomDraft();const lim=key==='cleanerMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,baseLim[1]))]:key==='parasiteMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,3))]:baseLim;d[key]=clamp(Math.round(+value),lim[0],lim[1]);if(key==='impostors'){if(Number(d.cleanerMax)>d.impostors)d.cleanerMax=d.impostors;if(Number(d.parasiteMax)>d.impostors)d.parasiteMax=d.impostors;}NET.roomDraftDirty=true;
   const field={speed:'roomSpeedIn',kill:'roomKillIn',sab:'roomSabIn',meet:'roomMeetIn',discussion:'roomDiscussionIn',voting:'roomVotingIn',crewVision:'roomCrewVisionIn'}[key];if(field&&$(field)&&document.activeElement!==$(field))$(field).value=d[key];
 }
 function netNoteRoomControl(key,value){
@@ -4042,7 +4078,7 @@ function netRoomSettingsFromControls(){
   const draft=NET.roomDraft||NET.room?.settings||netSettings();
   const bots=clamp(Math.round(Number(draft.bots??NET.room?.bots??$('roomBotsIn').value)||0),0,Math.max(0,fixedSize-players));
   const settings={...netSettings()};
-  for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];const n=Number(draft[k]??CFG[k]);if(lim&&Number.isFinite(n))settings[k]=clamp(Math.round(n),lim[0],lim[1])}
+  for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];const n=Number(draft[k]??CFG[k]);if(lim&&Number.isFinite(n))settings[k]=clamp(Math.round(n),lim[0],lim[1])}settings.cleanerMax=Math.min(settings.cleanerMax,settings.impostors);settings.parasiteMax=Math.min(settings.parasiteMax,settings.impostors,3);
   return {bots,settings};
 }
 function netApplyRoomToCFG(){if(NET.room?.settings)netApplySettings(NET.room.settings)}
@@ -4055,12 +4091,12 @@ function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=
 function netCaptureSnapshot(){if(G.player){G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses}
   const st=(G.state==='task'||G.state==='tool')?'playing':G.state;
   if(G.player){G.player.netKillCd=G.killCd;G.player.netDelayedCd=G.delayedCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
-  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0,cosmetics:cloneCosmetics(c.cosmetics)}));
+  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0,parasiteReady:c.parasiteReady!==false,parasiteTargetId:c.parasiteTargetId||null,cosmetics:cloneCosmetics(c.cosmetics)}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
   const bodies=G.bodies.map(b=>({id:b.id,name:b.name,color:b.color,cosmetics:cloneCosmetics(b.cosmetics),x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
   const deadPets=(G.deadPets||[]).map(p=>({id:p.id,ownerId:p.ownerId,pet:p.pet,x:p.x,y:p.y,face:p.face||1,phase:p.phase||0,sad:true}));
   const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chat:(G.M.chat||[]).map(m=>({fromId:m.fromId,text:m.text})),chatCount:$('meetChat').children.length}:null;
-  return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,deadPets,delayedMarks:{...G.delayedMarks},sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,observer:G.observer,cleaner:G.cleaner,selfCleanerCd:G.cleanerCd,selfCleanerUses:G.cleanerUses,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
+  return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,deadPets,delayedMarks:{...G.delayedMarks},parasiteInfections:{...(G.parasiteInfections||{})},sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,observer:G.observer,cleaner:G.cleaner,parasite:G.parasite,selfParasiteReady:G.player?.parasiteReady!==false,selfCleanerCd:G.cleanerCd,selfCleanerUses:G.cleanerUses,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
 }
 function netCaptureMotion(){
   const q=n=>Math.round((Number(n)||0)*10)/10;
@@ -4153,9 +4189,9 @@ function netApplySnapshot(s,force=false){
     const oldTasks=new Map((G.tasks||[]).map(t=>[String(t.id),t]));
     G.tasks=s.tasks.map(r=>{let t=oldTasks.get(String(r.id));if(!t)t={id:r.id,steps:[]};t.id=r.id;t.key=r.key;t.name=r.name;t.owner=r.owner;t.fake=!!r.fake;t.fakeOnly=!!r.fakeOnly;t.fix=r.fix||null;const oldSteps=new Map((t.steps||[]).map((q,i)=>[String(q.st)+'/'+i,q]));t.steps=r.steps.map((q,i)=>{let z=oldSteps.get(String(q.st)+'/'+i);if(!z)z={};const key=String(t.id)+':'+String(q.st);Object.assign(z,q);if(q.done)NET.pendingTasks.delete(key);return z});t.done=!!r.done||t.steps.every(q=>q.done);for(const q of t.steps){const key=String(t.id)+':'+String(q.st);if(q.done||t.done)NET.pendingTasks.delete(key)}return t});
     const oldBodies=new Map((G.bodies||[]).map(b=>[String(b.id),b]));G.bodies=s.bodies.map(r=>{const b=oldBodies.get(String(r.id))||{};Object.assign(b,r);return b});G.deadPets=Array.isArray(s.deadPets)?s.deadPets.map(p=>({...p,sad:true})):[];
-    G.delayedMarks=s.delayedMarks&&typeof s.delayedMarks==='object'?{...s.delayedMarks}:{};
+    G.delayedMarks=s.delayedMarks&&typeof s.delayedMarks==='object'?{...s.delayedMarks}:{};G.parasiteInfections=s.parasiteInfections&&typeof s.parasiteInfections==='object'?{...s.parasiteInfections}:{};
     if(s.cfg)netApplySettings(s.cfg);G.sab={...s.sab};const doorsChanged=doors.some((d,i)=>d.closed!==!!s.doors[i]);doors.forEach((d,i)=>{d.closed=!!s.doors[i]});if(doorsChanged){rebuildWalk();G.walkVer++}
-    G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;G.delayedCd=s.selfDelayedCd??G.player.netDelayedCd??s.delayedCd??G.delayedCd;G.player.netDelayedCd=G.delayedCd;NET.pendingSheriffShot=false;NET.pendingDelayedMark=false;NET.pendingControl=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.observer=!!(s.observer||G.player.function==='observer');G.cleaner=!!(s.cleaner||G.player.function==='cleaner');G.cleanerCd=s.selfCleanerCd??G.player.cleanCd??G.cleanerCd;G.cleanerUses=s.selfCleanerUses??G.player.cleanUses??G.cleanerUses;G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){if(!G.player.controlledBy){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}else $('ventPanel').hidden=true}
+    G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;G.delayedCd=s.selfDelayedCd??G.player.netDelayedCd??s.delayedCd??G.delayedCd;G.player.netDelayedCd=G.delayedCd;NET.pendingSheriffShot=false;NET.pendingDelayedMark=false;NET.pendingControl=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.observer=!!(s.observer||G.player.function==='observer');G.cleaner=!!(s.cleaner||G.player.function==='cleaner');G.parasite=!!(s.parasite||G.player.function==='parasite');G.player.parasiteReady=s.selfParasiteReady??G.player.parasiteReady??true;G.cleanerCd=s.selfCleanerCd??G.player.cleanCd??G.cleanerCd;G.cleanerUses=s.selfCleanerUses??G.player.cleanUses??G.cleanerUses;G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){if(!G.player.controlledBy){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}else $('ventPanel').hidden=true}
     if(s.state==='meeting'){
       const sm=s.meeting;if(sm){const caller=charById(sm.callerId)||G.player;const body=sm.bodyId?G.bodies.find(b=>String(b.id)===String(sm.bodyId)):null;if(!G.M||oldState!=='meeting')callMeeting(caller,sm.reason,body);if(G.M){G.M.caller=caller;G.M.body=body;G.M.phase=sm.phase;G.M.t=sm.t;G.M.clock=sm.clock;G.M.dur=sm.dur;G.M.votes={...sm.votes};G.M.voteAt={...sm.voteAt};G.M.log=sm.log||[];G.M.result=(sm.phase==='result'||sm.phase==='eject')?{eject:sm.ejectId?charById(sm.ejectId):null,counts:sm.counts||{},skipN:sm.skipN||0,headline:sm.ejectHeadline||''}:null;G.M.resultHeadline=sm.resultHeadline||'';netPaintMeeting(sm)}}
       G.state='meeting';$('role').hidden=true;$('end').hidden=true;
@@ -4233,6 +4269,8 @@ function netHostCommand(m){
   }else if(command==='delayed_mark'){
     const target=G.chars.find(c=>c.id===m.targetId);
     if(activePlay&&!G.M&&ch.alive&&ch.role==='imp'&&ch.function==='delayed'&&!ch.vent&&(ch.netDelayedCd||0)<=0&&target&&target!==ch&&target.alive&&target.role==='crew'&&!target.vent&&!G.delayedMarks[target.id]&&dist(ch,target)<=84&&losClear(ch.x,ch.y,target.x,target.y))doDelayedMark(ch,target);
+  }else if(command==='parasite_infect'){
+    const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&!G.M&&ch.alive&&ch.role==='imp'&&ch.function==='parasite'&&ch.parasiteReady!==false&&!ch.vent&&target&&target.alive&&target.role==='crew'&&!target.vent&&!G.parasiteInfections?.[target.id]&&dist(ch,target)<=92&&losClear(ch.x,ch.y,target.x,target.y))infectTarget(ch,target);
   }else if(command==='clean_body'){
     const body=m.bodyId!=null?G.bodies.find(b=>String(b.id)===String(m.bodyId)):cleanerBodyFor(ch,100);if(activePlay&&!G.M&&ch.alive&&ch.role==='imp'&&ch.function==='cleaner'&&!ch.vent&&body)cleanBody(ch,body);
   }else if(command==='report'){
@@ -4259,12 +4297,12 @@ function netHostCommand(m){
   }
 }
 function netWithRemotePlayer(ch,fn){
-  const oldPlayer=G.player,oldRole=G.role,oldLocator=G.locator,oldObserver=G.observer,oldCleaner=G.cleaner,oldCleanerCd=G.cleanerCd,oldCleanerUses=G.cleanerUses,oldTrack={target:G.trackTarget,time:G.trackTime,cd:G.trackCd},oldKill=G.killCd,oldState=G.state;
+  const oldPlayer=G.player,oldRole=G.role,oldLocator=G.locator,oldObserver=G.observer,oldCleaner=G.cleaner,oldParasite=G.parasite,oldCleanerCd=G.cleanerCd,oldCleanerUses=G.cleanerUses,oldTrack={target:G.trackTarget,time:G.trackTime,cd:G.trackCd},oldKill=G.killCd,oldState=G.state;
   if(oldPlayer){oldPlayer.netTrackTarget=G.trackTarget;oldPlayer.netTrackTime=G.trackTime;oldPlayer.netTrackCd=G.trackCd;oldPlayer.netKillCd=G.killCd}
-  G.player=ch;G.role=ch.role;G.locator=ch.function==='locator';G.observer=ch.function==='observer';G.cleaner=ch.function==='cleaner';G.cleanerCd=ch.cleanCd||0;G.cleanerUses=ch.cleanUses||0;G.trackTarget=ch.netTrackTarget||null;G.trackTime=ch.netTrackTime||0;G.trackCd=ch.netTrackCd||0;G.killCd=ch.netKillCd||0;if(G.state==='task'||G.state==='tool')G.state='playing';
+  G.player=ch;G.role=ch.role;G.locator=ch.function==='locator';G.observer=ch.function==='observer';G.cleaner=ch.function==='cleaner';G.parasite=ch.function==='parasite';G.cleanerCd=ch.cleanCd||0;G.cleanerUses=ch.cleanUses||0;G.trackTarget=ch.netTrackTarget||null;G.trackTime=ch.netTrackTime||0;G.trackCd=ch.netTrackCd||0;G.killCd=ch.netKillCd||0;if(G.state==='task'||G.state==='tool')G.state='playing';
   try{fn()}finally{
     ch.netTrackTarget=G.trackTarget;ch.netTrackTime=G.trackTime;ch.netTrackCd=G.trackCd;ch.netKillCd=G.killCd;ch.cleanCd=G.cleanerCd;ch.cleanUses=G.cleanerUses;
-    const after=G.state;G.player=oldPlayer;G.role=oldRole;G.locator=oldLocator;G.observer=oldObserver;G.cleaner=oldCleaner;G.cleanerCd=oldCleanerCd;G.cleanerUses=oldCleanerUses;G.trackTarget=oldTrack.target;G.trackTime=oldTrack.time;G.trackCd=oldTrack.cd;G.killCd=oldKill;
+    const after=G.state;G.player=oldPlayer;G.role=oldRole;G.locator=oldLocator;G.observer=oldObserver;G.cleaner=oldCleaner;G.parasite=oldParasite;G.cleanerCd=oldCleanerCd;G.cleanerUses=oldCleanerUses;G.trackTarget=oldTrack.target;G.trackTime=oldTrack.time;G.trackCd=oldTrack.cd;G.killCd=oldKill;
     if(after==='meeting'||after==='over')G.state=after;else G.state=oldState;
   }
 }
@@ -4346,6 +4384,7 @@ const netOriginalCheckEnd=checkEnd;checkEnd=function(){if(NET.inRoom&&!NET.isHos
 const netOriginalEndGame=endGame;endGame=function(winner,msg){if(NET.inRoom&&!NET.isHost&&!NET.applying)return;netOriginalEndGame(winner,msg);if(NET.inRoom&&NET.isHost)netSend({type:'game_end',winner,reason:msg,snapshot:netCaptureSnapshot()})};
 const netOriginalStartPlay=startPlay;startPlay=function(){if(NET.inRoom&&!NET.isHost){if(!NET.localReadySent){NET.localReadySent=true;netSend({type:'ready'})}G.roleT=999999;return}netOriginalStartPlay()};
 const netOriginalPlayerKill=playerKill;playerKill=function(){if(NET.inRoom&&!NET.isHost){const t=G.killT;if(t)netSend({type:'action',action:'kill',targetId:t.id});return}netOriginalPlayerKill()};
+const netOriginalPlayerInfect=playerInfect;playerInfect=function(){if(NET.inRoom&&!NET.isHost){const t=G.parasiteT||parasiteTargetFor(G.player,92);if(t&&G.player?.parasiteReady!==false)netSend({type:'action',action:'parasite_infect',targetId:t.id});return}netOriginalPlayerInfect()};
 const netOriginalPlayerCleanBody=playerCleanBody;playerCleanBody=function(){if(NET.inRoom&&!NET.isHost){const b=G.cleanerT||nearBody();if(b)netSend({type:'action',action:'clean_body',bodyId:b.id});return}netOriginalPlayerCleanBody()};
 const netOriginalPlayerReport=playerReport;playerReport=function(){if(NET.inRoom&&!NET.isHost){netSend({type:'action',action:'report'});return}netOriginalPlayerReport()};
 const netOriginalPlayerSab=playerSab;playerSab=function(){if(NET.inRoom&&!NET.isHost){if(G.role==='imp')openTool({tool:'sab'});return}netOriginalPlayerSab()};
