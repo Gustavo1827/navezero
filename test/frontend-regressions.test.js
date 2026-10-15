@@ -70,7 +70,7 @@ test('Observador usa o mapa dos vivos, some em Comunicações e bloqueia movimen
   assert.match(server, /s\.observer=recipient\.function==='observer'/);
 });
 test('disparo do Xerife é validado pelo host e respeita alcance, linha de visão e cooldown', () => {
-  assert.match(html, /command==='sheriff_shoot'[\s\S]*?activePlay&&!G\.M&&ch\.alive&&ch\.role==='crew'&&ch\.function==='sheriff'[\s\S]*?dist\(ch,target\)<=84&&losClear/);
+  assert.match(html, /command==='sheriff_shoot'[\s\S]*?activePlay&&!G\.M&&ch\.alive&&ch\.role==='crew'&&ch\.function==='sheriff'[\s\S]*?dist\(ch,target\)<=actionDistancePx\('sheriff'\)&&losClear/);
   assert.match(server, /'sheriff_shoot'/);
   assert.match(html, /function doSheriffShot\(shooter,target\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(target\);parkPetAtBody/);
   assert.doesNotMatch(html.slice(html.indexOf('function doSheriffShot(shooter,target)'),html.indexOf('function playerSheriffShot()')), /addSheriffBody\(/, 'disparos do Xerife não criam corpo físico');
@@ -131,7 +131,7 @@ test('Atrasado tem aba vermelha, ativação, duração limitada e marcação aut
   assert.match(html, /function doDelayedMark\(shooter,target\)/);
   assert.match(html, /remaining:CFG\.delayedDuration/);
   assert.match(html, /if\(G\.M\|\|G\.state==='meeting'/);
-  assert.match(html, /command==='delayed_mark'[\s\S]*?dist\(ch,target\)<=84&&losClear/);
+  assert.match(html, /command==='delayed_mark'[\s\S]*?dist\(ch,target\)<=actionDistancePx\('delayed'\)&&losClear/);
   assert.match(html, /delayedMarks:\{\.\.\.G\.delayedMarks\}/);
   assert.match(html, /delayedChance:\[0,100\]/);
   assert.match(html, /delayedMax:\[0,3\]/);
@@ -267,7 +267,7 @@ test('NPCs usam falas contextuais e jogadores mortos veem funções sem revelar 
     assert.ok(html.includes(phrase), 'fala contextual ausente: '+phrase);
   }
   assert.match(html, /\(\(!G\.player\?\.alive\|\|G\.role==='imp'\)&&ch\.role==='imp'\?'#ff6b7e'/);
-  assert.match(html, /if\(!G\.player\.alive\)\{const fl=\{sheriff:'Xerife'.*const roleLine=el\('small','pfunction',fl\+' — '\+ch\.name\)/s);
+  assert.match(html, /if\(!G\.player\.alive\)\{const fl=\{sheriff:'Xerife'.*const roleLine=el\('small','pfunction',fl\);/s);
   assert.match(html, /if\(!G\.player\.alive&&ch\.role==='imp'\)pn\.style\.color='#ff6b7e'/);
   assert.match(html, /if\(ai\.ventSaw&&G\.gt-ai\.ventSaw\.gt<45/);
   assert.match(html, /\.pc\.dead\{filter:none;border-color/);
@@ -361,10 +361,10 @@ test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comuni
 
 test('Instrutor só pode selecionar jogadores vivos próximos', () => {
   assert.match(html, /const INSTRUCTOR_TARGET_RANGE=100/);
-  assert.match(html, /function instructorSelectableTargets\(owner,range=INSTRUCTOR_TARGET_RANGE\)[\s\S]*?c\.alive[\s\S]*?!c\.vent[\s\S]*?dist\(owner,c\)<=range[\s\S]*?losClear/);
+  assert.match(html, /function instructorSelectableTargets\(owner,range=actionDistancePx\('instructor'\)\)[\s\S]*?c\.alive[\s\S]*?!c\.vent[\s\S]*?dist\(owner,c\)<=range[\s\S]*?losClear/);
   assert.match(html, /function openInstructorPicker\(\)[\s\S]*?const nearby=instructorSelectableTargets\(p\)[\s\S]*?Chegue perto de um jogador vivo/);
   assert.match(html, /action:'instructor_select'/);
-  assert.match(html, /command==='instructor_select'[\s\S]*?dist\(ch,target\)<=INSTRUCTOR_TARGET_RANGE[\s\S]*?ch\.instructorTargetId=target\.id/);
+  assert.match(html, /command==='instructor_select'[\s\S]*?dist\(ch,target\)<=instructorRange[\s\S]*?ch\.instructorTargetId=target\.id/);
   assert.match(html, /command==='instructor_mark'[\s\S]*?String\(ch\.instructorTargetId\)===String\(target\.id\)/);
   assert.match(server, /'instructor_select'/);
 });
@@ -372,7 +372,7 @@ test('Instrutor só pode selecionar jogadores vivos próximos', () => {
 test('Instrutor online tolera pequena divergência de sincronização e aceita null autoritativo do alvo', () => {
   assert.match(html, /const INSTRUCTOR_NET_RANGE_TOLERANCE=55, INSTRUCTOR_NET_POINT_TOLERANCE=120/);
   assert.match(html, /action:'instructor_select',targetId:ch\.id,x:p\.x,y:p\.y/);
-  assert.match(html, /hostNear=dist\(ch,target\)<=INSTRUCTOR_TARGET_RANGE\+INSTRUCTOR_NET_RANGE_TOLERANCE/);
+  assert.match(html, /hostNear=dist\(ch,target\)<=instructorRange\+INSTRUCTOR_NET_RANGE_TOLERANCE/);
   assert.match(html, /drift<=INSTRUCTOR_NET_POINT_TOLERANCE\?rx:ch\.x/);
   assert.match(html, /hasOwnProperty\.call\(s,'selfInstructorTargetId'\)\?s\.selfInstructorTargetId/);
   assert.match(server, /\['targetId','x','y','sabotage'/);
@@ -393,4 +393,48 @@ test('Instrutor pode ser aplicado e removido pelo computador da Partida Livre', 
   assert.match(html, /if\(fn==='instructor'\)[\s\S]*?ch\.instructor=true[\s\S]*?if\(ch\.alive\)killChar\(ch\)/, 'adicionar Instrutor deve matar o personagem imediatamente');
   assert.match(html, /if\(ch\.instructor\)[\s\S]*?ch\.instructor=false[\s\S]*?ch\.alive=true;ch\.ghost=false/, 'remover Instrutor deve reviver o personagem');
   assert.match(html, /return ch\.instructor\?`\$\{base\} \+ Instrutor ↔️`:/, 'o computador deve indicar Instrutor sem apagar a função-base do Tripulante');
+});
+
+
+test('fantasmas veem apenas a função acima do nome, eliminações têm respingo e novos cosméticos são aceitos', () => {
+  assert.match(html, /c\.strokeText\(fn,ch\.x,ch\.y-74\)/);
+  assert.doesNotMatch(html, /const label=fn\+' — '\+ch\.name/);
+  assert.match(html, /function spawnKillSplash\(k,v\)/);
+  assert.match(html, /drawKillSplashes\(c\)/);
+  assert.match(html, /spawnKillSplash\(k,v\);killChar\(v\)/);
+  assert.match(html, /killSplashes:\(G\.killSplashes\|\|\[\]\)\.map/);
+  for (const id of ['hat_traveler','hat_tide','hat_nightcap','hat_signal','hat_bow','hat_cosmic','hat_colorcap','hat_nyah','pet_scout','pet_mini','outfit_cadet']) {
+    assert.ok(html.includes(id), 'cosmético novo ausente no cliente: '+id);
+    assert.ok(server.includes(id), 'cosmético novo ausente no servidor: '+id);
+  }
+  assert.match(html, /const PROVIDED_COSMETIC_SRC=\{/);
+});
+
+test('distância para ações oferece Curta, Média e Longa e sincroniza no multiplayer', () => {
+  assert.match(html, /actionDistance:\[0,2\]/);
+  assert.match(html, /const ACTION_DISTANCE_LABELS=\['Curta','Média','Longa'\]/);
+  assert.match(html, /function actionDistancePx\(kind='default'\)/);
+  for (const kind of ['kill','sheriff','delayed','parasite','instructor','locator','cleaner','report','control']) assert.match(html, new RegExp(kind+":\\["));
+  assert.match(html, /\['actionDistance','Distância para ações'/);
+  assert.match(html, /'actionDistance','renderDist'/);
+  assert.match(server, /actionDistance:\[0,2\]/);
+  assert.match(server, /actionDistance:1/);
+});
+
+test('configurações de funções mostram descrição no topo de cada função', () => {
+  assert.match(html, /const descriptions=\{locator:/);
+  for (const role of ['Localizador','Xerife','Atrasado','Observador','Instrutor','Faxineiro','Parasita','Engenheiro','Marionetista']) assert.match(html,new RegExp(role));
+  assert.match(html, /box\.appendChild\(info\)/);
+});
+
+test('texto da função para fantasmas é maior e portas sabotadas são redesenhadas por cima da névoa', () => {
+  assert.match(html, /\.pfunction\{[^}]*font-size:14px/);
+  assert.match(html, /c\.font='800 16px/);
+  assert.match(html, /Durante a sabotagem de portas, as portas fechadas permanecem legíveis sobre a névoa/);
+  assert.match(html, /if\(\(G\.sab\.doors\|\|0\)>0\)[\s\S]*?for\(const d of doors\)\{if\(!d\.closed\)continue/);
+});
+
+test('portas sabotadas bloqueiam a iluminação como paredes e liberam visão ao reabrir', () => {
+  assert.match(html, /!isFloor\(tx,ty\)\|\|doorClosedAt\(tx,ty\)/);
+  assert.match(html, /function doorClosedAt\(tx,ty\)\{return doors\.some\(d=>d\.closed/);
 });
