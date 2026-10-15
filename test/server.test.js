@@ -352,3 +352,24 @@ test('Instrutor no servidor respeita limites de chance, quantidade, recarga e du
   assert.equal(s.instructorCooldown,20);
   assert.equal(s.instructorDuration,15);
 });
+
+test('ações online do Instrutor retransmitem seleção e ponto ao host', async t=>{
+  const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:20,loadingMs:10});
+  await new Promise(resolve=>app.server.once('listening',resolve));
+  const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
+  t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+  const host=await connect(url,'Host','azul');all.push(host);
+  send(host,{type:'create_room',name:'Host',color:'azul',size:4,bots:2});
+  const made=await onceMessage(host,m=>m.type==='room_state');const code=made.room.code;
+  const guest=await connect(url,'Instrutor Online','verde');all.push(guest);
+  send(guest,{type:'join_room',code});await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.length===2);await onceMessage(host,m=>m.type==='room_state'&&m.room.players.length===2);
+  send(host,{type:'start_game'});await onceMessage(host,m=>m.type==='game_start');await onceMessage(guest,m=>m.type==='game_start');
+
+  send(guest,{type:'action',action:'instructor_select',targetId:host.id,x:321.5,y:456.25});
+  const selected=await onceMessage(host,m=>m.type==='host_command'&&m.command==='instructor_select'&&m.playerId===guest.id);
+  assert.equal(selected.targetId,host.id);assert.equal(selected.x,321.5);assert.equal(selected.y,456.25);
+
+  send(guest,{type:'action',action:'instructor_mark',targetId:host.id,x:777.75,y:888.5});
+  const marked=await onceMessage(host,m=>m.type==='host_command'&&m.command==='instructor_mark'&&m.playerId===guest.id);
+  assert.equal(marked.targetId,host.id);assert.equal(marked.x,777.75);assert.equal(marked.y,888.5);
+});

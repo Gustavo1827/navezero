@@ -359,6 +359,25 @@ test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comuni
   assert.match(server, /recipient\?\.instructor[\s\S]*?c\.alive&&c\.role==='crew'\)c\.function=null/);
 });
 
+test('Instrutor só pode selecionar jogadores vivos próximos', () => {
+  assert.match(html, /const INSTRUCTOR_TARGET_RANGE=100/);
+  assert.match(html, /function instructorSelectableTargets\(owner,range=INSTRUCTOR_TARGET_RANGE\)[\s\S]*?c\.alive[\s\S]*?!c\.vent[\s\S]*?dist\(owner,c\)<=range[\s\S]*?losClear/);
+  assert.match(html, /function openInstructorPicker\(\)[\s\S]*?const nearby=instructorSelectableTargets\(p\)[\s\S]*?Chegue perto de um jogador vivo/);
+  assert.match(html, /action:'instructor_select'/);
+  assert.match(html, /command==='instructor_select'[\s\S]*?dist\(ch,target\)<=INSTRUCTOR_TARGET_RANGE[\s\S]*?ch\.instructorTargetId=target\.id/);
+  assert.match(html, /command==='instructor_mark'[\s\S]*?String\(ch\.instructorTargetId\)===String\(target\.id\)/);
+  assert.match(server, /'instructor_select'/);
+});
+
+test('Instrutor online tolera pequena divergência de sincronização e aceita null autoritativo do alvo', () => {
+  assert.match(html, /const INSTRUCTOR_NET_RANGE_TOLERANCE=55, INSTRUCTOR_NET_POINT_TOLERANCE=120/);
+  assert.match(html, /action:'instructor_select',targetId:ch\.id,x:p\.x,y:p\.y/);
+  assert.match(html, /hostNear=dist\(ch,target\)<=INSTRUCTOR_TARGET_RANGE\+INSTRUCTOR_NET_RANGE_TOLERANCE/);
+  assert.match(html, /drift<=INSTRUCTOR_NET_POINT_TOLERANCE\?rx:ch\.x/);
+  assert.match(html, /hasOwnProperty\.call\(s,'selfInstructorTargetId'\)\?s\.selfInstructorTargetId/);
+  assert.match(server, /\['targetId','x','y','sabotage'/);
+});
+
 test('habilidades especiais possuem efeitos sonoros e visuais leves personalizados', () => {
   assert.match(html, /roleFx\(kind,phase='use'\)/);
   assert.match(html, /const ROLE_FX=\[\]/);
