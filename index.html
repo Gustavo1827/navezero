@@ -345,6 +345,8 @@ body.touch #stick{display:block}
 /* ---------- salas online ---------- */
 .onlineMenu{margin-top:9px}
 #joinPanel{margin-top:10px;padding-top:10px;border-top:2px dashed #2b3270}
+#joinError{min-height:22px;margin:2px 0 7px;color:#ff6377;font-weight:800;text-align:center}#joinError:empty{display:none}
+#playerLeaveNotices{position:fixed;z-index:210;left:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:7px;pointer-events:none;max-width:min(360px,70vw)}.playerLeaveNotice{background:rgba(53,8,18,.9);border:2px solid #ff5368;border-radius:10px;padding:6px 10px;color:#ff8796;font-weight:800;font-size:14px;box-shadow:0 4px 0 rgba(10,12,38,.7);animation:leaveNoticeIn .18s ease-out}.playerLeaveNotice.out{opacity:0;transform:translateX(-16px);transition:.35s}@keyframes leaveNoticeIn{from{opacity:0;transform:translateX(-15px)}to{opacity:1;transform:translateX(0)}}
 #serverUrlIn,#roomCodeIn{font:700 16px var(--font);color:var(--ink);background:#0d1033;border:2px solid var(--edge);border-radius:12px;padding:8px 12px;outline:none;width:100%;user-select:text;-webkit-user-select:text}
 #roomLobby{position:fixed;z-index:100;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto;background:rgba(3,4,17,.88);backdrop-filter:blur(7px)}
 .roomCard{max-height:96dvh;overflow:auto;width:min(650px,100%);text-align:left}
@@ -401,6 +403,7 @@ body.touch #stick{display:block}
       <div class="row"><button class="big" id="btnCreateConfirm">Criar sala agora</button><button class="big alt" id="btnCreateCancel">Cancelar</button></div>
     </div>
     <div id="joinPanel" hidden>
+      <div id="joinError" role="alert" aria-live="polite"></div>
       <div class="field"><label for="roomCodeIn">Código da sala (6 letras maiúsculas ou números)</label><input id="roomCodeIn" type="text" maxlength="6" inputmode="text" pattern="[A-Za-z0-9]{6}" placeholder="A7K9Q2" autocomplete="off" autocapitalize="characters" spellcheck="false"></div>
       <div class="field"><label for="serverUrlIn">Servidor multiplayer</label><input id="serverUrlIn" autocomplete="url" spellcheck="false"></div>
       <div class="row"><button class="big" id="btnJoinConfirm">Entrar</button><button class="big alt" id="btnJoinCancel">Cancelar</button></div>
@@ -411,6 +414,7 @@ body.touch #stick{display:block}
   </div>
 </div>
 
+<div id="playerLeaveNotices" aria-live="polite"></div>
 <div id="roomLobby" hidden aria-live="polite">
   <div class="card roomCard" role="dialog" aria-modal="true" aria-labelledby="roomLobbyTitle">
     <h2 id="roomLobbyTitle">Sala multiplayer</h2>
@@ -1687,7 +1691,7 @@ function setFreePlayFunction(ch,fn){
   // Instrutor é uma função pós-morte e pode coexistir com outra função de Tripulante.
   if(fn==='instructor'){
     if(ch.role!=='crew')return false;
-    ch.instructor=true;ch.instructorCd=0;ch.instructorTargetId=null;ch.instructorPoint=null;
+    ch.instructor=true;ch.instructorCd=0;ch.instructorTargetId=null;ch.instructorPoint=null;ch.instructorOrigin={x:ch.x,y:ch.y};
     // Evita que a chance normal tente sortear a função durante esta morte forçada.
     if(ch.alive)killChar(ch);else {ch.ghost=true;ch.moving=false}
     G.bodies=G.bodies.filter(b=>String(b.id)!==String(ch.id));
@@ -1705,7 +1709,7 @@ function removeFreePlayFunction(ch){
   if(!G.freePlay||!ch)return false;
   // Se houver Instrutor, removê-lo primeiro preserva qualquer função que o Tripulante já tinha em vida.
   if(ch.instructor){
-    ch.instructor=false;ch.instructorCd=0;ch.instructorTargetId=null;ch.instructorPoint=null;
+    ch.instructor=false;ch.instructorCd=0;ch.instructorTargetId=null;ch.instructorPoint=null;ch.instructorOrigin=null;
     G.instructorTrails=G.instructorTrails.filter(t=>String(t.ownerId)!==String(ch.id));
     if(!ch.alive){
       ch.alive=true;ch.ghost=false;ch.moving=false;ch.vent=null;ch.ventAnim=null;ch.ventMv=0;ch.bubble=null;
@@ -2333,19 +2337,19 @@ function maybeActivateInstructor(ch){
   if(!ch||ch.alive||ch.role!=='crew'||ch.instructor||CFG.instructorChance<=0||CFG.instructorMax<=0)return false;
   if(instructorCount()>=Math.min(15,Math.max(0,CFG.instructorMax),G.chars.length))return false;
   if(Math.random()*100>=CFG.instructorChance)return false;
-  ch.instructor=true;ch.instructorCd=0;ch.instructorTargetId=null;ch.instructorPoint=null;
+  ch.instructor=true;ch.instructorCd=0;ch.instructorTargetId=null;ch.instructorPoint=null;ch.instructorOrigin={x:ch.x,y:ch.y};
   if(ch===G.player){G.instructorCd=0;G.instructorTargetId=null;G.followTarget=null;Snd.roleFx('instructor','done');emitRoleFx(ch.x,ch.y,'instructor',1);toast('↔️ Você despertou como Instrutor. Use Trilhar para ajudar um jogador vivo.',4200)}
   return true;
 }
-function instructorPathPoints(target,x,y){
-  const a=tileOf(target),b={x:clamp(Math.floor(x/TILE),0,COLS-1),y:clamp(Math.floor(y/TILE),0,ROWS-1)};let path=null;
+function instructorPathPoints(owner,x,y){
+  const origin=owner?.instructorOrigin||{x:owner?.x||x,y:owner?.y||y},a=tileOf(origin),b={x:clamp(Math.floor(x/TILE),0,COLS-1),y:clamp(Math.floor(y/TILE),0,ROWS-1)};let path=null;
   try{path=findPath(a.x,a.y,(tx,ty)=>tx===b.x&&ty===b.y)}catch(e){}
-  if(!path||!path.length)return [{x:target.x,y:target.y},{x,y}];
-  const pts=[{x:target.x,y:target.y}];for(const q of path)pts.push({x:q.x*TILE+TILE/2,y:q.y*TILE+TILE/2});pts.push({x,y});return pts;
+  if(!path||!path.length)return [{x:origin.x,y:origin.y},{x,y}];
+  const pts=[{x:origin.x,y:origin.y}];for(const q of path)pts.push({x:q.x*TILE+TILE/2,y:q.y*TILE+TILE/2});pts.push({x,y});return pts;
 }
 function createInstructorTrail(owner,target,x,y){
   if(!owner||!owner.instructor||owner.alive||owner.role!=='crew'||!target||!target.alive||(G.sab.comms||0)>0||(owner.instructorCd||0)>0)return false;
-  const tr={id:'trail_'+(++G.instructorTrailSeq),ownerId:owner.id,targetId:target.id,points:instructorPathPoints(target,x,y),t:CFG.instructorDuration,max:CFG.instructorDuration};
+  const tr={id:'trail_'+(++G.instructorTrailSeq),ownerId:owner.id,targetId:target.id,points:instructorPathPoints(owner,x,y),t:CFG.instructorDuration,max:CFG.instructorDuration};
   G.instructorTrails.push(tr);owner.instructorCd=CFG.instructorCooldown;owner.instructorTargetId=null;owner.instructorPoint=null;
   if(owner===G.player){G.instructorCd=owner.instructorCd;G.instructorTargetId=null;Snd.roleFx('instructor','done');emitRoleFx(x,y,'instructor',1);toast('Trilha marcada para '+target.name+'.',2200)}
   if(target===G.player){Snd.roleFx('instructor','done');toast('↔️ Um Instrutor marcou um caminho para você.',2400)}
@@ -2368,8 +2372,17 @@ function instructorSelectableTargets(owner,range=INSTRUCTOR_TARGET_RANGE){
   if(!owner)return[];return G.chars.filter(c=>c.alive&&!c.vent&&c!==owner&&dist(owner,c)<=range&&losClear(owner.x,owner.y,c.x,c.y)).sort((a,b)=>dist(owner,a)-dist(owner,b));
 }
 function ensureInstructorPicker(){let box=$('instructorPicker');if(box)return box;box=el('div','instructorPicker');box.id='instructorPicker';box.hidden=true;const card=el('div','instructorPickerCard');card.append(el('h3','', 'Escolha um jogador próximo'),el('div','instructorPickerList'));const cancel=el('button','big alt','Cancelar');cancel.type='button';cancel.addEventListener('click',()=>{box.hidden=true;Snd.click()});card.append(cancel);box.append(card);document.body.append(box);return box}
+function selectNearestInstructorTarget(p){
+  const target=instructorSelectableTargets(p)[0]||null;
+  if(!target){toast('Chegue perto de um jogador vivo para escolhê-lo.');Snd.err();return null}
+  const ch=target;p.instructorTargetId=ch.id;G.instructorTargetId=ch.id;
+  if(NET.inRoom&&!NET.isHost)netSend({type:'action',action:'instructor_select',targetId:ch.id,x:p.x,y:p.y});
+  Snd.roleFx('instructor','use');emitRoleFx(p.x,p.y,'instructor',.7);toast('Alvo escolhido: '+ch.name+'. Vá até o ponto desejado e use Marcar ponto.',3200);
+  return ch;
+}
 function openInstructorPicker(){
-  const p=G.player;if(!p?.instructor||p.alive||(G.sab.comms||0)>0||G.instructorCd>0)return;const box=ensureInstructorPicker(),list=box.querySelector('.instructorPickerList');list.innerHTML='';const nearby=instructorSelectableTargets(p);if(!nearby.length){toast('Chegue perto de um jogador vivo para escolhê-lo.');Snd.err();return}for(const ch of nearby){const b=el('button','big',ch.name);b.type='button';b.addEventListener('click',()=>{if(!instructorSelectableTargets(p).some(v=>String(v.id)===String(ch.id))){box.hidden=true;toast('Esse jogador não está mais próximo o bastante.');Snd.err();return}p.instructorTargetId=ch.id;G.instructorTargetId=ch.id;if(NET.inRoom&&!NET.isHost)netSend({type:'action',action:'instructor_select',targetId:ch.id,x:p.x,y:p.y});box.hidden=true;Snd.roleFx('instructor','use');emitRoleFx(p.x,p.y,'instructor',.7);toast('Alvo escolhido: '+ch.name+'. Vá até o ponto desejado e use Marcar ponto.',3200)});list.append(b)}box.hidden=false;Snd.open()
+  // Mantém o ponto de entrada antigo, mas não abre menu: escolhe obrigatoriamente o vivo mais próximo.
+  const p=G.player;if(!p?.instructor||p.alive||(G.sab.comms||0)>0||G.instructorCd>0)return null;const nearby=instructorSelectableTargets(p);if(!nearby.length){toast('Chegue perto de um jogador vivo para escolhê-lo.');Snd.err();return null}return selectNearestInstructorTarget(p)
 }
 function playerInstructorAction(){
   const p=G.player;if(!p||p.alive||!p.instructor||G.state!=='playing')return;if((G.sab.comms||0)>0){toast('Comunicações fora do ar: não é possível criar trilhas.');Snd.err();return}if((p.instructorCd||G.instructorCd||0)>0){toast('Trilha recarregando: '+Math.ceil(p.instructorCd||G.instructorCd)+'s');Snd.err();return}
@@ -2691,7 +2704,7 @@ function noteEngineerVentSeen(ch,v,act){
     npcSay(o,pick([`Vi ${ch.name} usando um duto; deve ser Engenheiro.`,`${ch.name} usou um duto. Parece ser Engenheiro.`]));
   });
 }
-function enterVent(ch,v){if(ch?.function==='engineer'){emitRoleFx(ch.x,ch.y,'engineer');if(ch===G.player)Snd.roleFx('engineer','use')}
+function enterVent(ch,v){if(ch?.function==='engineer'&&ch===G.player){emitRoleFx(ch.x,ch.y,'engineer');Snd.roleFx('engineer','use')}
   const engineer=ch.function==='engineer'&&ch.role==='crew';
   if(!ch.alive||!(ch.role==='imp'||engineer)||ch.vent||ch.ventCd>0||ch.ventAnim)return false;
   if(engineer&&((G.sab.comms||0)>0||(ch.engVentCd||0)>0))return false;
@@ -2735,7 +2748,7 @@ function playerEngineerVent(){
   const v=nearestVentFor(p,84);if(!v){toast('Aproxime-se de um duto.');return}enterVent(p,v);
 }
 function controlTargetFor(ch,maxDist=100){return G.chars.filter(c=>c.alive&&c!==ch&&c.role==='crew'&&!c.vent&&!c.controlledBy&&!c.controlTargetId&&(!c.isPlayer||c.id!==ch.id)).map(c=>({c,d:dist(ch,c)})).filter(x=>x.d<=maxDist&&losClear(ch.x,ch.y,x.c.x,x.c.y)).sort((a,b)=>a.d-b.d)[0]?.c||null}
-function startControl(ch,target){emitRoleFx(ch?.x,ch?.y,'marionette');if(ch===G.player)Snd.roleFx('marionette','use');
+function startControl(ch,target){if(ch===G.player){emitRoleFx(ch?.x,ch?.y,'marionette');Snd.roleFx('marionette','use');}
   if(!ch||!target||!ch.alive||ch.role!=='imp'||ch.function!=='marionette'||ch.vent||ch.controlTargetId||(ch.controlCd||0)>0||G.state!=='playing'||G.M||!target.alive||target.role!=='crew'||target.vent||target.controlledBy||dist(ch,target)>100||!losClear(ch.x,ch.y,target.x,target.y))return false;
   ch.controlReturn={x:ch.x,y:ch.y,face:ch.face};ch.controlTargetId=target.id;ch.controlTime=CFG.marionDuration;target.controlledBy=ch.id;ch.x=target.x;ch.y=target.y;ch.moving=false;target.moving=false;
   // Zera o último vetor da vítima para que um input enviado antes da posse não reapareça ao soltá-la.
@@ -2942,7 +2955,7 @@ function parasiteTargetFor(ch,range=92){
   if(!ch||!ch.alive||ch.role!=='imp'||ch.function!=='parasite'||ch.vent||ch.parasiteReady===false)return null;
   let best=null,bd=range;for(const t of G.chars){if(t===ch||!t.alive||t.role!=='crew'||t.vent||G.parasiteInfections?.[t.id])continue;const d=dist(ch,t);if(d<=bd&&losClear(ch.x,ch.y,t.x,t.y)){best=t;bd=d}}return best;
 }
-function infectTarget(parasite,target){emitRoleFx(parasite?.x,parasite?.y,'parasite');if(parasite===G.player)Snd.roleFx('parasite','use');
+function infectTarget(parasite,target){if(parasite===G.player){emitRoleFx(parasite?.x,parasite?.y,'parasite');Snd.roleFx('parasite','use');}
   if(!parasite||!target||!parasite.alive||parasite.role!=='imp'||parasite.function!=='parasite'||parasite.parasiteReady===false||parasite.vent||!target.alive||target.role!=='crew'||target.vent||G.M||dist(parasite,target)>92||!losClear(parasite.x,parasite.y,target.x,target.y)||G.parasiteInfections?.[target.id])return false;
   G.parasiteInfections=G.parasiteInfections||{};G.parasiteInfections[target.id]={targetId:target.id,parasiteId:parasite.id};parasite.parasiteReady=false;parasite.parasiteTargetId=target.id;
   if(parasite===G.player)toast(`${target.name} foi infectado. A transformação ocorrerá ao fim da próxima reunião.`,2800);
@@ -2988,7 +3001,7 @@ function noteCleanerEvidence(cleaner,body){
     }
   }
 }
-function cleanBody(cleaner,body){emitRoleFx(body?.x,body?.y,'cleaner');if(cleaner===G.player)Snd.roleFx('cleaner','use');
+function cleanBody(cleaner,body){if(cleaner===G.player){emitRoleFx(body?.x,body?.y,'cleaner');Snd.roleFx('cleaner','use');}
   if(!cleaner||!body||G.over||G.M||!['playing','task','tool'].includes(G.state)||!cleaner.alive||cleaner.role!=='imp'||cleaner.function!=='cleaner'||cleaner.vent)return false;
   const cd=cleaner===G.player?G.cleanerCd:(cleaner.cleanCd||0),uses=cleaner===G.player?G.cleanerUses:(cleaner.cleanUses||0);
   if(cd>0||uses<=0||!G.bodies.includes(body)||dist(cleaner,body)>100||!losClear(cleaner.x,cleaner.y,body.x,body.y))return false;
@@ -3020,7 +3033,7 @@ function sheriffTargetFor(shooter){
 function addSheriffBody(ch,killerId,cause){
   addBodyWithPet({id:'body_'+String(ch.id)+'_'+Math.round(G.gt*1000),name:ch.name,color:ch.color,cosmetics:cloneCosmetics(ch.cosmetics),x:ch.x,y:ch.y,room:roomName(ch.x,ch.y),tKill:G.gt,killerId:killerId??null,cause},ch);
 }
-function doSheriffShot(shooter,target){emitRoleFx(shooter?.x,shooter?.y,'sheriff');if(shooter===G.player)Snd.roleFx('sheriff','use');
+function doSheriffShot(shooter,target){if(shooter===G.player){emitRoleFx(shooter?.x,shooter?.y,'sheriff');Snd.roleFx('sheriff','use');}
   if(!shooter||!target||G.over||!['playing','task','tool'].includes(G.state)||G.M||!shooter.alive||shooter.role!=='crew'||shooter.function!=='sheriff'||shooter.vent||target===shooter||!target.alive||target.vent)return false;
   const cd=shooter===G.player?G.sheriffCd:(shooter.netSheriffCd||0);
   if(cd>0||dist(shooter,target)>84||!losClear(shooter.x,shooter.y,target.x,target.y))return false;
@@ -3053,7 +3066,7 @@ function delayedTargetFor(shooter){
   for(const ch of G.chars){if(!ch||ch===shooter||!ch.alive||ch.role!=='crew'||ch.vent||G.delayedMarks[ch.id])continue;const d=dist(shooter,ch);if(d<=bd&&losClear(shooter.x,shooter.y,ch.x,ch.y)){if(d<bd||!best){best=ch;bd=d}}}
   return best;
 }
-function doDelayedMark(shooter,target){emitRoleFx(shooter?.x,shooter?.y,'delayed');if(shooter===G.player)Snd.roleFx('delayed','use');
+function doDelayedMark(shooter,target){if(shooter===G.player){emitRoleFx(shooter?.x,shooter?.y,'delayed');Snd.roleFx('delayed','use');}
   if(!shooter||!target||G.over||!['playing','task','tool'].includes(G.state)||G.M||!shooter.alive||shooter.role!=='imp'||shooter.function!=='delayed'||shooter.vent||target===shooter||!target.alive||target.role!=='crew'||target.vent||G.delayedMarks[target.id])return false;
   const cd=shooter===G.player?G.delayedCd:(shooter.netDelayedCd||0);
   if(cd>0||dist(shooter,target)>84||!losClear(shooter.x,shooter.y,target.x,target.y))return false;
@@ -3716,7 +3729,10 @@ function endMeeting(){
   const M=G.M, ej=M.result?.eject||null; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject','vote-reveal'); $('meetingIntro').hidden=true; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent=''; $('skipVoteDots').hidden=true; $('skipVoteDots').innerHTML=''; $('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML=''); $('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'));
   if(ej)killChar(ej);
   resolveParasiteInfections();
-  G.bodies=[]; G.M=null; G.state='playing';
+  G.bodies=[];
+  // A reunião cancela qualquer efeito pendente do Atrasado.
+  G.delayedMarks={};G.delayedT=null;
+  G.M=null; G.state='playing';
   if(checkEnd())return;
   // Ao terminar qualquer reunião, todas as habilidades com cooldown entram em recarga completa.
   const pts=cafePoints(G.chars.length); G.chars.filter(c=>c.alive).forEach((c,i)=>placeChar(c,pts[i]));
@@ -4048,6 +4064,8 @@ function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_S
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
 if($('serverUrlIn'))$('serverUrlIn').value=netDefaultUrl();
 function netSend(o){if(NET.ws&&NET.ws.readyState===WebSocket.OPEN){try{NET.ws.send(JSON.stringify(o));return true}catch(e){}}return false}
+function friendlyJoinError(msg=''){const t=String(msg||'');if(/lotada/i.test(t))return'Esta sala está cheia.';if(/inexistente|código precisa|codigo precisa/i.test(t))return'Código inválido. Tente novamente';if(/já começou|foi encerrada|partida/i.test(t)&&/sala/i.test(t))return'Esta sala já começou, tente de novo mais tarde';return t}function setJoinError(msg=''){const el=$('joinError');if(el)el.textContent=friendlyJoinError(msg)}
+function showPlayerLeaveNotice(name,reason='leave'){const host=$('playerLeaveNotices');if(!host)return;const n=el('div','playerLeaveNotice',reason==='disconnect'?`${name||'Jogador'} se desconectou devido a um erro`:`${name||'Jogador'} saiu do jogo`);host.append(n);setTimeout(()=>{n.classList.add('out');setTimeout(()=>n.remove(),380)},3600)}
 function netConnect(action){
   const url=String($('serverUrlIn')?.value||netDefaultUrl()).trim();
   if(!/^wss?:\/\//i.test(url)){toast('Endereço do servidor inválido. Use ws:// ou wss://.');return}
@@ -4058,13 +4076,13 @@ function netConnect(action){
     NET.connecting=true;const ws=new WebSocket(url);NET.ws=ws;
     ws.onopen=()=>{NET.connecting=false;ws.send(JSON.stringify({type:'hello',name:String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante',color:G.cfg.color}))};
     ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}netHandleMessage(m)};
-    ws.onerror=()=>{NET.connecting=false;toast('Não foi possível conectar ao servidor multiplayer. Confira o endereço e se o servidor está ligado.',4200)};
-    ws.onclose=()=>{NET.connecting=false;const wasRoom=NET.inRoom;NET.ws=null;NET.id=null;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.remoteInputs.clear();NET.pendingTasks.clear();NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastMotionAt=0;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.matchImpIds.clear();NET.departedImpIds.clear();netHideWait();if(wasRoom){$('roomLobby').hidden=true;toast('Conexão com o servidor perdida. A partida online foi desconectada.',4000)}};
-  }catch(e){NET.connecting=false;toast('Falha ao abrir a conexão multiplayer.');}
+    ws.onerror=()=>{NET.connecting=false;if(NET.joinPending)setJoinError('Não foi possível conectar ao servidor multiplayer.');else toast('Não foi possível conectar ao servidor multiplayer. Confira o endereço e se o servidor está ligado.',4200)};
+    ws.onclose=()=>{NET.connecting=false;const wasRoom=NET.inRoom,wasJoining=!!NET.joinPending;NET.joinPending=false;if(wasJoining&&!wasRoom)setJoinError('Não foi possível conectar à sala. Tente novamente.');NET.ws=null;NET.id=null;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.remoteInputs.clear();NET.pendingTasks.clear();NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastMotionAt=0;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.matchImpIds.clear();NET.departedImpIds.clear();netHideWait();if(wasRoom){$('roomLobby').hidden=true;toast('Conexão com o servidor perdida. A partida online foi desconectada.',4000)}};
+  }catch(e){NET.connecting=false;if(NET.joinPending){NET.joinPending=false;setJoinError('Não foi possível conectar à sala. Tente novamente.')}else toast('Falha ao abrir a conexão multiplayer.');}
 }
 function netRoomPayload(){const size=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createSizeIn').value=size;const bots=clamp(Math.round(+$('createBotsIn').value||0),0,size-1);$('createBotsIn').value=bots;return {size,bots,settings:netSettings(),cosmetics:cloneCosmetics(PLAYER_COSMETICS)}}
 function netCreateRoom(){Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';$('createPanel').hidden=true;netConnect(()=>netSend({type:'create_room',name:G.cfg.name,color:G.cfg.color,...netRoomPayload()}))}
-function netJoinRoom(){const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(!/^[A-Z0-9]{6}$/.test(code)){toast('Digite o código completo de 6 letras maiúsculas ou números.');return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';netConnect(()=>netSend({type:'join_room',code,name:G.cfg.name,color:G.cfg.color,cosmetics:cloneCosmetics(PLAYER_COSMETICS)}))}
+function netJoinRoom(){const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);setJoinError('');if(!/^[A-Z0-9]{6}$/.test(code)){setJoinError('Código inválido. Tente novamente');Snd.err();return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';NET.joinPending=true;netConnect(()=>netSend({type:'join_room',code,name:G.cfg.name,color:G.cfg.color,cosmetics:cloneCosmetics(PLAYER_COSMETICS)}))}
 function netLeaveRoom(){closeCosmetics();if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;netHideWait();$('roomLobby').hidden=true}
 function netTotal(room=NET.room){return room?(room.players.length+(room.bots||0)):0}
 function netRenderRoom(){
@@ -4103,7 +4121,7 @@ function netBecomeHost(){
 }
 function netHandleMessage(m){
   if(m.type==='welcome'){NET.id=m.id;NET.connecting=false;if(NET.afterWelcome){const f=NET.afterWelcome;NET.afterWelcome=null;f()}return}
-  if(m.type==='room_error'){toast(m.message||'Não foi possível entrar na sala.',3500);$('btnJoinConfirm').disabled=false;$('btnCreateRoom').disabled=false;return}
+  if(m.type==='room_error'){const msg=m.message||'Não foi possível entrar na sala.';if(NET.joinPending)setJoinError(msg);else toast(msg,3500);NET.joinPending=false;$('btnJoinConfirm').disabled=false;$('btnCreateRoom').disabled=false;return}
   if(m.type==='room_state'){
     const wasHost=NET.isHost;NET.room=m.room;NET.inRoom=!!m.room;NET.isHost=!!(m.room&&m.room.hostId===NET.id);
     if(!m.room){NET.inRoom=false;NET.isHost=false;$('roomLobby').hidden=true;return}
@@ -4115,6 +4133,7 @@ function netHandleMessage(m){
   }
   if(m.type==='left'){NET.inRoom=false;NET.isHost=false;NET.room=null;$('roomLobby').hidden=true;netHideWait();return}
   if(m.type==='player_left'){
+    showPlayerLeaveNotice(m.name,m.reason);
     if(NET.isHost&&G.chars.length){const c=G.chars.find(x=>x.id===m.playerId);if(c&&c.role==='imp')NET.departedImpIds.add(c.id);if(NET.matchImpIds.has(m.playerId)&&!c?.isBot)NET.departedImpIds.add(m.playerId);if(c){G.chars=G.chars.filter(x=>x.id!==m.playerId);G.tasks=G.tasks.filter(t=>t.owner!==m.playerId);NET.remoteInputs.delete(m.playerId);if(G.M&&G.M.cards)delete G.M.cards[m.playerId];if(G.M&&G.M.votes){delete G.M.votes[m.playerId];delete G.M.voteAt[m.playerId];G.M.log=G.M.log.filter(v=>v.voter!==m.playerId&&v.target!==m.playerId)}if(G.player&&G.player.id===m.playerId)G.player=null;checkEnd()}}
     return;
   }
@@ -4299,7 +4318,7 @@ function netApplySnapshot(s,force=false){
     G.player=G.chars.find(c=>c.id===NET.id)||G.player;if(!G.player)return;G.player.isPlayer=true;G.role=G.player.role;G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.imps=G.chars.filter(c=>c.role==='imp');G.imp=G.imps[0]||null;
     const oldTasks=new Map((G.tasks||[]).map(t=>[String(t.id),t]));
     G.tasks=s.tasks.map(r=>{let t=oldTasks.get(String(r.id));if(!t)t={id:r.id,steps:[]};t.id=r.id;t.key=r.key;t.name=r.name;t.owner=r.owner;t.fake=!!r.fake;t.fakeOnly=!!r.fakeOnly;t.fix=r.fix||null;const oldSteps=new Map((t.steps||[]).map((q,i)=>[String(q.st)+'/'+i,q]));t.steps=r.steps.map((q,i)=>{let z=oldSteps.get(String(q.st)+'/'+i);if(!z)z={};const key=String(t.id)+':'+String(q.st);Object.assign(z,q);if(q.done)NET.pendingTasks.delete(key);return z});t.done=!!r.done||t.steps.every(q=>q.done);for(const q of t.steps){const key=String(t.id)+':'+String(q.st);if(q.done||t.done)NET.pendingTasks.delete(key)}return t});
-    const oldBodies=new Map((G.bodies||[]).map(b=>[String(b.id),b]));G.bodies=s.bodies.map(r=>{const b=oldBodies.get(String(r.id))||{};Object.assign(b,r);return b});G.deadPets=Array.isArray(s.deadPets)?s.deadPets.map(p=>({...p,sad:true})):[];G.instructorTrails=Array.isArray(s.instructorTrails)?s.instructorTrails.map(t=>({...t,points:(t.points||[]).map(p=>({...p}))})):[];for(const tr of G.instructorTrails){if(!INSTRUCTOR_SEEN_TRAILS.has(tr.id)){INSTRUCTOR_SEEN_TRAILS.add(tr.id);const end=tr.points?.[tr.points.length-1];if(end){emitRoleFx(end.x,end.y,'instructor',1);Snd.roleFx('instructor','done');toast('↔️ Um Instrutor marcou um caminho para você.',2400)}}}
+    const oldBodies=new Map((G.bodies||[]).map(b=>[String(b.id),b]));G.bodies=s.bodies.map(r=>{const b=oldBodies.get(String(r.id))||{};Object.assign(b,r);return b});G.deadPets=Array.isArray(s.deadPets)?s.deadPets.map(p=>({...p,sad:true})):[];G.instructorTrails=Array.isArray(s.instructorTrails)?s.instructorTrails.map(t=>({...t,points:(t.points||[]).map(p=>({...p}))})):[];for(const tr of G.instructorTrails){if(!INSTRUCTOR_SEEN_TRAILS.has(tr.id)){INSTRUCTOR_SEEN_TRAILS.add(tr.id);const end=tr.points?.[tr.points.length-1];if(end){Snd.roleFx('instructor','done');toast('↔️ Um Instrutor marcou um caminho para você.',2400)}}}
     G.delayedMarks=s.delayedMarks&&typeof s.delayedMarks==='object'?{...s.delayedMarks}:{};G.parasiteInfections=s.parasiteInfections&&typeof s.parasiteInfections==='object'?{...s.parasiteInfections}:{};
     if(s.cfg)netApplySettings(s.cfg);G.sab={...s.sab};const doorsChanged=doors.some((d,i)=>d.closed!==!!s.doors[i]);doors.forEach((d,i)=>{d.closed=!!s.doors[i]});if(doorsChanged){rebuildWalk();G.walkVer++}
     G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;G.delayedCd=s.selfDelayedCd??G.player.netDelayedCd??s.delayedCd??G.delayedCd;G.player.netDelayedCd=G.delayedCd;NET.pendingSheriffShot=false;NET.pendingDelayedMark=false;NET.pendingControl=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.observer=!!(s.observer||G.player.function==='observer');G.cleaner=!!(s.cleaner||G.player.function==='cleaner');G.parasite=!!(s.parasite||G.player.function==='parasite');G.player.parasiteReady=s.selfParasiteReady??G.player.parasiteReady??true;G.player.instructor=!!(s.selfInstructor??G.player.instructor);G.player.instructorCd=s.selfInstructorCd??G.player.instructorCd??0;G.player.instructorTargetId=Object.prototype.hasOwnProperty.call(s,'selfInstructorTargetId')?s.selfInstructorTargetId:(G.player.instructorTargetId??null);G.instructorCd=G.player.instructorCd;G.instructorTargetId=G.player.instructorTargetId;G.cleanerCd=s.selfCleanerCd??G.player.cleanCd??G.cleanerCd;G.cleanerUses=s.selfCleanerUses??G.player.cleanUses??G.cleanerUses;G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){if(!G.player.controlledBy){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}else $('ventPanel').hidden=true}
@@ -4386,9 +4405,12 @@ function netHostCommand(m){
     const target=G.chars.find(c=>String(c.id)===String(m.targetId));
     if(activePlay&&!G.M&&!ch.alive&&ch.ghost&&ch.role==='crew'&&ch.instructor&&(ch.instructorCd||0)<=0&&(G.sab.comms||0)<=0&&target&&target.alive&&!target.vent){
       const sx=Number(m.x),sy=Number(m.y),hasClientPoint=Number.isFinite(sx)&&Number.isFinite(sy),clientDrift=hasClientPoint?Math.hypot(ch.x-sx,ch.y-sy):Infinity;
+      const strictNear=dist(ch,target)<=INSTRUCTOR_TARGET_RANGE&&losClear(ch.x,ch.y,target.x,target.y);
       const hostNear=dist(ch,target)<=INSTRUCTOR_TARGET_RANGE+INSTRUCTOR_NET_RANGE_TOLERANCE&&losClear(ch.x,ch.y,target.x,target.y);
-      const clientNear=hasClientPoint&&clientDrift<=INSTRUCTOR_NET_POINT_TOLERANCE&&Math.hypot(sx-target.x,sy-target.y)<=INSTRUCTOR_TARGET_RANGE+INSTRUCTOR_NET_RANGE_TOLERANCE&&losClear(sx,sy,target.x,target.y);
-      if(hostNear||clientNear){ch.instructorTargetId=target.id;ch.instructorPoint=null}
+      const hostCandidates=G.chars.filter(c=>c!==ch&&c.alive&&!c.vent&&dist(ch,c)<=INSTRUCTOR_TARGET_RANGE+INSTRUCTOR_NET_RANGE_TOLERANCE&&losClear(ch.x,ch.y,c.x,c.y)).sort((a,b)=>dist(ch,a)-dist(ch,b));
+      const clientCandidates=hasClientPoint&&clientDrift<=INSTRUCTOR_NET_POINT_TOLERANCE?G.chars.filter(c=>c!==ch&&c.alive&&!c.vent&&Math.hypot(sx-c.x,sy-c.y)<=INSTRUCTOR_TARGET_RANGE+INSTRUCTOR_NET_RANGE_TOLERANCE&&losClear(sx,sy,c.x,c.y)).sort((a,b)=>Math.hypot(sx-a.x,sy-a.y)-Math.hypot(sx-b.x,sy-b.y)):[];
+      const closestHost=hostCandidates[0],closestClient=clientCandidates[0];
+      if((strictNear||hostNear||closestClient)&& (String(closestHost?.id)===String(target.id)||String(closestClient?.id)===String(target.id))){ch.instructorTargetId=target.id;ch.instructorPoint=null}
     }
   }else if(command==='instructor_mark'){
     const target=G.chars.find(c=>String(c.id)===String(m.targetId));if(activePlay&&!G.M&&!ch.alive&&ch.ghost&&ch.role==='crew'&&ch.instructor&&(ch.instructorCd||0)<=0&&(G.sab.comms||0)<=0&&target&&target.alive&&String(ch.instructorTargetId)===String(target.id)){
@@ -4544,8 +4566,8 @@ $('btnCreateRoom').addEventListener('click',()=>{$('joinPanel').hidden=true;$('c
 $('btnCreateConfirm').addEventListener('click',netCreateRoom);$('btnCreateCancel').addEventListener('click',()=>$('createPanel').hidden=true);
 $('createSizeIn').addEventListener('input',()=>{const n=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createBotsIn').max=Math.max(0,n-1);if(+$('createBotsIn').value>n-1)$('createBotsIn').value=n-1});
 $('createBotsIn').addEventListener('input',()=>{const n=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createBotsIn').value=clamp(Math.round(+$('createBotsIn').value||0),0,n-1)});
-$('btnJoinRoom').addEventListener('click',()=>{$('joinPanel').hidden=false;$('roomCodeIn').focus();if(!$('serverUrlIn').value)$('serverUrlIn').value=netDefaultUrl()});
-$('btnJoinConfirm').addEventListener('click',()=>netJoinRoom());$('roomCodeIn').addEventListener('input',()=>{$('roomCodeIn').value=$('roomCodeIn').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)});$('roomCodeIn').addEventListener('keydown',e=>{if(e.key==='Enter')netJoinRoom()});$('btnJoinCancel').addEventListener('click',()=>$('joinPanel').hidden=true);
+$('btnJoinRoom').addEventListener('click',()=>{setJoinError('');$('joinPanel').hidden=false;$('roomCodeIn').focus();if(!$('serverUrlIn').value)$('serverUrlIn').value=netDefaultUrl()});
+$('btnJoinConfirm').addEventListener('click',()=>netJoinRoom());$('roomCodeIn').addEventListener('input',()=>{$('roomCodeIn').value=$('roomCodeIn').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)});$('roomCodeIn').addEventListener('keydown',e=>{if(e.key==='Enter')netJoinRoom()});$('btnJoinCancel').addEventListener('click',()=>{NET.joinPending=false;setJoinError('');$('joinPanel').hidden=true});
 $('btnSaveRoomConfig').addEventListener('click',netSaveRoomSettings);
 for(const [id,key] of [['roomSpeedIn','speed'],['roomKillIn','kill'],['roomSabIn','sab'],['roomMeetIn','meet'],['roomDiscussionIn','discussion'],['roomVotingIn','voting'],['roomCrewVisionIn','crewVision']])$(id).addEventListener('input',()=>netNoteRoomControl(key,$(id).value));
 $('roomBotsIn').addEventListener('input',()=>netNoteRoomBots($('roomBotsIn').value));
