@@ -341,3 +341,30 @@ test('Parasita é função de Infiltrado com infecção adiada até o fim da reu
   assert.match(html, /action:'parasite_infect'/);
   assert.match(server, /'parasite_infect'/);
 });
+
+test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comunicações', () => {
+  assert.match(html, /class="act2 instructor" id="btnInstructor"[\s\S]*?↔️<small>Trilhar<\/small>/);
+  assert.match(html, /instructorChance:\[0,100\]/);
+  assert.match(html, /instructorMax:\[0,15\]/);
+  assert.match(html, /instructorCooldown:\[20,60\]/);
+  assert.match(html, /instructorDuration:\[5,15\]/);
+  assert.match(html, /function maybeActivateInstructor\(ch\)[\s\S]*?ch\.alive[\s\S]*?ch\.role!=='crew'[\s\S]*?ch\.instructor=true/);
+  assert.match(html, /function killChar\(c\)[\s\S]*?maybeActivateInstructor\(c\)/);
+  assert.match(html, /function createInstructorTrail\(owner,target,x,y\)[\s\S]*?targetId:target\.id[\s\S]*?CFG\.instructorDuration/);
+  assert.match(html, /if\(type==='comms'\)\{G\.instructorTrails\.length=0/);
+  assert.match(html, /function instructorNpcThink\(ch,dt\)/);
+  assert.match(html, /action:'instructor_mark'/);
+  assert.match(server, /'instructor_mark'/);
+  assert.match(server, /s\.instructorTrails=\(s\.instructorTrails\|\|\[\]\)\.filter\(t=>String\(t\.targetId\)===String\(recipientId\)\)/);
+  assert.match(server, /recipient\?\.instructor[\s\S]*?c\.alive&&c\.role==='crew'\)c\.function=null/);
+});
+
+test('habilidades especiais possuem efeitos sonoros e visuais leves personalizados', () => {
+  assert.match(html, /roleFx\(kind,phase='use'\)/);
+  assert.match(html, /const ROLE_FX=\[\]/);
+  assert.match(html, /function emitRoleFx\(/);
+  assert.match(html, /function drawRoleFx\(/);
+  for (const role of ['locator','sheriff','delayed','observer','cleaner','parasite','engineer','marionette','instructor']) {
+    assert.match(html, new RegExp(`roleFx\\('${role}'`));
+  }
+});
