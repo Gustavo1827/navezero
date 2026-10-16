@@ -697,8 +697,18 @@ const COLORS=[
   {id:'caqui',name:'Caqui',main:'#b8a04a',dark:'#79672a'},
   {id:'coral',name:'Coral',main:'#ff786b',dark:'#b84742'},
   {id:'cinza',name:'Cinza',main:'#8a91a0',dark:'#555b68'},
+  {id:'azul_claro',name:'Azul-claro',main:'#7dbbe6',dark:'#4e88b8'},
+  {id:'rosado',name:'Rosado',main:'#f3bfd7',dark:'#c47aa3'},
+  {id:'verde_forte',name:'Verde Forte',main:'#16a85f',dark:'#0a6a3c'},
+  {id:'oliva',name:'Oliva',main:'#778728',dark:'#485617'},
+  {id:'lavanda',name:'Lavanda',main:'#b77ae7',dark:'#8147b5'},
+  {id:'mostarda',name:'Mostarda',main:'#e1c600',dark:'#9f8610'},
+  {id:'musgo',name:'Musgo',main:'#667a1d',dark:'#3d4d12'},
+  {id:'verde_claro',name:'Verde-claro',main:'#72dda0',dark:'#45a968'},
 ];
 const COLOR_BY={}; COLORS.forEach(c=>COLOR_BY[c.id]=c);
+// Compatibilidade visual com estados antigos que ainda usem o antigo id Marinho.
+COLOR_BY.marinho=COLOR_BY.azul_claro;
 const COSMETIC_NONE='none';
 const COSMETIC_CATALOG={
   hat:[
@@ -716,7 +726,17 @@ const COSMETIC_CATALOG={
     {id:'hat_bow',name:'Laço Rosa'},
     {id:'hat_cosmic',name:'Gorro Cósmico'},
     {id:'hat_colorcap',name:'Capuz de Tripulante'},
-    {id:'hat_nyah',name:'Orelhas Neon'}
+    {id:'hat_nyah',name:'Orelhas Neon'},
+    {id:'hat_orbit_badge',name:'Boné de Patrulha'},
+    {id:'hat_eye_pod',name:'Capuz Vigia'},
+    {id:'hat_comet_mane',name:'Cabeleira Cometa'},
+    {id:'hat_void_topper',name:'Cartola do Vácuo'},
+    {id:'hat_dune_brim',name:'Chapéu de Expedição'},
+    {id:'hat_solar_peak',name:'Boné Solar'},
+    {id:'hat_nova_fold',name:'Touca de Dobra'},
+    {id:'hat_dust_spire',name:'Pico de Poeira'},
+    {id:'hat_polar_brim',name:'Aba Polar'},
+    {id:'hat_winter_comet',name:'Gorro de Cometa'}
   ],
   pet:[
     {id:'none',name:'Nenhum'},
@@ -726,7 +746,9 @@ const COSMETIC_CATALOG={
     {id:'luna_bug',name:'Lesminha Lunar'},
     {id:'beacon_orb',name:'Mini Disco'},
     {id:'pet_scout',name:'Bichinho Explorador'},
-    {id:'pet_mini',name:'Mini Tripulante'}
+    {id:'pet_mini',name:'Mini Tripulante'},
+    {id:'pet_signal_orb',name:'Orbe de Sinal'},
+    {id:'pet_pocket_eye',name:'Olho de Bolso'}
   ],
   outfit:[
     {id:'none',name:'Nenhum'},
@@ -735,7 +757,9 @@ const COSMETIC_CATALOG={
     {id:'utility_belt',name:'Shorts de Carga'},
     {id:'polar_wrap',name:'Macacão de Frio'},
     {id:'explorer_harness',name:'Colete de Campo'},
-    {id:'outfit_cadet',name:'Uniforme de Cadete'}
+    {id:'outfit_cadet',name:'Uniforme de Cadete'},
+    {id:'outfit_orbit_collar',name:'Traje Orbital'},
+    {id:'outfit_signal_wrap',name:'Colete de Sinal'}
   ],
   visor:[
     {id:'none',name:'Nenhum'},
@@ -743,7 +767,9 @@ const COSMETIC_CATALOG={
     {id:'prism_strip',name:'Óculos de Impacto'},
     {id:'data_monocle',name:'Lente Analítica'},
     {id:'star_sticker',name:'Adesivo Prisma'},
-    {id:'scan_bar',name:'Etiqueta de Lembrete'}
+    {id:'scan_bar',name:'Etiqueta de Lembrete'},
+    {id:'visor_eclipse',name:'Óculos Eclipse'},
+    {id:'visor_scope',name:'Mira de Convés'}
   ]
 };
 const COSMETIC_CATEGORIES=[['hat','Chapéus'],['pet','Pets'],['outfit','Roupas'],['visor','Visores']];
@@ -840,12 +866,22 @@ function drawOutfitCosmetic(c,id){
     c.fillStyle='#315f92';c.strokeStyle='#10122a';c.lineWidth=1.25;c.beginPath();c.moveTo(-11,1);c.quadraticCurveTo(0,4,11,1);c.lineTo(10,5);c.quadraticCurveTo(0,7,-10,5);c.closePath();c.fill();c.stroke();
     c.fillStyle='#efc85b';c.beginPath();c.arc(0,3,1.4,0,6.283);c.fill();
     c.strokeStyle='rgba(255,255,255,.45)';c.lineWidth=.8;c.beginPath();c.moveTo(-7,-1);c.lineTo(-4,1);c.moveTo(7,-1);c.lineTo(4,1);c.stroke();
+  }else if(id==='outfit_orbit_collar'){
+    torso('#304b45','#1c332f');collar('#b8e3d6','#487d72');
+    c.fillStyle='#173e39';c.strokeStyle='#10122a';c.lineWidth=1.2;c.beginPath();c.moveTo(-12,-1);c.quadraticCurveTo(0,3.2,12,-1);c.lineTo(11,3.5);c.quadraticCurveTo(0,6,-11,3.5);c.closePath();c.fill();c.stroke();
+    c.fillStyle='#5cd2ae';rr(c,-2,1,4,5.2,1.2);c.fill();c.stroke();
+    c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=.8;c.beginPath();c.moveTo(-8,7);c.quadraticCurveTo(0,9,8,7);c.stroke();
+  }else if(id==='outfit_signal_wrap'){
+    torso('#6873bb','#444c87');collar('#d9dcff','#6e78ba');
+    c.fillStyle='#30375e';c.strokeStyle='#10122a';c.lineWidth=1.2;rr(c,-9,2.5,18,4.8,2);c.fill();c.stroke();
+    c.fillStyle='#80d8e8';c.beginPath();c.arc(-6,5,1.1,0,6.283);c.arc(0,5,1.1,0,6.283);c.arc(6,5,1.1,0,6.283);c.fill();
+    c.strokeStyle='rgba(255,255,255,.32)';c.lineWidth=.8;c.beginPath();c.moveTo(-8,-1);c.lineTo(-4,1);c.moveTo(8,-1);c.lineTo(4,1);c.stroke();
   }
   c.restore();
 }
 function drawOutfitLegCosmetic(c,id,walkStep=0){
   if(!id||id==='none')return;
-  const palette={tech_vest:['#e8edf0','#b8c5ce'],command_jacket:['#292b39','#d9b85e'],utility_belt:['#3d74ad','#223f63'],polar_wrap:['#edf2f1','#9ca8b0'],explorer_harness:['#526650','#cbb36c'],outfit_cadet:['#b83b55','#315f92']}[id];
+  const palette={tech_vest:['#e8edf0','#b8c5ce'],command_jacket:['#292b39','#d9b85e'],utility_belt:['#3d74ad','#223f63'],polar_wrap:['#edf2f1','#9ca8b0'],explorer_harness:['#526650','#cbb36c'],outfit_cadet:['#b83b55','#315f92'],outfit_orbit_collar:['#304b45','#5cd2ae'],outfit_signal_wrap:['#6873bb','#80d8e8']}[id];
   if(!palette)return;const [fill,cuff]=palette,leftY=5+walkStep*3,rightY=5-walkStep*3;
   c.save();c.lineJoin='round';c.lineCap='round';c.fillStyle=fill;c.strokeStyle='#10122a';c.lineWidth=1.45;
   // Cada perna é recortada dentro do mesmo contorno arredondado do corpo base.
@@ -853,6 +889,8 @@ function drawOutfitLegCosmetic(c,id,walkStep=0){
   leg(-11.4,leftY);leg(2.6,rightY);
   c.fillStyle=cuff;c.strokeStyle='#10122a';c.lineWidth=1.05;rr(c,-10.7,leftY+8.2,7.4,2.5,1.2);c.fill();c.stroke();rr(c,3.3,rightY+8.2,7.4,2.5,1.2);c.fill();c.stroke();
   if(id==='outfit_cadet'){c.fillStyle='#efc85b';rr(c,-10,leftY+5.1,6,1.45,.7);c.fill();rr(c,4,rightY+5.1,6,1.45,.7);c.fill()}
+  if(id==='outfit_orbit_collar'){c.fillStyle='#5cd2ae';rr(c,-10,leftY+5.3,6,1.25,.6);c.fill();rr(c,4,rightY+5.3,6,1.25,.6);c.fill()}
+  if(id==='outfit_signal_wrap'){c.fillStyle='#80d8e8';rr(c,-9.7,leftY+5.2,5.4,1.2,.6);c.fill();rr(c,4.3,rightY+5.2,5.4,1.2,.6);c.fill()}
   c.restore();
 }
 function drawVisorCosmetic(c,id){
@@ -879,6 +917,16 @@ function drawVisorCosmetic(c,id){
     // Pequena etiqueta presa no canto do visor, com dobra de papel.
     c.fillStyle='#f4d96c';c.strokeStyle='#10122a';c.lineWidth=1.2;c.save();c.translate(11,-14);c.rotate(-.12);rr(c,-5,-4,10,8,1.5);c.fill();c.stroke();
     c.strokeStyle='#816925';c.lineWidth=.8;c.beginPath();c.moveTo(-3,-1);c.lineTo(2,-1);c.moveTo(-3,1);c.lineTo(1,1);c.stroke();c.restore();
+  }else if(id==='visor_eclipse'){
+    c.fillStyle='rgba(26,22,35,.9)';c.strokeStyle='#10122a';c.lineWidth=1.55;rr(c,1.5,-18,17,10.5,5);c.fill();c.stroke();
+    c.fillStyle='#d9c9aa';c.beginPath();c.arc(6.5,-13,2.2,0,6.283);c.arc(13.5,-13,2.2,0,6.283);c.fill();
+    c.fillStyle='#2f2a3a';c.beginPath();c.arc(6.5,-13,1.05,0,6.283);c.arc(13.5,-13,1.05,0,6.283);c.fill();
+    c.strokeStyle='#d8b56b';c.lineWidth=.9;c.beginPath();c.moveTo(3,-9);c.quadraticCurveTo(10,-6.7,17,-9);c.stroke();
+  }else if(id==='visor_scope'){
+    c.strokeStyle='#5de0e4';c.lineWidth=1.4;c.beginPath();c.arc(12,-13,4.4,0,6.283);c.stroke();
+    c.strokeStyle='#10122a';c.lineWidth=1.2;c.beginPath();c.moveTo(7.5,-13);c.lineTo(2,-13);c.moveTo(16.5,-13);c.lineTo(19,-13);c.stroke();
+    c.fillStyle='rgba(93,224,228,.18)';c.beginPath();c.arc(12,-13,3.2,0,6.283);c.fill();
+    c.fillStyle='#f0c85a';c.beginPath();c.arc(12,-13,1,0,6.283);c.fill();
   }
   c.restore();
 }
@@ -933,6 +981,37 @@ function drawHatCosmetic(c,id,colorId=c._nzCosmeticColor){
     c.fillStyle='#242842';c.beginPath();c.moveTo(-12,-27);c.lineTo(-9,-43);c.lineTo(-1,-31);c.closePath();c.fill();c.stroke();c.beginPath();c.moveTo(4,-31);c.lineTo(11,-43);c.lineTo(13,-27);c.closePath();c.fill();c.stroke();
     c.fillStyle='#e75a8b';c.beginPath();c.moveTo(-9,-31);c.lineTo(-8,-39);c.lineTo(-3,-32);c.closePath();c.fill();c.beginPath();c.moveTo(7,-32);c.lineTo(10,-39);c.lineTo(11,-30);c.closePath();c.fill();
     c.strokeStyle='#65dff1';c.lineWidth=1.1;c.beginPath();c.moveTo(-5,-29);c.lineTo(6,-29);c.stroke();
+  }else if(id==='hat_orbit_badge'){
+    c.fillStyle='#2c3445';c.beginPath();c.moveTo(-11,-27);c.quadraticCurveTo(-8,-37,2,-37);c.quadraticCurveTo(10,-35,11,-27);c.closePath();c.fill();c.stroke();
+    c.fillStyle='#202634';c.beginPath();c.moveTo(2,-28);c.quadraticCurveTo(14,-29,18,-24);c.quadraticCurveTo(11,-22,3,-23);c.closePath();c.fill();c.stroke();
+    c.fillStyle='#e9eef7';c.beginPath();c.arc(3,-32,3.3,0,6.283);c.fill();c.stroke();c.fillStyle='#5aaed8';c.beginPath();c.arc(3,-32,1.3,0,6.283);c.fill();
+  }else if(id==='hat_eye_pod'){
+    c.fillStyle='#247b70';c.beginPath();c.moveTo(-13,-25);c.quadraticCurveTo(-12,-37,-3,-41);c.quadraticCurveTo(8,-39,13,-29);c.quadraticCurveTo(8,-24,-13,-25);c.closePath();c.fill();c.stroke();
+    c.fillStyle='#d7f1ed';c.beginPath();c.ellipse(4,-33,5.5,4,0,0,6.283);c.fill();c.stroke();c.fillStyle='#15283d';c.beginPath();c.arc(5,-33,1.8,0,6.283);c.fill();
+    c.fillStyle='#4dbca9';c.beginPath();c.moveTo(-13,-25);c.quadraticCurveTo(-17,-18,-11,-16);c.quadraticCurveTo(-6,-18,-4,-24);c.closePath();c.fill();c.stroke();
+  }else if(id==='hat_comet_mane'){
+    c.fillStyle='#242631';c.beginPath();c.moveTo(-13,-27);c.quadraticCurveTo(-12,-39,-2,-42);c.quadraticCurveTo(7,-40,12,-31);c.lineTo(16,-35);c.lineTo(14,-25);c.lineTo(20,-27);c.lineTo(13,-20);c.quadraticCurveTo(2,-24,-13,-27);c.closePath();c.fill();c.stroke();
+    c.strokeStyle='#5a6071';c.lineWidth=1.1;c.beginPath();c.moveTo(-6,-34);c.quadraticCurveTo(1,-39,8,-34);c.stroke();
+  }else if(id==='hat_void_topper'){
+    c.fillStyle='#282a3e';c.beginPath();c.ellipse(0,-25,16,4.8,0,0,6.283);c.fill();c.stroke();c.fillStyle='#30344d';rr(c,-8,-39,16,14,4);c.fill();c.stroke();
+    c.fillStyle='#6a72a2';rr(c,-8,-31,16,3.2,1.2);c.fill();c.stroke();
+  }else if(id==='hat_dune_brim'){
+    c.fillStyle='#8e805c';c.beginPath();c.ellipse(0,-25,17,5.2,0,0,6.283);c.fill();c.stroke();c.fillStyle='#b0a37b';c.beginPath();c.moveTo(-9,-27);c.quadraticCurveTo(-7,-39,1,-40);c.quadraticCurveTo(9,-37,10,-27);c.closePath();c.fill();c.stroke();
+    c.fillStyle='#3d4655';rr(c,-9,-31,18,3,1);c.fill();c.stroke();
+  }else if(id==='hat_solar_peak'){
+    c.fillStyle='#e7b52f';c.beginPath();c.moveTo(-11,-27);c.quadraticCurveTo(-8,-37,1,-38);c.quadraticCurveTo(10,-36,11,-27);c.closePath();c.fill();c.stroke();c.fillStyle='#c98c1d';c.beginPath();c.moveTo(2,-28);c.quadraticCurveTo(14,-29,18,-24);c.quadraticCurveTo(11,-22,3,-23);c.closePath();c.fill();c.stroke();
+    c.strokeStyle='#fff0a0';c.lineWidth=1.1;c.beginPath();c.moveTo(-4,-34);c.quadraticCurveTo(2,-37,7,-33);c.stroke();
+  }else if(id==='hat_nova_fold'){
+    c.fillStyle='#7371bb';c.beginPath();c.moveTo(-12,-26);c.quadraticCurveTo(-10,-35,-3,-38);c.quadraticCurveTo(5,-37,9,-31);c.lineTo(15,-35);c.quadraticCurveTo(14,-28,9,-24);c.quadraticCurveTo(0,-26,-12,-26);c.closePath();c.fill();c.stroke();
+    c.fillStyle='#a6a4e0';c.beginPath();c.moveTo(-8,-31);c.quadraticCurveTo(-2,-35,4,-32);c.lineTo(1,-29);c.closePath();c.fill();
+  }else if(id==='hat_dust_spire'){
+    c.fillStyle='#5a4b3e';c.beginPath();c.moveTo(-12,-25);c.quadraticCurveTo(-8,-30,-5,-33);c.lineTo(-2,-40);c.lineTo(2,-35);c.lineTo(6,-42);c.lineTo(9,-32);c.quadraticCurveTo(13,-29,12,-25);c.closePath();c.fill();c.stroke();
+    c.strokeStyle='#887565';c.lineWidth=1;c.beginPath();c.moveTo(-7,-29);c.quadraticCurveTo(0,-32,7,-29);c.stroke();
+  }else if(id==='hat_polar_brim'){
+    c.fillStyle='#eceff2';c.beginPath();c.ellipse(0,-25,17,5,0,0,6.283);c.fill();c.stroke();c.fillStyle='#f8fafb';c.beginPath();c.moveTo(-9,-27);c.quadraticCurveTo(-8,-38,0,-39);c.quadraticCurveTo(8,-37,10,-27);c.closePath();c.fill();c.stroke();c.fillStyle='#9ab9c9';rr(c,-10,-31,20,3.1,1.2);c.fill();c.stroke();
+  }else if(id==='hat_winter_comet'){
+    c.fillStyle='#d9484b';c.beginPath();c.moveTo(-11,-27);c.quadraticCurveTo(-8,-37,-2,-40);c.quadraticCurveTo(5,-43,9,-37);c.quadraticCurveTo(12,-33,11,-27);c.closePath();c.fill();c.stroke();
+    c.fillStyle='#eff4f6';rr(c,-12,-29,24,5,2.5);c.fill();c.stroke();c.beginPath();c.arc(10,-38,3.6,0,6.283);c.fill();c.stroke();
   }
   c.restore();
 }
@@ -960,6 +1039,12 @@ function drawPetShape(c,id,x,y,phase=0,opts={}){
     // Mini tripulante usa a cor do dono, mas com proporção própria e visor verde-limão.
     c.fillStyle=crew.dark;rr(c,-7,2,5,7,2.3);c.fill();c.stroke();rr(c,2,2,5,7,2.3);c.fill();c.stroke();rr(c,-10,-4,4,8,2);c.fill();c.stroke();
     c.fillStyle=crew.main;rr(c,-7,-9,14,13,6);c.fill();c.stroke();c.fillStyle='#9ff3a8';rr(c,1,-6,7,4.8,2.4);c.fill();c.stroke();c.fillStyle='rgba(255,255,255,.72)';rr(c,2,-5.3,2.5,1.3,.6);c.fill();
+  }else if(id==='pet_signal_orb'){
+    c.fillStyle='#5d1c2c';c.beginPath();c.arc(0,sad?1:0,8,0,6.283);c.fill();c.stroke();c.fillStyle='#d62d55';c.beginPath();c.arc(0,sad?0:-1,5.5,0,6.283);c.fill();c.stroke();c.fillStyle='#ff879c';c.beginPath();c.ellipse(-2,-3,2.3,1.5,-.45,0,6.283);c.fill();
+    c.strokeStyle='#7cf0e3';c.lineWidth=1.2;c.beginPath();c.arc(0,0,10,-.35,.35);c.stroke();
+  }else if(id==='pet_pocket_eye'){
+    c.fillStyle='#344052';c.beginPath();c.ellipse(0,sad?1:0,9,7,0,0,6.283);c.fill();c.stroke();c.fillStyle='#bfe9ff';c.beginPath();c.ellipse(2,-1,5,3.5,0,0,6.283);c.fill();c.stroke();c.fillStyle='#23324c';c.beginPath();c.arc(3,sad?0:-1,1.5,0,6.283);c.fill();
+    c.strokeStyle='#6ce0d2';c.lineWidth=1.2;c.beginPath();c.moveTo(-4,-6);c.quadraticCurveTo(0,-10,5,-7);c.stroke();c.fillStyle='#6ce0d2';c.beginPath();c.arc(5,-7,1.2,0,6.283);c.fill();
   }
   if(sad){c.strokeStyle='#10122a';c.lineWidth=1.2;c.beginPath();c.arc(1,4,3,Math.PI*1.16,Math.PI*1.84);c.stroke();c.fillStyle='#78d7ff';c.beginPath();c.ellipse(8,4,1.4,2.4,-.18,0,6.283);c.fill();c.stroke()}
   c.restore();

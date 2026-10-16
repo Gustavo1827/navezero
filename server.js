@@ -10,12 +10,14 @@ const HOST = process.env.HOST || '0.0.0.0';
 const HTML_FILE = path.join(__dirname, 'index.html');
 const rooms = new Map();
 const clients = new Map();
-const COLORS = ['vermelho','azul','amarelo','verde','rosa','roxo','laranja','ciano','preto','branco','carmim','banana','caqui','coral','cinza'];
+const COLORS = ['vermelho','azul','amarelo','verde','rosa','roxo','laranja','ciano','preto','branco','carmim','banana','caqui','coral','cinza','azul_claro','rosado','verde_forte','oliva','lavanda','mostarda','musgo','verde_claro'];
+const LEGACY_COLORS={marinho:'azul_claro'};
+const normalizeColor=value=>LEGACY_COLORS[String(value||'')]||String(value||'');
 const COSMETIC_ALLOWED={
-  hat:new Set(['none','antenna_lunar','cap_orbital','crown_scrap','sprout_solar','halo_signal','navigator_band','hat_traveler','hat_tide','hat_nightcap','hat_signal','hat_bow','hat_cosmic','hat_colorcap','hat_nyah']),
-  pet:new Set(['none','drone_pingo','cube_bot','comet_pup','luna_bug','beacon_orb','pet_scout','pet_mini']),
-  outfit:new Set(['none','tech_vest','command_jacket','utility_belt','polar_wrap','explorer_harness','outfit_cadet']),
-  visor:new Set(['none','hud_grid','prism_strip','data_monocle','star_sticker','scan_bar'])
+  hat:new Set(['none','antenna_lunar','cap_orbital','crown_scrap','sprout_solar','halo_signal','navigator_band','hat_traveler','hat_tide','hat_nightcap','hat_signal','hat_bow','hat_cosmic','hat_colorcap','hat_nyah','hat_orbit_badge','hat_eye_pod','hat_comet_mane','hat_void_topper','hat_dune_brim','hat_solar_peak','hat_nova_fold','hat_dust_spire','hat_polar_brim','hat_winter_comet']),
+  pet:new Set(['none','drone_pingo','cube_bot','comet_pup','luna_bug','beacon_orb','pet_scout','pet_mini','pet_signal_orb','pet_pocket_eye']),
+  outfit:new Set(['none','tech_vest','command_jacket','utility_belt','polar_wrap','explorer_harness','outfit_cadet','outfit_orbit_collar','outfit_signal_wrap']),
+  visor:new Set(['none','hud_grid','prism_strip','data_monocle','star_sticker','scan_bar','visor_eclipse','visor_scope'])
 };
 const DEFAULT_COSMETICS={hat:'none',pet:'none',outfit:'none',visor:'none'};
 function cleanCosmetics(input={}){const src=input&&typeof input==='object'?input:{};const out={};for(const key of Object.keys(DEFAULT_COSMETICS)){const id=String(src[key]||'none');out[key]=COSMETIC_ALLOWED[key].has(id)?id:'none'}return out}
@@ -59,6 +61,7 @@ function cleanSettings(input={}, playerCount=15) {
 const ROOM_CODE_CHARS='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 function makeCode(){let code;do{code='';for(let i=0;i<6;i++)code+=ROOM_CODE_CHARS[crypto.randomInt(ROOM_CODE_CHARS.length)]}while(rooms.has(code));return code}
 function pickColor(requested, room) {
+  requested=normalizeColor(requested);
   const used = new Set(room.players.map(p=>p.color));
   if(COLORS.includes(requested) && !used.has(requested))return requested;
   return COLORS.find(c=>!used.has(c)) || COLORS[0];
@@ -154,7 +157,7 @@ function handle(ws, raw, timings={}){
   if(!m||typeof m.type!=='string')return;
   if(m.type==='hello'){
     if(c.id)return;
-    c.id='p_'+crypto.randomBytes(8).toString('hex');c.name=safeText(m.name);c.color=COLORS.includes(m.color)?m.color:'azul';clients.set(c.id,c);
+    c.id='p_'+crypto.randomBytes(8).toString('hex');c.name=safeText(m.name);{const requested=normalizeColor(m.color);c.color=COLORS.includes(requested)?requested:'azul'}clients.set(c.id,c);
     send(ws,{type:'welcome',id:c.id});return;
   }
   if(!c.id)return error(ws,'Conecte-se primeiro ao servidor.');
@@ -198,7 +201,7 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='set_color'){
     if(room.status!=='lobby')return error(ws,'A cor só pode ser alterada na sala de espera.');
-    const color=String(m.color||'');if(!COLORS.includes(color))return error(ws,'Cor inválida.');
+    const color=normalizeColor(m.color);if(!COLORS.includes(color))return error(ws,'Cor inválida.');
     const player=room.players.find(p=>p.id===c.id);if(!player)return;
     if(room.players.some(p=>p.id!==c.id&&p.color===color))return error(ws,'Essa cor já está em uso por outro jogador.');
     player.color=color;c.color=color;sendRoomState(room);return;
