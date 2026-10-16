@@ -41,7 +41,6 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .field label{font-size:15px;color:var(--ink2);font-weight:500}
 #nameIn{font:700 18px var(--font);color:var(--ink);background:#0d1033;border:2px solid var(--edge);border-radius:14px;padding:8px 14px;outline:none;width:100%;user-select:text;-webkit-user-select:text}
 #nameIn:focus-visible{border-color:var(--amber)}
-#swatches{display:flex;flex-wrap:wrap;gap:8px}
 .sw{width:38px;height:38px;border-radius:50%;border:3px solid #10122a;box-shadow:0 3px 0 #05061a;padding:0}
 .sw[aria-pressed="true"]{outline:3px solid var(--amber);outline-offset:2px}
 .sw:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
@@ -392,9 +391,8 @@ body.touch #stick{display:block}
     <p class="phase" style="margin:-4px 0 8px">Versão 0.2-b</p>
     <canvas id="pv" width="280" height="260"></canvas>
     <div class="field"><label for="nameIn">Seu nome</label><input id="nameIn" maxlength="12" value="Você" autocomplete="off"></div>
-    <div class="field"><label id="colLab">Sua cor</label><div id="swatches" role="group" aria-labelledby="colLab"></div></div>
     <div class="row onlineMenu"><button class="big" id="btnCreateRoom">Criar sala</button><button class="big alt" id="btnJoinRoom">Entrar na sala</button></div>
-    <div class="row" style="justify-content:center;margin-top:8px"><button class="chip" id="btnFreePlay" type="button">Partida Livre</button><button class="chip" id="btnCosmetics" type="button">Cosméticos</button></div>
+    <div class="row" style="justify-content:center;margin-top:8px"><button class="chip" id="btnFreePlay" type="button">Partida Livre</button><button class="chip" id="btnCosmetics" type="button">Inventário</button></div>
     <div id="createPanel" hidden>
       <h3 style="margin:0 0 10px;color:var(--amber)">Preparar sala</h3>
       <div class="createFields">
@@ -451,7 +449,7 @@ body.touch #stick{display:block}
 
 <div id="cosmeticsOverlay" hidden aria-live="polite">
   <div class="cosmeticsCard" role="dialog" aria-modal="true" aria-labelledby="cosmeticsTitle">
-    <div class="cosmeticsHead"><h2 id="cosmeticsTitle">Cosméticos</h2><button class="chip" id="btnCosmeticsClose" type="button" aria-label="Fechar cosméticos">✕</button></div>
+    <div class="cosmeticsHead"><h2 id="cosmeticsTitle">Inventário</h2><button class="chip" id="btnCosmeticsClose" type="button" aria-label="Fechar inventário">✕</button></div>
     <p class="phase">Itens apenas visuais. Não alteram velocidade, colisão, visão, função ou habilidades.</p>
     <div class="cosmeticsLayout"><aside class="cosmeticsPreview"><canvas id="cosmeticsPreviewCv" width="520" height="440" aria-label="Prévia do personagem"></canvas><strong>Sua aparência</strong><div class="lobbyColorBlock"><strong>Cor</strong><div id="lobbyColorSwatches" class="lobbyColorSwatches" aria-label="Cores disponíveis"></div><small class="lobbyColorHint">Cada jogador usa uma cor diferente. Cosméticos podem se repetir.</small></div><div id="cosmeticsEquipped"></div></aside><section><div id="cosmeticsTabs" class="cosmeticsTabs" aria-label="Categorias"></div><div id="cosmeticsGrid"></div></section></div>
   </div>
@@ -703,7 +701,6 @@ const COLORS=[
   {id:'oliva',name:'Oliva',main:'#778728',dark:'#485617'},
   {id:'lavanda',name:'Lavanda',main:'#b77ae7',dark:'#8147b5'},
   {id:'mostarda',name:'Mostarda',main:'#e1c600',dark:'#9f8610'},
-  {id:'musgo',name:'Musgo',main:'#667a1d',dark:'#3d4d12'},
   {id:'verde_claro',name:'Verde-claro',main:'#72dda0',dark:'#45a968'},
 ];
 const COLOR_BY={}; COLORS.forEach(c=>COLOR_BY[c.id]=c);
@@ -4021,7 +4018,13 @@ function endMeeting(){
   G.M=null; G.state='playing';
   if(checkEnd())return;
   // Ao terminar qualquer reunião, todas as habilidades com cooldown entram em recarga completa.
-  const pts=cafePoints(G.chars.length); G.chars.filter(c=>c.alive).forEach((c,i)=>placeChar(c,pts[i]));
+  if(G.freePlay){
+    // Na Partida Livre os bots permanecem exatamente onde estavam antes da reunião.
+    const alivePlayer=G.player&&G.player.alive?G.player:null;
+    if(alivePlayer){const pt=cafePoints(1)[0];if(pt)placeChar(alivePlayer,pt)}
+  }else{
+    const pts=cafePoints(G.chars.length); G.chars.filter(c=>c.alive).forEach((c,i)=>placeChar(c,pts[i]));
+  }
   G.meetCd=CFG.meet; G.killCd=CFG.kill; G.sheriffCd=CFG.sheriffCooldown; G.delayedCd=CFG.kill; G.cleanerCd=CFG.cleanerCooldown; G.paramedicCd=CFG.paramedicCooldown;if(G.player)G.player.paramedicCd=G.paramedicCd;
   G.sab.cd=CFG.sab;
   G.trackTarget=null;G.trackTime=0;G.trackCd=CFG.locCooldown;G.fixT=0;
@@ -4030,7 +4033,7 @@ function endMeeting(){
     if(c.ai){resetAI(c);c.ai.killCd=CFG.kill;c.ai.sabT=CFG.sab}
   });
   G.cam.x=focus().x-VW/2; G.cam.y=focus().y-VH/2;
-  toast(G.player.alive?'Todos voltaram à cantina. Habilidades em recarga.':'Você virou morto. Use o botão de modo para tarefas ou espectador.');
+  toast(G.player.alive?(G.freePlay?'Reunião encerrada. Bots permaneceram em suas posições. Habilidades em recarga.':'Todos voltaram à cantina. Habilidades em recarga.'):'Você virou morto. Use o botão de modo para tarefas ou espectador.');
 }
 function appendMeetingMsgVisual(from,text,silent=false){
   if(!from)return;const p=el('p'); const b=el('b','',from.name+': '); b.style.color=chatCol(from);
@@ -4302,13 +4305,6 @@ stick.addEventListener('pointerup',endStick);stick.addEventListener('pointercanc
 addEventListener('blur',()=>resetStick());
 addEventListener('touchstart',()=>document.body.classList.add('touch'),{once:true,passive:true});
 
-// seletor de cor
-(function(){
-  const box=$('swatches');
-  COLORS.forEach(c=>{const b=el('button','sw');b.style.background=c.main;b.dataset.playerColor=c.id;b.setAttribute('aria-label',c.name);b.title=c.name;b.setAttribute('aria-pressed',String(c.id===G.cfg.color));
-    b.addEventListener('click',()=>{G.cfg.color=c.id;[...box.children].forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');Snd.init();Snd.click()});box.appendChild(b)});
-})();
-
 buildStatic(); resize(); requestAnimationFrame(frame);
 /* =====================================================================
    CATÁLOGO DE COSMÉTICOS — menu / somente visual
@@ -4316,10 +4312,10 @@ buildStatic(); resize(); requestAnimationFrame(frame);
 let COSMETIC_TAB='hat';
 function drawCosmeticPortrait(cv,char,scale=2.7){const c=cv.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);c.setTransform(scale,0,0,scale,cv.width/2,cv.height*.56);drawChar(c,{x:0,y:0,face:1,walk:(G.t||0)*.25,moving:true,color:char.color||G.cfg.color,cosmetics:cloneCosmetics(char.cosmetics),id:'cosmetic_preview'},false,{portrait:true})}
 function drawLobbyAvatar(cv,p){drawCosmeticPortrait(cv,{color:p.color,cosmetics:p.cosmetics},.95)}
-function syncMenuColorSelection(){document.querySelectorAll('#swatches .sw').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.playerColor===G.cfg.color)))}
+function syncMenuColorSelection(){if(!$('swatches'))return;document.querySelectorAll('#swatches .sw').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.playerColor===G.cfg.color)))}
 function renderLobbyColorSwatches(){const box=$('lobbyColorSwatches');if(!box)return;box.innerHTML='';const used=new Set((NET.room?.players||[]).filter(p=>p.id!==NET.id).map(p=>p.color));for(const color of COLORS){const b=el('button','sw');b.type='button';b.dataset.playerColor=color.id;b.style.background=color.main;b.setAttribute('aria-label',color.name);b.title=NET.inRoom&&used.has(color.id)?`${color.name} — em uso`:color.name;b.disabled=!!(NET.inRoom&&used.has(color.id));b.setAttribute('aria-pressed',String(color.id===G.cfg.color));b.addEventListener('click',()=>{if(NET.inRoom){if(NET.room?.status!=='lobby')return;if(used.has(color.id)){toast('Essa cor já está em uso.');return}if(color.id===G.cfg.color)return;netSend({type:'set_color',color:color.id});Snd.click();return}G.cfg.color=color.id;syncMenuColorSelection();renderCosmeticsCatalog();Snd.click()});box.appendChild(b)}}
 function renderCosmeticsCatalog(){const overlay=$('cosmeticsOverlay');if(!overlay||overlay.hidden)return;const tabs=$('cosmeticsTabs'),grid=$('cosmeticsGrid');tabs.innerHTML='';grid.innerHTML='';renderLobbyColorSwatches();for(const [key,label] of COSMETIC_CATEGORIES){const b=el('button','chip',label);b.type='button';b.setAttribute('aria-pressed',key===COSMETIC_TAB?'true':'false');b.addEventListener('click',()=>{COSMETIC_TAB=key;renderCosmeticsCatalog();Snd.click()});tabs.appendChild(b)}for(const item of COSMETIC_CATALOG[COSMETIC_TAB]){const b=el('button','cosmeticItem');b.type='button';b.setAttribute('aria-pressed',PLAYER_COSMETICS[COSMETIC_TAB]===item.id?'true':'false');if(item.id==='none'){b.appendChild(el('div','cosmeticNoneMark','∅'))}else{const cv=document.createElement('canvas');cv.width=208;cv.height=180;const only=cloneCosmetics(DEFAULT_COSMETICS);only[COSMETIC_TAB]=item.id;drawCosmeticPortrait(cv,{color:G.cfg.color,cosmetics:only},3.10);b.appendChild(cv)}b.appendChild(el('span','',item.name));b.addEventListener('click',()=>{PLAYER_COSMETICS[COSMETIC_TAB]=item.id;savePlayerCosmetics();renderCosmeticsCatalog();if(NET.inRoom&&NET.room?.status==='lobby')netSend({type:'set_cosmetics',cosmetics:cloneCosmetics(PLAYER_COSMETICS)});Snd.click()});grid.appendChild(b)}drawCosmeticPortrait($('cosmeticsPreviewCv'),{color:G.cfg.color,cosmetics:PLAYER_COSMETICS},5.30);$('cosmeticsEquipped').textContent=COSMETIC_CATEGORIES.map(([k,label])=>`${label}: ${cosmeticItemName(k,PLAYER_COSMETICS[k])}`).join(' · ')}
-function openCosmetics(){if(NET.inRoom){toast('A aparência é escolhida na tela inicial, antes de entrar na sala.');return}COSMETIC_TAB='hat';$('cosmeticsOverlay').hidden=false;renderCosmeticsCatalog();Snd.open()}
+function openCosmetics(){if(NET.inRoom){toast('O Inventário é usado na tela inicial, antes de entrar na sala.');return}COSMETIC_TAB='hat';$('cosmeticsOverlay').hidden=false;renderCosmeticsCatalog();Snd.open()}
 function closeCosmetics(){$('cosmeticsOverlay').hidden=true}
 
 /* =====================================================================

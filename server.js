@@ -10,7 +10,7 @@ const HOST = process.env.HOST || '0.0.0.0';
 const HTML_FILE = path.join(__dirname, 'index.html');
 const rooms = new Map();
 const clients = new Map();
-const COLORS = ['vermelho','azul','amarelo','verde','rosa','roxo','laranja','ciano','preto','branco','carmim','banana','caqui','coral','cinza','azul_claro','rosado','verde_forte','oliva','lavanda','mostarda','musgo','verde_claro'];
+const COLORS = ['vermelho','azul','amarelo','verde','rosa','roxo','laranja','ciano','preto','branco','carmim','banana','caqui','coral','cinza','azul_claro','rosado','verde_forte','oliva','lavanda','mostarda','verde_claro'];
 const LEGACY_COLORS={marinho:'azul_claro'};
 const normalizeColor=value=>LEGACY_COLORS[String(value||'')]||String(value||'');
 const COSMETIC_ALLOWED={
