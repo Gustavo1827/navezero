@@ -406,3 +406,16 @@ test('ações de corpo online preservam bodyId para o host decidir reportar, lim
     assert.equal(cmd.bodyId,bodyId);
   }
 });
+
+test('Preguiçoso no servidor respeita chance, limite de jogadores, lentidão e quantidade de tarefas', () => {
+  const high=cleanSettings({lazyChance:180,lazyMax:15,lazySlowdown:99,lazyTasks:9},6);
+  assert.equal(high.lazyChance,100);
+  assert.equal(high.lazyMax,6);
+  assert.equal(high.lazySlowdown,20);
+  assert.equal(high.lazyTasks,3);
+  const low=cleanSettings({lazyChance:-5,lazyMax:-2,lazySlowdown:1,lazyTasks:0},4);
+  assert.equal(low.lazyChance,0);
+  assert.equal(low.lazyMax,0);
+  assert.equal(low.lazySlowdown,5);
+  assert.equal(low.lazyTasks,1);
+});

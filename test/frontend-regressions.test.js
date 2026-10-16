@@ -213,10 +213,11 @@ test('após a reunião, todos os cooldowns de habilidades voltam à recarga comp
   assert.match(html, /c\.engVentCd=CFG\.engCooldown/);
 });
 
-test('NPCs consideram causas ligadas a funções especiais ao discutir um corpo', () => {
-  assert.match(html, /cause==='delayed'[\s\S]*?causada por um Atrasado/);
-  assert.match(html, /cause==='sheriff_misfire'[\s\S]*?Xerife tenha errado o disparo/);
-  assert.match(html, /um Infiltrado, um Atrasado ou até um disparo de Xerife/);
+test('NPCs não usam a causa interna do corpo para descobrir funções', () => {
+  const statement=html.slice(html.indexOf('function npcStatement(ch,M){'),html.indexOf('function meetingNPCs(){'));
+  assert.doesNotMatch(statement, /M\.body\.cause|const cause=/, 'NPC não pode ler a causa interna do corpo durante a reunião');
+  assert.match(statement, /Não usa `body\.cause`: NPCs só discutem o que poderiam observar ou ouvir/);
+  assert.match(statement, /Não sei qual habilidade causou isso; precisamos de testemunhas/);
 });
 
 test('Faxineiro tem configuração, atribuição, limpeza autoritativa e memória dos NPCs', () => {
@@ -321,7 +322,7 @@ test('Faxineiro é exclusivamente Infiltrado, usa identidade vermelha e respeita
   assert.match(html, /if\(k==='impostors'&&CFG\.cleanerMax>CFG\.impostors\)\{CFG\.cleanerMax=CFG\.impostors/);
   assert.match(html, /cleanerEligible=shuffle\(\[\.\.\.G\.imps\]\.filter\(ch=>ch\.role==='imp'&&!ch\.function\)\)/);
   assert.match(html, /cleanerLimit=Math\.min\(clamp\(CFG\.cleanerMax,0,CFG\.impostors\),G\.imps\.length,cleanerEligible\.length\)/);
-  assert.match(html, /const crewFns=\['locator','sheriff','observer','engineer'\], impFns=\['delayed','cleaner','marionette'\]/);
+  assert.match(html, /const crewFns=\['locator','sheriff','observer','engineer','lazy'\], impFns=\['delayed','cleaner','marionette'\]/);
   assert.match(html, /cleaner=G\.role==='imp'&&p\.function==='cleaner'/);
   assert.match(server, /out\.cleanerMax=Math\.min\(out\.cleanerMax,out\.impostors\)/);
 });
@@ -453,9 +454,8 @@ test('tarefas usam categorias configuráveis, comuns compartilhadas e sorteio in
   assert.match(html, /category:'long'/);
   assert.match(html, /name:'Baixar dados da nave'/);
   assert.match(html, /const commonTaskTemplates=taskTemplateSelection\(TASK_POOLS\.common,CFG\.commonTasks\)/);
-  assert.match(html, /createTasksFor\(c\.id,commonTaskTemplates\)/);
-  assert.match(html, /taskTemplateSelection\(TASK_POOLS\.medium,CFG\.mediumTasks\)/);
-  assert.match(html, /taskTemplateSelection\(TASK_POOLS\.long,CFG\.longTasks\)/);
+  assert.match(html, /normalTemplates=\[\.\.\.commonTaskTemplates,\.\.\.taskTemplateSelection\(TASK_POOLS\.medium,CFG\.mediumTasks\),\.\.\.taskTemplateSelection\(TASK_POOLS\.long,CFG\.longTasks\)\]/);
+  assert.match(html, /c\.function==='lazy'\)\?createLazyTasksFor\(c\.id\):normalTemplates\.map/);
 });
 
 test('novas falas dos NPCs dependem de corpo, memória, função observada ou suspeita', () => {
@@ -463,7 +463,8 @@ test('novas falas dos NPCs dependem de corpo, memória, função observada ou su
   assert.match(html, /`Vamos votar em \$\{suspect\.name\}\.`/);
   assert.match(html, /Mortos, nos ajudem!/);
   assert.match(html, /é Marionetista!!!/);
-  assert.match(html, /é Engenheiro!!!/);
+  assert.match(html, /Pode ser Engenheiro ou Infiltrado/);
+  assert.doesNotMatch(html, /é Engenheiro!!!/);
   assert.match(html, /é Faxineiro!!!/);
   assert.match(html, /Não acho que \$\{T\.name\} seja/);
   assert.match(html, /pick\(\['Concordo\.','Sim\.'/);
@@ -543,4 +544,54 @@ test('Inventário concentra a seleção de cor e substitui o nome Cosméticos no
 test('Partida Livre não reposiciona bots na Cafeteria após reunião', () => {
   assert.match(html, /if\(G\.freePlay\)[\s\S]*bots permanecem exatamente onde estavam antes da reunião/);
   assert.match(html, /if\(alivePlayer\)[\s\S]*placeChar\(alivePlayer,pt\)/);
+});
+
+
+test('fantasma usa barbixo ondulado em vez do rabo antigo', () => {
+  assert.match(html, /Fantasma mantém o corpo normal e troca as pernas por um “barbixo” ondulado/);
+  assert.match(html, /Três ondas curtas na parte inferior; sem rabo lateral/);
+  assert.match(html, /quadraticCurveTo\(10,20,6,15\)/);
+  assert.doesNotMatch(html, /sem pernas e com rabinho/);
+});
+
+test('sorteio de Infiltrados usa todos os participantes igualmente', () => {
+  assert.match(html, /function drawImpostors\(participants,count\)[\s\S]*?Host, humanos remotos e NPCs entram exatamente no mesmo embaralhamento[\s\S]*?return shuffle\(participants\.slice\(\)\)\.slice/);
+  assert.match(html, /drawImpostors\(G\.chars,normalImpCount\)/);
+  assert.doesNotMatch(html, /filter\([^\n]*isPlayer[^\n]*\).*drawImpostors/);
+});
+
+test('Chat Rápido contém as novas frases e reutiliza seletores de salas e jogadores', () => {
+  for (const id of ['whoPassedRoom','yes','no','lie','truth','voteWho','voteTarget','playerOnly']) assert.match(html,new RegExp("id:'"+id+"'"));
+  assert.match(html, /\{id:'whoPassedRoom',label:'Quem passou para \[local\]\?',room:true\}/);
+  assert.match(html, /\{id:'voteTarget',label:'Vamos votar em \[jogador\]',target:true\}/);
+  assert.match(html, /\{id:'playerOnly',label:'\[jogador\]',target:true\}/);
+  assert.match(html, /case 'whoPassedRoom':[\s\S]*?Quem passou para \$\{rm\}\?/);
+  assert.match(html, /case 'voteTarget':[\s\S]*?Vamos votar em \$\{T\.name\}/);
+});
+
+test('Preguiçoso é Tripulante vivo com tarefas reduzidas e peso normal na barra', () => {
+  assert.match(html, /id="btnLazySection"[^>]*>🍕 Preguiçoso/);
+  assert.match(html, /Preguiçoso - Suas tarefas são fáceis, complete elas e ajude a Tripulação\./);
+  for (const key of ['lazyChance','lazyMax','lazySlowdown','lazyTasks']) {
+    assert.match(html,new RegExp(key+':\\['));
+    assert.match(server,new RegExp(key+':\\['));
+  }
+  assert.match(html, /lazyEligible=shuffle\(G\.chars\.filter\(c=>c\.role==='crew'&&!c\.function\)\)/);
+  assert.match(html, /function createLazyTasksFor\(owner\)[\s\S]*?slice\(0,count\)[\s\S]*?task\.lazy=true/);
+  assert.match(html, /lazyNormalSteps=normalTemplates\.reduce/);
+  assert.match(html, /if\(allDone\)\{d\+=weight;t\+=weight\}/);
+  assert.match(html, /function moveSpeedFor\(ch,base=CFG\.speed\)/);
+  assert.match(html, /const p=G\.player, sp=moveSpeedFor\(p,CFG\.speed\)\*dt/);
+  assert.match(html, /moveSpeedFor\(target,CFG\.speed\)\*dt/);
+  assert.match(server, /out\.lazyMax=Math\.min\(out\.lazyMax,Math\.max\(0,Math\.min\(15,playerCount\)\)\)/);
+});
+
+test('NPCs formam suspeitas de funções por evidência e não leem função alheia em reuniões', () => {
+  const statement=html.slice(html.indexOf('function npcStatement(ch,M){'),html.indexOf('function meetingNPCs(){'));
+  assert.match(statement, /controlVictimSaw/);
+  assert.match(statement, /reviveSaw/);
+  assert.match(statement, /cleanSaw/);
+  assert.match(statement, /engineerSaw/);
+  assert.doesNotMatch(statement, /seen\.function|T\.function|target\.function/);
+  assert.doesNotMatch(statement, /G\.imps\.includes/);
 });
