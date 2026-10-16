@@ -595,3 +595,22 @@ test('NPCs formam suspeitas de funções por evidência e não leem função alh
   assert.doesNotMatch(statement, /seen\.function|T\.function|target\.function/);
   assert.doesNotMatch(statement, /G\.imps\.includes/);
 });
+
+
+test('Marrom faz parte da paleta do cliente e da lista aceita pelo servidor', () => {
+  assert.match(html, /\{id:'marrom',name:'Marrom',main:'#8a5a3b',dark:'#573724'\}/);
+  assert.match(server, /'marrom'/);
+});
+
+test('NPC Preguiçoso conclui a função e recebe a mesma lentidão dos jogadores', () => {
+  assert.match(html, /function lazyTasksDone\(ch\)[\s\S]*?if\(ch\.lazyDone===true\)return true/);
+  assert.match(html, /if\(!g\.t\.fake\)\{ai\.lastTaskName=g\.t\.name;ai\.lastTaskAt=G\.gt;if\(ch\.function==='lazy'\)lazyTasksDone\(ch\)/);
+  assert.match(html, /const st=Math\.min\(d,moveSpeedFor\(ch,ai\.speed\)\*dt\)/);
+  assert.match(html, /lazyDone:!!c\.lazyDone/);
+});
+
+test('otimização agrupa tarefas do Preguiçoso para a barra de progresso', () => {
+  assert.match(html, /charsById=new Map\(G\.chars\.map/);
+  assert.match(html, /lazyByOwner=new Map\(\)/);
+  assert.match(html, /lazyByOwner\.get\(o\.id\)\|\|\[\]/);
+});
