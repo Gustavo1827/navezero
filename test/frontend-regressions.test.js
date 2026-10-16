@@ -614,3 +614,14 @@ test('otimização agrupa tarefas do Preguiçoso para a barra de progresso', () 
   assert.match(html, /lazyByOwner=new Map\(\)/);
   assert.match(html, /lazyByOwner\.get\(o\.id\)\|\|\[\]/);
 });
+
+test('NPCs usam campo de visão real e sofrem Sabotagem de Luzes em todas as evidências visuais', () => {
+  assert.match(html, /function npcVisionRange\(ch\)[\s\S]*?ch\.role==='crew'&&\(G\.sab\.lights\|\|0\)>0\?Math\.max\(110,base\*\.34\):base/);
+  assert.match(html, /function npcCanSeePoint\(ch,x,y\)[\s\S]*?npcVisionRange\(ch\)[\s\S]*?losClear/);
+  assert.match(html, /function npcCanSeeChar\(ch,target\)[\s\S]*?target\.spectralInvisible/);
+  assert.match(html, /noteSpectralSmokeEvidence[\s\S]*?!npcCanSeePoint\(o,x,y\)/);
+  assert.match(html, /function ventWitnesses\(v,who\)[\s\S]*?npcCanSeePoint\(o,v\.px,v\.py\)/);
+  assert.match(html, /function doKill\(k,v\)[\s\S]*?npcCanSeePoint\(o,v\.x,v\.y\)&&npcCanSeeChar\(o,k\)/);
+  assert.match(html, /function noteCleanerEvidence[\s\S]*?const sawBody=npcCanSeePoint[\s\S]*?sawCleaner=npcCanSeeChar/);
+  assert.match(html, /function noteParamedicEvidence[\s\S]*?npcCanSeePoint\(o,body\.x,body\.y\)&&npcCanSeeChar\(o,medic\)/);
+});

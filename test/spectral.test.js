@@ -11,7 +11,7 @@ test('Espectral tem configuração, aba e botão vermelhos',()=>{
   assert.match(html,/spectralChance:\[0,100\]/);
   assert.match(html,/spectralCooldown:\[5,20\]/);
   assert.match(html,/spectralDuration:\[10,90\]/);
-  assert.match(html,/spectralSpeed:\[10,20\]/);
+  assert.match(html,/spectralSpeed:\[0,20\]/);
   assert.match(html,/\.act2\.spectral,\.spectral-tab/);
 });
 
@@ -22,7 +22,7 @@ test('Espectral é distribuído somente entre Infiltrados sem outra função',()
 
 test('invisibilidade bloqueia eliminação, acelera e some do mapa do Observador',()=>{
   assert.match(html,/k\.spectralInvisible\|\|!v\.alive/);
-  assert.match(html,/CFG\.spectralSpeed\/10/);
+  assert.match(html,/1\+CFG\.spectralSpeed\/10/);
   assert.match(html,/observerReveal&&ch\.spectralInvisible\)return/);
   assert.match(html,/spectralViewerAlpha/);
 });
@@ -34,4 +34,15 @@ test('fumaça, som próximo, NPCs e multiplayer do Espectral estão integrados',
   assert.match(html,/spectralSmokes:\(G\.spectralSmokes\|\|\[\]\)/);
   assert.match(server,/spectral_toggle/);
   assert.match(server,/spectralChance:\[0,100\]/);
+});
+
+
+test('velocidade do Espectral usa passos de 0,2x e contagem autoritativa monotônica',()=>{
+  assert.match(html,/if\(k==='spectralSpeed'\)\{wireRepeat\(minus,-2\);wireRepeat\(plus,2\)\}/);
+  assert.match(html,/spectralEndsAt=G\.gt\+CFG\.spectralDuration/);
+  assert.match(html,/function spectralRemaining\(ch\)/);
+  assert.match(html,/proposed<ch\._spectralUiDeadline/);
+  assert.match(html,/Voltar · \$\{Math\.max\(0,Math\.ceil\(time\)\)\}s/);
+  assert.match(server,/spectralSpeed:\[0,20\]/);
+  assert.match(server,/Math\.round\(out\.spectralSpeed\/2\)\*2/);
 });
