@@ -45,6 +45,7 @@ function ensureBotRoster(room){
 const safeText = (v, max=12, fallback='Tripulante') => String(v ?? '').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,max) || fallback;
 const send = (ws, obj) => { if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify(obj)); };
 const broadcast = (room, obj, exceptId=null) => { for(const p of room.players){ if(p.id===exceptId)continue; const c=clients.get(p.id); if(c)send(c.ws,obj); } };
+const broadcastSystemNotice=(room,text)=>broadcast(room,{type:'system_notice',text:String(text||'').slice(0,160)});
 function maxImpostorsForCount(count){const n=Math.max(4,Math.min(15,Math.round(Number(count)||4)));return n>=10?3:n>=8?2:1}
 function cleanSettings(input={}, playerCount=15) {
   const out={...DEFAULT_SETTINGS};
@@ -242,6 +243,8 @@ function handle(ws, raw, timings={}){
     if(!targetId||targetId===c.id||targetId===room.hostId)return error(ws,'Não é possível aplicar essa ação ao host atual.');
     const target=clients.get(targetId);if(!target||target.roomCode!==room.code)return error(ws,'Jogador não encontrado nesta sala.');
     ensureModeration(room);if(action==='ban')room.banned.add(target.clientKey);
+    const hostPlayer=room.players.find(p=>p.id===c.id),targetPlayer=room.players.find(p=>p.id===targetId);
+    broadcastSystemNotice(room,`${hostPlayer?.name||'Host'} ${action==='ban'?'baniu':'expulsou'} ${targetPlayer?.name||'jogador'}`);
     removePlayerByModeration(room,targetId,action);return;
   }
   if(m.type==='moderation_vote'){
@@ -301,10 +304,17 @@ function handle(ws, raw, timings={}){
   if(m.type==='state_snapshot'){
     if(!isHost||!['loading','playing'].includes(room.status)||!m.snapshot||typeof m.snapshot!=='object')return;
     const wasMeeting=room.lastSnapshot?.state==='meeting',isMeeting=m.snapshot.state==='meeting';
+    const meetingStarted=!wasMeeting&&isMeeting&&m.snapshot.meeting;
     room.lastSnapshot=m.snapshot;
     ensureModeration(room);if(wasMeeting!==isMeeting)room.modVotes=new Map();
     if(isMeeting){if(!evaluateModeration(room)){} }else if(wasMeeting!==isMeeting)broadcastModeration(room);
     if(!clients.get(c.id)||c.roomCode!==room.code)return;
+    // A transição para reunião é prioritária e nunca é descartada por backpressure.
+    // Ela leva o snapshot autoritativo completo: chamador, motivo, corpo, participantes,
+    // cronômetros e estado de votação. Os snapshots periódicos continuam descartáveis.
+    if(meetingStarted){
+      for(const p of room.players){if(p.id===c.id)continue;const target=clients.get(p.id);if(target)send(target.ws,{type:'meeting_start',snapshot:personalizeSnapshot(m.snapshot,p.id)});}
+    }
     for(const p of room.players){
       if(p.id===c.id)continue;
       const target=clients.get(p.id);

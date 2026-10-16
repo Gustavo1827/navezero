@@ -411,7 +411,7 @@ body.touch #stick{display:block}
   <div class="card">
     <h1 class="logo">Nave Zero</h1>
     <p class="tag">A nave está falhando. Conclua as tarefas antes que seja tarde.</p>
-    <p class="phase" style="margin:-4px 0 8px">Versão 0.2-b</p>
+    <p class="phase" style="margin:-4px 0 8px">Versão 0.3-b</p>
     <canvas id="pv" width="280" height="260"></canvas>
     <div class="field"><label for="nameIn">Seu nome</label><input id="nameIn" maxlength="12" value="Você" autocomplete="off"></div>
     <div class="row onlineMenu"><button class="big" id="btnCreateRoom">Criar sala</button><button class="big alt" id="btnJoinRoom">Entrar na sala</button></div>
@@ -503,7 +503,7 @@ body.touch #stick{display:block}
     </div>
   </div>
   <div id="topRight">
-    <div class="chips"><button class="chip" id="btnMap" aria-pressed="false">Mapa</button><button class="chip" id="btnRoomChat" aria-expanded="false" aria-controls="roomChatPanel" hidden>Chat</button><button class="chip" id="btnGhost" hidden>Modo: Tarefas</button><button class="chip" id="btnSound">Som: ligado</button><button class="chip" id="btnExit">Sair do jogo</button></div>
+    <div class="chips"><button class="chip" id="btnMap" aria-pressed="false">Mapa</button><button class="chip" id="btnRoomChat" aria-expanded="false" aria-controls="roomChatPanel" hidden>Chat</button><button class="chip" id="btnSound">Som: ligado</button><button class="chip" id="btnExit">Sair do jogo</button></div>
     <div class="info">Seu papel: <b id="roleName">-</b></div>
   </div>
   <div id="toast" role="status"></div>
@@ -4120,11 +4120,12 @@ function renderMeetingIntro(){
   c.restore(); wrap.hidden=false;
 }
 
-function callMeeting(caller,reason,body){
-  if(!caller.alive)return;
-  G.chars.forEach(c=>{if(c.controlTargetId)stopControl(c,'meeting')});   // mortos não convocam reuniões
-  if(G.over||G.state==='meeting'||G.state==='role'||G.state==='over'||G.M)return;
-  if(reason==='emergency'){if(caller.emUses<=0||G.meetCd>0||G.sab.reactor>0)return; caller.emUses--}
+function callMeeting(caller,reason,body,forceSync=false){
+  if(!caller)return;
+  if(!forceSync&&!caller.alive)return;
+  G.chars.forEach(c=>{if(c.controlTargetId)stopControl(c,'meeting')});   // mortos não convocam reuniões locais
+  if(!forceSync&&(G.over||G.state==='meeting'||G.state==='role'||G.state==='over'||G.M))return;
+  if(!forceSync&&reason==='emergency'){if(caller.emUses<=0||G.meetCd>0||G.sab.reactor>0)return; caller.emUses--}
   closeModalSilent(); G.state='meeting'; closeMap(); G.cfgOpen=false; $('settings').hidden=true;
   if(G.sab.doors>0){G.sab.doors=0;doors.forEach(d=>d.closed=false);rebuildWalk();G.walkVer++}
   G.chars.forEach(c=>{c.moving=false; if(c.vent){const v=ventById[c.vent];c.vent=null;c.x=v.px;c.y=v.py-OFF_Y} c.ventAnim=null});
@@ -4139,6 +4140,9 @@ function callMeeting(caller,reason,body){
   if(evid){evid.text=reasonText(caller,evid.top.id,evid.rs,true); evid.claim=reasonClaim(caller,evid.top.id,evid.rs); G.M.evid=evid}
   if(body)G.chars.forEach(o=>{if(o.alive&&!o.isPlayer&&!o.isRemoteHuman&&o.ai&&o.role==='crew')noteBodyEvidence(o,body)});
   buildMeetUI(); Snd.err(); updateSabUI();
+  // Reunião online: publica imediatamente o primeiro snapshot autoritativo. O servidor
+  // transforma a transição em meeting_start prioritário para todos os clientes.
+  if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&!NET.applying)queueMicrotask(()=>netSyncHostAfterAuthorityChange());
 }
 function buildMeetUI(){
   const M=G.M; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject'); $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';$('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML='');$('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick')); $('meetTitle').textContent='Reunião convocada';
@@ -4313,9 +4317,7 @@ function updateButtons(){
   const ventReady=!!p.vent||((G.sab.comms||0)<=0&&(p.engVentCd||0)<=0&&!!nearestVentFor(p,84));be.disabled=!p.vent&&!ventReady;be.classList.toggle('ready',ventReady);const ventLabel=p.vent?'Sair do duto':((p.engVentCd||0)>0?String(Math.ceil(p.engVentCd)):'Dutar');if(be._l!==ventLabel){be._l=ventLabel;be.innerHTML=ventLabel==='Dutar'?'🔧<small>Dutar</small>':ventLabel==='Sair do duto'?'↗<small>Sair</small>':ventLabel}
   if(!bspec.hidden){const cd=p.spectralCd||0,time=p.spectralInvisible?spectralRemaining(p):0,lab=p.spectralInvisible?'Voltar':(cd>0?String(Math.ceil(cd)):'Sumir');bspec.disabled=!p.spectralInvisible&&cd>0;setCls(bspec,'ready',!bspec.disabled);setCls(bspec,'cooldown-label',cd>0&&!p.spectralInvisible);if(bspec._l!==lab||bspec._sec!==Math.ceil(time)){bspec._l=lab;bspec._sec=Math.ceil(time);bspec.innerHTML=lab==='Sumir'?'👻<small>Sumir</small>':lab==='Voltar'?`👻<small>Voltar · ${Math.max(0,Math.ceil(time))}s</small>`:lab}}
   const ctlTarget=controlTargetFor(p,actionDistancePx('control')),ctlLabel=p.controlTargetId?('Controlando '+Math.ceil(p.controlTime)+'s'):((p.controlCd||0)>0?String(Math.ceil(p.controlCd)):(NET?.pendingControl?'…':'Controlar'));bc.disabled=!p.controlTargetId&&(!ctlTarget||(p.controlCd||0)>0);bc.classList.toggle('ready',!!ctlTarget&&!(p.controlCd||0)&&!p.controlTargetId);if(bc._l!==ctlLabel){bc._l=ctlLabel;bc.innerHTML=ctlLabel==='Controlar'?'✋<small>Controlar</small>':ctlLabel}
-  const gh=$('btnGhost'), showGh=!p.alive&&G.role==='crew'; hv(gh,!showGh);
   const fb=$('btnFollow'); hv(fb,!(G.state==='playing'&&!p.alive&&!p.instructor)); if(!fb.hidden){const t=G.followTarget&&charById(G.followTarget);fb.innerHTML=t&&t.alive?'Seguindo<br>'+t.name:'Seguir<br>jogador';fb.title=t&&t.alive?'Toque para trocar de alvo; toque duas vezes para cancelar':'Toque para começar a seguir';}
-  const gl='Modo: '+(G.ghostMode==='spec'?'Espectador':'Tarefas'); if(gh._l!==gl){gh._l=gl;gh.textContent=gl}
   const rl=p.alive?roleNameForPlayer(p):(imp?'Infiltrado (morto)':(p.instructor?'Instrutor ↔️':(G.ghostMode==='spec'?'Espectador':'Tripulante (morto)'))); const rn=$('roleName'); if(rn._l!==rl){rn._l=rl;rn.textContent=rl}
   const lab=(p.alive||ghostActs())?'Usar':'Trocar'; if(ub._l!==lab){ub._l=lab;ub.textContent=lab}
   G.killT=null;
@@ -4473,10 +4475,6 @@ $('btnExit').addEventListener('click',()=>{Snd.click();askExit()});
 $('btnKeys').addEventListener('click',openKeysMenu);$('btnKeysClose').addEventListener('click',closeKeysMenu);$('btnKeysDefaults').addEventListener('click',()=>{KEY_BINDINGS={...DEFAULT_KEYS};saveKeyBindings();KEY_EDIT=null;renderKeyMenu();Snd.click()});
 $('cfmStay').addEventListener('click',()=>{closeConfirm();Snd.click()});
 $('cfmLeave').addEventListener('click',()=>{Snd.click();toMenu()});
-$('btnGhost').addEventListener('click',()=>{
-  if(G.state==='menu'||!G.player||G.player.alive||G.role!=='crew'||uiBusy())return;
-  cycleFollowTarget();
-});
 function cycleFollowTarget(){
   const alive=G.chars.filter(c=>c.alive);if(!alive.length)return;
   const idx=alive.findIndex(c=>c.id===G.followTarget);G.followTarget=idx<0?alive[0].id:alive[(idx+1)%alive.length].id;
@@ -4647,6 +4645,7 @@ function netHandleMessage(m){
   if(m.type==='pong'){return}
   if(m.type==='welcome'){NET.id=m.id;NET.connecting=false;if(NET.afterWelcome){const f=NET.afterWelcome;NET.afterWelcome=null;f()}return}
   if(m.type==='moderation_state'){NET.moderationState=m.state||null;renderMeetingModerationControls();return}
+  if(m.type==='system_notice'){const text=String(m.text||'').slice(0,160);if(text)toast(text,4200);return}
   if(m.type==='moderation_removed'){const reason=m.reason;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;toMenu();toast(reason==='ban'?'Você foi banido desta sala.':'Você foi expulso da sala.',4200);return}
   if(m.type==='room_error'){const msg=m.message||'Não foi possível entrar na sala.';if(NET.joinPending)setJoinError(msg);else toast(msg,3500);NET.joinPending=false;$('btnJoinConfirm').disabled=false;$('btnCreateRoom').disabled=false;return}
   if(m.type==='room_state'){
@@ -4700,6 +4699,7 @@ function netHandleMessage(m){
   }
   if(m.type==='host_command'){if(NET.isHost)netHostCommand(m);return}
   if(m.type==='motion'){if(!NET.isHost&&NET.inRoom)netApplyMotion(m.motion);return}
+  if(m.type==='meeting_start'){if(!NET.isHost&&NET.inRoom&&m.snapshot){netApplySnapshot(m.snapshot,true);NET.revealPending=false;netHideWait()}return}
   if(m.type==='snapshot'){if(!NET.isHost&&NET.inRoom){netApplySnapshot(m.snapshot);if(NET.revealPending&&G.player&&G.chars.length){NET.revealPending=false;showLocalRoleReveal(true);netHideWait()}}return}
   if(m.type==='host_snapshot'){if(NET.isHost&&NET.inRoom&&m.snapshot){netApplySnapshot(m.snapshot,true);NET.matchImpIds=new Set(G.chars.filter(c=>c.role==='imp').map(c=>c.id));const present=new Set((NET.room?.players||[]).map(p=>p.id));for(const c of G.chars)if(c.role==='imp'&&!present.has(c.id)&&!c.isBot)NET.departedImpIds.add(c.id);netBecomeHost();checkEnd()}return}
   if(m.type==='meeting_chat'){
@@ -4859,7 +4859,7 @@ function netApplySnapshot(s,force=false){
     if(s.cfg)netApplySettings(s.cfg);G.sab={...s.sab};const doorsChanged=doors.some((d,i)=>d.closed!==!!s.doors[i]);doors.forEach((d,i)=>{d.closed=!!s.doors[i]});if(doorsChanged){rebuildWalk();G.walkVer++}
     G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;G.delayedCd=s.selfDelayedCd??G.player.netDelayedCd??s.delayedCd??G.delayedCd;G.player.netDelayedCd=G.delayedCd;NET.pendingSheriffShot=false;NET.pendingDelayedMark=false;NET.pendingControl=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.observer=!!(s.observer||G.player.function==='observer');G.cleaner=!!(s.cleaner||G.player.function==='cleaner');G.parasite=!!(s.parasite||G.player.function==='parasite');G.paramedic=!!(s.paramedic||G.player.function==='paramedic');G.player.paramedicCd=s.selfParamedicCd??G.player.paramedicCd??0;G.player.paramedicSpent=s.selfParamedicSpent??G.player.paramedicSpent??0;G.paramedicCd=G.player.paramedicCd;G.player.parasiteReady=s.selfParasiteReady??G.player.parasiteReady??true;G.player.instructor=!!(s.selfInstructor??G.player.instructor);G.player.instructorCd=s.selfInstructorCd??G.player.instructorCd??0;G.player.instructorTargetId=Object.prototype.hasOwnProperty.call(s,'selfInstructorTargetId')?s.selfInstructorTargetId:(G.player.instructorTargetId??null);G.instructorCd=G.player.instructorCd;G.instructorTargetId=G.player.instructorTargetId;G.cleanerCd=s.selfCleanerCd??G.player.cleanCd??G.cleanerCd;G.cleanerUses=s.selfCleanerUses??G.player.cleanUses??G.cleanerUses;G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){if(!G.player.controlledBy){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}else $('ventPanel').hidden=true}
     if(s.state==='meeting'){
-      const sm=s.meeting;if(sm){const caller=charById(sm.callerId)||G.player;const body=sm.bodyId?G.bodies.find(b=>String(b.id)===String(sm.bodyId)):null;if(!G.M||oldState!=='meeting')callMeeting(caller,sm.reason,body);if(G.M){G.M.caller=caller;G.M.body=body;G.M.phase=sm.phase;G.M.t=sm.t;G.M.clock=sm.clock;G.M.dur=sm.dur;G.M.votes={...sm.votes};G.M.voteAt={...sm.voteAt};G.M.log=sm.log||[];G.M.result=(sm.phase==='result'||sm.phase==='eject')?{eject:sm.ejectId?charById(sm.ejectId):null,counts:sm.counts||{},skipN:sm.skipN||0,headline:sm.ejectHeadline||''}:null;G.M.resultHeadline=sm.resultHeadline||'';netPaintMeeting(sm)}}
+      const sm=s.meeting;if(sm){const caller=charById(sm.callerId)||G.player;const body=sm.bodyId?G.bodies.find(b=>String(b.id)===String(sm.bodyId)):null;if(!G.M||oldState!=='meeting')callMeeting(caller,sm.reason,body,true);if(G.M){G.M.caller=caller;G.M.body=body;G.M.phase=sm.phase;G.M.t=sm.t;G.M.clock=sm.clock;G.M.dur=sm.dur;G.M.votes={...sm.votes};G.M.voteAt={...sm.voteAt};G.M.log=sm.log||[];G.M.result=(sm.phase==='result'||sm.phase==='eject')?{eject:sm.ejectId?charById(sm.ejectId):null,counts:sm.counts||{},skipN:sm.skipN||0,headline:sm.ejectHeadline||''}:null;G.M.resultHeadline=sm.resultHeadline||'';netPaintMeeting(sm)}}
       G.state='meeting';$('role').hidden=true;$('end').hidden=true;
     }else if(s.state==='over'){
       if(!G.over||oldState!=='over'){G.over=false;G.M=null;$('meet').hidden=true;$('meetingIntro').hidden=true;endGame(s.winner||'crew',s.endReason||'A partida terminou.')}
