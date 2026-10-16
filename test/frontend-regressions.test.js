@@ -515,3 +515,19 @@ test('configurações da sala do host persistem localmente ao fechar/salvar o me
   assert.match(html, /function netSaveRoomSettings\(\)[\s\S]*?netApplySettings\(cfg\.settings\);saveCfg\(true\);netSend/);
   assert.match(html, /const netOriginalCloseCfg=closeCfg;closeCfg=function\(\)\{const shouldSave=NET\.inRoom&&NET\.isHost&&NET\.room\?\.status==='lobby';if\(shouldSave\)netSaveRoomSettings\(\)/);
 });
+
+test('paleta ampliada inclui Azul-claro, Lavanda, Mostarda, Musgo e Verde-claro no cliente e servidor', () => {
+  for (const [id,name] of [['azul_claro','Azul-claro'],['lavanda','Lavanda'],['mostarda','Mostarda'],['musgo','Musgo'],['verde_claro','Verde-claro'],['rosado','Rosado'],['verde_forte','Verde Forte'],['oliva','Oliva']]) {
+    assert.match(html, new RegExp("\\{id:'"+id+"',name:'"+name+"'"));
+    assert.match(server, new RegExp("'"+id+"'"));
+  }
+});
+
+test('novos cosméticos inspirados são vetoriais, catalogados e aceitos pelo servidor', () => {
+  for (const id of ['hat_orbit_badge','hat_eye_pod','hat_comet_mane','hat_void_topper','hat_dune_brim','hat_solar_peak','hat_nova_fold','hat_dust_spire','hat_polar_brim','hat_winter_comet','pet_signal_orb','pet_pocket_eye','outfit_orbit_collar','outfit_signal_wrap','visor_eclipse','visor_scope']) {
+    assert.match(html, new RegExp(id));
+    assert.match(server, new RegExp(id));
+  }
+  assert.match(html, /outfit_orbit_collar:\['#304b45','#5cd2ae'\]/);
+  assert.match(html, /outfit_signal_wrap:\['#6873bb','#80d8e8'\]/);
+});
