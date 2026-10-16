@@ -690,6 +690,7 @@ const COLORS=[
   {id:'rosa',name:'Rosa',main:'#f283b8',dark:'#b94b84'},
   {id:'roxo',name:'Roxo',main:'#7a3fc4',dark:'#4e2488'},
   {id:'laranja',name:'Laranja',main:'#f08a24',dark:'#a85a0c'},
+  {id:'marrom',name:'Marrom',main:'#8a5a3b',dark:'#573724'},
   {id:'ciano',name:'Ciano',main:'#35d0e0',dark:'#1b8e9c'},
   {id:'preto',name:'Preto',main:'#424857',dark:'#252937'},
   {id:'branco',name:'Branco',main:'#e8ecf3',dark:'#9aa3b8'},
@@ -1346,19 +1347,29 @@ function createLazyTasksFor(owner){
 }
 const taskStepCount=list=>list.reduce((n,t)=>n+(t.steps?.length||0),0);
 const nextStep=t=>t.steps.find(s=>!s.done);
-function lazyTasksDone(ch){const own=G.tasks.filter(t=>t.owner===ch.id&&!t.fake&&t.lazy);return !!(ch&&ch.alive&&ch.role==='crew'&&ch.function==='lazy'&&own.length&&own.every(t=>t.done))}
+function lazyTasksDone(ch){
+  if(!ch||!ch.alive||ch.role!=='crew'||ch.function!=='lazy'){if(ch)ch.lazyDone=false;return false}
+  // Cacheia o estado final: depois que um Preguiçoso conclui suas tarefas exclusivas,
+  // não precisamos filtrar a lista inteira de tarefas a cada frame de movimento.
+  if(ch.lazyDone===true)return true;
+  let found=false;
+  for(const t of G.tasks){if(t.owner!==ch.id||t.fake||!t.lazy)continue;found=true;if(!t.done)return false}
+  ch.lazyDone=found;return found;
+}
 function lazySpeedScale(ch){if(!lazyTasksDone(ch))return 1;const slow=clamp(CFG.lazySlowdown/10,.5,2);return 1/(1+slow*.5)}
 function moveSpeedFor(ch,base=CFG.speed){return base*(ch?.ghost?2:lazySpeedScale(ch))}
 function progress(){
-  let d=0,t=0;const lazyHandled=new Set();
+  let d=0,t=0;const lazyHandled=new Set(),charsById=new Map(G.chars.map(c=>[c.id,c])),lazyByOwner=new Map();
+  // Agrupa uma vez as tarefas especiais para evitar buscas repetidas na barra de progresso.
+  for(const task of G.tasks){if(task.fake||!task.lazy)continue;let list=lazyByOwner.get(task.owner);if(!list)lazyByOwner.set(task.owner,list=[]);list.push(task)}
   for(const task of G.tasks){
     if(task.fake)continue;
-    const o=G.chars.find(c=>c.id===task.owner), on=!!(o&&(o.alive||(o.ghost&&o.role==='crew'&&(!o.isPlayer||ghostActs()))));
+    const o=charsById.get(task.owner), on=!!(o&&(o.alive||(o.ghost&&o.role==='crew'&&(!o.isPlayer||ghostActs()))));
     if(o?.function==='lazy'&&task.lazy){
       if(lazyHandled.has(o.id))continue;lazyHandled.add(o.id);
-      const own=G.tasks.filter(x=>x.owner===o.id&&!x.fake&&x.lazy),weight=Math.max(1,Math.round(o.lazyNormalSteps||taskStepCount(own)));
-      const completed=own.reduce((n,x)=>n+(x.steps||[]).filter(st=>st.done).length,0),allDone=own.length&&own.every(x=>x.done);
-      if(allDone){d+=weight;t+=weight}else{d+=Math.min(completed,weight);if(on)t+=weight;else t+=Math.min(completed,weight)}
+      const own=lazyByOwner.get(o.id)||[],weight=Math.max(1,Math.round(o.lazyNormalSteps||taskStepCount(own)));
+      let completed=0,allDone=own.length>0;for(const x of own){for(const st of x.steps||[])if(st.done)completed++;if(!x.done)allDone=false}
+      if(allDone)o.lazyDone=true;if(allDone){d+=weight;t+=weight}else{d+=Math.min(completed,weight);if(on)t+=weight;else t+=Math.min(completed,weight)}
       continue;
     }
     for(const st of task.steps){if(st.done){d++;t++}else if(on)t++}
@@ -1396,7 +1407,7 @@ function pendingAt(stationId){
    JOGADOR, MOVIMENTO E COLISÃO
    ===================================================================== */
 function newChar(name,color,tx,ty,isPlayer){
-  return {id:isPlayer?'player':'npc'+Math.random().toString(36).slice(2,7),name,color,x:tx*TILE+TILE/2,y:ty*TILE+TILE/2,face:1,walk:0,moving:false,alive:true,ghost:false,vent:null,ventAnim:null,ventCd:0,ventMv:0,bubble:null,isPlayer,cosmetics:cloneCosmetics(DEFAULT_COSMETICS),petX:undefined,petY:undefined,paramedicCd:0,paramedicSpent:0,revivedOnce:false};
+  return {id:isPlayer?'player':'npc'+Math.random().toString(36).slice(2,7),name,color,x:tx*TILE+TILE/2,y:ty*TILE+TILE/2,face:1,walk:0,moving:false,alive:true,ghost:false,vent:null,ventAnim:null,ventCd:0,ventMv:0,bubble:null,isPlayer,cosmetics:cloneCosmetics(DEFAULT_COSMETICS),petX:undefined,petY:undefined,paramedicCd:0,paramedicSpent:0,revivedOnce:false,lazyDone:false};
 }
 const HALF_W=11,HALF_H=9,OFF_Y=6;
 function boxBlocked(x,y,g){
@@ -1530,7 +1541,7 @@ function finishStep(tok){
   }else{m.step.done=true}
   Snd.ok();
   const task=m.task;
-  if(!onlineClient)task.done=task.steps.every(s=>s.done);
+  if(!onlineClient){task.done=task.steps.every(s=>s.done);if(G.player?.function==='lazy')lazyTasksDone(G.player)}
   const fx=$('mfx'); fx.className='show'; fx.innerHTML='✓<small>'+(onlineClient?'Enviando confirmação ao host…':task.fix?'Sabotagem resolvida':task.done?'Tarefa concluída':'Passo concluído')+'</small>';
   renderTasks();
   if(!onlineClient){if(task.fix)resolveSab(task.fix);else if(checkEnd())return}
@@ -1884,7 +1895,7 @@ function clearFreePlayFunctionState(ch){
   if(oldFn==='engineer')ch.ventCd=0;
   if(oldFn==='marionette'){ch.controlTargetId=null;ch.controlTime=0;ch.controlCd=0}
   if(oldFn==='delayed')ch.netDelayedCd=0;if(oldFn==='cleaner'){ch.cleanCd=0;ch.cleanUses=CFG.cleanerUses}
-  if(oldFn==='sheriff')ch.netSheriffCd=0;if(oldFn==='paramedic'){ch.paramedicCd=0;ch.paramedicSpent=0;}
+  if(oldFn==='sheriff')ch.netSheriffCd=0;if(oldFn==='paramedic'){ch.paramedicCd=0;ch.paramedicSpent=0;}if(oldFn==='lazy')ch.lazyDone=false;
   if(ch===G.player){
     if(oldFn==='locator'){G.trackTarget=null;G.trackTime=0;G.trackCd=0}
     if(oldFn==='sheriff'){G.sheriffCd=0;G.sheriffT=null}
@@ -1908,7 +1919,7 @@ function setFreePlayFunction(ch,fn){
   const crewFns=['locator','sheriff','observer','engineer','lazy'], impFns=['delayed','cleaner','marionette'];crewFns.push('paramedic');impFns.push('parasite');
   if((ch.role==='crew'&&!crewFns.includes(fn))||(ch.role==='imp'&&!impFns.includes(fn)))return false;
   clearFreePlayFunctionState(ch);ch.function=fn;
-  if(fn==='paramedic'){ch.paramedicCd=0;ch.paramedicSpent=0}if(fn==='lazy'){const common=taskTemplateSelection(TASK_POOLS.common,CFG.commonTasks),normal=createTasksFor(ch.id,common);ch.lazyNormalSteps=taskStepCount(normal);G.tasks=G.tasks.filter(t=>t.owner!==ch.id);G.tasks.push(...createLazyTasksFor(ch.id));renderTasks()}if(ch===G.player){G.locator=fn==='locator';G.observer=fn==='observer';G.cleaner=fn==='cleaner';G.parasite=fn==='parasite';G.paramedic=fn==='paramedic';G.paramedicCd=ch.paramedicCd||0;if(G.cleaner)G.cleanerUses=CFG.cleanerUses;$('roleName').textContent=roleNameForPlayer(ch)}
+  if(fn==='paramedic'){ch.paramedicCd=0;ch.paramedicSpent=0}if(fn==='lazy'){ch.lazyDone=false;const common=taskTemplateSelection(TASK_POOLS.common,CFG.commonTasks),normal=createTasksFor(ch.id,common);ch.lazyNormalSteps=taskStepCount(normal);G.tasks=G.tasks.filter(t=>t.owner!==ch.id);G.tasks.push(...createLazyTasksFor(ch.id));renderTasks()}if(ch===G.player){G.locator=fn==='locator';G.observer=fn==='observer';G.cleaner=fn==='cleaner';G.parasite=fn==='parasite';G.paramedic=fn==='paramedic';G.paramedicCd=ch.paramedicCd||0;if(G.cleaner)G.cleanerUses=CFG.cleanerUses;$('roleName').textContent=roleNameForPlayer(ch)}
   return true;
 }
 function removeFreePlayFunction(ch){
@@ -1925,7 +1936,7 @@ function removeFreePlayFunction(ch){
     if(ch===G.player){G.instructorCd=0;G.instructorTargetId=null;G.ghostMode='tasks';G.followTarget=null;G.spec=null;G.role=ch.role;G.vision=G.visionTarget=CFG.crewVision;Snd.roleFx('instructor','done');emitRoleFx(ch.x,ch.y,'instructor',.8);toast('Instrutor removido. Você voltou à vida.',2600);$('roleName').textContent=roleNameForPlayer(ch)}
     return true;
   }
-  const removedFn=ch.function;clearFreePlayFunctionState(ch);ch.function=null;if(removedFn==='lazy'){const common=taskTemplateSelection(TASK_POOLS.common,CFG.commonTasks);G.tasks=G.tasks.filter(t=>t.owner!==ch.id);G.tasks.push(...createTasksFor(ch.id,common));ch.lazyNormalSteps=0;renderTasks()}
+  const removedFn=ch.function;clearFreePlayFunctionState(ch);ch.function=null;if(removedFn==='lazy'){ch.lazyDone=false;const common=taskTemplateSelection(TASK_POOLS.common,CFG.commonTasks);G.tasks=G.tasks.filter(t=>t.owner!==ch.id);G.tasks.push(...createTasksFor(ch.id,common));ch.lazyNormalSteps=0;renderTasks()}
   if(ch===G.player){G.locator=false;G.observer=false;G.cleaner=false;G.parasite=false;G.paramedic=false;$('roleName').textContent=roleNameForPlayer(ch)}
   return true;
 }
@@ -2065,7 +2076,7 @@ function newGame(prepareOnline=false){
   G.chars.forEach(c=>{
     if(G.freePlay&&c.freeDummy)return;
     const normalTemplates=[...commonTaskTemplates,...taskTemplateSelection(TASK_POOLS.medium,CFG.mediumTasks),...taskTemplateSelection(TASK_POOLS.long,CFG.longTasks)];
-    c.lazyNormalSteps=normalTemplates.reduce((n,t)=>n+(t.steps?.length||0),0);
+    c.lazyNormalSteps=normalTemplates.reduce((n,t)=>n+(t.steps?.length||0),0);c.lazyDone=false;
     const ts=(c.role==='crew'&&c.function==='lazy')?createLazyTasksFor(c.id):normalTemplates.map(t=>makeTask(t,c.id));
     if(c.role==='imp')ts.forEach(t=>t.fake=true);
     G.tasks.push(...ts);
@@ -2899,7 +2910,7 @@ function finishWork(ch){
   if(g.type==='fix'){ if(G.sab[g.sab]>0&&ch.role==='crew')resolveSab(g.sab); ai.fix=null; return }
   if(g.type==='task'){
     if(!g.step.done){g.step.done=true; g.t.done=g.t.steps.every(s=>s.done)}
-    if(!g.t.fake){ai.lastTaskName=g.t.name;ai.lastTaskAt=G.gt;}
+    if(!g.t.fake){ai.lastTaskName=g.t.name;ai.lastTaskAt=G.gt;if(ch.function==='lazy')lazyTasksDone(ch);}
     renderTasks(); if(!g.t.fake)checkEnd();
   }
 }
@@ -3229,7 +3240,7 @@ function clearConvertedCrewFunctionState(target){
   if(!target)return;
   if(target.controlledBy){const controller=charById(target.controlledBy);if(controller?.controlTargetId===target.id)stopControl(controller)}
   if(target.controlTargetId)stopControl(target);
-  target.function=null;target.instructor=false;target.instructorCd=0;target.instructorTargetId=null;target.instructorPoint=null;target.instructorOrigin=null;
+  target.function=null;target.lazyDone=false;target.instructor=false;target.instructorCd=0;target.instructorTargetId=null;target.instructorPoint=null;target.instructorOrigin=null;
   target.netSheriffCd=0;target.netDelayedCd=0;target.netTrackTarget=null;target.netTrackTime=0;target.netTrackCd=0;target.cleanCd=0;target.cleanUses=0;
   target.paramedicCd=0;target.paramedicSpent=0;target.engVentTime=0;target.engVentCd=0;target.controlCd=0;target.controlTime=0;
   G.instructorTrails=(G.instructorTrails||[]).filter(t=>String(t.ownerId)!==String(target.id));
@@ -3276,7 +3287,7 @@ function noteParamedicEvidence(medic,victim,body){
   for(const o of G.chars){if(!o.alive||o===medic||o===victim||o.isPlayer||o.isRemoteHuman||!o.ai||o.role!=='crew')continue;const R=(G.sab.lights>0?170:340);if(dist(o,body)<R&&losClear(o.x,o.y,body.x,body.y)&&dist(o,medic)<R){o.ai.reviveSaw={medicId:medic.id,victimId:victim.id,room,gt:now};addSusp(o,medic.id,-1.4,'clear',{room});npcSay(o,pick([`${victim.name} voltou!`,`${medic.name} reviveu ${victim.name}!`]))}}
 }
 function clearRevivedFunctionState(victim){
-  victim.function=null;victim.instructor=false;victim.instructorCd=0;victim.instructorTargetId=null;victim.instructorPoint=null;victim.instructorOrigin=null;victim.netSheriffCd=0;victim.netDelayedCd=0;victim.netTrackTarget=null;victim.netTrackTime=0;victim.netTrackCd=0;victim.cleanCd=0;victim.cleanUses=0;victim.parasiteReady=true;victim.parasiteTargetId=null;victim.paramedicCd=0;victim.paramedicSpent=0;victim.engVentTime=0;victim.engVentCd=0;victim.controlTargetId=null;victim.controlledBy=null;victim.controlTime=0;victim.controlCd=0;
+  victim.function=null;victim.lazyDone=false;victim.instructor=false;victim.instructorCd=0;victim.instructorTargetId=null;victim.instructorPoint=null;victim.instructorOrigin=null;victim.netSheriffCd=0;victim.netDelayedCd=0;victim.netTrackTarget=null;victim.netTrackTime=0;victim.netTrackCd=0;victim.cleanCd=0;victim.cleanUses=0;victim.parasiteReady=true;victim.parasiteTargetId=null;victim.paramedicCd=0;victim.paramedicSpent=0;victim.engVentTime=0;victim.engVentCd=0;victim.controlTargetId=null;victim.controlledBy=null;victim.controlTime=0;victim.controlCd=0;
   G.instructorTrails=(G.instructorTrails||[]).filter(t=>String(t.ownerId)!==String(victim.id));
 }
 function reviveBody(medic,body){
@@ -4577,7 +4588,7 @@ function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=
 function netCaptureSnapshot(){if(G.player){G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses}
   const st=(G.state==='task'||G.state==='tool')?'playing':G.state;
   if(G.player){G.player.netKillCd=G.killCd;G.player.netDelayedCd=G.delayedCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
-  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0,parasiteReady:c.parasiteReady!==false,parasiteTargetId:c.parasiteTargetId||null,paramedicCd:c.paramedicCd||0,paramedicSpent:c.paramedicSpent||0,revivedOnce:!!c.revivedOnce,lazyNormalSteps:c.lazyNormalSteps||0,instructor:!!c.instructor,instructorCd:c.instructorCd||0,instructorTargetId:c.instructorTargetId||null,cosmetics:cloneCosmetics(c.cosmetics)}));
+  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0,parasiteReady:c.parasiteReady!==false,parasiteTargetId:c.parasiteTargetId||null,paramedicCd:c.paramedicCd||0,paramedicSpent:c.paramedicSpent||0,revivedOnce:!!c.revivedOnce,lazyNormalSteps:c.lazyNormalSteps||0,lazyDone:!!c.lazyDone,instructor:!!c.instructor,instructorCd:c.instructorCd||0,instructorTargetId:c.instructorTargetId||null,cosmetics:cloneCosmetics(c.cosmetics)}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,lazy:!!t.lazy,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
   const bodies=G.bodies.map(b=>({id:b.id,victimId:b.victimId??b.id,name:b.name,color:b.color,cosmetics:cloneCosmetics(b.cosmetics),x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
   const deadPets=(G.deadPets||[]).map(p=>({id:p.id,ownerId:p.ownerId,pet:p.pet,x:p.x,y:p.y,face:p.face||1,phase:p.phase||0,sad:true}));
@@ -4805,7 +4816,7 @@ function netHostCommand(m){
   else if(command==='task_complete'){
     if(!activePlay||ch.vent)return;
     if(m.fix){const f=FIX[m.fix];if(m.stepId!==f?.st)return;if(ch.alive&&ch.role==='crew'){if(f&&stationById[f.st]&&G.sab[m.fix]>0&&stationDist(stationById[f.st],ch)<=95)resolveSab(m.fix)}return}
-    const t=G.tasks.find(t=>String(t.id)===String(m.taskId)&&t.owner===ch.id);if(!t||t.fake||!ch.alive||ch.role!=='crew')return;const step=t.steps.find(s=>s.st===m.stepId);if(!step||step.done)return;const station=stationById[step.st];if(!station||stationDist(station,ch)>95)return;step.done=true;t.done=t.steps.every(s=>s.done);checkEnd();
+    const t=G.tasks.find(t=>String(t.id)===String(m.taskId)&&t.owner===ch.id);if(!t||t.fake||!ch.alive||ch.role!=='crew')return;const step=t.steps.find(s=>s.st===m.stepId);if(!step||step.done)return;const station=stationById[step.st];if(!station||stationDist(station,ch)>95)return;step.done=true;t.done=t.steps.every(s=>s.done);if(ch.function==='lazy')lazyTasksDone(ch);checkEnd();
   }else if(command==='vote'){
     const M=G.M;if(!M||M.phase!=='vote'||!ch.alive||M.votes[ch.id]!==undefined)return;if(m.targetId!=='skip'&&!G.chars.some(c=>c.id===m.targetId&&c.alive))return;castVote(ch.id,m.targetId);if(m.targetId!=='skip'&&M.cards[m.targetId])M.cards[m.targetId].classList.add('pick');
   }else if(command==='chat'){
