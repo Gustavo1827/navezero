@@ -997,12 +997,12 @@ function drawChar(c,ch,showName=true,opts={}){
   c.save();c.translate(vx,vy);c.fillStyle=ghost?'rgba(0,0,0,.20)':'rgba(0,0,0,.32)';c.beginPath();c.ellipse(0,ghost?27:18,ghost?18:16,ghost?4.5:6,0,0,6.283);c.fill();
   c.translate(0,bob);c.scale(ch.face||1,1);c.lineWidth=2.5;c.strokeStyle='#10122a';c.lineJoin='round';c.lineCap='round';
   if(ghost){
-    // Cauda espectral: nasce no corpo, afina e curva para trás, substituindo totalmente as pernas.
-    c.fillStyle=col.dark;c.beginPath();c.moveTo(-12,-1);c.quadraticCurveTo(-15,8,-11,15);c.quadraticCurveTo(-7,21,-13,25);c.quadraticCurveTo(-19,29,-25,24);c.quadraticCurveTo(-21,34,-10,35);c.quadraticCurveTo(1,36,8,27);c.quadraticCurveTo(13,20,9,10);c.lineTo(8,0);c.closePath();c.fill();c.stroke();
-    c.fillStyle=col.main;c.beginPath();c.moveTo(-14,-22);c.quadraticCurveTo(-16,-7,-12,4);c.quadraticCurveTo(-8,14,-2,19);c.quadraticCurveTo(3,23,7,18);c.quadraticCurveTo(12,12,11,3);c.lineTo(14,-8);c.quadraticCurveTo(15,-21,5,-25);c.quadraticCurveTo(-6,-28,-14,-22);c.closePath();c.fill();c.stroke();
-    // Mochila continua presa ao corpo do fantasma.
+    // Fantasma usa o mesmo corpo do tripulante normal, mas sem pernas e com rabinho.
     c.fillStyle=col.dark;rr(c,-21,-12,10,20,5);c.fill();c.stroke();
-    c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.moveTo(-10,2);c.quadraticCurveTo(0,7,9,2);c.lineTo(8,8);c.quadraticCurveTo(0,12,-7,7);c.closePath();c.fill();
+    c.fillStyle=col.main;rr(c,-15,-24,30,34,14);c.fill();c.stroke();
+    c.fillStyle='rgba(0,0,0,.14)';rr(c,-12,2,24,6,3);c.fill();
+    c.fillStyle=col.dark;c.beginPath();c.moveTo(-8,9);c.quadraticCurveTo(-14,17,-13,25);c.quadraticCurveTo(-12,33,-23,36);c.quadraticCurveTo(-12,42,2,38);c.quadraticCurveTo(14,35,16,24);c.quadraticCurveTo(17,16,11,10);c.lineTo(10,8);c.quadraticCurveTo(4,12,-1,12);c.quadraticCurveTo(-5,12,-8,9);c.closePath();c.fill();c.stroke();
+    c.fillStyle=col.main;c.beginPath();c.moveTo(-6,8);c.quadraticCurveTo(-10,16,-9,24);c.quadraticCurveTo(-8,31,-16,34);c.quadraticCurveTo(-8,38,2,35);c.quadraticCurveTo(11,32,12,23);c.quadraticCurveTo(13,16,8,10);c.quadraticCurveTo(4,14,-1,14);c.quadraticCurveTo(-4,13,-6,8);c.closePath();c.fill();c.stroke();
   }else{
     c.fillStyle=col.dark;rr(c,-12,5+s*3,10,13,4);c.fill();c.stroke();rr(c,2,5-s*3,10,13,4);c.fill();c.stroke();rr(c,-21,-12,10,20,5);c.fill();c.stroke();
     c.fillStyle=col.main;rr(c,-15,-24,30,34,14);c.fill();c.stroke();c.fillStyle='rgba(0,0,0,.14)';rr(c,-12,2,24,6,3);c.fill();
