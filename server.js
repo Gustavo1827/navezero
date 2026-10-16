@@ -51,6 +51,7 @@ function cleanSettings(input={}, playerCount=15) {
   for(const [key,[lo,hi]] of Object.entries(LIMITS)) {
     const n=Number(input[key]); if(Number.isFinite(n))out[key]=Math.min(hi,Math.max(lo,Math.round(n)));
   }
+  out.spectralSpeed=Math.min(20,Math.max(0,Math.round(out.spectralSpeed/2)*2));
   out.impostors=Math.min(out.impostors,maxImpostorsForCount(playerCount));
   out.cleanerMax=Math.min(out.cleanerMax,out.impostors);
   out.parasiteMax=Math.min(out.parasiteMax,out.impostors,3);
@@ -58,7 +59,6 @@ function cleanSettings(input={}, playerCount=15) {
   out.paramedicMax=Math.min(out.paramedicMax,Math.max(0,Math.min(15,playerCount)));
   out.lazyMax=Math.min(out.lazyMax,Math.max(0,Math.min(15,playerCount)));
   out.spectralMax=Math.min(out.spectralMax,Math.max(0,Math.min(15,playerCount)));
-  out.spectralSpeed=Math.min(20,Math.max(0,Math.round(out.spectralSpeed/2)*2));
   return out;
 }
 const ROOM_CODE_CHARS='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -163,6 +163,7 @@ function handle(ws, raw, timings={}){
     c.id='p_'+crypto.randomBytes(8).toString('hex');c.name=safeText(m.name);{const requested=normalizeColor(m.color);c.color=COLORS.includes(requested)?requested:'azul'}clients.set(c.id,c);
     send(ws,{type:'welcome',id:c.id});return;
   }
+  if(m.type==='ping'){send(ws,{type:'pong',echo:Number(m.echo)||0,t:Date.now()});return}
   if(!c.id)return error(ws,'Conecte-se primeiro ao servidor.');
   if(m.type==='create_room'){
     if(c.roomCode)detachFromRoom(c);
@@ -296,6 +297,16 @@ function createGameServer(opts={}){
     if(pathname==='/health'){res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({ok:true,rooms:rooms.size,clients:clients.size}));return}
     if(pathname==='/'||pathname==='/index.html'){
       fs.readFile(HTML_FILE,(err,data)=>{if(err){res.writeHead(500);res.end('Não foi possível abrir index.html');return}res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-cache'});res.end(data)});return;
+    }
+    if(pathname.startsWith('/assets/')){
+      const filePath=path.join(__dirname,pathname);
+      if(!filePath.startsWith(path.join(__dirname,'assets'))) {res.writeHead(403);res.end('Proibido');return}
+      fs.readFile(filePath,(err,data)=>{
+        if(err){res.writeHead(404,{'content-type':'text/plain; charset=utf-8'});res.end('Não encontrado');return}
+        const ext=path.extname(filePath).toLowerCase();
+        const type=ext==='.png'?'image/png':ext==='.jpg'||ext==='.jpeg'?'image/jpeg':ext==='.webp'?'image/webp':'application/octet-stream';
+        res.writeHead(200,{'content-type':type,'cache-control':'public, max-age=3600'});res.end(data)
+      });return;
     }
     res.writeHead(404,{'content-type':'text/plain; charset=utf-8'});res.end('Não encontrado');
   });
