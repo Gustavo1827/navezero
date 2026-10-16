@@ -263,6 +263,7 @@ body.touch #stick{display:block}
 .meetp h2{margin:0;font-size:26px;font-weight:800}
 #meetDesc{margin:2px 0 10px;color:var(--ink2);font-size:16px}
 #meetGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.meetPlayerWrap{display:flex;flex-direction:column;gap:5px;min-width:0}.meetPlayerWrap>.pc{width:100%;min-height:100%}.meetingModVote{border:2px solid #10122a;border-radius:10px;background:#b51f3d;color:#fff;font:800 11px/1.15 var(--font);padding:6px 5px;box-shadow:0 3px 0 #711126}.meetingModVote:disabled{opacity:.48;filter:grayscale(.25)}
 .pc{position:relative;display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;border-radius:14px;border:2.5px solid var(--edge);background:var(--panel2);box-shadow:0 4px 0 #0a0c26;font-size:15px;font-weight:700}
 .pc canvas{width:60px;height:60px;display:block}
 .pc.me{border-color:var(--sky)}
@@ -380,6 +381,7 @@ body.touch #stick{display:block}
 .roomPlayer{display:flex;align-items:center;gap:9px;padding:7px 10px;background:#0d1033;border:1px solid #343d80;border-radius:10px}
 .roomDot{width:18px;height:18px;border-radius:50%;border:2px solid #080a20;flex:none}
 .roomPlayer span:last-child{margin-left:auto;color:var(--ink2);font-size:13px}
+.modWarn{width:42px;height:38px;padding:0;border-radius:12px;border:2px solid #10122a;background:#d92d43;color:#fff;font:800 22px/1 var(--font);box-shadow:0 4px 0 #8f172a,0 6px 0 #10122a}.modWarn[aria-pressed="true"]{outline:3px solid #ff91a0;outline-offset:2px}.roomModeration{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.roomModeration button{padding:5px 8px;border-radius:9px;border:2px solid #10122a;font:800 12px var(--font)}.roomKick{background:#e35b65;color:#fff}.roomBan{background:#a8122a;color:#fff}.roomState{margin-left:auto;color:var(--ink2);font-size:13px}
 .roomFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 12px}
 .roomFields label{display:flex;flex-direction:column;gap:4px;color:var(--ink2);font-size:13px}.roomFields #roomBotsOk{align-self:end;min-height:36px;min-width:58px;padding:5px 24px 3px;font:800 20px var(--font);border-radius:14px;box-shadow:0 4px 0 var(--amber-d),0 6px 0 #10122a}
 .roomFields #roomBotsOk:active{transform:translateY(3px);box-shadow:0 1px 0 var(--amber-d),0 2px 0 #10122a}
@@ -439,7 +441,7 @@ body.touch #stick{display:block}
 <div id="roomLobby" hidden aria-live="polite">
   <div class="card roomCard" role="dialog" aria-modal="true" aria-labelledby="roomLobbyTitle">
     <h2 id="roomLobbyTitle">Sala multiplayer</h2>
-    <p class="roomCodeLine">Código: <strong id="roomCodeText">------</strong> <button class="chip" id="btnCopyCode" type="button">Copiar</button> <button class="chip" id="btnRoomChatLobby" type="button" hidden>Chat escrito</button></p>
+    <p class="roomCodeLine">Código: <strong id="roomCodeText">------</strong> <button class="chip" id="btnCopyCode" type="button">Copiar</button> <button class="chip" id="btnRoomChatLobby" type="button" hidden>Chat escrito</button> <button class="modWarn" id="btnLobbyModeration" type="button" aria-label="Punições" aria-pressed="false" hidden>⚠️</button></p>
     <p id="roomStatusText" class="phase">Aguardando jogadores...</p>
     <h3>Participantes</h3><div id="roomPlayers" class="roomPlayers"></div>
     <div id="hostRoomConfig" class="roomConfig" hidden>
@@ -533,7 +535,7 @@ body.touch #stick{display:block}
 
 <div id="meet" hidden>
   <div class="mpanel meetp" role="dialog" aria-modal="true" aria-labelledby="meetTitle">
-    <header><h2 id="meetTitle"></h2><span class="chip" id="meetTimer">3s</span></header>
+    <header><h2 id="meetTitle"></h2><div class="row"><button class="modWarn" id="btnMeetingModeration" type="button" aria-label="Votação de expulsão" aria-pressed="false" hidden>⚠️</button><span class="chip" id="meetTimer">3s</span></div></header>
     <p id="meetDesc"></p>
     <div id="voteBreakdown" hidden aria-live="polite"></div><div id="skipVoteDots" class="skip-vote-dots" hidden aria-label="Cores dos jogadores que pularam a votação"></div>
     <div id="meetGrid"></div>
@@ -2145,7 +2147,7 @@ let toastT=0;
 function toast(m,ms=2200){
   const msg=String(m);
   // Mantém apenas alertas importantes; mensagens rotineiras deixam de ocupar o topo.
-  if(!/(sabot|reator|eliminad|morte|vit[oó]ria|derrota|conex[aã]o perdida|sala fechada|cooldown|recarga|vota[cç][aã]o|ejetad|erro|inv[aá]lid|emerg[eê]ncia|marcad|restaurad|estabilizad|reabert|destrav|aplicad)/i.test(msg))return;
+  if(!/(sabot|reator|eliminad|morte|vit[oó]ria|derrota|conex[aã]o perdida|sala fechada|cooldown|recarga|vota[cç][aã]o|ejetad|erro|banid|expuls|inv[aá]lid|emerg[eê]ncia|marcad|restaurad|estabilizad|reabert|destrav|aplicad)/i.test(msg))return;
   const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms)
 }
 
@@ -3692,16 +3694,16 @@ function alibiMsg(ch,M,room){
 }
 function npcStatement(ch,M){
   const ai=ch.ai, P=PERS[ai.pers];
-  if(M.body&&ch===M.caller&&Math.random()<.85)return {from:ch,text:pickLine([`Corpo de ${M.body.name} em ${M.body.room}.`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`]),claim:{from:ch.id,kind:'bodyReport',target:M.body.id,room:M.body.room,time:M.body.tKill}};
+  if(M.body&&ch===M.caller&&Math.random()<.85)return {from:ch,text:pickLine([`Corpo de ${M.body.name} em ${M.body.room}.`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`]),claim:{from:ch.id,kind:'bodyReport',target:M.body.id,room:M.body.room,time:M.body.tKill}};
   if(M.body&&Math.random()<.12)return {from:ch,text:`Onde que mataram ${M.body.name}?`,claim:{from:ch.id,kind:'ask',bodyInquiry:true}};
   if(G.sab.reactor>0&&Math.random()<.35)return {from:ch,text:'Cuidado! Vamos resolver o reator!',claim:null};
   const lastSab=ai.sabs[ai.sabs.length-1];if(lastSab&&G.sab[lastSab.type]>0&&G.gt-lastSab.gt<18&&Math.random()<.22){if(lastSab.type==='doors')return {from:ch,text:'As portas estão travadas. Temos que esperar abrir!',claim:null};const sn={lights:'as luzes',comms:'as comunicações',reactor:'o reator'}[lastSab.type]||'a sabotagem';return {from:ch,text:`Cuidado! Vamos resolver ${sn}!`,claim:null}}
-  if(ai.controlVictimSaw&&G.gt-ai.controlVictimSaw.gt<45&&Math.random()<.55){const seen=charById(ai.controlVictimSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Marionetista!!!`,`${seen.name} me controlou! Acho que é Marionetista.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'marionette'}}}
+  if(ai.controlVictimSaw&&G.gt-ai.controlVictimSaw.gt<45&&Math.random()<.55){const seen=charById(ai.controlVictimSaw.id);if(seen)return {from:ch,text:pick([`Vi ${seen.name} usar a função de Marionetista!`,`${seen.name} é Marionetista!!!`,`${seen.name} me controlou! Acho que é Marionetista.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'marionette'}}}
   if(ai.controlSaw&&G.gt-ai.controlSaw.gt<35&&Math.random()<.22){const seen=charById(ai.controlSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Infiltrado? Eu vi algo estranho durante o controle.`,`${seen.name} é Marionetista? O comportamento durante o controle foi estranho.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:false}}}
   if(ai.engineerSaw&&G.gt-ai.engineerSaw.gt<45&&Math.random()<.20){const seen=charById(ai.engineerSaw.id);if(seen)return {from:ch,text:pick([`Vi ${seen.name} a entrar em um duto. Pode ser Engenheiro ou Infiltrado.`,`Vi ${seen.name} usando um duto, mas isso sozinho não prova a função.`]),claim:{from:ch.id,kind:'suspicion',target:seen.id,vent:true,strong:false}}}
   if(ai.ventSaw&&G.gt-ai.ventSaw.gt<45&&Math.random()<.16){const seen=charById(ai.ventSaw.id);if(seen)return {from:ch,text:pick([`Vi ${seen.name} a entrar em um duto!`,`${seen.name} é Infiltrado? Eu vi essa pessoa entrando em um duto.`]),claim:{from:ch.id,kind:'suspicion',target:seen.id,vent:true,strong:false}}}
-  if(ai.reviveSaw&&G.gt-ai.reviveSaw.gt<75&&Math.random()<.65){const medic=charById(ai.reviveSaw.medicId),victim=charById(ai.reviveSaw.victimId);if(medic&&victim)return {from:ch,text:pick([`${medic.name} é Paramédico!!! Eu vi ${medic.name} reviver ${victim.name}.`,`Vi ${medic.name} trazer ${victim.name} de volta. É Paramédico.`]),claim:{from:ch.id,kind:'defend',target:medic.id,role:'paramedic'}}}
-  if(ai.cleanSaw&&G.gt-ai.cleanSaw.gt<60&&Math.random()<.65){const seen=charById(ai.cleanSaw.id);if(seen&&seen.alive)return {from:ch,text:pick([`${seen.name} é Faxineiro!!! Eu vi o corpo desaparecer perto dessa pessoa.`,`Vi ${seen.name} perto do corpo quando ele desapareceu. Pode ser Faxineiro.`,`O corpo sumiu quando ${seen.name} estava ali. Isso foi muito suspeito.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'cleaner'}}}
+  if(ai.reviveSaw&&G.gt-ai.reviveSaw.gt<75&&Math.random()<.65){const medic=charById(ai.reviveSaw.medicId),victim=charById(ai.reviveSaw.victimId);if(medic&&victim)return {from:ch,text:pick([`Vi ${medic.name} usar a função de Paramédico!`,`${medic.name} é Paramédico!!! Eu vi ${medic.name} reviver ${victim.name}.`,`Vi ${medic.name} trazer ${victim.name} de volta. É Paramédico.`]),claim:{from:ch.id,kind:'defend',target:medic.id,role:'paramedic'}}}
+  if(ai.cleanSaw&&G.gt-ai.cleanSaw.gt<60&&Math.random()<.65){const seen=charById(ai.cleanSaw.id);if(seen&&seen.alive)return {from:ch,text:pick([`Vi ${seen.name} usar a função de Faxineiro!`,`${seen.name} é Faxineiro!!! Eu vi o corpo desaparecer perto dessa pessoa.`,`Vi ${seen.name} perto do corpo quando ele desapareceu. Pode ser Faxineiro.`,`O corpo sumiu quando ${seen.name} estava ali. Isso foi muito suspeito.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'cleaner'}}}
   const cleanMyst=(ai.cleanMysteries||[]).filter(e=>G.gt-e.gt<90);if(cleanMyst.length&&Math.random()<.5){const e=cleanMyst[cleanMyst.length-1];return {from:ch,text:pick([`Eu tinha visto um corpo ${inRoom(e.room)} e depois ele sumiu. Pode existir um Faxineiro.`,`Um corpo desapareceu ${inRoom(e.room)}. Isso parece trabalho de Faxineiro.`]),claim:{from:ch.id,kind:'theory',role:'cleaner'}}}
   if(ai.spectralSeen&&G.gt-ai.spectralSeen.gt<90&&Math.random()<.62){const seen=charById(ai.spectralSeen.id);if(seen&&seen.alive)return {from:ch,text:pick([`Acho que vi um Espectral. ${seen.name} estava bem onde surgiu aquela fumaça.`,`Acho que vi um Espectral. Vi uma fumaça estranha perto de ${seen.name}.`]),claim:{from:ch.id,kind:'suspicion',target:seen.id,strong:false,role:'spectral'}}}
   const spectralMyst=(ai.spectralMysteries||[]).filter(e=>G.gt-e.gt<90);if(spectralMyst.length&&Math.random()<.46){const e=spectralMyst[spectralMyst.length-1];return {from:ch,text:pick([`Acho que vi um Espectral. Surgiu uma fumaça estranha ${inRoom(e.room)}.`,`Vi uma fumaça estranha ${inRoom(e.room)}. Pode existir um Espectral.`]),claim:{from:ch.id,kind:'theory',role:'spectral'}}}
@@ -3717,7 +3719,7 @@ function npcStatement(ch,M){
     const suspect=charById(knownTop.id),rs=bestReason(ai,knownTop.id);
     if(suspect){
       if(rs)return {from:ch,text:reasonText(ch,knownTop.id,rs,knownTop.s>=P.thr),claim:reasonClaim(ch,knownTop.id,rs)};
-      return {from:ch,text:pickLine(knownTop.s>=P.thr?[`Vamos votar em ${suspect.name}.`,`Suspeito de ${suspect.name}.`,`${suspect.name} é suspeito.`]:[`Suspeito de ${suspect.name}.`,`${suspect.name} é suspeito.`,`${suspect.name} é Infiltrado?`,`Estou desconfiando de ${suspect.name}.`]),claim:{from:ch.id,kind:'accuse',target:suspect.id,strong:knownTop.s>=P.thr}};
+      return {from:ch,text:pickLine(knownTop.s>=P.thr?[`Vamos expulsar ${suspect.name} do jogo!`,`Vamos votar em ${suspect.name}.`,`Suspeito de ${suspect.name}.`,`${suspect.name} é suspeito.`]:[`Vamos expulsar ${suspect.name} do jogo?`,`Suspeito de ${suspect.name}.`,`${suspect.name} é suspeito.`,`${suspect.name} é Infiltrado?`,`Estou desconfiando de ${suspect.name}.`]),claim:{from:ch.id,kind:'accuse',target:suspect.id,strong:knownTop.s>=P.thr}};
     }
   }
   const recentSeen=Object.entries(ai.seen||{}).map(([id,rec])=>({id,rec})).filter(x=>x.rec&&x.rec.room&&G.gt-(Number(x.rec.t)||0)<30&&charById(x.id)?.alive);
@@ -3760,7 +3762,7 @@ function genChat(){
   const M=G.M, L=[], npcs=meetingNPCs();
   const c=M.caller;
   if(!c.isPlayer&&!c.isRemoteHuman){
-    if(M.reason==='body')L.push({from:c,text:pickLine([`Corpo de ${M.body.name} em ${M.body.room}.`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`]),claim:null});
+    if(M.reason==='body')L.push({from:c,text:pickLine([`Corpo de ${M.body.name} em ${M.body.room}.`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`]),claim:null});
     else if(M.evid)L.push({from:c,text:'Chamei a reunião porque '+M.evid.text.charAt(0).toLowerCase()+M.evid.text.slice(1),claim:M.evid.claim});
     else L.push({from:c,text:'Chamei a reunião. Precisamos conversar.',claim:null});
   }
@@ -3798,7 +3800,7 @@ function hear(L,claim){
       else if(claim.vent&&own<P.thr*.6){text=pick(['Não vi!',`Eu não vi isso, mas ${sp.name} parece ter certeza.`,`Se for verdade, ${T.name} é o Infiltrado. Quem mais viu?`]);prio=3}
       else if(own<=-1){text=pick(['Discordo.','Não.',`Não concordo, vi ${T.name} fazendo tarefa de verdade.`]);prio=3}
       else if(own>=P.thr*.6){text=pick(['Concordo.','Sim.',`Concordo, eu também desconfio de ${T.name}.`,`É, ${T.name} também me chamou atenção.`]);prio=3}
-      else if((ai.pers==='cauteloso'||ai.pers==='observador')&&Math.random()<.8){text=pick(['Que evidências você tem?','Onde você viu isso exatamente?','Calma, sem provas é arriscado.']);prio=2}
+      else if((ai.pers==='cauteloso'||ai.pers==='observador')&&Math.random()<.8){text=pick(['Você não tem provas','Que evidências você tem?','Onde você viu isso exatamente?','Calma, sem provas é arriscado.']);prio=2}
       else if(ai.pers==='impulsivo'&&Math.random()<.55){text=pick([`Faz sentido, ${T.name} está estranho mesmo.`,`Boa, vamos de ${T.name}!`]);prio=2}
       else if(ai.pers==='desconfiado'&&Math.random()<.45){text=`Pode ser, ${T.name} não me passa confiança.`;prio=2}
       else{text=pick([`Hmm, ${T.name} não me pareceu tão suspeito.`,`Acho cedo para acusar ${T.name}.`,`Não vi nada contra ${T.name}.`]);prio=2}
@@ -3828,6 +3830,14 @@ function hear(L,claim){
     if(c){text=`Isso não combina com o que vimos: eu vi ${sp.name} ${inRoom(c)}.`;prio=4;addSusp(L,sp.id,2,'contra')}
   }else if(claim.kind==='ask'&&claim.bodyInquiry&&M.body){
     text=pick([`O corpo foi encontrado ${inRoom(M.body.room)}.`,`Pelo que foi reportado, foi ${inRoom(M.body.room)}.`,`A denúncia indicou ${inRoom(M.body.room)}.`]); prio=2;
+  }else if(claim.kind==='roleSight'){
+    const roleNames={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',delayed:'Atrasado',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',instructor:'Instrutor'},roleName=roleNames[claim.role]||'essa função';
+    if(!T){text=pick(['Quem você viu usando essa função?','Pode ser. Alguém mais presenciou isso?','Você não tem provas de quem foi.']);prio=2}
+    else{
+      const supports=(claim.role==='marionette'&&(ai.controlSaw?.id===T.id||ai.controlVictimSaw?.id===T.id))||(claim.role==='paramedic'&&ai.reviveSaw?.medicId===T.id)||(claim.role==='cleaner'&&ai.cleanSaw?.id===T.id)||(claim.role==='spectral'&&ai.spectralSeen?.id===T.id);
+      if(supports){text=pick(['Sim.','Verdade.',`Eu também vi ${T.name} usar algo compatível com ${roleName}.`]);prio=4}
+      else{const hostile=['imp','cleaner','parasite','spectral','delayed','marionette'].includes(claim.role);if(!imp&&hostile)addSusp(L,T.id,.45*heard,'claim',{by:sp.id,role:claim.role});text=pick(['Você não tem provas','Eu não vi isso acontecer.',`Não consigo confirmar que ${T.name} seja ${roleName}.`]);prio=2}
+    }
   }else if(claim.kind==='ask'&&claim.role&&T){
     const sawMarion=(ai.controlSaw?.id===T.id||ai.controlVictimSaw?.id===T.id),sawEngineer=ai.engineerSaw?.id===T.id,sawCleaner=ai.cleanSaw?.id===T.id,sawParamedic=ai.reviveSaw?.medicId===T.id;
     const roleNames={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',delayed:'Atrasado',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico'};
@@ -3931,7 +3941,12 @@ const PRESET_PHRASES=[
   {id:'truth',label:'Verdade'},
   {id:'voteWho',label:'Vamos votar em quem?'},
   {id:'voteTarget',label:'Vamos votar em [jogador]',target:true},
-  {id:'playerOnly',label:'[jogador]',target:true}
+  {id:'playerOnly',label:'[jogador]',target:true},
+  {id:'foundBodyExact',label:'Encontrei o corpo de [morto] em [sala]',target:true,targetDead:true,room:true},
+  {id:'sawRoleUse',label:'Vi [jogador/alguém] usar a função de [função]!',target:true,allowSomeone:true,roleChoice:true},
+  {id:'noProof',label:'Você não tem provas'},
+  {id:'expelTargetBang',label:'Vamos expulsar [jogador] do jogo!',target:true},
+  {id:'expelTargetAsk',label:'Vamos expulsar [jogador] do jogo?',target:true}
 ];
 function renderQuickPhrases(){
   const box=$('sayChips'); box.innerHTML='';
@@ -3941,14 +3956,14 @@ function renderQuickPhrases(){
   });
 }
 function renderPhraseTargets(phraseId){
-  const box=$('sayChips'); box.innerHTML='';
-  const title=el('span','mstatus','Escolha um jogador vivo:'); title.style.width='100%'; box.appendChild(title);
-  G.chars.filter(c=>c.alive&&c.id!==G.player.id).forEach(ch=>{
+  const box=$('sayChips'); box.innerHTML='';const phrase=PRESET_PHRASES.find(x=>x.id===phraseId);if(!phrase)return;
+  const title=el('span','mstatus',phrase.targetDead?'Escolha um jogador morto:':'Escolha um jogador:'); title.style.width='100%'; box.appendChild(title);
+  if(phrase.allowSomeone){const any=el('button','chip phrase target','Alguém');any.type='button';any.addEventListener('click',()=>{if(phrase.roleChoice)renderPhraseRoles(phraseId,null);else if(phrase.room)renderPhraseRooms(phraseId,null);else sendPresetPhrase(phraseId,null,null)});box.appendChild(any)}
+  G.chars.filter(c=>(phrase.targetDead?!c.alive:c.alive)&&c.id!==G.player.id).forEach(ch=>{
     const b=el('button','chip phrase target',ch.name); b.type='button';
     b.addEventListener('click',()=>{
-      const phrase=PRESET_PHRASES.find(x=>x.id===phraseId);
-      if(phrase&&phrase.roleChoice)renderPhraseRoles(phraseId,ch.id);
-      else if(phrase&&phrase.room)renderPhraseRooms(phraseId,ch.id);
+      if(phrase.roleChoice)renderPhraseRoles(phraseId,ch.id);
+      else if(phrase.room)renderPhraseRooms(phraseId,ch.id);
       else sendPresetPhrase(phraseId,ch.id,null);
     }); box.appendChild(b);
   });
@@ -3957,7 +3972,7 @@ function renderPhraseTargets(phraseId){
 function renderPhraseRoles(phraseId,targetId=null){
   const box=$('sayChips');box.innerHTML='';
   const title=el('span','mstatus','Escolha uma função:');title.style.width='100%';box.appendChild(title);
-  const roles=[['crew','Tripulante'],['imp','Infiltrado'],['sheriff','Xerife'],['locator','Localizador'],['observer','Observador'],['cleaner','Faxineiro'],['parasite','Parasita'],['delayed','Atrasado'],['engineer','Engenheiro'],['marionette','Marionetista'],['paramedic','Paramédico'],['lazy','Preguiçoso']];
+  const roles=[['crew','Tripulante'],['imp','Infiltrado'],['sheriff','Xerife'],['locator','Localizador'],['observer','Observador'],['cleaner','Faxineiro'],['parasite','Parasita'],['spectral','Espectral'],['delayed','Atrasado'],['engineer','Engenheiro'],['marionette','Marionetista'],['paramedic','Paramédico'],['lazy','Preguiçoso'],['instructor','Instrutor']];
   for(const [id,label] of roles){
     const b=el('button','chip phrase',label);b.type='button';
     b.addEventListener('click',()=>sendPresetPhrase(phraseId,targetId,null,id));box.appendChild(b);
@@ -3986,8 +4001,8 @@ function choosePresetPhrase(id){
 }
 function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
   const M=G.M; if(!M||M.phase!=='discuss'||!G.player.alive)return;
-  const T=targetId?charById(targetId):null;
-  if(targetId&&(!T||!T.alive||T.isPlayer))return;
+  const def=PRESET_PHRASES.find(x=>x.id===id),T=targetId?charById(targetId):null;
+  if(targetId&&(!T||T.isPlayer||(def?.targetDead?T.alive:!T.alive)))return;
   const rm=roomNamePicked||null;
   let text='',claim={from:G.player.id,kind:'other'};
   switch(id){
@@ -4015,7 +4030,7 @@ function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
     case 'roleGuess': if(!T)return; text=`Será que ${T.name} é o Localizador?`; claim={from:G.player.id,kind:'ask',target:T.id}; break;
     case 'roleCrew': if(!T)return; text=`Acho que ${T.name} é inocente.`; claim={from:G.player.id,kind:'defend',target:T.id}; break;
     case 'roleDeny': case 'roleSelf': case 'roleSight': case 'roleGuessPlayer': {
-      const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',engineer:'Engenheiro',marionette:'Marionetista',lazy:'Preguiçoso'};
+      const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',instructor:'Instrutor'};
       const role=roles[rolePicked];if(!role)return;
       const article=role==='Infiltrado'?'o Infiltrado':role==='Tripulante'?'Tripulante':`o ${role}`;
       if(id==='roleDeny')text=`Não sou ${article}.`;
@@ -4038,6 +4053,13 @@ function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
     case 'voteWho': text='Vamos votar em quem?'; claim={from:G.player.id,kind:'ask'}; break;
     case 'voteTarget': if(!T)return; text=`Vamos votar em ${T.name}`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:false}; break;
     case 'playerOnly': if(!T)return; text=T.name; claim={from:G.player.id,kind:'ask',target:T.id}; break;
+    case 'foundBodyExact': if(!T||!rm)return; text=`Encontrei o corpo de ${T.name} em ${rm}`; claim={from:G.player.id,kind:'bodyReport',target:T.id,room:rm,strong:true}; break;
+    case 'sawRoleUse': {
+      const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',delayed:'Atrasado',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',instructor:'Instrutor'};const role=roles[rolePicked];if(!role)return;text=T?`Vi ${T.name} usar a função de ${role}!`:`Vi alguém usar a função de ${role}!`;claim={from:G.player.id,kind:'roleSight',target:T?.id||null,role:rolePicked,strong:!!T};break;
+    }
+    case 'noProof': text='Você não tem provas'; claim={from:G.player.id,kind:'caution'}; break;
+    case 'expelTargetBang': if(!T)return; text=`Vamos expulsar ${T.name} do jogo!`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:true}; break;
+    case 'expelTargetAsk': if(!T)return; text=`Vamos expulsar ${T.name} do jogo?`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:false}; break;
     default: return;
   }
   if(sendSay(text,claim))renderQuickPhrases();
@@ -4127,14 +4149,19 @@ function buildMeetUI(){
   $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';
   const grid=$('meetGrid'); grid.innerHTML='';
   G.chars.forEach(ch=>{
+    const wrap=el('div','meetPlayerWrap');wrap.dataset.playerId=ch.id;
     const b=el('button','pc'+(ch.isPlayer?' me':'')+(ch.alive?'':' dead')); b.type='button';
     const cv=document.createElement('canvas'); cv.width=100; cv.height=88; const c=cv.getContext('2d');
     c.setTransform(1.65,0,0,1.65,50,47); drawChar(c,{x:0,y:0,color:ch.color,face:1,walk:0,moving:false,cosmetics:ch.cosmetics,id:ch.id},false,{portrait:true});
     const pv=el('span','pv',ch.alive?'':'Eliminado'), dots=el('span','dots'), pn=el('span','pn',ch.name);
     if(!G.player.alive&&ch.role==='imp')pn.style.color='#ff6b7e';
     if(!G.player.alive){const fl={sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',__hidden:'Tripulante'}[G.player.instructor&&ch.alive&&ch.role==='crew'?'__hidden':ch.function]|| (ch.role==='imp'?'Infiltrado':'Tripulante');const roleLine=el('small','pfunction',fl);b.append(cv,roleLine,pn,pv,dots)}else b.append(cv,pn,pv,dots); b.pvEl=pv; b.dotsEl=dots;
-    b.addEventListener('click',()=>cardClick(ch.id)); grid.appendChild(b); M.cards[ch.id]=b;
+    b.addEventListener('click',()=>cardClick(ch.id));wrap.appendChild(b);M.cards[ch.id]=b;
+    const onlineHuman=!!(NET.inRoom&&NET.room?.players?.some(p=>String(p.id)===String(ch.id)));
+    if(onlineHuman&&String(ch.id)!==String(NET.id)){const mb=el('button','meetingModVote','Votar para expulsar');mb.type='button';mb.dataset.targetId=ch.id;mb.hidden=!NET.modMeetingOpen;mb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();meetingModerationVote(ch.id)});wrap.appendChild(mb)}
+    grid.appendChild(wrap);
   });
+  $('btnMeetingModeration').hidden=!NET.inRoom;$('btnMeetingModeration').setAttribute('aria-pressed',String(!!NET.modMeetingOpen));renderMeetingModerationControls();
   renderMeetingIntro();
 }
 function setMeetPhase(ph){
@@ -4157,7 +4184,7 @@ function setMeetPhase(ph){
     for(const c of G.chars){const card=M.cards[c.id];if(card){card.dotsEl.innerHTML='';card.classList.remove('pick')}}
     $('meetDesc').textContent=M.result?.headline||'Ninguém foi ejetado.'; $('btnSkip').hidden=true;
   }
-  $('meetSay').hidden=!(al&&ph==='discuss'); $('sayChips').hidden=!(al&&ph==='discuss');
+  $('meetSay').hidden=!(al&&ph==='discuss'); $('sayChips').hidden=!(al&&ph==='discuss');renderMeetingModerationControls();
   if(ph!=='discuss')$('sayChips').innerHTML='';
   Snd.open();
 }
@@ -4189,6 +4216,7 @@ function updateMeeting(dt){
   }else if(M.phase==='result'){if(M.t>=M.dur)setMeetPhase('eject')}else if(M.phase==='eject'){if(M.t>=M.dur)endMeeting()}
 }
 function endMeeting(){
+  NET.modMeetingOpen=false;NET.moderationState=null;$('btnMeetingModeration').hidden=true;$('btnMeetingModeration').setAttribute('aria-pressed','false');
   const M=G.M, ej=M.result?.eject||null; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject','vote-reveal'); $('meetingIntro').hidden=true; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent=''; $('skipVoteDots').hidden=true; $('skipVoteDots').innerHTML=''; $('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML=''); $('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick'));
   if(ej)killChar(ej);
   resolveParasiteInfections();
@@ -4514,11 +4542,13 @@ function renderLobbyColorSwatches(){const box=$('lobbyColorSwatches');if(!box)re
 function renderCosmeticsCatalog(){const overlay=$('cosmeticsOverlay');if(!overlay||overlay.hidden)return;const tabs=$('cosmeticsTabs'),grid=$('cosmeticsGrid');tabs.innerHTML='';grid.innerHTML='';renderLobbyColorSwatches();for(const [key,label] of COSMETIC_CATEGORIES){const b=el('button','chip',label);b.type='button';b.setAttribute('aria-pressed',key===COSMETIC_TAB?'true':'false');b.addEventListener('click',()=>{COSMETIC_TAB=key;renderCosmeticsCatalog();Snd.click()});tabs.appendChild(b)}for(const item of COSMETIC_CATALOG[COSMETIC_TAB]){const b=el('button','cosmeticItem');b.type='button';b.setAttribute('aria-pressed',PLAYER_COSMETICS[COSMETIC_TAB]===item.id?'true':'false');if(item.id==='none'){b.appendChild(el('div','cosmeticNoneMark','∅'))}else{const cv=document.createElement('canvas');cv.width=208;cv.height=180;const only=cloneCosmetics(DEFAULT_COSMETICS);only[COSMETIC_TAB]=item.id;drawCosmeticPortrait(cv,{color:G.cfg.color,cosmetics:only},3.10);b.appendChild(cv)}b.appendChild(el('span','',item.name));b.addEventListener('click',()=>{PLAYER_COSMETICS[COSMETIC_TAB]=item.id;savePlayerCosmetics();renderCosmeticsCatalog();if(NET.inRoom&&NET.room?.status==='lobby')netSend({type:'set_cosmetics',cosmetics:cloneCosmetics(PLAYER_COSMETICS)});Snd.click()});grid.appendChild(b)}drawCosmeticPortrait($('cosmeticsPreviewCv'),{color:G.cfg.color,cosmetics:PLAYER_COSMETICS},5.30);$('cosmeticsEquipped').textContent=COSMETIC_CATEGORIES.map(([k,label])=>`${label}: ${cosmeticItemName(k,PLAYER_COSMETICS[k])}`).join(' · ')}
 function openCosmetics(){if(NET.inRoom){toast('O Inventário é usado na tela inicial, antes de entrar na sala.');return}COSMETIC_TAB='hat';$('cosmeticsOverlay').hidden=false;renderCosmeticsCatalog();Snd.open()}
 function closeCosmetics(){$('cosmeticsOverlay').hidden=true}
+function loadNetClientKey(){try{let k=localStorage.getItem('navezero_online_client_v1');if(!/^[A-Za-z0-9_-]{12,96}$/.test(String(k||''))){k=(globalThis.crypto?.randomUUID?.()||('nz_'+Math.random().toString(36).slice(2)+Date.now().toString(36))).replace(/[^A-Za-z0-9_-]/g,'');localStorage.setItem('navezero_online_client_v1',k)}return k}catch{return 'nz_'+Math.random().toString(36).slice(2)+Date.now().toString(36)}}
+const NET_CLIENT_KEY=loadNetClientKey();
 
 /* =====================================================================
    MULTIPLAYER ONLINE — autoridade da sala no host + snapshots/requisições
    ===================================================================== */
-const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,motionSeq:0,recvMotionSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,preparedRound:0,revealPending:false,startRequested:false,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,motionTimer:0,lastSnapshotAt:0,lastMotionAt:0,snapshotBlendDuration:.15,inputSeq:0,inputAck:0,reconcileX:0,reconcileY:0,authX:null,authY:null,lastServerMsgAt:0,pingProbe:null};
+const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,motionSeq:0,recvMotionSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,preparedRound:0,revealPending:false,startRequested:false,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,motionTimer:0,lastSnapshotAt:0,lastMotionAt:0,snapshotBlendDuration:.15,inputSeq:0,inputAck:0,reconcileX:0,reconcileY:0,authX:null,authY:null,lastServerMsgAt:0,pingProbe:null,modLobbyOpen:false,modMeetingOpen:false,moderationState:null};
 function netVisualState(ch){
   // O jogador local usa previsão imediata. Interpolação visual fica apenas para os outros jogadores.
   if(!NET.inRoom||NET.isHost||ch.id===NET.id||G.player?.controlTargetId===ch.id||!Number.isFinite(ch.netVisualX)||!Number.isFinite(ch.netVisualY))return null;
@@ -4559,7 +4589,7 @@ function netConnect(action){
   if(NET.connecting)return;
   try{
     NET.connecting=true;const ws=new WebSocket(url);NET.ws=ws;
-    ws.onopen=()=>{NET.connecting=false;NET.lastServerMsgAt=performance.now();ws.send(JSON.stringify({type:'hello',name:String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante',color:G.cfg.color}))};
+    ws.onopen=()=>{NET.connecting=false;NET.lastServerMsgAt=performance.now();ws.send(JSON.stringify({type:'hello',name:String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante',color:G.cfg.color,clientKey:NET_CLIENT_KEY}))};
     ws.onmessage=e=>{netMarkAlive();let m;try{m=JSON.parse(e.data)}catch{return}netHandleMessage(m)};
     ws.onerror=()=>{NET.connecting=false;if(NET.joinPending)setJoinError('Não foi possível conectar ao servidor multiplayer.');else toast('Não foi possível conectar ao servidor multiplayer. Confira o endereço e se o servidor está ligado.',4200)};
     ws.onclose=()=>{NET.connecting=false;netStopSilentProbe();const wasRoom=NET.inRoom,wasJoining=!!NET.joinPending;NET.joinPending=false;if(wasJoining&&!wasRoom)setJoinError('Não foi possível conectar à sala. Tente novamente.');NET.ws=null;NET.id=null;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.remoteInputs.clear();NET.pendingTasks.clear();NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastMotionAt=0;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.matchImpIds.clear();NET.departedImpIds.clear();netHideWait();if(wasRoom){$('roomLobby').hidden=true;toast('Conexão com o servidor perdida. A partida online foi desconectada.',4000)}};
@@ -4568,14 +4598,23 @@ function netConnect(action){
 function netRoomPayload(){const size=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createSizeIn').value=size;const bots=clamp(Math.round(+$('createBotsIn').value||0),0,size-1);$('createBotsIn').value=bots;return {size,bots,settings:netSettings(),cosmetics:cloneCosmetics(PLAYER_COSMETICS)}}
 function netCreateRoom(){Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';$('createPanel').hidden=true;netConnect(()=>netSend({type:'create_room',name:G.cfg.name,color:G.cfg.color,...netRoomPayload()}))}
 function netJoinRoom(){const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);setJoinError('');if(!/^[A-Z0-9]{6}$/.test(code)){setJoinError('Código inválido. Tente novamente');Snd.err();return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';NET.joinPending=true;netConnect(()=>netSend({type:'join_room',code,name:G.cfg.name,color:G.cfg.color,cosmetics:cloneCosmetics(PLAYER_COSMETICS)}))}
-function netLeaveRoom(){closeCosmetics();if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;netHideWait();$('roomLobby').hidden=true}
+function netLeaveRoom(){closeCosmetics();if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;netHideWait();$('roomLobby').hidden=true}
 function netTotal(room=NET.room){return room?(room.players.length+(room.bots||0)):0}
+function moderationTargetState(id){return NET.moderationState?.targets?.find(x=>String(x.targetId)===String(id))||null}
+function toggleLobbyModeration(){if(!NET.inRoom||!NET.isHost||NET.room?.status!=='lobby')return;NET.modLobbyOpen=!NET.modLobbyOpen;$('btnLobbyModeration').setAttribute('aria-pressed',String(NET.modLobbyOpen));netRenderRoom();Snd.click()}
+function toggleMeetingModeration(){if(!NET.inRoom||G.state!=='meeting')return;NET.modMeetingOpen=!NET.modMeetingOpen;$('btnMeetingModeration').setAttribute('aria-pressed',String(NET.modMeetingOpen));renderMeetingModerationControls();Snd.click()}
+function lobbyModerate(targetId,action){if(!NET.isHost||!['kick','ban'].includes(action))return;netSend({type:'moderate_lobby',targetId,action})}
+function meetingModerationVote(targetId){if(!NET.inRoom||G.state!=='meeting'||String(targetId)===String(NET.id))return;netSend({type:'moderation_vote',targetId})}
+function renderMeetingModerationControls(){
+  const top=$('btnMeetingModeration');if(top){top.hidden=!(NET.inRoom&&G.state==='meeting');top.setAttribute('aria-pressed',String(!!NET.modMeetingOpen))}
+  document.querySelectorAll('.meetingModVote').forEach(btn=>{const id=btn.dataset.targetId,st=moderationTargetState(id),own=!!st?.voters?.includes(NET.id);btn.hidden=!NET.modMeetingOpen;const suffix=st?`${st.count}/${st.required}${st.hostRequired&&!st.hostVoted?' · host necessário':''}`:'aguardando';btn.textContent=own?`Voto enviado · ${suffix}`:`Votar para expulsar · ${suffix}`;btn.disabled=own||!G.player?.alive||st?.possible===false;});
+}
 function netRenderRoom(){
   const r=NET.room;if(!r)return;
   $('roomCodeText').textContent=r.code||'------';$('roomStatusText').textContent=r.status==='lobby'?'Aguardando jogadores':r.status==='countdown'?'Contagem regressiva':r.status==='loading'?'Carregando partida':r.status==='playing'?'Partida em andamento':r.status==='ended'?'Partida encerrada':'Conectando';
-  $('btnRoomChatLobby').hidden=r.status!=='lobby';if(r.status!=='lobby')closeRoomChat();
+  $('btnRoomChatLobby').hidden=r.status!=='lobby';if(r.status!=='lobby')closeRoomChat();const modBtn=$('btnLobbyModeration');modBtn.hidden=!(NET.isHost&&r.status==='lobby');if(modBtn.hidden)NET.modLobbyOpen=false;modBtn.setAttribute('aria-pressed',String(!!NET.modLobbyOpen));
   const list=$('roomPlayers');list.innerHTML='';
-  (r.players||[]).forEach(p=>{const item=el('div','roomPlayer');const av=document.createElement('canvas');av.width=44;av.height=44;av.className='roomAvatar';drawLobbyAvatar(av,p);const name=el('strong','',p.name+(p.id===r.hostId?' ★ Host':''));const role=el('span','',p.id===NET.id?'Você':(p.ready?'Pronto':'Conectado'));item.append(av,name,role);list.append(item)});
+  (r.players||[]).forEach(p=>{const item=el('div','roomPlayer');const av=document.createElement('canvas');av.width=44;av.height=44;av.className='roomAvatar';drawLobbyAvatar(av,p);const name=el('strong','',p.name+(p.id===r.hostId?' ★ Host':''));const role=el('span','roomState',p.id===NET.id?'Você':(p.ready?'Pronto':'Conectado'));item.append(av,name,role);if(NET.modLobbyOpen&&NET.isHost&&p.id!==NET.id){const actions=el('div','roomModeration'),kick=el('button','roomKick','Expulsar'),ban=el('button','roomBan','Banir');kick.type=ban.type='button';kick.addEventListener('click',e=>{e.stopPropagation();lobbyModerate(p.id,'kick')});ban.addEventListener('click',e=>{e.stopPropagation();lobbyModerate(p.id,'ban')});actions.append(kick,ban);item.append(actions)}list.append(item)});
   if(r.bots){for(let i=0;i<r.bots;i++){const item=el('div','roomPlayer');const dot=el('i','roomDot');dot.style.background='#9298ad';const bot=r.botRoster?.[i];item.append(dot,el('strong','',bot?.name||('Bot '+(i+1))),el('span','','IA'));list.append(item)}}
   $('hostRoomConfig').hidden=!NET.isHost||r.status!=='lobby';$('btnCfg').disabled=!NET.isHost||r.status!=='lobby';
   $('roomLobbyHint').textContent=NET.isHost?'Você é o host. Ajuste a sala e inicie quando houver pelo menos 4 participantes contando os bots.':'Aguardando o host iniciar. Só o host pode alterar configurações ou reiniciar a partida.';
@@ -4607,9 +4646,11 @@ function netBecomeHost(){
 function netHandleMessage(m){
   if(m.type==='pong'){return}
   if(m.type==='welcome'){NET.id=m.id;NET.connecting=false;if(NET.afterWelcome){const f=NET.afterWelcome;NET.afterWelcome=null;f()}return}
+  if(m.type==='moderation_state'){NET.moderationState=m.state||null;renderMeetingModerationControls();return}
+  if(m.type==='moderation_removed'){const reason=m.reason;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;toMenu();toast(reason==='ban'?'Você foi banido desta sala.':'Você foi expulso da sala.',4200);return}
   if(m.type==='room_error'){const msg=m.message||'Não foi possível entrar na sala.';if(NET.joinPending)setJoinError(msg);else toast(msg,3500);NET.joinPending=false;$('btnJoinConfirm').disabled=false;$('btnCreateRoom').disabled=false;return}
   if(m.type==='room_state'){
-    const wasHost=NET.isHost;NET.room=m.room;NET.inRoom=!!m.room;NET.isHost=!!(m.room&&m.room.hostId===NET.id);
+    const wasHost=NET.isHost;NET.room=m.room;NET.inRoom=!!m.room;NET.isHost=!!(m.room&&m.room.hostId===NET.id);if(!NET.isHost)NET.modLobbyOpen=false;
     if(!m.room){NET.inRoom=false;NET.isHost=false;$('roomLobby').hidden=true;return}
     const ownRoomPlayer=m.room.players?.find(p=>p.id===NET.id);if(ownRoomPlayer){G.cfg.name=ownRoomPlayer.name;G.cfg.color=ownRoomPlayer.color;PLAYER_COSMETICS=cloneCosmetics(ownRoomPlayer.cosmetics);savePlayerCosmetics();$('nameIn').value=ownRoomPlayer.name;syncMenuColorSelection();if(!$('cosmeticsOverlay').hidden)renderCosmeticsCatalog()}
     if(['lobby','countdown'].includes(m.room.status))netShowRoom();else{$('roomLobby').hidden=true;$('menu').hidden=true;if(m.room.status==='loading')netShowLoading()}
@@ -4617,7 +4658,7 @@ function netHandleMessage(m){
     if(!wasHost&&NET.isHost&&m.room.status!=='lobby'&&m.room.status!=='countdown'&&m.room.status!=='loading')netBecomeHost();
     netRenderRoom();return;
   }
-  if(m.type==='left'){NET.inRoom=false;NET.isHost=false;NET.room=null;$('roomLobby').hidden=true;netHideWait();return}
+  if(m.type==='left'){NET.inRoom=false;NET.isHost=false;NET.room=null;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;$('roomLobby').hidden=true;netHideWait();return}
   if(m.type==='player_left'){
     showPlayerLeaveNotice(m.name,m.reason);
     if(NET.isHost&&G.chars.length){const c=G.chars.find(x=>x.id===m.playerId);if(c&&c.role==='imp')NET.departedImpIds.add(c.id);if(NET.matchImpIds.has(m.playerId)&&!c?.isBot)NET.departedImpIds.add(m.playerId);if(c){G.chars=G.chars.filter(x=>x.id!==m.playerId);G.tasks=G.tasks.filter(t=>t.owner!==m.playerId);NET.remoteInputs.delete(m.playerId);if(G.M&&G.M.cards)delete G.M.cards[m.playerId];if(G.M&&G.M.votes){delete G.M.votes[m.playerId];delete G.M.voteAt[m.playerId];G.M.log=G.M.log.filter(v=>v.voter!==m.playerId&&v.target!==m.playerId)}if(G.player&&G.player.id===m.playerId)G.player=null;checkEnd()}}
@@ -4640,7 +4681,7 @@ function netHandleMessage(m){
   }
   if(m.type==='countdown_cancelled'){NET.startRequested=false;NET.preparedRound=0;NET.revealPending=false;netHideWait();toast(m.reason||'Contagem cancelada.',2400);if(NET.room&&['lobby','countdown'].includes(NET.room.status))netShowRoom();return}
   if(m.type==='game_start'){
-    NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.matchImpIds.clear();NET.departedImpIds.clear();NET.startRequested=false;
+    NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.matchImpIds.clear();NET.departedImpIds.clear();NET.startRequested=false;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;
     const own=m.room.players.find(p=>p.id===NET.id);if(own){G.cfg.name=own.name;G.cfg.color=own.color;PLAYER_COSMETICS=cloneCosmetics(own.cosmetics);savePlayerCosmetics();$('nameIn').value=own.name;if(!$('cosmeticsOverlay').hidden)renderCosmeticsCatalog()}
     netApplySettings(m.room.settings);
     $('roomLobby').hidden=true;$('joinPanel').hidden=true;$('menu').hidden=true;
@@ -4867,6 +4908,7 @@ function netPaintMeeting(sm){
     card.dotsEl.innerHTML='';
     if(ph==='eject')card.classList.remove('pick');
   }
+  renderMeetingModerationControls();
   if(ph==='result'){
     (sm.log||[]).forEach(v=>{
       const card=M.cards[v.target];if(!card||v.target==='skip')return;
@@ -5071,7 +5113,7 @@ $('btnSaveRoomConfig').addEventListener('click',netSaveRoomSettings);
 for(const [id,key] of [['roomSpeedIn','speed'],['roomKillIn','kill'],['roomSabIn','sab'],['roomMeetIn','meet'],['roomDiscussionIn','discussion'],['roomVotingIn','voting'],['roomCrewVisionIn','crewVision']])$(id).addEventListener('input',()=>netNoteRoomControl(key,$(id).value));
 $('roomBotsIn').addEventListener('input',()=>netNoteRoomBots($('roomBotsIn').value));
 $('roomBotsOk').addEventListener('click',()=>{if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;const max=Math.max(0,NET.room.size-NET.room.players.length);$('roomBotsIn').value=clamp(Math.round(Number($('roomBotsIn').value)||0),0,max);netNoteRoomBots($('roomBotsIn').value);netSaveRoomSettings();toast('Quantidade de bots aplicada.')});
-$('btnStartRoom').addEventListener('click',netStartGame);$('btnCosmetics').addEventListener('click',openCosmetics);$('btnCosmeticsClose').addEventListener('click',closeCosmetics);$('cosmeticsOverlay').addEventListener('pointerdown',e=>{if(e.target===$('cosmeticsOverlay'))closeCosmetics()});$('btnLeaveRoom').addEventListener('click',()=>{netLeaveRoom();netOriginalToMenu()});
+$('btnLobbyModeration').addEventListener('click',toggleLobbyModeration);$('btnMeetingModeration').addEventListener('click',toggleMeetingModeration);$('btnStartRoom').addEventListener('click',netStartGame);$('btnCosmetics').addEventListener('click',openCosmetics);$('btnCosmeticsClose').addEventListener('click',closeCosmetics);$('cosmeticsOverlay').addEventListener('pointerdown',e=>{if(e.target===$('cosmeticsOverlay'))closeCosmetics()});$('btnLeaveRoom').addEventListener('click',()=>{netLeaveRoom();netOriginalToMenu()});
 $('btnCopyCode').addEventListener('click',()=>{const code=NET.room?.code;if(!code)return;try{navigator.clipboard.writeText(code);toast('Código copiado: '+code)}catch(e){toast('Código da sala: '+code)}});
 // Meeting chat / votes / action requests are sent to the host; the host answers with authoritative snapshots.
 function netSyncHostAfterAuthorityChange(){if(NET.inRoom&&NET.isHost){const snap=netCaptureSnapshot();netSend({type:'state_snapshot',snapshot:snap})}}

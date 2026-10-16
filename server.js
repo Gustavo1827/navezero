@@ -73,6 +73,43 @@ function roomPublic(room){ensureBotRoster(room);return {code:room.code,hostId:ro
 function sendRoomState(room){const pub=roomPublic(room);for(const p of room.players){const c=clients.get(p.id);if(c)send(c.ws,{type:'room_state',room:pub,youId:p.id})}}
 function roomFor(client){return client.roomCode?rooms.get(client.roomCode):null}
 function error(ws,message){send(ws,{type:'room_error',message})}
+function snapshotAlive(room,id){const ch=room.lastSnapshot?.chars?.find(c=>String(c.id)===String(id));return ch?ch.alive!==false:true}
+function ensureModeration(room){if(!(room.modVotes instanceof Map))room.modVotes=new Map();if(!(room.banned instanceof Set))room.banned=new Set();return room.modVotes}
+function moderationRule(room,targetId){
+  const eligible=room.players.filter(p=>p.id!==targetId&&snapshotAlive(room,p.id));
+  const maxVotes=eligible.length;
+  const hostRequired=room.hostId!==targetId&&eligible.some(p=>p.id===room.hostId);
+  let required=maxVotes>=2?(hostRequired&&maxVotes>=4?4:Math.min(3,maxVotes)):2;
+  required=Math.max(2,required);
+  return {eligible:eligible.map(p=>p.id),maxVotes,required,hostRequired,possible:maxVotes>=2};
+}
+function pruneModeration(room){
+  const votes=ensureModeration(room),playerIds=new Set(room.players.map(p=>p.id));
+  for(const [targetId,set] of [...votes.entries()]){
+    if(!playerIds.has(targetId)){votes.delete(targetId);continue}
+    const rule=moderationRule(room,targetId),allowed=new Set(rule.eligible);
+    for(const voterId of [...set])if(!allowed.has(voterId)||voterId===targetId)set.delete(voterId);
+    if(!set.size)votes.delete(targetId);
+  }
+}
+function moderationPayload(room){
+  pruneModeration(room);const votes=ensureModeration(room);
+  return {meeting:room.lastSnapshot?.state==='meeting',targets:room.players.map(p=>{const rule=moderationRule(room,p.id),set=votes.get(p.id)||new Set();return {targetId:p.id,count:set.size,required:rule.required,possible:rule.possible,hostRequired:rule.hostRequired,hostVoted:set.has(room.hostId),voters:[...set]}})};
+}
+function broadcastModeration(room,force=false){const state=moderationPayload(room),sig=JSON.stringify(state);if(!force&&room.modStateSig===sig)return;room.modStateSig=sig;broadcast(room,{type:'moderation_state',state})}
+function removePlayerByModeration(room,targetId,reason){
+  const target=clients.get(targetId);if(!target||target.roomCode!==room.code)return false;
+  send(target.ws,{type:'moderation_removed',reason});
+  detachFromRoom(target,reason==='ban'?'ban':'kicked');return true;
+}
+function evaluateModeration(room){
+  pruneModeration(room);const votes=ensureModeration(room);
+  for(const [targetId,set] of [...votes.entries()]){
+    const rule=moderationRule(room,targetId);if(!rule.possible)continue;
+    if(set.size>=rule.required&&(!rule.hostRequired||set.has(room.hostId))){votes.delete(targetId);removePlayerByModeration(room,targetId,'vote_kick');return true}
+  }
+  broadcastModeration(room);return false;
+}
 function invalidateCountdown(room){
   const active=room.status==='countdown'||room.status==='loading';
   if(room.countdownTimer)clearTimeout(room.countdownTimer);
@@ -90,7 +127,8 @@ function detachFromRoom(client,reason='leave'){
   room.players=room.players.filter(p=>p.id!==client.id);client.roomCode=null;
   if(room.players.length===0){rooms.delete(room.code);send(client.ws,{type:'left'});return}
   if(wasHost)room.hostId=room.players[0].id;
-  sendRoomState(room);
+  pruneModeration(room);
+  sendRoomState(room);evaluateModeration(room);
   if(cancelled)broadcast(room,{type:'countdown_cancelled',reason:'Um jogador saiu. A contagem foi cancelada.'});
   if(wasHost && room.status!=='lobby' && room.lastSnapshot){const elected=clients.get(room.hostId);if(elected)send(elected.ws,{type:'host_snapshot',snapshot:snapshotForNewHost(room.lastSnapshot,room.hostId)});}
   broadcast(room,{type:'player_left',playerId:client.id,name:removed.name,reason});
@@ -160,7 +198,8 @@ function handle(ws, raw, timings={}){
   if(!m||typeof m.type!=='string')return;
   if(m.type==='hello'){
     if(c.id)return;
-    c.id='p_'+crypto.randomBytes(8).toString('hex');c.name=safeText(m.name);{const requested=normalizeColor(m.color);c.color=COLORS.includes(requested)?requested:'azul'}clients.set(c.id,c);
+    c.id='p_'+crypto.randomBytes(8).toString('hex');c.name=safeText(m.name);{const requested=normalizeColor(m.color);c.color=COLORS.includes(requested)?requested:'azul'}
+    const rawKey=String(m.clientKey||'').trim();c.clientKey=/^[A-Za-z0-9_-]{12,96}$/.test(rawKey)?rawKey:c.id;clients.set(c.id,c);
     send(ws,{type:'welcome',id:c.id});return;
   }
   if(m.type==='ping'){send(ws,{type:'pong',echo:Number(m.echo)||0,t:Date.now()});return}
@@ -170,7 +209,7 @@ function handle(ws, raw, timings={}){
     const size=Math.min(15,Math.max(4,Math.round(Number(m.size)||10)));
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
     const code=makeCode();
-    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,createdAt:Date.now(),countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,botRoster:[],botNameSeq:0};
+    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,createdAt:Date.now(),countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};
     room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmetics(m.cosmetics)});
     c.name=room.players[0].name;c.color=room.players[0].color;c.roomCode=code;rooms.set(code,room);
     sendRoomState(room);return;
@@ -181,6 +220,7 @@ function handle(ws, raw, timings={}){
     if(!/^[A-Z0-9]{6}$/.test(code))return error(ws,'O código precisa ter 6 letras maiúsculas ou números.');
     const room=rooms.get(code);
     if(!room)return error(ws,'Sala inexistente. Confira o código de 6 caracteres.');
+    ensureModeration(room);if(room.banned.has(c.clientKey))return error(ws,'Você foi banido desta sala.');
     if(!['lobby','countdown','loading'].includes(room.status))return error(ws,'Esta sala já começou ou foi encerrada.');
     if(room.players.length+room.bots>=room.size)return error(ws,'Sala lotada. O host precisa remover bots para liberar uma vaga.');
     const cancelled=invalidateCountdown(room);
@@ -194,6 +234,24 @@ function handle(ws, raw, timings={}){
   if(m.type==='leave_room'){detachFromRoom(c);return}
   if(!room)return error(ws,'Você não está em uma sala.');
   const isHost=room.hostId===c.id;
+  if(m.type==='moderate_lobby'){
+    if(!isHost)return error(ws,'Somente o host pode expulsar ou banir jogadores na sala de espera.');
+    if(room.status!=='lobby')return error(ws,'A punição da sala de espera só funciona antes da partida.');
+    const targetId=String(m.targetId||''),action=String(m.action||'');
+    if(!['kick','ban'].includes(action))return error(ws,'Ação de punição inválida.');
+    if(!targetId||targetId===c.id||targetId===room.hostId)return error(ws,'Não é possível aplicar essa ação ao host atual.');
+    const target=clients.get(targetId);if(!target||target.roomCode!==room.code)return error(ws,'Jogador não encontrado nesta sala.');
+    ensureModeration(room);if(action==='ban')room.banned.add(target.clientKey);
+    removePlayerByModeration(room,targetId,action);return;
+  }
+  if(m.type==='moderation_vote'){
+    if(room.status!=='playing'||room.lastSnapshot?.state!=='meeting')return error(ws,'A votação de expulsão só fica disponível durante reuniões.');
+    const targetId=String(m.targetId||'');if(!targetId||targetId===c.id)return error(ws,'Escolha outro jogador online.');
+    if(!room.players.some(p=>p.id===targetId))return error(ws,'Esse jogador não está mais na sala.');
+    if(!snapshotAlive(room,c.id))return error(ws,'Jogadores eliminados não participam da votação de punição.');
+    const rule=moderationRule(room,targetId);if(!rule.possible||!rule.eligible.includes(c.id))return error(ws,'Não há jogadores suficientes para essa expulsão.');
+    const votes=ensureModeration(room),set=votes.get(targetId)||new Set();set.add(c.id);votes.set(targetId,set);evaluateModeration(room);return;
+  }
   if(m.type==='set_room'){
     if(!isHost)return error(ws,'Somente o host pode alterar as configurações.');
     if(room.status!=='lobby')return error(ws,'As configurações só podem ser alteradas antes da contagem regressiva.');
@@ -242,7 +300,11 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='state_snapshot'){
     if(!isHost||!['loading','playing'].includes(room.status)||!m.snapshot||typeof m.snapshot!=='object')return;
+    const wasMeeting=room.lastSnapshot?.state==='meeting',isMeeting=m.snapshot.state==='meeting';
     room.lastSnapshot=m.snapshot;
+    ensureModeration(room);if(wasMeeting!==isMeeting)room.modVotes=new Map();
+    if(isMeeting){if(!evaluateModeration(room)){} }else if(wasMeeting!==isMeeting)broadcastModeration(room);
+    if(!clients.get(c.id)||c.roomCode!==room.code)return;
     for(const p of room.players){
       if(p.id===c.id)continue;
       const target=clients.get(p.id);
@@ -312,7 +374,7 @@ function createGameServer(opts={}){
   });
   const wss=new WebSocketServer({server,maxPayload:2*1024*1024});
   wss.on('connection',ws=>{
-    ws.client={id:null,roomCode:null,name:'Tripulante',color:'azul',ws};
+    ws.client={id:null,roomCode:null,name:'Tripulante',color:'azul',clientKey:null,ws};
     ws.on('message',data=>handle(ws,data,{countdownMs:opts.countdownMs??5000,loadingMs:opts.loadingMs??1200}));
     ws.on('close',()=>{const c=ws.client;if(c.id){detachFromRoom(c,'disconnect');clients.delete(c.id)}});
     ws.on('error',()=>{});
