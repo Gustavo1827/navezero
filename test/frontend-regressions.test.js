@@ -276,7 +276,7 @@ test('NPCs usam falas contextuais e jogadores mortos veem funções sem revelar 
 });
 
 test('cosméticos têm catálogo, categorias, renderização centralizada e sincronização no snapshot', () => {
-  assert.match(html, /id="btnCosmetics"[^>]*>Cosméticos</);
+  assert.match(html, /id="btnCosmetics"[^>]*>Inventário</);
   for (const label of ['Chapéus','Pets','Roupas','Visores']) assert.match(html, new RegExp(label));
   assert.match(html, /const DEFAULT_COSMETICS=Object\.freeze\(\{hat:COSMETIC_NONE,pet:COSMETIC_NONE,outfit:COSMETIC_NONE,visor:COSMETIC_NONE\}\)/);
   assert.match(html, /drawOutfitCosmetic\(c,cosmetics\.outfit\);drawVisorCosmetic\(c,cosmetics\.visor\);drawHatCosmetic\(c,cosmetics\.hat\)/);
@@ -292,9 +292,9 @@ test('cosméticos têm catálogo, categorias, renderização centralizada e sinc
 });
 
 test('catálogo de cosméticos fica no menu inicial e preserva a regra de cores únicas online', () => {
-  assert.match(html, /id="btnFreePlay"[^>]*>Partida Livre<\/button><button class="chip" id="btnCosmetics"[^>]*>Cosméticos<\/button>/, 'Cosméticos deve usar o mesmo estilo compacto de Partida Livre no menu');
+  assert.match(html, /id="btnFreePlay"[^>]*>Partida Livre<\/button><button class="chip" id="btnCosmetics"[^>]*>Inventário<\/button>/, 'Inventário deve usar o mesmo estilo compacto de Partida Livre no menu');
   assert.doesNotMatch(html, /roomActions[^\n]*id="btnCosmetics"/, 'o botão não deve permanecer na janela do lobby');
-  assert.match(html, /function openCosmetics\(\)\{if\(NET\.inRoom\)\{toast\('A aparência é escolhida na tela inicial/, 'catálogo deve ser aberto antes de entrar na sala');
+  assert.match(html, /function openCosmetics\(\)\{if\(NET\.inRoom\)\{toast\('O Inventário é usado na tela inicial/, 'Inventário deve ser aberto antes de entrar na sala');
   assert.match(html, /id="lobbyColorSwatches"/, 'catálogo deve manter o seletor de cor');
   assert.match(html, /netSend\(\{type:'set_color',color:color\.id\}\)/, 'a proteção de cor única continua disponível para estado de lobby sincronizado');
   assert.match(html, /filter\(p=>p\.id!==NET\.id\)\.map\(p=>p\.color\)/, 'cores usadas por outros jogadores continuam detectadas');
@@ -516,8 +516,8 @@ test('configurações da sala do host persistem localmente ao fechar/salvar o me
   assert.match(html, /const netOriginalCloseCfg=closeCfg;closeCfg=function\(\)\{const shouldSave=NET\.inRoom&&NET\.isHost&&NET\.room\?\.status==='lobby';if\(shouldSave\)netSaveRoomSettings\(\)/);
 });
 
-test('paleta ampliada inclui Azul-claro, Lavanda, Mostarda, Musgo e Verde-claro no cliente e servidor', () => {
-  for (const [id,name] of [['azul_claro','Azul-claro'],['lavanda','Lavanda'],['mostarda','Mostarda'],['musgo','Musgo'],['verde_claro','Verde-claro'],['rosado','Rosado'],['verde_forte','Verde Forte'],['oliva','Oliva']]) {
+test('paleta ampliada mantém Oliva e remove Musgo redundante', () => {
+  for (const [id,name] of [['azul_claro','Azul-claro'],['lavanda','Lavanda'],['mostarda','Mostarda'],['verde_claro','Verde-claro'],['rosado','Rosado'],['verde_forte','Verde Forte'],['oliva','Oliva']]) {
     assert.match(html, new RegExp("\\{id:'"+id+"',name:'"+name+"'"));
     assert.match(server, new RegExp("'"+id+"'"));
   }
@@ -530,4 +530,17 @@ test('novos cosméticos inspirados são vetoriais, catalogados e aceitos pelo se
   }
   assert.match(html, /outfit_orbit_collar:\['#304b45','#5cd2ae'\]/);
   assert.match(html, /outfit_signal_wrap:\['#6873bb','#80d8e8'\]/);
+});
+
+
+test('Inventário concentra a seleção de cor e substitui o nome Cosméticos no menu', () => {
+  assert.match(html, /id="btnCosmetics"[^>]*>Inventário<\/button>/);
+  assert.match(html, /id="cosmeticsTitle">Inventário<\/h2>/);
+  assert.doesNotMatch(html, /id="swatches"/);
+  assert.match(html, /id="lobbyColorSwatches"/);
+});
+
+test('Partida Livre não reposiciona bots na Cafeteria após reunião', () => {
+  assert.match(html, /if\(G\.freePlay\)[\s\S]*bots permanecem exatamente onde estavam antes da reunião/);
+  assert.match(html, /if\(alivePlayer\)[\s\S]*placeChar\(alivePlayer,pt\)/);
 });
