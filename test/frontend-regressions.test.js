@@ -191,10 +191,12 @@ test('nomes de bots são baseados no cadastro persistente da sala e persistem no
   assert.match(html, /const names=online\?fallbackNames:offlineBotNames\(G\.cfg\.name\)/);
 });
 
-test('revanche usa a mesma sala e é autorizada somente pelo host', () => {
-  assert.match(server, /if\(m\.type==='rematch'\)\{[\s\S]*?if\(!isHost\)return error\(ws,'Somente o host pode reiniciar a partida\.'\);[\s\S]*?startGame\(room,true,timings\)/);
-  assert.match(server, /broadcast\(room,\{type:'game_start',room:roomPublic\(room\),round:room\.round,rematch\}/);
-  assert.match(html, /NET\.room\?\.code===m\.room\?\.code/);
+test('revanche recria a mesma sala e permite reentrada dos jogadores anteriores', () => {
+  assert.match(server, /if\(m\.type==='rematch'\)\{[\s\S]*?room\.status='lobby'[\s\S]*?room\.rematchLobby=true/);
+  assert.match(server, /send\(target\.ws,\{type:'rematch_available',code:room\.code\}\)/);
+  assert.match(server, /startGame\(room,!!room\.rematchLobby,timings\)/);
+  assert.match(html, /rematchReadyCode/);
+  assert.match(html, /type:'join_room',code:NET\.rematchReadyCode/);
 });
 
 test('falas novas dos bots são condicionadas a corpo, tarefa ou evidência', () => {

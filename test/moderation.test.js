@@ -13,7 +13,7 @@ async function closeClient(c){if(!c)return;try{c.ws.close()}catch{}await new Pro
 test('Chat Rápido e interface incluem novas falas e controles de punição',()=>{
   for(const text of ['Encontrei o corpo de [morto] em [sala]','Vi [jogador/alguém] usar a função de [função]!','Você não tem provas','Vamos expulsar [jogador] do jogo!','Vamos expulsar [jogador] do jogo?'])assert.ok(html.includes(text),text);
   assert.match(html,/id="btnLobbyModeration"[^>]*>⚠️/);
-  assert.match(html,/id="btnMeetingModeration"[^>]*>⚠️/);
+  assert.match(html,/id="btnMeetingModeration"[^>]*>🦶/);assert.match(html,/meetingModProgress/);
   assert.match(html,/moderate_lobby/);assert.match(html,/moderation_vote/);assert.match(html,/navezero_online_client_v1/);
 });
 
@@ -27,7 +27,7 @@ test('host pode expulsar e banir no lobby, e banimento vale enquanto a sala exis
   const retry=await connect(url,'Ban de novo','ban_key_1234567');all.push(retry);send(retry,{type:'join_room',code});const err=await onceMessage(retry,m=>m.type==='room_error');assert.match(err.message,/banido/i);
 });
 
-test('votação de punição na reunião não duplica votos e exige o host quando aplicável',async t=>{
+test('votação de punição usa maioria dos elegíveis, ignora duplicata e não exige o host',async t=>{
   const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:10,loadingMs:5});await new Promise(r=>app.server.once('listening',r));const url=`ws://127.0.0.1:${app.server.address().port}`,all=[];
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
   const host=await connect(url,'Host','host_vote_123456'),a=await connect(url,'A','vote_a_12345678'),b=await connect(url,'B','vote_b_12345678'),target=await connect(url,'Alvo','vote_t_12345678');all.push(host,a,b,target);
@@ -36,8 +36,7 @@ test('votação de punição na reunião não duplica votos e exige o host quand
   send(host,{type:'start_game'});for(const c of [host,a,b,target])await onceMessage(c,m=>m.type==='game_start');
   const chars=[host,a,b,target].map(c=>({id:c.id,name:c===target?'Alvo':'P',color:'azul',role:'crew',alive:true,x:100,y:100}));send(host,{type:'state_snapshot',snapshot:{seq:1,state:'meeting',chars,tasks:[],bodies:[],sab:{lights:0,reactor:0,comms:0,doors:0},doors:[],meeting:{phase:'discuss'}}});
   await onceMessage(a,m=>m.type==='moderation_state'&&m.state.meeting);
-  send(a,{type:'moderation_vote',targetId:target.id});send(a,{type:'moderation_vote',targetId:target.id});send(b,{type:'moderation_vote',targetId:target.id});
-  const state=await onceMessage(a,m=>m.type==='moderation_state'&&m.state.targets.some(x=>x.targetId===target.id&&x.count===2));const row=state.state.targets.find(x=>x.targetId===target.id);assert.equal(row.required,3);assert.equal(row.hostRequired,true);assert.equal(row.hostVoted,false);
-  await new Promise(r=>setTimeout(r,80));assert.equal(target.messages.some(m=>m.type==='moderation_removed'),false);
-  send(host,{type:'moderation_vote',targetId:target.id});const removed=await onceMessage(target,m=>m.type==='moderation_removed');assert.equal(removed.reason,'vote_kick');
+  send(a,{type:'moderation_vote',targetId:target.id});send(a,{type:'moderation_vote',targetId:target.id});
+  const state=await onceMessage(a,m=>m.type==='moderation_state'&&m.state.targets.some(x=>x.targetId===target.id&&x.count===1));const row=state.state.targets.find(x=>x.targetId===target.id);assert.equal(row.required,2);assert.equal(row.hostRequired,false);assert.equal(row.count,1);
+  send(b,{type:'moderation_vote',targetId:target.id});const removed=await onceMessage(target,m=>m.type==='moderation_removed');assert.equal(removed.reason,'vote_kick');
 });
