@@ -781,10 +781,10 @@ const MAP_LIBRARY={
       {id:'comm_channels',room:'comm',x:59,y:29,w:2,h:1,label:'Canais de comunicação'},
     ],
     vents:[
-      {id:'v_ship',room:'ship',x:13,y:28},{id:'v_reactor',room:'reactor',x:27,y:40},{id:'v_lab',room:'lab',x:40,y:40},
-      {id:'v_decon',room:'decon',x:25,y:25},{id:'v_vision',room:'vision',x:39,y:25},{id:'v_med',room:'med',x:12,y:13},
+      {id:'v_ship',room:'ship',x:13,y:28},{id:'v_reactor',room:'reactor',x:27,y:40},{id:'v_lab',room:'lab',x:31,y:40},
+      {id:'v_decon',room:'decon',x:25,y:25},{id:'v_vision',room:'vision',x:33,y:25},{id:'v_med',room:'med',x:12,y:13},
       {id:'v_balcony',room:'balcony',x:62,y:44},{id:'v_cafe',room:'cafe',x:61,y:37},{id:'v_admin',room:'admin',x:44,y:19},
-      {id:'v_elec',room:'elec',x:62,y:19},{id:'v_o2',room:'o2',x:61,y:8},
+      {id:'v_elec',room:'elec',x:62,y:19},{id:'v_o2',room:'o2',x:47,y:8},
     ],
     roomEdges:[
       ['ship','shiphall'],['shiphall','med'],['shiphall','decon'],['decon','vision'],['reactor','lab'],
@@ -1827,7 +1827,7 @@ function bestAction(){
   let best=null,bd=1e9;
   if(G.freePlay){const d=stationDist(FREEPLAY_COMPUTER,G.player);if(d<=72){best={type:'freecomputer',station:FREEPLAY_COMPUTER,label:'Usar computador'};bd=d}}
   for(const s of STATION_DEFS){
-    const d=stationDist(s,G.player); if(d>62||d>=bd)continue;
+    const d=stationDist(s,G.player),reach=s.kind==='decon'?80:62; if(d>reach||d>=bd)continue;
     const a=actionFor(s); if(a&&(G.player.alive||(G.role==='crew'&&G.player.ghost&&a.type==='task'))){best=a;bd=d}
   }
   const dt=stationDist(TABLE,G.player);
@@ -1850,26 +1850,36 @@ function useDeconButton(ch,st){
   if(ACTIVE_MAP_ID!=='nexus'||!ch?.alive||!st||st.kind!=='decon')return false;
   const D=G.decon||(G.decon={phase:'idle',until:0,exitSide:null,entrySide:null});
   if(D.phase==='idle'&&!st.inside){
-    D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+2.4;
+    D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+4.5;
     setDoorClosedById(deconDoorId(D.entrySide),false);setDoorClosedById(deconDoorId(D.exitSide),true);
     toast('Descontaminação: entrada liberada.',1500);Snd.click();return true;
   }
   if(D.phase==='ready'&&st.inside&&charInsideDecon(ch)){
-    D.exitSide=st.side;D.phase='exit';D.until=G.gt+2.5;setDoorClosedById(deconDoorId(D.exitSide),false);
+    D.exitSide=st.side;D.phase='exit';D.until=G.gt+4;setDoorClosedById(deconDoorId(D.exitSide),false);
     toast('Descontaminação concluída: saída liberada.',1700);Snd.ok();return true;
   }
   return false;
 }
 function updateDecon(){
   if(ACTIVE_MAP_ID!=='nexus'||!G.decon)return;
-  const D=G.decon;if(!(D.until>0)||G.gt<D.until)return;
+  const D=G.decon,inside=G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c));
   if(D.phase==='entry'){
-    setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true);
-    if(!G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c))){resetDeconState();return}
-    D.phase='cleaning';D.until=G.gt+2.6;toast('Ciclo de descontaminação em andamento.',1400);return;
+    // A porta permanece aberta até alguém realmente entrar. Isso evita falhas por atraso de rede ou passagem estreita.
+    if(inside){
+      setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true);
+      D.phase='cleaning';D.until=G.gt+2.6;toast('Ciclo de descontaminação em andamento.',1400);return;
+    }
+    if(D.until>0&&G.gt>=D.until)resetDeconState();
+    return;
   }
-  if(D.phase==='cleaning'){D.phase='ready';D.until=0;toast('Ciclo concluído. Use o botão interno para sair.',1800);return}
-  if(D.phase==='exit'){resetDeconState()}
+  if(D.phase==='cleaning'){
+    if(D.until>0&&G.gt>=D.until){D.phase='ready';D.until=0;toast('Ciclo concluído. Use o botão interno para sair.',1800)}
+    return;
+  }
+  if(D.phase==='exit'){
+    // Fecha assim que a câmara estiver vazia; o limite evita uma porta presa aberta caso alguém fique parado dentro.
+    if(!inside||(D.until>0&&G.gt>=D.until))resetDeconState();
+  }
 }
 function doInteract(a){
   if(G.player?.controlledBy||G.state!=='playing'||uiBusy()||!a)return;
@@ -2236,7 +2246,18 @@ GAMES.nx_weather={
   run(body,step,api){
     const wrap=nxBox('☁️ Estação atmosférica');const collect=el('button','big','Iniciar coleta');const st=el('div','mstatus','Sensores aguardando');wrap.append(collect,st);body.appendChild(wrap);
     collect.addEventListener('click',()=>{collect.disabled=true;let p=0;const pb=el('div','pbar'),bar=el('i');pb.appendChild(bar);wrap.insertBefore(pb,st);const tick=()=>{if(!api.alive())return;p+=8;bar.style.width=p+'%';st.textContent=`Coletando dados... ${Math.min(100,p)}%`;if(p<100)api.later(tick,70);else setup()};tick()});
-    function setup(){st.textContent='Ajuste os três sensores';const targets=[rand(30,70),rand(25,75),rand(20,80)],vals=[50,50,50],names=['Pressão','Vento','Temperatura'],rows=[];targets.forEach((t,i)=>{const o=nxRange(`${names[i]} · alvo ${t}±4`,0,100,vals[i]);o.r.addEventListener('input',()=>{vals[i]=+o.r.value;check()});wrap.insertBefore(o.w,st);rows.push(o)});const send=el('button','big','Enviar dados');send.disabled=true;send.addEventListener('click',()=>api.done());wrap.appendChild(send);function check(){const ok=vals.every((v,i)=>Math.abs(v-targets[i])<=4);send.disabled=!ok;st.textContent=ok?'Leituras estáveis — pronto para enviar':'Ajuste os sensores às faixas indicadas'}}
+    function setup(){
+      st.textContent='Ajuste os três sensores';
+      const targets=[rand(30,70),rand(25,75),rand(20,80)],vals=[50,50,50],names=['Pressão','Vento','Temperatura'],rows=[];
+      const labelFor=(i)=>`${names[i]} · atual ${vals[i]} · pedido ${targets[i]-4}–${targets[i]+4}`;
+      targets.forEach((t,i)=>{
+        const o=nxRange(labelFor(i),0,100,vals[i]);
+        o.r.addEventListener('input',()=>{vals[i]=+o.r.value;o.l.firstChild.textContent=labelFor(i);check()});
+        wrap.insertBefore(o.w,st);rows.push(o)
+      });
+      const send=el('button','big','Enviar dados');send.disabled=true;send.addEventListener('click',()=>api.done());wrap.appendChild(send);
+      function check(){const ok=vals.every((v,i)=>Math.abs(v-targets[i])<=4);send.disabled=!ok;st.textContent=ok?'Leituras estáveis — pronto para enviar':'Ajuste os sensores às quantidades pedidas'}
+    }
   }
 };
 
@@ -2989,6 +3010,16 @@ function render(){
   // Somente a lanterna do personagem observado pelo jogador é desenhada.
   // As lanternas dos NPCs não são renderizadas aqui; seus dados e a lógica de IA/LOS permanecem intactos.
   fogC.globalCompositeOperation='source-over';
+  if(nexusAmbient){
+    // O céu exterior não recebe a névoa de visão. Jogadores, corpos e outros elementos dinâmicos
+    // continuam ocultos separadamente por distância/linha de visão em drawWorld().
+    fogC.save();fogC.globalCompositeOperation='destination-out';fogC.fillStyle='#000';
+    const pad=7*ZOOM/FOG_DIV,tx0=clamp(Math.floor(G.cam.x/TILE)-1,0,COLS-1),ty0=clamp(Math.floor(G.cam.y/TILE)-1,0,ROWS-1),tx1=clamp(Math.ceil((G.cam.x+VW)/TILE)+1,0,COLS),ty1=clamp(Math.ceil((G.cam.y+VH)/TILE)+1,0,ROWS);
+    for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++)if(!isFloor(tx,ty)){
+      const fx=(tx*TILE-G.cam.x)*ZOOM/FOG_DIV-pad,fy=(ty*TILE-G.cam.y)*ZOOM/FOG_DIV-pad,fw=TILE*ZOOM/FOG_DIV+pad*2;fogC.fillRect(fx,fy,fw,fw);
+    }
+    fogC.restore();
+  }
   c.setTransform(DPR,0,0,DPR,0,0); c.imageSmoothingEnabled=true;
   c.drawImage(fogCv,0,0,fogCv.width*FOG_DIV,fogCv.height*FOG_DIV);
   }
@@ -3784,8 +3815,7 @@ function enterVent(ch,v){if(ch?.function==='engineer'&&ch===G.player){emitRoleFx
 function ventMove(ch,toId){
   if(!ch.vent||ch.ventAnim||ch.ventMv>0)return false;
   const from=ventById[ch.vent], to=ventById[toId];
-  if(!to||!VENT_ADJ[ch.vent].includes(toId))return false;   // só destinos realmente conectados
-  const d=roomDist(from.room,to.room); if(d<1||d>3)return false;   // nunca além de 3 salas
+  if(!to||!VENT_ADJ[ch.vent].includes(toId))return false;   // a rede de dutos define exatamente os destinos diretos permitidos
   ch.vent=toId; ch.x=to.px; ch.y=to.py-OFF_Y; ch.ventMv=.8;const puppet=ch.controlTargetId&&charById(ch.controlTargetId);if(puppet){puppet.vent=toId;puppet.x=ch.x;puppet.y=ch.y;puppet.ventMv=.8} Snd.tone(220,.15,'triangle',.05);
   if(ch.isPlayer){refreshVentPanel();toast('Duto: '+ROOM_BY_ID[to.room].name,1200)}
   return true;
