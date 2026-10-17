@@ -287,7 +287,7 @@ body.touch #stick{display:block}
 @media (max-width:560px){#meetGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.act2{width:68px;height:68px;font-size:14px}}
 #topRight{z-index:2}
 #mapView{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;padding:56px 12px 12px;background:rgba(4,5,18,.72)}
-#mapView .mpanel{width:min(600px,100%)}
+#mapView .mpanel{width:min(600px,100%);background:rgba(8,11,30,.97);border-color:#313b78}
 #mapCv{display:block;width:100%;aspect-ratio:64/46;margin-top:8px;border-radius:12px;background:#05061a;border:3px solid #10122a}
 #mapClose{width:38px;height:38px;border-radius:12px;border:2px solid var(--edge);background:#1d2358;font-size:18px;line-height:1;padding:0}
 #mapClose:focus-visible,#btnMap:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
@@ -315,6 +315,10 @@ body.touch #stick{display:block}
 .presetCard.active{border-color:var(--sky);box-shadow:0 0 0 2px rgba(101,216,255,.3),0 14px 30px rgba(0,0,0,.3)}
 .presetCard.active .presetState{color:#92ffd0}
 .presetApply{min-width:120px}
+.mapSelect{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 16px;padding:12px;border:2px solid var(--edge);border-radius:18px;background:rgba(8,12,38,.62)}
+.mapSelectTitle{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:900;color:#eef5ff}.mapSelectTitle small{font-weight:600;color:var(--ink2)}
+.mapCard{position:relative;min-height:112px;border:3px solid #2c3678;border-radius:17px;background:linear-gradient(160deg,#1d285e,#101633);color:#fff;padding:12px;text-align:left;display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;overflow:hidden}.mapCard::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 82% 8%,rgba(140,222,255,.18),transparent 36%);pointer-events:none}.mapCard .mapIcon{position:relative;z-index:1;width:68px;height:68px;display:block;object-fit:contain;filter:drop-shadow(0 5px 7px rgba(0,0,0,.35))}.mapCard b,.mapCard small{position:relative;z-index:1;display:block}.mapCard small{color:#cbd8f6;line-height:1.15;margin-top:3px}.mapCard.selected{border-color:#7de1ff;box-shadow:0 0 0 2px rgba(125,225,255,.25),0 10px 24px rgba(0,0,0,.24)}.mapCard.selected::before{content:'✓';position:absolute;right:10px;bottom:8px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:#6fe2b3;color:#10243a;font-weight:1000;z-index:2}.mapCard[disabled]{opacity:.66;cursor:not-allowed}.freePlayMapSelect{margin:8px 0 0}.freePlayMapSelect .mapCard{cursor:pointer;min-height:154px;grid-template-columns:116px 1fr;gap:14px;padding:14px}.freePlayMapSelect .mapCard .mapIcon{width:112px;height:112px}.freePlayMapSelect .mapCard.selected::before{display:none}
+@media(max-width:560px){.mapSelect{grid-template-columns:1fr}.mapCard{min-height:94px}.freePlayMapSelect .mapCard{min-height:136px;grid-template-columns:100px 1fr}.freePlayMapSelect .mapCard .mapIcon{width:96px;height:96px}}
 @media (max-width:780px){.presetGrid{grid-template-columns:1fr}.presetArt{min-height:150px}}
 .cfgnote{margin:0 0 6px;color:var(--ink2);font-size:15px}
 .cfgrow{text-align:left;margin:12px 0}
@@ -610,94 +614,264 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
    ===================================================================== */
 //#MAP_START
 const TILE=48, COLS=64, ROWS=46, WORLD_W=COLS*TILE, WORLD_H=ROWS*TILE;
-const ROOM_DEFS=[
-  {id:'med',name:'Enfermaria',x:3,y:3,w:12,h:9,hue:170},
-  {id:'cafe',name:'Cafeteria',x:22,y:2,w:20,h:11,hue:232},
-  {id:'comm',name:'Comunicações',x:50,y:3,w:11,h:9,hue:285},
-  {id:'sec',name:'Segurança',x:3,y:19,w:10,h:8,hue:205},
-  {id:'hub',name:'Corredor Central',x:24,y:17,w:16,h:8,hue:238,hall:true},
-  {id:'admin',name:'Administração',x:47,y:17,w:11,h:8,hue:135},
-  {id:'reactor',name:'Reator',x:3,y:34,w:11,h:9,hue:355},
-  {id:'elec',name:'Elétrica',x:20,y:31,w:12,h:9,hue:48},
-  {id:'stor',name:'Armazém',x:34,y:31,w:12,h:9,hue:24},
-];
-const CORRIDORS=[
-  {x:30,y:13,w:4,h:4},{x:15,y:6,w:7,h:3},{x:42,y:6,w:8,h:3},{x:40,y:19,w:7,h:3},
-  {x:13,y:21,w:11,h:3},{x:7,y:12,w:4,h:7},{x:6,y:27,w:4,h:7},{x:26,y:25,w:4,h:6},
-  {x:35,y:25,w:4,h:6},{x:14,y:35,w:6,h:3},{x:46,y:34,w:8,h:3},{x:50,y:25,w:4,h:10},
-];
-const DOOR_DEFS=[
-  {id:'d_med_cafe',x:17,y:6,w:1,h:3},{id:'d_cafe_comm',x:46,y:6,w:1,h:3},
-  {id:'d_cafe_hub',x:30,y:14,w:4,h:1},{id:'d_hub_admin',x:43,y:19,w:1,h:3},
-  {id:'d_hub_sec',x:18,y:21,w:1,h:3},{id:'d_med_sec',x:7,y:15,w:4,h:1},
-  {id:'d_sec_reactor',x:6,y:30,w:4,h:1},{id:'d_hub_elec',x:26,y:27,w:4,h:1},
-  {id:'d_hub_stor',x:35,y:27,w:4,h:1},{id:'d_reactor_elec',x:16,y:35,w:1,h:3},
-];
-const DECOR=[
-  {k:'table',x:29,y:6,w:6,h:3},{k:'table',x:24,y:4,w:3,h:3},{k:'table',x:37,y:9,w:3,h:3},{k:'table',x:24,y:10,w:3,h:2},
-  {k:'bed',x:4,y:4,w:3,h:2},{k:'bed',x:4,y:7,w:3,h:2},
-  {k:'pillar',x:30,y:19,w:4,h:3},
-  {k:'crate',x:38,y:35,w:3,h:2},{k:'crate',x:42,y:37,w:2,h:2},{k:'crate',x:36,y:38,w:2,h:1},
-  {k:'core',x:6,y:38,w:4,h:3},
-  {k:'gen',x:24,y:35,w:3,h:2},
-];
-const STATION_DEFS=[
-  {id:'scan',room:'med',x:9,y:3,w:3,h:2,label:'Scanner médico'},
-  {id:'wires_cafe',room:'cafe',x:24,y:2,w:2,h:1,label:'Painel de fios'},
-  {id:'code_cafe',room:'cafe',x:38,y:2,w:2,h:1,label:'Terminal de código'},
-  {id:'pow_cafe',room:'cafe',x:41,y:10,w:1,h:2,label:'Painel de energia'},
-  {id:'signal',room:'comm',x:53,y:3,w:3,h:1,label:'Antena de sinais'},
-  {id:'pow_comm',room:'comm',x:60,y:8,w:1,h:2,label:'Painel de energia'},
-  {id:'cams',room:'sec',x:3,y:20,w:1,h:3,label:'Câmeras'},
-  {id:'unlock',room:'sec',x:3,y:24,w:1,h:2,label:'Painel trancado'},
-  {id:'adminmap',room:'admin',x:50,y:17,w:4,h:1,label:'Mapa da nave'},
-  {id:'code_admin',room:'admin',x:57,y:19,w:1,h:2,label:'Terminal de código'},
-  {id:'pow_admin',room:'admin',x:47,y:22,w:1,h:2,label:'Painel de energia'},
-  {id:'wires_elec',room:'elec',x:21,y:31,w:3,h:1,label:'Painel de fios'},
-  {id:'circuits',room:'elec',x:31,y:33,w:1,h:3,label:'Quadro de circuitos'},
-  {id:'divert',room:'elec',x:23,y:39,w:4,h:1,label:'Alavanca de desvio'},
-  {id:'wires_stor',room:'stor',x:40,y:31,w:3,h:1,label:'Painel de fios'},
-  {id:'fuel',room:'stor',x:34,y:34,w:1,h:3,label:'Bomba de combustível'},
-  {id:'pow_stor',room:'stor',x:45,y:32,w:1,h:2,label:'Painel de energia'},
-  {id:'reactor',room:'reactor',x:3,y:38,w:1,h:3,label:'Núcleo do reator'},
-  {id:'fuel_reactor',room:'reactor',x:9,y:42,w:3,h:1,label:'Entrada de combustível'},
-];
+const MAP_LIBRARY={
+  nave:{
+    id:'nave',name:'Nave de viagem',icon:'assets/map-nave.png',subtitle:'A nave clássica do Nave Zero',
+    rooms:[
+      {id:'med',name:'Enfermaria',x:3,y:3,w:12,h:9,hue:170},
+      {id:'cafe',name:'Cafeteria',x:22,y:2,w:20,h:11,hue:232},
+      {id:'comm',name:'Comunicações',x:50,y:3,w:11,h:9,hue:285},
+      {id:'sec',name:'Segurança',x:3,y:19,w:10,h:8,hue:205},
+      {id:'hub',name:'Corredor Central',x:24,y:17,w:16,h:8,hue:238,hall:true},
+      {id:'admin',name:'Administração',x:47,y:17,w:11,h:8,hue:135},
+      {id:'reactor',name:'Reator',x:3,y:34,w:11,h:9,hue:355},
+      {id:'elec',name:'Elétrica',x:20,y:31,w:12,h:9,hue:48},
+      {id:'stor',name:'Armazém',x:34,y:31,w:12,h:9,hue:24},
+    ],
+    corridors:[
+      {x:30,y:13,w:4,h:4},{x:15,y:6,w:7,h:3},{x:42,y:6,w:8,h:3},{x:40,y:19,w:7,h:3},
+      {x:13,y:21,w:11,h:3},{x:7,y:12,w:4,h:7},{x:6,y:27,w:4,h:7},{x:26,y:25,w:4,h:6},
+      {x:35,y:25,w:4,h:6},{x:14,y:35,w:6,h:3},{x:46,y:34,w:8,h:3},{x:50,y:25,w:4,h:10},
+    ],
+    glassRects:[],
+    doors:[
+      {id:'d_med_cafe',x:17,y:6,w:1,h:3},{id:'d_cafe_comm',x:46,y:6,w:1,h:3},
+      {id:'d_cafe_hub',x:30,y:14,w:4,h:1},{id:'d_hub_admin',x:43,y:19,w:1,h:3},
+      {id:'d_hub_sec',x:18,y:21,w:1,h:3},{id:'d_med_sec',x:7,y:15,w:4,h:1},
+      {id:'d_sec_reactor',x:6,y:30,w:4,h:1},{id:'d_hub_elec',x:26,y:27,w:4,h:1},
+      {id:'d_hub_stor',x:35,y:27,w:4,h:1},{id:'d_reactor_elec',x:16,y:35,w:1,h:3},
+    ],
+    decor:[
+      {k:'table',x:29,y:6,w:6,h:3},{k:'table',x:24,y:4,w:3,h:3},{k:'table',x:37,y:9,w:3,h:3},{k:'table',x:24,y:10,w:3,h:2},
+      {k:'bed',x:4,y:4,w:3,h:2},{k:'bed',x:4,y:7,w:3,h:2},
+      {k:'pillar',x:30,y:19,w:4,h:3},
+      {k:'crate',x:38,y:35,w:3,h:2},{k:'crate',x:42,y:37,w:2,h:2},{k:'crate',x:36,y:38,w:2,h:1},
+      {k:'core',x:6,y:38,w:4,h:3},{k:'gen',x:24,y:35,w:3,h:2},
+    ],
+    stations:[
+      {id:'scan',room:'med',x:9,y:3,w:3,h:2,label:'Scanner médico'},
+      {id:'wires_cafe',room:'cafe',x:24,y:2,w:2,h:1,label:'Painel de fios'},
+      {id:'code_cafe',room:'cafe',x:38,y:2,w:2,h:1,label:'Terminal de código'},
+      {id:'pow_cafe',room:'cafe',x:41,y:10,w:1,h:2,label:'Painel de energia'},
+      {id:'signal',room:'comm',x:53,y:3,w:3,h:1,label:'Antena de sinais'},
+      {id:'pow_comm',room:'comm',x:60,y:8,w:1,h:2,label:'Painel de energia'},
+      {id:'cams',room:'sec',x:3,y:20,w:1,h:3,label:'Câmeras'},
+      {id:'unlock',room:'sec',x:3,y:24,w:1,h:2,label:'Painel trancado'},
+      {id:'adminmap',room:'admin',x:50,y:17,w:4,h:1,label:'Mapa da nave'},
+      {id:'code_admin',room:'admin',x:57,y:19,w:1,h:2,label:'Terminal de código'},
+      {id:'pow_admin',room:'admin',x:47,y:22,w:1,h:2,label:'Painel de energia'},
+      {id:'wires_elec',room:'elec',x:21,y:31,w:3,h:1,label:'Painel de fios'},
+      {id:'circuits',room:'elec',x:31,y:33,w:1,h:3,label:'Quadro de circuitos'},
+      {id:'divert',room:'elec',x:23,y:39,w:4,h:1,label:'Alavanca de desvio'},
+      {id:'wires_stor',room:'stor',x:40,y:31,w:3,h:1,label:'Painel de fios'},
+      {id:'fuel',room:'stor',x:34,y:34,w:1,h:3,label:'Bomba de combustível'},
+      {id:'pow_stor',room:'stor',x:45,y:32,w:1,h:2,label:'Painel de energia'},
+      {id:'reactor',room:'reactor',x:3,y:38,w:1,h:3,label:'Núcleo do reator'},
+      {id:'fuel_reactor',room:'reactor',x:9,y:42,w:3,h:1,label:'Entrada de combustível'},
+    ],
+    vents:[
+      {id:'v_cafe',room:'cafe',x:40,y:12},{id:'v_med',room:'med',x:13,y:10},{id:'v_sec',room:'sec',x:11,y:25},
+      {id:'v_hub',room:'hub',x:26,y:18},{id:'v_admin',room:'admin',x:55,y:23},{id:'v_elec',room:'elec',x:21,y:38},
+      {id:'v_stor',room:'stor',x:44,y:32},{id:'v_reactor',room:'reactor',x:12,y:39},{id:'v_comm',room:'comm',x:59,y:10},
+    ],
+    roomEdges:[['med','cafe'],['cafe','comm'],['cafe','hub'],['hub','admin'],['hub','sec'],['med','sec'],['sec','reactor'],['hub','elec'],['hub','stor'],['reactor','elec'],['stor','admin']],
+    ventLinks:[['v_cafe','v_med'],['v_cafe','v_comm'],['v_cafe','v_hub'],['v_med','v_sec'],['v_sec','v_hub'],['v_sec','v_reactor'],['v_hub','v_elec'],['v_hub','v_stor'],['v_hub','v_admin'],['v_elec','v_reactor'],['v_stor','v_admin'],['v_reactor','v_stor'],['v_admin','v_comm']],
+    spawn:{x:31,y:11},table:{x:29,y:6,w:6,h:3},freeComputer:{id:'freeplay_pc',room:'cafe',x:38,y:10,w:1,h:1,label:'Computador da Partida Livre'},
+    cams:[{name:'Cafeteria',tx:31,ty:8},{name:'Corredor Central',tx:32,ty:21},{name:'Elétrica',tx:26,ty:35},{name:'Armazém',tx:40,ty:35}],
+    decon:null
+  },
+  nexus:{
+    id:'nexus',name:'Nexus HQ',icon:'assets/map-nexus.png',subtitle:'Torre tecnológica acima das nuvens',
+    rooms:[
+      {id:'ship',name:'Nave',x:1,y:16,w:14,h:14,hue:205},
+      {id:'med',name:'Enfermaria',x:11,y:3,w:13,h:12,hue:8},
+      {id:'decon',name:'Descontaminação',x:24,y:19,w:6,h:8,hue:52},
+      {id:'vision',name:'Visão',x:31,y:18,w:10,h:9,hue:188,glass:true},
+      {id:'reactor',name:'Reator',x:16,y:31,w:12,h:11,hue:24},
+      {id:'lab',name:'Laboratório',x:30,y:31,w:12,h:11,hue:92},
+      {id:'o2',name:'O2',x:45,y:1,w:18,h:9,hue:276,glass:true},
+      {id:'admin',name:'Administração',x:43,y:11,w:10,h:11,hue:218},
+      {id:'elec',name:'Elétrica',x:54,y:11,w:10,h:11,hue:356},
+      {id:'comm',name:'Comunicações',x:53,y:23,w:11,h:8,hue:302},
+      {id:'stor',name:'Armazém',x:44,y:32,w:9,h:9,hue:184},
+      {id:'cafe',name:'Cafeteria',x:54,y:32,w:10,h:9,hue:334},
+      {id:'balcony',name:'Varanda',x:54,y:42,w:10,h:4,hue:48,glass:true},
+      {id:'shiphall',name:'Corredor da Nave',x:16,y:19,w:7,h:8,hue:220,hall:true},
+    ],
+    corridors:[
+      {x:14,y:22,w:3,h:3},{x:18,y:14,w:3,h:6},{x:22,y:21,w:3,h:3},
+      {x:29,y:21,w:3,h:3,glass:true},{x:35,y:26,w:3,h:6,glass:true},{x:27,y:35,w:4,h:3},
+      {x:40,y:18,w:4,h:3,glass:true},{x:47,y:9,w:3,h:3,glass:true},{x:52,y:16,w:3,h:3,glass:true},
+      {x:40,y:24,w:14,h:3,glass:true},{x:40,y:25,w:5,h:3,glass:true},{x:43,y:25,w:3,h:8,glass:true},
+      {x:52,y:35,w:3,h:3,glass:true},{x:57,y:30,w:3,h:3,glass:true},{x:57,y:40,w:3,h:3,glass:true},
+    ],
+    glassRects:[
+      {x:29,y:21,w:3,h:3},{x:31,y:18,w:10,h:9},{x:35,y:26,w:3,h:6},{x:40,y:18,w:4,h:3},
+      {x:47,y:9,w:3,h:3},{x:52,y:16,w:3,h:3},{x:40,y:24,w:14,h:3},{x:40,y:25,w:5,h:3},
+      {x:43,y:25,w:3,h:8},{x:52,y:35,w:3,h:3},{x:57,y:30,w:3,h:3},{x:57,y:40,w:3,h:3},
+      {x:45,y:1,w:18,h:9},{x:54,y:42,w:10,h:4}
+    ],
+    doors:[
+      {id:'d_ship_hall',x:14,y:22,w:1,h:3},{id:'d_med_hall',x:18,y:14,w:3,h:1},
+      {id:'decon_w',x:24,y:22,w:1,h:2,decon:true},{id:'decon_e',x:29,y:22,w:1,h:2,decon:true},
+      {id:'d_vision_admin',x:42,y:18,w:1,h:3},{id:'d_admin_elec',x:53,y:16,w:1,h:3},
+      {id:'d_vision_lower',x:35,y:27,w:3,h:1},{id:'d_stor_cafe',x:53,y:35,w:1,h:3},
+      {id:'d_cafe_balcony',x:57,y:41,w:3,h:1},{id:'d_vision_comm',x:52,y:24,w:1,h:3},
+      {id:'d_reactor_lab',x:28,y:35,w:1,h:3},
+    ],
+    decor:[
+      {k:'landing',x:5,y:20,w:5,h:5},{k:'crate',x:2,y:27,w:2,h:1},{k:'crate',x:11,y:17,w:2,h:1},
+      {k:'medbay',x:14,y:7,w:6,h:4},{k:'glasscore',x:34,y:20,w:4,h:4},
+      {k:'decon',x:25,y:21,w:4,h:4},{k:'reactor_hq',x:19,y:34,w:6,h:5},{k:'labbench',x:33,y:34,w:6,h:4},
+      {k:'greenhouse',x:49,y:3,w:10,h:5},{k:'admindesk',x:46,y:14,w:4,h:4},{k:'powerwall',x:57,y:14,w:5,h:4},
+      {k:'servers',x:57,y:25,w:4,h:3},{k:'crate',x:47,y:35,w:2,h:2},{k:'crate',x:49,y:38,w:2,h:2},
+      {k:'cafeteria_hq',x:57,y:35,w:4,h:3},{k:'balcony_hq',x:57,y:43,w:4,h:1}
+    ],
+    stations:[
+      {id:'landing_supports',room:'ship',x:2,y:17,w:2,h:1,label:'Suportes de pouso'},
+      {id:'landing_fuel',room:'ship',x:13,y:17,w:1,h:2,label:'Módulo de combustível'},
+      {id:'hull_check',room:'ship',x:2,y:28,w:1,h:1,label:'Scanner do casco'},
+      {id:'med_sterilize',room:'med',x:12,y:4,w:2,h:1,label:'Esterilizador'},
+      {id:'med_vitals',room:'med',x:22,y:4,w:1,h:2,label:'Monitor vital'},
+      {id:'scan',room:'med',x:21,y:13,w:2,h:1,label:'Separador de amostras'},
+      {id:'decon_cycle_task',room:'decon',x:25,y:20,w:1,h:1,label:'Ciclo de limpeza'},
+      {id:'decon_pressure',room:'decon',x:28,y:20,w:1,h:1,label:'Pressão da câmara'},
+      {id:'decon_validate',room:'decon',x:26,y:25,w:1,h:1,label:'Validador de descontaminação'},
+      {id:'decon_w_out',room:'shiphall',x:22,y:22,w:1,h:1,label:'Abrir Descontaminação',kind:'decon',side:'w',inside:false},
+      {id:'decon_e_in',room:'decon',x:28,y:23,w:1,h:1,label:'Liberar saída',kind:'decon',side:'e',inside:true},
+      {id:'decon_e_out',room:'vision',x:31,y:22,w:1,h:1,label:'Abrir Descontaminação',kind:'decon',side:'e',inside:false},
+      {id:'decon_w_in',room:'decon',x:25,y:23,w:1,h:1,label:'Liberar saída',kind:'decon',side:'w',inside:true},
+      {id:'reactor',room:'reactor',x:17,y:32,w:1,h:3,label:'Núcleo do reator'},
+      {id:'reactor_flow',room:'reactor',x:26,y:32,w:1,h:2,label:'Fluxo energético'},
+      {id:'reactor_cool',room:'reactor',x:25,y:40,w:2,h:1,label:'Célula de resfriamento'},
+      {id:'lab_samples',room:'lab',x:31,y:32,w:2,h:1,label:'Analisador de amostras'},
+      {id:'lab_mix',room:'lab',x:40,y:32,w:1,h:2,label:'Misturador químico'},
+      {id:'lab_scanner',room:'lab',x:40,y:40,w:1,h:1,label:'Scanner científico'},
+      {id:'vision_lenses',room:'vision',x:39,y:24,w:1,h:2,label:'Conjunto de lentes'},
+      {id:'o2_prune',room:'o2',x:46,y:2,w:2,h:1,label:'Bancada de cultivo'},
+      {id:'o2_irrigation',room:'o2',x:61,y:2,w:1,h:2,label:'Irrigação'},
+      {id:'o2_balance',room:'o2',x:60,y:8,w:2,h:1,label:'Controle de O2'},
+      {id:'admin_records',room:'admin',x:44,y:12,w:2,h:1,label:'Registros'},
+      {id:'admin_sync',room:'admin',x:51,y:12,w:1,h:2,label:'Terminal central'},
+      {id:'admin_sort',room:'admin',x:51,y:20,w:1,h:1,label:'Arquivo da tripulação'},
+      {id:'adminmap',room:'admin',x:44,y:20,w:3,h:1,label:'Mapa da Nexus HQ'},
+      {id:'cams',room:'admin',x:48,y:20,w:1,h:1,label:'Monitoramento'},
+      {id:'wires_elec',room:'elec',x:55,y:12,w:2,h:1,label:'Painel de energia'},
+      {id:'circuits',room:'elec',x:62,y:12,w:1,h:3,label:'Quadro de circuitos'},
+      {id:'divert',room:'elec',x:55,y:20,w:3,h:1,label:'Distribuidor de energia'},
+      {id:'unlock',room:'elec',x:62,y:20,w:1,h:1,label:'Controle de portas'},
+      {id:'pow_admin',room:'admin',x:43,y:15,w:1,h:2,label:'Energia da Administração'},
+      {id:'pow_cafe',room:'cafe',x:62,y:38,w:1,h:2,label:'Energia da Cafeteria'},
+      {id:'pow_comm',room:'comm',x:62,y:26,w:1,h:2,label:'Energia das Comunicações'},
+      {id:'pow_stor',room:'stor',x:51,y:38,w:1,h:2,label:'Energia do Armazém'},
+      {id:'cafe_trays',room:'cafe',x:55,y:33,w:2,h:1,label:'Bandejas'},
+      {id:'cafe_food',room:'cafe',x:62,y:33,w:1,h:2,label:'Armário de alimentos'},
+      {id:'cafe_clean',room:'cafe',x:55,y:39,w:2,h:1,label:'Higienização'},
+      {id:'storage_boxes',room:'stor',x:45,y:33,w:2,h:1,label:'Caixas'},
+      {id:'storage_deliveries',room:'stor',x:51,y:33,w:1,h:2,label:'Registro de entregas'},
+      {id:'storage_materials',room:'stor',x:45,y:39,w:2,h:1,label:'Classificador'},
+      {id:'balcony_weather',room:'balcony',x:55,y:42,w:2,h:1,label:'Estação climática'},
+      {id:'balcony_equipment',room:'balcony',x:62,y:42,w:1,h:1,label:'Equipamento externo'},
+      {id:'balcony_atmosphere',room:'balcony',x:58,y:44,w:2,h:1,label:'Leitura atmosférica'},
+      {id:'signal',room:'comm',x:54,y:23,w:2,h:1,label:'Frequência de transmissão'},
+      {id:'comm_reconnect',room:'comm',x:61,y:23,w:2,h:1,label:'Link de sinal'},
+      {id:'comm_antennas',room:'comm',x:54,y:29,w:2,h:1,label:'Antenas'},
+      {id:'comm_restore',room:'comm',x:62,y:29,w:1,h:1,label:'Transmissor'},
+      {id:'comm_channels',room:'comm',x:59,y:29,w:2,h:1,label:'Canais de comunicação'},
+    ],
+    vents:[
+      {id:'v_ship',room:'ship',x:13,y:28},{id:'v_reactor',room:'reactor',x:27,y:40},{id:'v_lab',room:'lab',x:40,y:40},
+      {id:'v_decon',room:'decon',x:25,y:25},{id:'v_vision',room:'vision',x:39,y:25},{id:'v_med',room:'med',x:12,y:13},
+      {id:'v_balcony',room:'balcony',x:62,y:44},{id:'v_cafe',room:'cafe',x:61,y:37},{id:'v_admin',room:'admin',x:44,y:19},
+      {id:'v_elec',room:'elec',x:62,y:19},{id:'v_o2',room:'o2',x:61,y:8},
+    ],
+    roomEdges:[
+      ['ship','shiphall'],['shiphall','med'],['shiphall','decon'],['decon','vision'],['reactor','lab'],
+      ['lab','vision'],['vision','admin'],['admin','o2'],['admin','elec'],['vision','comm'],['vision','stor'],
+      ['stor','cafe'],['cafe','balcony'],['comm','cafe']
+    ],
+    ventLinks:[
+      ['v_ship','v_reactor'],['v_ship','v_vision'],
+      ['v_reactor','v_lab'],['v_reactor','v_decon'],
+      ['v_lab','v_decon'],['v_lab','v_elec'],
+      ['v_decon','v_vision'],['v_vision','v_med'],
+      ['v_med','v_balcony'],['v_balcony','v_cafe'],
+      ['v_cafe','v_admin'],['v_admin','v_elec'],['v_admin','v_o2'],['v_elec','v_o2']
+    ],
+    spawn:{x:3,y:25},table:{x:57,y:35,w:4,h:2},freeComputer:{id:'freeplay_pc',room:'cafe',x:55,y:37,w:1,h:1,label:'Computador da Partida Livre'},
+    cams:[{name:'Nave',tx:7,ty:23},{name:'Visão',tx:36,ty:22},{name:'O2',tx:54,ty:5},{name:'Cafeteria',tx:59,ty:36}],
+    decon:{doorW:'decon_w',doorE:'decon_e'}
+  }
+};
+function loadMapSelection(){try{const id=localStorage.getItem('navezero_map_v1');return MAP_LIBRARY[id]?id:'nave'}catch{return'nave'}}
+function saveMapSelection(id){try{localStorage.setItem('navezero_map_v1',MAP_LIBRARY[id]?id:'nave')}catch{}}
+let SELECTED_MAP_ID=loadMapSelection(),ACTIVE_MAP_ID=SELECTED_MAP_ID;
+let ROOM_DEFS=[],CORRIDORS=[],GLASS_RECTS=[],DOOR_DEFS=[],DECOR=[],STATION_DEFS=[],VENT_DEFS=[],ROOM_EDGES=[],VENT_LINKS=[],SPAWN={x:31,y:11},TABLE={x:29,y:6,w:6,h:3},FREEPLAY_COMPUTER={id:'freeplay_pc',room:'cafe',x:38,y:10,w:1,h:1,label:'Computador da Partida Livre'},CAMS=[];
+let ROOM_BY_ID={},stationById={},ventById={},VENT_ADJ={},doors=[];
+// Compatibilidade estrutural da malha clássica: const floor=new Uint8Array(COLS*ROWS), block=new Uint8Array(COLS*ROWS), walk=new Uint8Array(COLS*ROWS)
+let floor=new Uint8Array(COLS*ROWS),block=new Uint8Array(COLS*ROWS),walk=new Uint8Array(COLS*ROWS),baseWalk=new Uint8Array(COLS*ROWS),roomAt=new Int16Array(COLS*ROWS).fill(-1);
 const TOOLS={cams:'Ver câmeras',adminmap:'Ver mapa da nave'};
-const DIVERT_DESTS=['pow_cafe','pow_comm','pow_admin','pow_stor'];
-const SPAWN={x:31,y:11};
-
-const ROOM_BY_ID={}; ROOM_DEFS.forEach((r,i)=>{r.idx=i;ROOM_BY_ID[r.id]=r});
-const stationById={}; STATION_DEFS.forEach(s=>stationById[s.id]=s);
-// dutos de ventilação: um por sala, ligados a salas a no máximo 3 transições de distância
-const VENT_DEFS=[
-  {id:'v_cafe',room:'cafe',x:40,y:12},{id:'v_med',room:'med',x:13,y:10},{id:'v_sec',room:'sec',x:11,y:25},
-  {id:'v_hub',room:'hub',x:26,y:18},{id:'v_admin',room:'admin',x:55,y:23},{id:'v_elec',room:'elec',x:21,y:38},
-  {id:'v_stor',room:'stor',x:44,y:32},{id:'v_reactor',room:'reactor',x:12,y:39},{id:'v_comm',room:'comm',x:59,y:10},
-];
-const ROOM_EDGES=[['med','cafe'],['cafe','comm'],['cafe','hub'],['hub','admin'],['hub','sec'],['med','sec'],['sec','reactor'],['hub','elec'],['hub','stor'],['reactor','elec'],['stor','admin']];
-const ventById={}; VENT_DEFS.forEach(v=>{v.px=v.x*TILE+TILE/2;v.py=v.y*TILE+TILE/2;v.flash=0;ventById[v.id]=v});
-function roomDist(a,b){   // número de transições entre salas
+let DIVERT_DESTS=['pow_cafe','pow_comm','pow_admin','pow_stor'];
+function fillR(arr,x,y,w,h,v){for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)if(i>=0&&j>=0&&i<COLS&&j<ROWS)arr[j*COLS+i]=v}
+function isGlassTile(x,y){return ACTIVE_MAP_ID==='nexus'&&GLASS_RECTS.some(r=>x>=r.x&&x<r.x+r.w&&y>=r.y&&y<r.y+r.h)}
+function roomDist(a,b){
   if(a===b)return 0; const seen={[a]:0}, q=[a];
   while(q.length){const c=q.shift(); for(const [x,y] of ROOM_EDGES){const n=x===c?y:(y===c?x:null); if(n&&seen[n]===undefined){seen[n]=seen[c]+1;if(n===b)return seen[n];q.push(n)}}}
   return 99;
 }
-const VENT_LINKS=[['v_cafe','v_med'],['v_cafe','v_comm'],['v_cafe','v_hub'],['v_med','v_sec'],['v_sec','v_hub'],['v_sec','v_reactor'],['v_hub','v_elec'],['v_hub','v_stor'],['v_hub','v_admin'],['v_elec','v_reactor'],['v_stor','v_admin'],['v_reactor','v_stor'],['v_admin','v_comm']];
-const VENT_ADJ={}; VENT_DEFS.forEach(v=>VENT_ADJ[v.id]=[]);
-VENT_LINKS.forEach(([a,b])=>{const d=roomDist(ventById[a].room,ventById[b].room); if(d>=1&&d<=3){VENT_ADJ[a].push(b);VENT_ADJ[b].push(a)}});
-const doors=DOOR_DEFS.map(d=>({...d,closed:false}));
-const floor=new Uint8Array(COLS*ROWS), block=new Uint8Array(COLS*ROWS), walk=new Uint8Array(COLS*ROWS);
-const roomAt=new Int16Array(COLS*ROWS).fill(-1);
-function fillR(arr,x,y,w,h,v){for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)arr[j*COLS+i]=v}
-CORRIDORS.forEach(c=>fillR(floor,c.x,c.y,c.w,c.h,1));
-ROOM_DEFS.forEach(r=>{fillR(floor,r.x,r.y,r.w,r.h,1);fillR(roomAt,r.x,r.y,r.w,r.h,r.idx)});
-DECOR.forEach(d=>fillR(block,d.x,d.y,d.w,d.h,1));
-STATION_DEFS.forEach(s=>fillR(block,s.x,s.y,s.w,s.h,1));
-const baseWalk=new Uint8Array(COLS*ROWS);
 function rebuildWalk(){
   for(let i=0;i<walk.length;i++){walk[i]=(floor[i]&&!block[i])?1:0;baseWalk[i]=walk[i]}
   doors.forEach(d=>{if(d.closed)fillR(walk,d.x,d.y,d.w,d.h,0)});
 }
-rebuildWalk();
+function activateMapData(id,rebuildVisual=false){
+  const map=MAP_LIBRARY[id]||MAP_LIBRARY.nave;ACTIVE_MAP_ID=map.id;SELECTED_MAP_ID=map.id;
+  ROOM_DEFS=map.rooms.map(r=>({...r}));CORRIDORS=map.corridors.map(r=>({...r}));GLASS_RECTS=(map.glassRects||[]).map(r=>({...r}));
+  DOOR_DEFS=map.doors.map(d=>({...d}));DECOR=map.decor.map(d=>({...d}));STATION_DEFS=map.stations.map(st=>({...st}));
+  VENT_DEFS=map.vents.map(v=>({...v}));ROOM_EDGES=map.roomEdges.map(e=>e.slice());VENT_LINKS=map.ventLinks.map(e=>e.slice());
+  SPAWN={...map.spawn};TABLE={...map.table};FREEPLAY_COMPUTER={...map.freeComputer};CAMS=(map.cams||[]).map(x=>({...x}));
+  const mapTitle=$('mapTitle'),mapCanvas=$('mapCv');if(mapTitle)mapTitle.textContent=`Mapa — ${map.name}`;if(mapCanvas)mapCanvas.setAttribute('aria-label',`Mapa de ${map.name}`);
+  ROOM_BY_ID={};ROOM_DEFS.forEach((r,i)=>{r.idx=i;ROOM_BY_ID[r.id]=r});stationById={};STATION_DEFS.forEach(st=>stationById[st.id]=st);
+  ventById={};VENT_DEFS.forEach(v=>{v.px=v.x*TILE+TILE/2;v.py=v.y*TILE+TILE/2;v.flash=0;ventById[v.id]=v});
+  VENT_ADJ={};VENT_DEFS.forEach(v=>VENT_ADJ[v.id]=[]);VENT_LINKS.forEach(([a,b])=>{if(!ventById[a]||!ventById[b])return;if(!VENT_ADJ[a].includes(b))VENT_ADJ[a].push(b);if(!VENT_ADJ[b].includes(a))VENT_ADJ[b].push(a)});
+  doors=DOOR_DEFS.map(d=>({...d,closed:!!d.decon}));
+  floor=new Uint8Array(COLS*ROWS);block=new Uint8Array(COLS*ROWS);walk=new Uint8Array(COLS*ROWS);baseWalk=new Uint8Array(COLS*ROWS);roomAt=new Int16Array(COLS*ROWS).fill(-1);
+  const corridorMask=new Uint8Array(COLS*ROWS);
+  CORRIDORS.forEach(c=>{fillR(floor,c.x,c.y,c.w,c.h,1);fillR(corridorMask,c.x,c.y,c.w,c.h,1)});ROOM_DEFS.forEach(r=>{fillR(floor,r.x,r.y,r.w,r.h,1);fillR(roomAt,r.x,r.y,r.w,r.h,r.idx)});
+  // Nexus HQ: salas adjacentes não se fundem em uma área aberta. As divisórias são
+  // fechadas e as passagens permanecem exatamente onde a malha de corredores cruza a borda.
+  // Isso deixa os corredores como rotas principais sem mudar as conexões lógicas do mapa.
+  if(ACTIVE_MAP_ID==='nexus'){
+    const seals=new Set(),consider=(x,y,nx,ny)=>{
+      if(nx<0||ny<0||nx>=COLS||ny>=ROWS)return;const i=y*COLS+x,j=ny*COLS+nx,a=roomAt[i],b=roomAt[j];
+      if(a<0||b<0||a===b||corridorMask[i]||corridorMask[j])return;
+      const k=a>b?i:j;seals.add(k);
+    };
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const i=y*COLS+x;if(!floor[i]||roomAt[i]<0)continue;consider(x,y,x+1,y);consider(x,y,x,y+1)}
+    seals.forEach(i=>{floor[i]=0;roomAt[i]=-1});
+    // A Descontaminação é um corredor totalmente fechado: apenas as duas portas
+    // laterais formam passagens. Nenhum corredor auxiliar pode criar uma terceira entrada.
+    const dc=ROOM_BY_ID.decon;
+    if(dc){
+      const doorTile=new Uint8Array(COLS*ROWS);DOOR_DEFS.filter(d=>d.decon).forEach(d=>fillR(doorTile,d.x,d.y,d.w,d.h,1));
+      for(let y=dc.y;y<dc.y+dc.h;y++)for(let x=dc.x;x<dc.x+dc.w;x++){
+        const edge=x===dc.x||x===dc.x+dc.w-1||y===dc.y||y===dc.y+dc.h-1,i=y*COLS+x;
+        if(edge&&!doorTile[i]){floor[i]=0;roomAt[i]=-1}
+      }
+    }
+  }
+  DECOR.forEach(d=>{if(ACTIVE_MAP_ID==='nexus'&&['decon','balcony_hq'].includes(d.k))return;fillR(block,d.x,d.y,d.w,d.h,1)});STATION_DEFS.forEach(st=>{if(st.kind==='decon')return;fillR(block,st.x,st.y,st.w,st.h,1)});
+  rebuildWalk();
+  if(typeof APP!=='undefined')for(const k of Object.keys(APP))delete APP[k];
+  if(rebuildVisual&&typeof buildStatic==='function'){buildStatic();if(typeof drawMapPanelIfOpen==='function')drawMapPanelIfOpen()}
+}
+const APP={}; // cache de componentes de caminho; precisa existir antes da ativação inicial do mapa
+activateMapData(SELECTED_MAP_ID,false);
+function resetMapDoors(){
+  doors.forEach(d=>d.closed=!!d.decon);rebuildWalk();G.walkVer++;
+}
+function openSabotageDoors(){
+  doors.forEach(d=>{if(!d.decon)d.closed=false});rebuildWalk();G.walkVer++;
+}
 const isFloor=(x,y)=>x>=0&&y>=0&&x<COLS&&y<ROWS&&floor[y*COLS+x]===1;
 function blockedPx(px,py,ghost){
   const tx=Math.floor(px/TILE), ty=Math.floor(py/TILE);
@@ -1166,7 +1340,8 @@ const hsl=(h,s,l,a=1)=>`hsl(${h} ${s}% ${l}% / ${a})`;
 function buildStatic(){
   const cv=document.createElement('canvas'); cv.width=WORLD_W; cv.height=WORLD_H;
   const c=cv.getContext('2d'); const T=TILE;
-  c.fillStyle='#070816'; c.fillRect(0,0,WORLD_W,WORLD_H);
+  if(ACTIVE_MAP_ID==='nexus')c.clearRect(0,0,WORLD_W,WORLD_H);
+  else{c.fillStyle='#070816'; c.fillRect(0,0,WORLD_W,WORLD_H);}
   // Paredes e corredores ficam na camada base compartilhada.
   for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
     if(isFloor(x,y))continue;
@@ -1181,9 +1356,10 @@ function buildStatic(){
   // possam deixar de ser submetidas à GPU sem alterar floor/block/walk.
   for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
     if(!isFloor(x,y)||roomAt[y*COLS+x]>=0)continue;
-    const hue=238, sat=16, li=((x+y)&1)?25:23.5;
-    c.fillStyle=hsl(hue,sat,li); c.fillRect(x*T,y*T,T,T);
-    c.strokeStyle='rgba(255,255,255,.05)'; c.lineWidth=1; c.strokeRect(x*T+.5,y*T+.5,T-1,T-1);
+    const glass=isGlassTile(x,y),hue=ACTIVE_MAP_ID==='nexus'?202:238, sat=glass?46:16, li=ACTIVE_MAP_ID==='nexus'?(glass?50:(((x+y)&1)?35:33)):glass?42:(((x+y)&1)?25:23.5);
+    c.fillStyle=glass?hsl(hue,sat,li,ACTIVE_MAP_ID==='nexus'?.66:.56):hsl(hue,sat,li); c.fillRect(x*T,y*T,T,T);
+    c.strokeStyle=glass?'rgba(220,247,255,.34)':'rgba(255,255,255,.05)'; c.lineWidth=glass?1.4:1; c.strokeRect(x*T+.5,y*T+.5,T-1,T-1);
+    if(glass){c.strokeStyle='rgba(255,255,255,.13)';c.beginPath();c.moveTo(x*T+4,y*T+T-5);c.lineTo(x*T+T-5,y*T+4);c.stroke()}
   }
   // Sombras/bordas dos corredores permanecem na base; as de cada sala vão para sua camada.
   for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
@@ -1192,6 +1368,24 @@ function buildStatic(){
     if(!isFloor(x,y+1)){c.fillStyle='#4a54a0';c.fillRect(px,py+T-3,T,3)}
     if(!isFloor(x-1,y)){c.fillStyle='rgba(0,0,0,.25)';c.fillRect(px,py,10,T);c.fillStyle='#6f7acc';c.fillRect(px,py,3,T)}
     if(!isFloor(x+1,y)){c.fillStyle='rgba(0,0,0,.25)';c.fillRect(px+T-10,py,10,T);c.fillStyle='#6f7acc';c.fillRect(px+T-3,py,3,T)}
+  }
+  // Nexus: sela visualmente as junções das paredes pelo lado interno do piso.
+  // A colisão continua sendo definida exclusivamente por floor/walk; esta faixa só elimina frestas gráficas.
+  if(ACTIVE_MAP_ID==='nexus'){
+    c.save();c.lineCap='square';
+    for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){if(!isFloor(x,y))continue;const px=x*T,py=y*T;
+      c.strokeStyle='rgba(72,91,112,.88)';c.lineWidth=6;c.beginPath();
+      if(!isFloor(x,y-1)){c.moveTo(px,py+3);c.lineTo(px+T,py+3)}
+      if(!isFloor(x,y+1)){c.moveTo(px,py+T-3);c.lineTo(px+T,py+T-3)}
+      if(!isFloor(x-1,y)){c.moveTo(px+3,py);c.lineTo(px+3,py+T)}
+      if(!isFloor(x+1,y)){c.moveTo(px+T-3,py);c.lineTo(px+T-3,py+T)}
+      c.stroke();
+      c.strokeStyle='rgba(238,248,255,.52)';c.lineWidth=1.5;c.beginPath();
+      if(!isFloor(x,y-1)){c.moveTo(px+2,py+7);c.lineTo(px+T-2,py+7)}
+      if(!isFloor(x-1,y)){c.moveTo(px+7,py+2);c.lineTo(px+7,py+T-2)}
+      c.stroke();
+    }
+    c.restore();
   }
   const roomForTilePoint=(x,y)=>{const tx=clamp(Math.floor(x),0,COLS-1),ty=clamp(Math.floor(y),0,ROWS-1),ix=roomAt[ty*COLS+tx];return ix>=0?ROOM_DEFS[ix]:null};
   DECOR.forEach(d=>{if(!roomForTilePoint(d.x+d.w/2,d.y+d.h/2))drawDecor(c,d)});
@@ -1210,9 +1404,10 @@ function buildStatic(){
     const lc=layer.getContext('2d');lc.save();lc.translate(-ox,-oy);
     for(let y=r.y;y<r.y+r.h;y++)for(let x=r.x;x<r.x+r.w;x++){
       if(roomAt[y*COLS+x]!==r.idx||!isFloor(x,y))continue;
-      const px=x*T,py=y*T,hue=r.hue,sat=(r&&!r.hall)?30:16,li=((x+y)&1)?25:23.5;
-      lc.fillStyle=hsl(hue,sat,li);lc.fillRect(px,py,T,T);
-      lc.strokeStyle='rgba(255,255,255,.05)';lc.lineWidth=1;lc.strokeRect(px+.5,py+.5,T-1,T-1);
+      const px=x*T,py=y*T,hue=r.hue,sat=(r&&!r.hall)?(r.glass?42:26):14,li=ACTIVE_MAP_ID==='nexus'?(r.glass?51:(r.hall?38:(((x+y)&1)?36:34))):(r.glass?43:(((x+y)&1)?25:23.5));
+      lc.fillStyle=r.glass?hsl(hue,sat,li,ACTIVE_MAP_ID==='nexus'?.68:.58):hsl(hue,sat,li);lc.fillRect(px,py,T,T);
+      lc.strokeStyle=r.glass?'rgba(224,249,255,.34)':'rgba(255,255,255,.05)';lc.lineWidth=r.glass?1.4:1;lc.strokeRect(px+.5,py+.5,T-1,T-1);
+      if(r.glass){lc.strokeStyle='rgba(255,255,255,.12)';lc.beginPath();lc.moveTo(px+5,py+T-6);lc.lineTo(px+T-6,py+5);lc.stroke()}
       if(!isFloor(x,y-1)){lc.fillStyle='rgba(0,0,0,.3)';lc.fillRect(px,py,T,12);lc.fillStyle='#6f7acc';lc.fillRect(px,py,T,3)}
       if(!isFloor(x,y+1)){lc.fillStyle='#4a54a0';lc.fillRect(px,py+T-3,T,3)}
       if(!isFloor(x-1,y)){lc.fillStyle='rgba(0,0,0,.25)';lc.fillRect(px,py,10,T);lc.fillStyle='#6f7acc';lc.fillRect(px,py,3,T)}
@@ -1226,7 +1421,7 @@ function buildStatic(){
 
   // Minimap remains complete and does not use the player's rendering distance.
   const mm=document.createElement('canvas'); mm.width=256; mm.height=184; const m=mm.getContext('2d');
-  m.fillStyle='#05061a'; m.fillRect(0,0,256,184);
+  m.fillStyle=ACTIVE_MAP_ID==='nexus'?'#080c1d':'#05061a'; m.fillRect(0,0,256,184);
   for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
     if(!isFloor(x,y))continue;
     const ri=roomAt[y*COLS+x], r=ri>=0?ROOM_DEFS[ri]:null;
@@ -1267,6 +1462,54 @@ function drawDecor(c,d){
   }else if(d.k==='gen'){
     c.fillStyle='#d4a62a'; rr(c,x+3,y+3,w-8,h-10,8); c.fill(); c.stroke();
     c.fillStyle='#10122a'; for(let i=0;i<6;i++){c.save();c.beginPath();c.rect(x+8,y+8,w-18,h-22);c.clip();c.fillRect(x+i*24-10,y,10,h);c.restore()}
+  }else if(d.k==='landing'){
+    c.fillStyle='#d9e7ef';rr(c,x+3,y+3,w-8,h-10,18);c.fill();c.stroke();
+    c.fillStyle='#17233b';rr(c,x+w*.2,y+h*.18,w*.6,h*.55,24);c.fill();c.stroke();
+    c.fillStyle='#8fd4ff';rr(c,x+w*.31,y+h*.27,w*.38,h*.16,16);c.fill();
+    c.fillStyle='#f3c957';c.fillRect(x+w*.18,y+h*.78,w*.64,8);
+    c.strokeStyle='#7b8aa1';c.lineWidth=5;c.beginPath();c.moveTo(x+w*.2,y+h*.1);c.lineTo(x+w*.1,y+h*.8);c.moveTo(x+w*.8,y+h*.1);c.lineTo(x+w*.9,y+h*.8);c.stroke();
+  }else if(d.k==='medbay'){
+    c.fillStyle='#dfeff1';rr(c,x+3,y+3,w-8,h-10,16);c.fill();c.stroke();
+    c.fillStyle='#69d5c7';for(let i=0;i<3;i++){rr(c,x+12+i*w/3,y+h*.48,w/4,h*.23,10);c.fill();c.stroke()}
+    c.fillStyle='#efffff';rr(c,x+w*.18,y+h*.12,w*.64,h*.18,12);c.fill();c.stroke();
+  }else if(d.k==='glasscore'){
+    c.fillStyle='rgba(140,222,255,.18)';rr(c,x+3,y+3,w-8,h-10,24);c.fill();c.stroke();
+    c.strokeStyle='rgba(222,250,255,.65)';c.lineWidth=3;for(let i=0;i<5;i++){c.beginPath();c.moveTo(x+12+i*w/4,y+8);c.lineTo(x+w*.22+i*w/5,y+h-16);c.stroke()}
+    c.fillStyle='rgba(112,225,255,.22)';c.beginPath();c.arc(x+w/2,y+h/2,Math.min(w,h)*.24,0,6.283);c.fill();
+  }else if(d.k==='decon'){
+    c.fillStyle='#efe6a6';rr(c,x+3,y+3,w-8,h-10,22);c.fill();c.stroke();
+    c.strokeStyle='#f4cf45';c.lineWidth=5;for(let i=0;i<4;i++){c.beginPath();c.arc(x+w/2,y+h/2,24+i*18,0,6.283);c.stroke()}
+    c.fillStyle='rgba(115,215,255,.35)';rr(c,x+w*.24,y+h*.18,w*.52,h*.64,20);c.fill();c.stroke();
+  }else if(d.k==='reactor_hq'){
+    c.fillStyle='#382536';rr(c,x+3,y+3,w-8,h-10,20);c.fill();c.stroke();
+    const rg=c.createRadialGradient(x+w/2,y+h/2,8,x+w/2,y+h/2,Math.max(w,h)/2);rg.addColorStop(0,'#fff6c4');rg.addColorStop(.25,'#ffb64d');rg.addColorStop(.65,'#ff684a');rg.addColorStop(1,'#5e1f35');
+    c.fillStyle=rg;c.beginPath();c.ellipse(x+w/2,y+h/2,w*.28,h*.32,0,0,6.283);c.fill();c.stroke();
+    c.strokeStyle='#aeb6c8';c.lineWidth=8;for(const dx of [-.36,.36]){c.beginPath();c.moveTo(x+w/2+dx*w,y+12);c.lineTo(x+w/2+dx*w,y+h-20);c.stroke()}
+  }else if(d.k==='labbench'){
+    c.fillStyle='#edf4f2';rr(c,x+3,y+3,w-8,h-10,14);c.fill();c.stroke();
+    c.fillStyle='#9fd7b0';for(let i=0;i<3;i++){rr(c,x+12+i*w/3,y+12,w/4,h*.28,8);c.fill();c.stroke()}
+    c.fillStyle='#78bce5';rr(c,x+w*.12,y+h*.57,w*.76,h*.2,10);c.fill();c.stroke();
+  }else if(d.k==='greenhouse'){
+    c.fillStyle='rgba(224,252,246,.26)';rr(c,x+3,y+3,w-8,h-10,28);c.fill();c.stroke();
+    c.fillStyle='#23694d';for(let i=0;i<5;i++){const px=x+25+i*(w-50)/4;c.beginPath();c.ellipse(px,y+h*.66,18,38,(i%2?-.3:.3),0,6.283);c.fill()}
+    c.fillStyle='#77c95d';for(let i=0;i<7;i++){c.beginPath();c.arc(x+22+i*(w-44)/6,y+h*.4+(i%2)*15,14,0,6.283);c.fill()}
+    c.strokeStyle='rgba(210,250,255,.7)';c.lineWidth=2;c.beginPath();c.arc(x+w/2,y+h*.48,Math.min(w,h)*.32,Math.PI,0);c.stroke();
+  }else if(d.k==='admindesk'){
+    c.fillStyle='#38527c';for(let i=0;i<3;i++){rr(c,x+10,y+12+i*h/3,w-20,h/5,12);c.fill();c.stroke()}
+    c.fillStyle='#8bdfff';for(let i=0;i<3;i++){rr(c,x+w*.58,y+16+i*h/3,w*.24,h*.12,5);c.fill()}
+  }else if(d.k==='powerwall'){
+    c.fillStyle='#382b36';rr(c,x+3,y+3,w-8,h-10,14);c.fill();c.stroke();
+    const cols=['#ff6b68','#f5c935','#78d4ff','#83e18a'];for(let i=0;i<8;i++){c.strokeStyle=cols[i%4];c.lineWidth=4;c.beginPath();c.moveTo(x+12,y+18+i*10);c.bezierCurveTo(x+w*.4,y+i*12,x+w*.6,y+h-i*9,x+w-14,y+20+i*9);c.stroke()}
+    c.fillStyle='#c8d2df';for(let i=0;i<4;i++){rr(c,x+10+i*(w-24)/4,y+h-34,20,20,4);c.fill();c.stroke()}
+  }else if(d.k==='servers'){
+    c.fillStyle='#263249';for(let i=0;i<4;i++){rr(c,x+8+i*w/4,y+6,w/5,h-16,8);c.fill();c.stroke();c.fillStyle='#6ee6d5';for(let j=0;j<5;j++)c.fillRect(x+15+i*w/4,y+20+j*18,w/8,4);c.fillStyle='#263249'}
+    c.strokeStyle='#75ccff';c.lineWidth=3;c.beginPath();c.arc(x+w*.5,y+8,22,Math.PI,0);c.stroke();
+  }else if(d.k==='cafeteria_hq'){
+    c.fillStyle='#edc7d8';for(let i=0;i<2;i++){rr(c,x+18+i*w*.48,y+h*.18,w*.36,h*.5,18);c.fill();c.stroke();c.fillStyle='#fff0f5';rr(c,x+30+i*w*.48,y+h*.27,w*.18,h*.18,8);c.fill();c.fillStyle='#edc7d8'}
+  }else if(d.k==='balcony_hq'){
+    c.fillStyle='rgba(255,228,111,.22)';rr(c,x+3,y+3,w-8,h-10,16);c.fill();c.stroke();
+    c.strokeStyle='#f6d563';c.lineWidth=5;c.beginPath();c.moveTo(x+10,y+h*.72);c.lineTo(x+w-14,y+h*.72);c.stroke();
+    c.fillStyle='#86dcff';for(let i=0;i<4;i++){c.beginPath();c.arc(x+40+i*(w-80)/3,y+h*.35,8,0,6.283);c.fill()}
   }
   c.restore();
 }
@@ -1278,8 +1521,13 @@ function drawVentGrate(c,v){
   c.strokeStyle='#5b66b8'; c.lineWidth=1.5; rr(c,x+7,y+8,T-16,T-20,6); c.stroke(); c.restore();
 }
 function drawStationBody(c,s){
-  const T=TILE,x=s.x*T,y=s.y*T,w=s.w*T,h=s.h*T, hue=ROOM_BY_ID[s.room].hue;
+  const T=TILE,x=s.x*T,y=s.y*T,w=s.w*T,h=s.h*T, hue=ROOM_BY_ID[s.room]?.hue??205;
   c.save();
+  if(s.kind==='decon'){
+    c.fillStyle='rgba(0,0,0,.28)';c.beginPath();c.arc(x+T/2,y+T/2+4,16,0,6.283);c.fill();
+    c.lineWidth=3;c.strokeStyle='#10122a';c.fillStyle='#e9f7ff';c.beginPath();c.arc(x+T/2,y+T/2,15,0,6.283);c.fill();c.stroke();
+    c.fillStyle=s.inside?'#7fe7b4':'#72caff';c.beginPath();c.arc(x+T/2,y+T/2,8,0,6.283);c.fill();c.restore();return;
+  }
   c.fillStyle='rgba(0,0,0,.35)'; rr(c,x+3,y+7,w-3,h-3,10); c.fill();
   c.lineWidth=3; c.strokeStyle='#10122a';
   c.fillStyle='#10143a'; rr(c,x+2,y+2,w-6,h-8,10); c.fill(); c.stroke();
@@ -1292,7 +1540,7 @@ function drawStationBody(c,s){
 /* =====================================================================
    ESTADO DO JOGO
    ===================================================================== */
-const G={cfgFunctionTab:'locator',state:'menu',t:0,chars:[],player:null,tasks:[],pin:null,mini:null,tok:0,tool:null,
+const G={mapId:ACTIVE_MAP_ID,decon:{phase:'idle',until:0,exitSide:null,entrySide:null},cfgFunctionTab:'locator',state:'menu',t:0,chars:[],player:null,tasks:[],pin:null,mini:null,tok:0,tool:null,
   cam:{x:0,y:0},vision:820,visionTarget:820,cfg:{name:'Você',color:'azul'},over:false,lastRoom:null,action:null,
   role:'crew',imp:null,locator:false,observer:false,cleaner:false,parasite:false,paramedic:false,paramedicT:null,paramedicCd:0,parasiteInfections:{},instructorTrails:[],instructorTrailSeq:0,instructorCd:0,instructorTargetId:null,cleanerCd:0,cleanerUses:0,cleanerT:null,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,delayedCd:0,delayedT:null,delayedMarks:{},controlTargetId:null,controlTime:0,controlCd:0,bodies:[],deadPets:[],killSplashes:[],spectralSmokes:[],spectralSmokeSeq:0,sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,freePlay:false,dt:.016};
 // Mantém a visibilidade do painel de configurações sincronizada com cfgOpen desde a inicialização.
@@ -1366,11 +1614,60 @@ const TASK_TEMPLATES=[
     {st:'reactor',game:'reactor',label:'Ativar núcleo'},
     {st:'circuits',game:'circuits',label:'Equalizar circuitos'},
     {st:'wires_elec',game:'wires',label:'Finalizar conexão'}]},
+
+  // Nexus HQ — tarefas originais ligadas aos objetos do novo mapa.
+  {map:'nexus',key:'nx_supports',category:'common',name:'Fixar suportes de pouso',steps:[{st:'landing_supports',game:'nx_landing',label:'Fixar suportes de pouso'}]},
+  {map:'nexus',key:'nx_hull',category:'common',name:'Verificar integridade do casco',steps:[{st:'hull_check',game:'nx_hull',label:'Verificar integridade do casco'}]},
+  {map:'nexus',key:'nx_decon_validate',category:'common',name:'Validar descontaminação',steps:[{st:'decon_validate',game:'nx_decon',label:'Validar descontaminação'}]},
+  {map:'nexus',key:'nx_records',category:'common',name:'Validar registros',steps:[{st:'admin_records',game:'nx_records',label:'Validar registros'}]},
+  {map:'nexus',key:'nx_power',category:'common',name:'Redirecionar energia',steps:[{st:'divert',game:'nx_circuit',label:'Traçar rota de energia'},{st:'pow_admin',game:'nx_circuit',label:'Confirmar distribuição'}]},
+  {map:'nexus',key:'nx_landing_fuel',category:'medium',name:'Reabastecer o módulo',steps:[{st:'landing_fuel',game:'nx_landing_fuel',label:'Reabastecer o módulo',mode:'fill'}]},
+  {map:'nexus',key:'nx_med_sterilize',category:'medium',name:'Esterilizar instrumentos',steps:[{st:'med_sterilize',game:'nx_sterilize',label:'Esterilizar instrumentos'}]},
+  {map:'nexus',key:'nx_med_vitals',category:'medium',name:'Ajustar monitor de sinais vitais',steps:[{st:'med_vitals',game:'nx_medscan',label:'Ajustar monitor de sinais vitais'}]},
+  {map:'nexus',key:'nx_med_samples',category:'medium',name:'Separar amostras',steps:[{st:'scan',game:'nx_medscan',label:'Separar amostras'}]},
+  {map:'nexus',key:'nx_decon_cycle',category:'medium',name:'Acionar ciclo de limpeza',steps:[{st:'decon_cycle_task',game:'nx_decon',label:'Acionar ciclo de limpeza'}]},
+  {map:'nexus',key:'nx_decon_pressure',category:'medium',name:'Ajustar pressão da câmara',steps:[{st:'decon_pressure',game:'nx_decon',label:'Ajustar pressão da câmara'}]},
+  {map:'nexus',key:'nx_reactor_core',category:'medium',name:'Estabilizar núcleo',steps:[{st:'reactor',game:'nx_core',label:'Estabilizar núcleo'}]},
+  {map:'nexus',key:'nx_reactor_flow',category:'medium',name:'Alinhar fluxo energético',steps:[{st:'reactor_flow',game:'nx_core',label:'Alinhar fluxo energético'}]},
+  {map:'nexus',key:'nx_reactor_cool',category:'medium',name:'Substituir célula de resfriamento',steps:[{st:'reactor_cool',game:'nx_coolant',label:'Substituir célula de resfriamento'}]},
+  {map:'nexus',key:'nx_lab_samples',category:'medium',name:'Analisar amostras',steps:[{st:'lab_samples',game:'nx_anomaly',label:'Analisar amostras'}]},
+  {map:'nexus',key:'nx_lab_mix',category:'medium',name:'Misturar compostos',steps:[{st:'lab_mix',game:'nx_mix',label:'Misturar compostos'}]},
+  {map:'nexus',key:'nx_lab_scanner',category:'medium',name:'Calibrar scanner científico',steps:[{st:'lab_scanner',game:'nx_anomaly',label:'Calibrar scanner científico'}]},
+  {map:'nexus',key:'nx_o2_prune',category:'medium',name:'Podar plantas',steps:[{st:'o2_prune',game:'nx_prune',label:'Podar plantas'}]},
+  {map:'nexus',key:'nx_o2_irrigation',category:'medium',name:'Ajustar irrigação',steps:[{st:'o2_irrigation',game:'nx_gases',label:'Ajustar irrigação'}]},
+  {map:'nexus',key:'nx_o2_balance',category:'medium',name:'Balancear níveis de oxigênio',steps:[{st:'o2_balance',game:'nx_gases',label:'Balancear níveis de oxigênio'}]},
+  {map:'nexus',key:'nx_admin_sync',category:'medium',name:'Sincronizar terminais',steps:[{st:'admin_sync',game:'nx_records',label:'Sincronizar terminais'}]},
+  {map:'nexus',key:'nx_admin_sort',category:'medium',name:'Organizar informações da tripulação',steps:[{st:'admin_sort',game:'nx_records',label:'Organizar informações da tripulação'}]},
+  {map:'nexus',key:'nx_elec_fuses',category:'medium',name:'Trocar fusíveis',steps:[{st:'circuits',game:'nx_circuit',label:'Trocar fusíveis'}]},
+  {map:'nexus',key:'nx_elec_circuits',category:'medium',name:'Reorganizar circuitos',steps:[{st:'wires_elec',game:'nx_circuit',label:'Reorganizar circuitos'}]},
+  {map:'nexus',key:'nx_cafe_trays',category:'medium',name:'Repor bandejas',steps:[{st:'cafe_trays',game:'nx_supplies',label:'Repor bandejas'}]},
+  {map:'nexus',key:'nx_cafe_food',category:'medium',name:'Organizar alimentos',steps:[{st:'cafe_food',game:'nx_supplies',label:'Organizar alimentos'}]},
+  {map:'nexus',key:'nx_cafe_clean',category:'medium',name:'Higienizar equipamentos',steps:[{st:'cafe_clean',game:'nx_supplies',label:'Higienizar equipamentos'}]},
+  {map:'nexus',key:'nx_storage_boxes',category:'medium',name:'Organizar caixas',steps:[{st:'storage_boxes',game:'nx_cargo',label:'Organizar caixas'}]},
+  {map:'nexus',key:'nx_storage_deliveries',category:'medium',name:'Registrar entregas',steps:[{st:'storage_deliveries',game:'nx_cargo',label:'Registrar entregas'}]},
+  {map:'nexus',key:'nx_storage_materials',category:'medium',name:'Classificar materiais',steps:[{st:'storage_materials',game:'nx_cargo',label:'Classificar materiais'}]},
+  {map:'nexus',key:'nx_weather',category:'medium',name:'Coletar informações climáticas',steps:[{st:'balcony_weather',game:'nx_weather',label:'Coletar informações climáticas'}]},
+  {map:'nexus',key:'nx_external',category:'medium',name:'Ajustar equipamento externo',steps:[{st:'balcony_equipment',game:'nx_weather',label:'Ajustar equipamento externo'}]},
+  {map:'nexus',key:'nx_atmosphere',category:'medium',name:'Realizar leitura atmosférica',steps:[{st:'balcony_atmosphere',game:'nx_weather',label:'Realizar leitura atmosférica'}]},
+  {map:'nexus',key:'nx_comm_freq',category:'medium',name:'Sintonizar frequência',steps:[{st:'signal',game:'nx_frequency',label:'Sintonizar frequência'}]},
+  {map:'nexus',key:'nx_comm_reconnect',category:'medium',name:'Reconectar sinal',steps:[{st:'comm_reconnect',game:'nx_frequency',label:'Reconectar sinal'}]},
+  {map:'nexus',key:'nx_comm_antennas',category:'medium',name:'Alinhar antenas',steps:[{st:'comm_antennas',game:'nx_frequency',label:'Alinhar antenas'}]},
+  {map:'nexus',key:'nx_comm_restore',category:'medium',name:'Restaurar transmissão',steps:[{st:'comm_restore',game:'nx_frequency',label:'Restaurar transmissão'}]},
+  {map:'nexus',key:'nx_comm_channels',category:'medium',name:'Sincronizar canais de comunicação',steps:[{st:'comm_channels',game:'nx_frequency',label:'Sincronizar canais de comunicação'}]},
+  {map:'nexus',key:'nx_vision_lenses',category:'medium',name:'Alinhar lentes',steps:[{st:'vision_lenses',game:'nx_lenses',label:'Alinhar lentes da Visão'}]},
+  {map:'nexus',key:'nx_lab_anomaly',category:'medium',name:'Identificar anomalia',steps:[{st:'lab_samples',game:'nx_anomaly',label:'Identificar anomalia'}]},
+  {map:'nexus',key:'nx_storage_priority',category:'medium',name:'Priorizar carga',steps:[{st:'storage_boxes',game:'nx_cargo',label:'Priorizar carga por categoria'}]},
+  {map:'nexus',key:'nx_long_landing',category:'long',name:'Revisão completa da Nave',steps:[{st:'landing_fuel',game:'nx_landing_fuel',label:'Reabastecer o módulo',mode:'fill'},{st:'hull_check',game:'nx_hull',label:'Verificar integridade do casco'},{st:'landing_supports',game:'nx_landing',label:'Fixar suportes'}]},
+  {map:'nexus',key:'nx_long_reactor',category:'long',name:'Revisão completa do Reator',steps:[{st:'reactor_cool',game:'nx_coolant',label:'Substituir célula'},{st:'reactor_flow',game:'nx_core',label:'Alinhar fluxo'},{st:'reactor',game:'nx_core',label:'Estabilizar núcleo'}]},
+  {map:'nexus',key:'nx_long_science',category:'long',name:'Processar análise científica',steps:[{st:'lab_samples',game:'nx_anomaly',label:'Analisar amostras'},{st:'lab_mix',game:'nx_mix',label:'Misturar compostos'},{st:'lab_scanner',game:'nx_anomaly',label:'Calibrar scanner'}]},
+  {map:'nexus',key:'nx_long_o2',category:'long',name:'Recalibrar suporte de vida',steps:[{st:'o2_prune',game:'nx_prune',label:'Podar plantas'},{st:'o2_irrigation',game:'nx_gases',label:'Ajustar irrigação'},{st:'o2_balance',game:'nx_gases',label:'Balancear oxigênio'}]},
+  {map:'nexus',key:'nx_long_comms',category:'long',name:'Restabelecer cadeia de comunicação',steps:[{st:'comm_reconnect',game:'nx_frequency',label:'Reconectar sinal'},{st:'signal',game:'nx_frequency',label:'Sintonizar frequência'},{st:'comm_restore',game:'nx_frequency',label:'Restaurar transmissão'}]},
 ];
+const activeTaskTemplates=()=>TASK_TEMPLATES.filter(t=>(t.map||'nave')===ACTIVE_MAP_ID);
 const TASK_POOLS={
-  common:TASK_TEMPLATES.filter(t=>t.category==='common'),
-  medium:TASK_TEMPLATES.filter(t=>t.category==='medium'),
-  long:TASK_TEMPLATES.filter(t=>t.category==='long')
+  get common(){return activeTaskTemplates().filter(t=>t.category==='common')},
+  get medium(){return activeTaskTemplates().filter(t=>t.category==='medium')},
+  get long(){return activeTaskTemplates().filter(t=>t.category==='long')}
 };
 let TID=0;
 function makeTask(tpl,owner){
@@ -1386,7 +1683,7 @@ function createTasksFor(owner,commonTemplates){
 }
 function createLazyTasksFor(owner){
   const count=clamp(Math.round(CFG.lazyTasks)||1,1,3);
-  return shuffle(TASK_TEMPLATES.slice()).slice(0,count).map(t=>{const task=makeTask(t,owner);task.lazy=true;return task});
+  return shuffle(activeTaskTemplates()).slice(0,count).map(t=>{const task=makeTask(t,owner);task.lazy=true;return task});
 }
 const taskStepCount=list=>list.reduce((n,t)=>n+(t.steps?.length||0),0);
 const nextStep=t=>t.steps.find(s=>!s.done);
@@ -1498,7 +1795,11 @@ function stationDist(s,p){
 const FAKE_GAME={wires_cafe:{game:'wires'},wires_elec:{game:'wires'},wires_stor:{game:'wires'},circuits:{game:'circuits'},code_admin:{game:'code'},code_cafe:{game:'code'},
   divert:{game:'divert',mode:'lever',dest:'pow_cafe'},signal:{game:'signal'},unlock:{game:'unlock'},fuel:{game:'fuel',mode:'fill'},fuel_reactor:{game:'fuel',mode:'pour'},reactor:{game:'reactor'},scan:{game:'scan'}};
 DIVERT_DESTS.forEach(d=>{FAKE_GAME[d]={game:'divert',mode:'accept',dest:d}});
+for(const tpl of TASK_TEMPLATES)for(const step of (tpl.steps||[])){
+  if(step?.st&&!FAKE_GAME[step.st])FAKE_GAME[step.st]={game:step.game,mode:step.mode,dest:step.dest};
+}
 function actionFor(s){
+  if(s.kind==='decon'&&G.player.alive)return {type:'decon',station:s,label:s.label};
   if(G.role==='crew'&&G.player.alive){
     for(const t of FIX_KEYS){
       if(G.sab[t]>0&&FIX[t].st===s.id){
@@ -1530,6 +1831,41 @@ function bestAction(){
   if(P.alive&&G.role==='imp'&&P.ventCd<=0&&!P.ventAnim)for(const v of VENT_DEFS){const d=Math.hypot(P.x-v.px,P.y+4-v.py); if(d<=62&&d<bd){bd=d;best={type:'vent',vent:v,station:{x:v.x,y:v.y,w:1,h:1},label:'Entrar no duto'}}}
   return best;
 }
+function setDoorClosedById(id,closed){
+  const d=doors.find(x=>x.id===id);if(!d||d.closed===!!closed)return false;
+  d.closed=!!closed;rebuildWalk();G.walkVer++;return true;
+}
+function deconDoorId(side){const meta=MAP_LIBRARY[ACTIVE_MAP_ID]?.decon;return side==='w'?meta?.doorW:meta?.doorE}
+function resetDeconState(){
+  G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
+  if(ACTIVE_MAP_ID==='nexus'){setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true)}
+}
+function charInsideDecon(ch){return roomAtPx(ch.x,ch.y)?.id==='decon'}
+function useDeconButton(ch,st){
+  if(ACTIVE_MAP_ID!=='nexus'||!ch?.alive||!st||st.kind!=='decon')return false;
+  const D=G.decon||(G.decon={phase:'idle',until:0,exitSide:null,entrySide:null});
+  if(D.phase==='idle'&&!st.inside){
+    D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+2.4;
+    setDoorClosedById(deconDoorId(D.entrySide),false);setDoorClosedById(deconDoorId(D.exitSide),true);
+    toast('Descontaminação: entrada liberada.',1500);Snd.click();return true;
+  }
+  if(D.phase==='ready'&&st.inside&&charInsideDecon(ch)){
+    D.exitSide=st.side;D.phase='exit';D.until=G.gt+2.5;setDoorClosedById(deconDoorId(D.exitSide),false);
+    toast('Descontaminação concluída: saída liberada.',1700);Snd.ok();return true;
+  }
+  return false;
+}
+function updateDecon(){
+  if(ACTIVE_MAP_ID!=='nexus'||!G.decon)return;
+  const D=G.decon;if(!(D.until>0)||G.gt<D.until)return;
+  if(D.phase==='entry'){
+    setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true);
+    if(!G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c))){resetDeconState();return}
+    D.phase='cleaning';D.until=G.gt+2.6;toast('Ciclo de descontaminação em andamento.',1400);return;
+  }
+  if(D.phase==='cleaning'){D.phase='ready';D.until=0;toast('Ciclo concluído. Use o botão interno para sair.',1800);return}
+  if(D.phase==='exit'){resetDeconState()}
+}
 function doInteract(a){
   if(G.player?.controlledBy||G.state!=='playing'||uiBusy()||!a)return;
   if(!G.player.alive&&a.type!=='freecomputer'&&!(G.role==='crew'&&a.type==='task')){toast('Morto não pode interagir com isso.');return;}
@@ -1538,6 +1874,7 @@ function doInteract(a){
   else if(a.type==='fix'&&!G.player.alive){toast('Morto não pode reparar sabotagens.');return;}
   else if(a.type==='fix')openTask(a);
   else if(a.type==='emergency')pressEmergency();
+  else if(a.type==='decon')useDeconButton(G.player,a.station);
   else if(a.type==='vent')enterVent(G.player,a.vent);
   else openTool(a);
 }
@@ -1613,7 +1950,6 @@ function openTool(a){
     const list=el('div'); list.id='adminList'; $('mbody').appendChild(list); G.adminCtx=cv.getContext('2d');
   }
 }
-const CAMS=[{name:'Cafeteria',tx:31,ty:8},{name:'Corredor Central',tx:32,ty:21},{name:'Elétrica',tx:26,ty:35},{name:'Armazém',tx:40,ty:35}];
 
 const GAMES={};
 
@@ -1764,6 +2100,51 @@ GAMES.fuel={
   }
 };
 
+
+/* --- organizar / arrastar itens --- */
+GAMES.arrange={
+  desc:()=>'Arraste cada item até a área com o mesmo símbolo.',
+  run(body,step,api){
+    const wrap=el('div');wrap.style.cssText='position:relative;width:min(440px,94vw);height:280px;background:#0a0c26;border:3px solid #10122a;border-radius:16px;overflow:hidden;touch-action:none';
+    const symbols=['◆','●','▲'],items=[],targets=[];
+    symbols.forEach((sym,i)=>{
+      const t=el('div','',sym);t.style.cssText=`position:absolute;right:22px;top:${28+i*82}px;width:70px;height:56px;border:3px dashed #8fdcff;border-radius:12px;display:grid;place-items:center;font-size:27px;color:#bdeeff;background:rgba(91,190,240,.12)`;
+      wrap.appendChild(t);targets.push(t);
+      const it=el('button','mg',sym);it.type='button';it.style.cssText=`position:absolute;left:24px;top:${30+i*82}px;width:62px;height:52px;font-size:25px;touch-action:none`;
+      wrap.appendChild(it);items.push(it);
+      let drag=false,ox=0,oy=0;
+      const move=e=>{if(!drag)return;const r=wrap.getBoundingClientRect();const x=clamp(e.clientX-r.left-ox,0,r.width-62),y=clamp(e.clientY-r.top-oy,0,r.height-52);it.style.left=x+'px';it.style.top=y+'px'};
+      it.addEventListener('pointerdown',e=>{if(it.disabled)return;drag=true;const r=it.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;it.setPointerCapture?.(e.pointerId);e.preventDefault()});
+      it.addEventListener('pointermove',move);
+      const end=e=>{if(!drag)return;drag=false;const a=it.getBoundingClientRect(),b=t.getBoundingClientRect();const ok=Math.hypot((a.left+a.width/2)-(b.left+b.width/2),(a.top+a.height/2)-(b.top+b.height/2))<48;if(ok){it.disabled=true;it.style.left=(wrap.clientWidth-92)+'px';it.style.top=(30+i*82)+'px';it.style.opacity=.7;Snd.tone(620+i*90,.1,'triangle',.07);if(items.every(x=>x.disabled))api.later(api.done,300)}else{it.style.left='24px';it.style.top=(30+i*82)+'px';Snd.err()}};
+      it.addEventListener('pointerup',end);it.addEventListener('pointercancel',end);
+    });
+    body.appendChild(wrap);
+  }
+};
+
+/* --- balancear controles --- */
+GAMES.balance={
+  desc:()=>'Ajuste os três controles até todos entrarem na faixa correta.',
+  run(body,step,api){
+    const target=[rand(25,75),rand(25,75),rand(25,75)],vals=[10,50,90],rows=[],stt=el('div','mstatus','Ajuste fino necessário');
+    const check=()=>{let ok=true;rows.forEach((o,i)=>{const d=Math.abs(vals[i]-target[i]);o.lab.textContent=`Canal ${i+1}: ${vals[i]} · alvo ${target[i]}`;o.inp.style.filter=d<=4?'brightness(1.25)':'none';if(d>4)ok=false});if(ok){stt.textContent='Parâmetros equilibrados';rows.forEach(o=>o.inp.disabled=true);api.later(api.done,350)}};
+    for(let i=0;i<3;i++){const w=el('div');w.style.cssText='width:min(390px,92%)';const lab=el('div','lab');const inp=document.createElement('input');inp.type='range';inp.min=0;inp.max=100;inp.value=vals[i];inp.className='range';inp.addEventListener('input',()=>{vals[i]=+inp.value;check()});w.append(lab,inp);body.appendChild(w);rows.push({lab,inp})}
+    body.appendChild(stt);check();
+  }
+};
+
+/* --- limpar pontos / esterilizar --- */
+GAMES.clean={
+  desc:()=>'Remova todos os pontos destacados tocando neles.',
+  run(body,step,api){
+    const area=el('div');area.style.cssText='position:relative;width:min(420px,92vw);height:260px;background:linear-gradient(180deg,#1b3150,#0b1830);border:3px solid #10122a;border-radius:16px;overflow:hidden';
+    let left=9;
+    for(let i=0;i<9;i++){const b=el('button','');b.type='button';const sz=26+rand(0,18);b.style.cssText=`position:absolute;left:${rand(20,350)}px;top:${rand(18,200)}px;width:${sz}px;height:${sz}px;border-radius:50%;border:3px solid #10122a;background:radial-gradient(circle at 35% 30%,#c5ffea,#5ad6aa 48%,#1b7469);box-shadow:0 0 16px rgba(97,255,213,.35)`;b.addEventListener('click',()=>{if(b.disabled)return;b.disabled=true;b.style.transform='scale(.2)';b.style.opacity='0';left--;Snd.tone(500+i*20,.07,'sine',.05);if(!left)api.later(api.done,300)});area.appendChild(b)}
+    body.appendChild(area);
+  }
+};
+
 /* --- estabilizar reator (emergência) --- */
 GAMES.stabilize={
   desc:()=>'Segure o botão para estabilizar o reator antes que o tempo acabe.',
@@ -1824,6 +2205,164 @@ GAMES.scan={
 };
 
 /* =====================================================================
+   NEXUS HQ — MINIGAMES ORIGINAIS
+   Cada equipamento possui uma interação própria; respostas e alvos mudam
+   a cada abertura para evitar tarefas meramente renomeadas.
+   ===================================================================== */
+const nxBox=(title='')=>{const w=el('div');w.style.cssText='width:min(470px,94vw);padding:14px;border:3px solid #10122a;border-radius:16px;background:linear-gradient(180deg,#13264a,#09152e);box-sizing:border-box';if(title)w.appendChild(el('div','mstatus',title));return w};
+const nxRange=(label,min,max,value)=>{const w=el('div');w.style.cssText='margin:10px 0';const l=el('div','lab');l.append(el('span','',label));const r=document.createElement('input');r.type='range';r.min=min;r.max=max;r.value=value;r.className='range';r.style.width='100%';w.append(l,r);return{w,r,l}};
+
+GAMES.nx_anomaly={
+  desc:()=>'Compare as leituras das amostras e selecione a única com comportamento anômalo.',
+  run(body,step,api){
+    const wrap=nxBox('Analisador de amostras');const grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:10px';
+    const bad=rand(0,5),anomMetric=rand(0,2),base=[rand(42,58),rand(38,62),rand(45,60)];
+    for(let i=0;i<6;i++){
+      const vals=base.map((v,j)=>clamp(v+rand(-5,5)+(i===bad&&j===anomMetric?rand(24,32):0),5,95));
+      const b=el('button','mg');b.style.cssText='min-height:92px;font-size:14px;line-height:1.25';b.innerHTML=`🧪 Amostra ${i+1}<br><small>pH ${vals[0]} · D ${vals[1]} · R ${vals[2]}</small>`;
+      b.addEventListener('click',()=>{if(!api.alive())return;if(i===bad){b.classList.add('done');wrap.querySelectorAll('button').forEach(x=>x.disabled=true);api.later(api.done,350)}else{Snd.err();b.classList.add('shake');api.later(()=>b.classList.remove('shake'),300)}});grid.appendChild(b)
+    }
+    wrap.appendChild(grid);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_weather={
+  desc:()=>'Colete os dados e ajuste pressão, vento e temperatura às faixas indicadas antes de enviar.',
+  run(body,step,api){
+    const wrap=nxBox('☁️ Estação atmosférica');const collect=el('button','big','Iniciar coleta');const st=el('div','mstatus','Sensores aguardando');wrap.append(collect,st);body.appendChild(wrap);
+    collect.addEventListener('click',()=>{collect.disabled=true;let p=0;const pb=el('div','pbar'),bar=el('i');pb.appendChild(bar);wrap.insertBefore(pb,st);const tick=()=>{if(!api.alive())return;p+=8;bar.style.width=p+'%';st.textContent=`Coletando dados... ${Math.min(100,p)}%`;if(p<100)api.later(tick,70);else setup()};tick()});
+    function setup(){st.textContent='Ajuste os três sensores';const targets=[rand(30,70),rand(25,75),rand(20,80)],vals=[50,50,50],names=['Pressão','Vento','Temperatura'],rows=[];targets.forEach((t,i)=>{const o=nxRange(`${names[i]} · alvo ${t}±4`,0,100,vals[i]);o.r.addEventListener('input',()=>{vals[i]=+o.r.value;check()});wrap.insertBefore(o.w,st);rows.push(o)});const send=el('button','big','Enviar dados');send.disabled=true;send.addEventListener('click',()=>api.done());wrap.appendChild(send);function check(){const ok=vals.every((v,i)=>Math.abs(v-targets[i])<=4);send.disabled=!ok;st.textContent=ok?'Leituras estáveis — pronto para enviar':'Ajuste os sensores às faixas indicadas'}}
+  }
+};
+
+GAMES.nx_gases={
+  desc:()=>'Regule as válvulas de O₂, CO₂ e nitrogênio e aplique somente quando todos estiverem na faixa correta.',
+  run(body,step,api){
+    const wrap=nxBox('🌱 Misturador de gases'),names=['O₂','CO₂','N₂'],targets=[rand(55,72),rand(12,28),rand(30,48)],vals=[35,50,65],st=el('div','mstatus','Mistura fora do padrão');
+    names.forEach((n,i)=>{const o=nxRange(`${n} · faixa ${targets[i]-3}–${targets[i]+3}`,0,100,vals[i]);o.r.addEventListener('input',()=>{vals[i]=+o.r.value;check()});wrap.appendChild(o.w)});const apply=el('button','big','Aplicar mistura');apply.disabled=true;apply.addEventListener('click',()=>api.done());wrap.append(st,apply);body.appendChild(wrap);function check(){const ok=vals.every((v,i)=>Math.abs(v-targets[i])<=3);apply.disabled=!ok;st.textContent=ok?'Mistura respirável':'Mistura fora do padrão'}
+  }
+};
+
+GAMES.nx_core={
+  desc:()=>'Gire os anéis condutores até todas as fendas formarem um único circuito energético.',
+  run(body,step,api){
+    const wrap=nxBox('⚛️ Núcleo Nexus'),ring=el('div');ring.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0';const rot=Array.from({length:4},()=>rand(1,3)),btns=[];const st=el('div','mstatus','Circuito interrompido');
+    const paint=()=>btns.forEach((b,i)=>{b.textContent=['│','╲','─','╱'][rot[i]];b.style.transform=`rotate(${rot[i]*4}deg)`});
+    for(let i=0;i<4;i++){const b=el('button','mg');b.style.cssText='height:82px;font-size:42px';b.addEventListener('click',()=>{rot[i]=(rot[i]+1)%4;paint();Snd.click();if(rot.every(v=>v===0)){st.textContent='Circuito completo';btns.forEach(x=>x.disabled=true);api.later(api.done,400)}});btns.push(b);ring.appendChild(b)}paint();wrap.append(ring,st);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_circuit={
+  desc:()=>'Observe a sequência dos disjuntores e religue o quadro na mesma ordem.',
+  run(body,step,api){
+    const wrap=nxBox('⚡ Quadro de distribuição'),seq=shuffle([0,1,2,3,4,5]).slice(0,4),grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0';const bs=[],st=el('div','mstatus','Memorize a sequência');let pos=0,locked=true;
+    for(let i=0;i<6;i++){const b=el('button','mg',`Disjuntor ${i+1}`);b.style.minHeight='60px';b.addEventListener('click',()=>{if(locked||!api.alive())return;if(i===seq[pos]){b.classList.add('done');pos++;Snd.tone(480+pos*60,.08,'triangle',.05);if(pos===seq.length){locked=true;st.textContent='Circuito energizado';api.later(api.done,350)}}else{Snd.err();pos=0;bs.forEach(x=>x.classList.remove('done'));st.textContent='Sequência incorreta — tente novamente'}});bs.push(b);grid.appendChild(b)}wrap.append(grid,st);body.appendChild(wrap);seq.forEach((v,k)=>api.later(()=>{bs.forEach(x=>x.classList.remove('on'));bs[v].classList.add('on');Snd.tone(360+v*45,.09,'sine',.04);if(k===seq.length-1)api.later(()=>{bs.forEach(x=>x.classList.remove('on'));locked=false;st.textContent='Repita a sequência'},450)},350+k*520))
+  }
+};
+
+GAMES.nx_frequency={
+  desc:()=>'Ajuste frequência e amplitude para fazer o sinal vermelho coincidir com o sinal de referência.',
+  run(body,step,api){
+    const wrap=nxBox('📡 Sintonizador de transmissão'),tf=rand(18,48)/10,ta=rand(28,62),cv=document.createElement('canvas');cv.width=430;cv.height=160;cv.style.cssText='width:100%;background:#071124;border-radius:12px';const c=cv.getContext('2d');let f=1.5,a=25;const F=nxRange('Frequência',1,6,f),A=nxRange('Amplitude',10,75,a),st=el('div','mstatus','Sinal desalinhado');
+    const wave=(ff,aa,col,dash)=>{c.beginPath();c.strokeStyle=col;c.lineWidth=3;c.setLineDash(dash);for(let x=0;x<=430;x+=3){const y=80+aa*Math.sin(x/430*Math.PI*2*ff);x?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();c.setLineDash([])};const draw=()=>{c.clearRect(0,0,430,160);wave(tf,ta,'rgba(255,255,255,.65)',[7,5]);wave(f,a,'#ff6677',[]);const ok=Math.abs(f-tf)<=.12&&Math.abs(a-ta)<=3;st.textContent=ok?'Frequência sincronizada':'Sinal desalinhado';if(ok){F.r.disabled=A.r.disabled=true;api.later(api.done,500)}};F.r.step=.1;F.r.addEventListener('input',()=>{f=+F.r.value;draw()});A.r.addEventListener('input',()=>{a=+A.r.value;draw()});wrap.append(cv,F.w,A.w,st);body.appendChild(wrap);draw()
+  }
+};
+
+GAMES.nx_landing={
+  desc:()=>'Trave os suportes na ordem indicada e pressione o atuador até a pressão entrar na zona segura.',
+  run(body,step,api){
+    const wrap=nxBox('🚀 Suportes de pouso'),order=shuffle([0,1,2,3]),pos=0,grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0';const st=el('div','mstatus',`Ordem: ${order.map(x=>x+1).join(' → ')}`),pressure=nxRange('Pressão de trava',0,100,0);pressure.r.disabled=true;const bs=[];
+    for(let i=0;i<4;i++){const b=el('button','mg',`Pé ${i+1}`);b.addEventListener('click',()=>{if(i!==order[pos]){Snd.err();pos=0;bs.forEach(x=>x.classList.remove('done'));return}b.classList.add('done');b.disabled=true;pos++;if(pos===4){pressure.r.disabled=false;st.textContent='Ajuste a pressão entre 72 e 82'}});bs.push(b);grid.appendChild(b)}pressure.r.addEventListener('input',()=>{const v=+pressure.r.value;if(v>=72&&v<=82){pressure.r.disabled=true;st.textContent='Suportes travados';api.later(api.done,350)}});wrap.append(st,grid,pressure.w);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_landing_fuel={
+  desc:()=>'Abra a válvula, abasteça até a faixa indicada e sele o módulo sem exceder a pressão.',
+  run(body,step,api){
+    const wrap=nxBox('⛽ Módulo de combustível'),target=rand(68,86),g=nxRange(`Carga alvo ${target}±3`,0,100,0),seal=el('button','big','Selar módulo'),st=el('div','mstatus','Válvula aberta');seal.disabled=true;g.r.addEventListener('input',()=>{const v=+g.r.value;seal.disabled=Math.abs(v-target)>3;st.textContent=seal.disabled?'Ajuste a carga':'Carga correta — sele o módulo'});seal.addEventListener('click',()=>api.done());wrap.append(g.w,st,seal);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_hull={
+  desc:()=>'Passe o scanner pelos setores e sele a microfissura indicada pelas leituras.',
+  run(body,step,api){
+    const wrap=nxBox('Scanner estrutural'),bad=rand(0,7),grid=el('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px';for(let i=0;i<8;i++){const b=el('button','mg',`Setor ${i+1}\n${i===bad?'Δ +17':'Δ '+rand(-3,4)}`);b.style.whiteSpace='pre-line';b.addEventListener('click',()=>{if(i===bad){b.classList.add('done');api.later(api.done,300)}else{Snd.err();b.classList.add('shake');api.later(()=>b.classList.remove('shake'),250)}});grid.appendChild(b)}wrap.appendChild(grid);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_cargo={
+  desc:()=>'Arraste cada carga ao compartimento da mesma categoria.',
+  run(body,step,api){
+    const wrap=nxBox('📦 Classificador de carga'),area=el('div');area.style.cssText='position:relative;height:285px;margin-top:8px;background:#081126;border-radius:12px;overflow:hidden;touch-action:none';const cats=[['A','#75d6ff'],['B','#f5c935'],['C','#7fe0a7']],left=6;
+    cats.forEach(([k,col],i)=>{const bin=el('div','',`Compartimento ${k}`);bin.dataset.cat=k;bin.style.cssText=`position:absolute;right:10px;top:${10+i*90}px;width:125px;height:72px;border:3px dashed ${col};display:grid;place-items:center;border-radius:10px;color:${col}`;area.appendChild(bin)});
+    for(let i=0;i<6;i++){const cat=cats[i%3][0],b=el('button','mg',`Caixa ${cat}`);b.dataset.cat=cat;b.style.cssText=`position:absolute;left:${12+rand(0,100)}px;top:${10+i*42}px;width:92px;height:38px;touch-action:none`;let drag=false,ox=0,oy=0;b.addEventListener('pointerdown',e=>{drag=true;const r=b.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;b.setPointerCapture?.(e.pointerId)});b.addEventListener('pointermove',e=>{if(!drag)return;const r=area.getBoundingClientRect();b.style.left=clamp(e.clientX-r.left-ox,0,r.width-92)+'px';b.style.top=clamp(e.clientY-r.top-oy,0,r.height-38)+'px'});const end=()=>{if(!drag)return;drag=false;const br=b.getBoundingClientRect(),bin=[...area.children].find(x=>x.dataset?.cat===cat),tr=bin.getBoundingClientRect();if(br.left<tr.right&&br.right>tr.left&&br.top<tr.bottom&&br.bottom>tr.top){b.disabled=true;b.style.opacity=.35;left--;if(!left)api.later(api.done,300)}else{Snd.err();b.style.left='12px'}};b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);area.appendChild(b)}wrap.appendChild(area);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_medscan={
+  desc:()=>'Posicione os sensores nos pontos indicados e mantenha o sinal dentro da faixa estável.',
+  run(body,step,api){
+    const wrap=nxBox('🩺 Scanner biométrico'),sensor=el('div');sensor.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0';let placed=0;shuffle([0,1,2,3,4,5]).forEach((n,i)=>{const isSensor=n<3,b=el('button','mg',isSensor?'◎':'·');b.style.height='55px';b.addEventListener('click',()=>{if(!isSensor||b.disabled)return;b.disabled=true;b.classList.add('done');placed++;if(placed===3)stabilize()});sensor.appendChild(b)});const st=el('div','mstatus','Posicione 3 sensores');wrap.append(sensor,st);body.appendChild(wrap);function stabilize(){st.textContent='Mantenha o pulso na faixa verde por 1,5 s';const o=nxRange('Pulso',0,100,20);wrap.insertBefore(o.w,st);let good=0,last=performance.now();const target=rand(45,65);o.l.firstChild.textContent=`Pulso · faixa ${target-5}–${target+5}`;const tick=now=>{if(!api.alive())return;const dt=(now-last)/1000;last=now;good=(Math.abs(+o.r.value-target)<=5)?good+dt:0;st.textContent=`Estabilidade ${Math.min(100,Math.round(good/1.5*100))}%`;if(good>=1.5)api.done();else requestAnimationFrame(tick)};requestAnimationFrame(tick)}}
+};
+
+GAMES.nx_records={
+  desc:()=>'Encontre o registro incompatível ou duplicado no conjunto administrativo.',
+  run(body,step,api){
+    const wrap=nxBox('💻 Auditoria de registros'),bad=rand(0,5),names=['AX-14','BN-22','CR-09','DX-31','EV-18','FQ-27'],grid=el('div');grid.style.cssText='display:grid;gap:7px;margin-top:10px';for(let i=0;i<6;i++){const normal=`${names[i]} · setor ${i%3+1} · nível ${2+i%2}`;const text=i===bad?`${names[(i+1)%6]} · setor 9 · nível ${7+rand(1,2)}`:normal;const b=el('button','mg',text);b.style.textAlign='left';b.addEventListener('click',()=>{if(i===bad){b.classList.add('done');api.later(api.done,300)}else{Snd.err();b.classList.add('shake');api.later(()=>b.classList.remove('shake'),260)}});grid.appendChild(b)}wrap.appendChild(grid);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_lenses={
+  desc:()=>'Gire as três lentes até o feixe atingir o receptor.',
+  run(body,step,api){
+    const wrap=nxBox('🔭 Banco óptico'),targets=[rand(1,3),rand(0,3),rand(1,3)],vals=[0,0,0],cv=document.createElement('canvas');cv.width=430;cv.height=135;cv.style.cssText='width:100%;background:#061126;border-radius:12px';const c=cv.getContext('2d'),row=el('div');row.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px';const bs=[];const draw=()=>{c.clearRect(0,0,430,135);c.strokeStyle='#78dcff';c.lineWidth=5;c.beginPath();c.moveTo(20,68);let y=68;for(let i=0;i<3;i++){y+=((vals[i]-targets[i])*15);c.lineTo(120+i*105,y);c.fillStyle='#d9f7ff';c.fillRect(112+i*105,28,8,80)}c.lineTo(410,y);c.stroke();c.fillStyle=Math.abs(y-68)<5?'#7dffaf':'#ff6a79';c.beginPath();c.arc(412,68,10,0,6.283);c.fill()};for(let i=0;i<3;i++){const b=el('button','mg','Lente 0°');b.addEventListener('click',()=>{vals[i]=(vals[i]+1)%4;b.textContent=`Lente ${vals[i]*45}°`;draw();if(vals.every((v,j)=>v===targets[j])){bs.forEach(x=>x.disabled=true);api.later(api.done,350)}});bs.push(b);row.appendChild(b)}wrap.append(cv,row);body.appendChild(wrap);draw()
+  }
+};
+
+GAMES.nx_supplies={
+  desc:()=>'Classifique os suprimentos antes que a esteira avance.',
+  run(body,step,api){
+    const wrap=nxBox('🍽️ Esteira da Cafeteria'),items=[['🥫','Alimento'],['🍞','Alimento'],['🍽️','Bandeja'],['🥣','Bandeja'],['🧽','Limpeza'],['🧴','Limpeza'],['🥤','Alimento'],['🧹','Limpeza']],queue=shuffle(items.slice()),card=el('div','codeShow',''),st=el('div','mstatus','0 / 8 classificados'),row=el('div');row.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:8px';let i=0;['Alimento','Bandeja','Limpeza'].forEach(cat=>{const b=el('button','mg',cat);b.addEventListener('click',()=>pick(cat));row.appendChild(b)});wrap.append(card,row,st);body.appendChild(wrap);function show(){card.textContent=queue[i][0]}function pick(cat){if(cat===queue[i][1]){i++;st.textContent=`${i} / ${queue.length} classificados`;if(i>=queue.length){api.done();return}show()}else{Snd.err();st.textContent='Categoria incorreta — tente de novo'}}show()
+  }
+};
+
+GAMES.nx_decon={
+  desc:()=>'Ative pressão, temperatura e esterilização somente quando cada indicador entrar na zona segura.',
+  run(body,step,api){
+    const wrap=nxBox('🧼 Controle de descontaminação'),names=['Pressão','Temperatura','Esterilização'],done=[false,false,false],bars=[];names.forEach((n,i)=>{const line=el('div');line.style.cssText='display:grid;grid-template-columns:110px 1fr 92px;gap:8px;align-items:center;margin:10px 0';const lab=el('span','',n),pb=el('div','pbar'),bar=el('i');pb.appendChild(bar);const b=el('button','chip','Ativar');b.addEventListener('click',()=>{const v=+bar.dataset.v;if(v>=43&&v<=57){done[i]=true;b.disabled=true;b.textContent='✓';if(done.every(Boolean))api.later(api.done,350)}else Snd.err()});line.append(lab,pb,b);wrap.appendChild(line);bars.push(bar)});body.appendChild(wrap);const start=performance.now();const tick=now=>{if(!api.alive()||done.every(Boolean))return;bars.forEach((b,i)=>{if(done[i])return;const v=50+45*Math.sin((now-start)/550+i*1.8);b.dataset.v=v;b.style.width=clamp(v,0,100)+'%';b.style.background=(v>=43&&v<=57)?'#64e7aa':'var(--coral)'});requestAnimationFrame(tick)};requestAnimationFrame(tick)
+  }
+};
+
+GAMES.nx_sterilize={
+  desc:()=>'Passe os instrumentos pelas etapas de lavagem, UV e selagem na ordem correta.',
+  run(body,step,api){
+    const wrap=nxBox('Esterilizador'),stages=['Lavagem','UV','Selagem'],pos=0,st=el('div','mstatus','Etapa 1: Lavagem'),row=el('div');row.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:10px';shuffle(stages.slice()).forEach(name=>{const b=el('button','mg',name);b.addEventListener('click',()=>{if(name===stages[pos]){pos++;b.disabled=true;b.classList.add('done');if(pos===3)api.later(api.done,350);else st.textContent=`Etapa ${pos+1}: ${stages[pos]}`}else Snd.err()});row.appendChild(b)});wrap.append(st,row);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_prune={
+  desc:()=>'Remova apenas as folhas secas. Cortar folhas saudáveis reinicia a poda.',
+  run(body,step,api){
+    const wrap=nxBox('🌿 Bancada de cultivo'),area=el('div');area.style.cssText='position:relative;height:250px;background:#0c2b25;border-radius:12px;overflow:hidden';let dry=5;for(let i=0;i<12;i++){const bad=i<5,b=el('button','',bad?'🍂':'🌿');b.style.cssText=`position:absolute;left:${rand(12,390)}px;top:${rand(10,195)}px;font-size:${rand(25,37)}px;background:transparent;border:0`;b.addEventListener('click',()=>{if(b.disabled)return;if(!bad){Snd.err();area.querySelectorAll('button').forEach(x=>x.style.opacity=1);return}b.disabled=true;b.style.opacity=.15;dry--;if(!dry)api.later(api.done,300)});area.appendChild(b)}wrap.appendChild(area);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_mix={
+  desc:()=>'Dose os três compostos exatamente nas quantidades da receita.',
+  run(body,step,api){
+    const wrap=nxBox('🧪 Misturador químico'),target=[rand(2,5),rand(2,5),rand(2,5)],vals=[0,0,0],names=['A','B','C'],st=el('div','mstatus',`Receita: A${target[0]} · B${target[1]} · C${target[2]}`),row=el('div');row.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0';names.forEach((n,i)=>{const b=el('button','mg',`${n}: 0`);b.addEventListener('click',()=>{vals[i]=(vals[i]+1)%7;b.textContent=`${n}: ${vals[i]}`});row.appendChild(b)});const mix=el('button','big','Misturar');mix.addEventListener('click',()=>{if(vals.every((v,i)=>v===target[i]))api.done();else{Snd.err();st.textContent='Proporção incorreta — ajuste a receita'}});wrap.append(st,row,mix);body.appendChild(wrap)
+  }
+};
+
+GAMES.nx_coolant={
+  desc:()=>'Equalize a temperatura da nova célula antes de encaixá-la no reator.',
+  run(body,step,api){
+    const wrap=nxBox('❄️ Célula de resfriamento'),target=rand(35,65),o=nxRange(`Temperatura alvo ${target}±2`,0,100,80),insert=el('button','big','Encaixar célula'),st=el('div','mstatus','Resfriando');insert.disabled=true;o.r.addEventListener('input',()=>{insert.disabled=Math.abs(+o.r.value-target)>2;st.textContent=insert.disabled?'Ajuste a temperatura':'Temperatura estabilizada'});insert.addEventListener('click',()=>api.done());wrap.append(o.w,st,insert);body.appendChild(wrap)
+  }
+};
+
+
+/* =====================================================================
    FIM DE PARTIDA / CICLO DO JOGO
    ===================================================================== */
 function checkEnd(){
@@ -1860,15 +2399,30 @@ function endGame(winner,msg){
   G.endT=0; updateSabUI();
 }
 function closeModalSilent(){G.tok++;G.mini=null;G.tool=null;$('modal').hidden=true;$('mbody').innerHTML=''}
-function cafePoints(n){
-  const pts=[]; let tries=0;
-  while(pts.length<n&&tries++<2000){
-    const x=rand(23,40), y=rand(3,11); if(!walk[y*COLS+x])continue;
-    if(pts.some(p=>Math.abs(p.x-x)+Math.abs(p.y-y)<3))continue; pts.push({x,y});
+function roomSpawnPoints(roomId,n){
+  const r=ROOM_BY_ID[roomId]||ROOM_BY_ID.cafe||ROOM_DEFS[0],pts=[];
+  const candidates=[];
+  for(let y=r.y+1;y<r.y+r.h-1;y++)for(let x=r.x+1;x<r.x+r.w-1;x++)if(walk[y*COLS+x])candidates.push({x,y});
+  // Embaralha uma lista já validada, evitando fallback no centro bloqueado por móveis.
+  shuffle(candidates);
+  for(const pt of candidates){
+    if(pts.length>=n)break;
+    if(pts.some(p=>Math.abs(p.x-pt.x)+Math.abs(p.y-pt.y)<3))continue;
+    pts.push(pt);
   }
-  while(pts.length<n)pts.push({x:rand(23,40),y:11});
+  // Se a sala estiver muito cheia, reutiliza apenas tiles caminháveis distintos antes de sobrepor alguém.
+  if(pts.length<n)for(const pt of candidates){if(pts.length>=n)break;if(!pts.some(p=>p.x===pt.x&&p.y===pt.y))pts.push(pt)}
+  if(!pts.length){
+    const safe=nearestWalkablePosition((r.x+r.w/2)*TILE,(r.y+r.h/2)*TILE);
+    if(safe)pts.push({x:clamp(Math.floor(safe.x/TILE),0,COLS-1),y:clamp(Math.floor((safe.y+OFF_Y)/TILE),0,ROWS-1)});
+  }
+  if(!pts.length)pts.push({x:clamp(Math.round(SPAWN.x),0,COLS-1),y:clamp(Math.round(SPAWN.y),0,ROWS-1)});
+  while(pts.length<n)pts.push({...pts[pts.length%pts.length]});
   return pts;
 }
+function startSpawnPoints(n){return roomSpawnPoints(ACTIVE_MAP_ID==='nexus'?'ship':'cafe',n)}
+function meetingSpawnPoints(n){return roomSpawnPoints('cafe',n)}
+function cafePoints(n){return meetingSpawnPoints(n)}
 function placeChar(c,pt){c.x=pt.x*TILE+TILE/2;c.y=pt.y*TILE+TILE/2-OFF_Y;c.moving=false;c.face=Math.random()<.5?1:-1}
 let OFFLINE_BOT_ROSTER={owner:null,names:[]};
 function drawImpostors(participants,count){
@@ -1915,8 +2469,10 @@ function freePlayPointForRoom(r){
   }
   return {x:cx,y:cy};
 }
-function startFreePlay(){
-  Snd.init();
+function startFreePlay(mapId=SELECTED_MAP_ID){
+  Snd.init();closeModalSilent();
+  if(!MAP_LIBRARY[mapId])mapId='nave';
+  SELECTED_MAP_ID=mapId;
   G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';
   if(typeof NET!=='undefined'){
     if(NET.inRoom)netLeaveRoom();
@@ -1924,6 +2480,14 @@ function startFreePlay(){
   }
   G.freePlay=true;
   newGame(false);
+}
+function openFreePlayMapPicker(){
+  Snd.init();
+  showModal('Partida Livre — escolha o mapa','Selecione onde deseja jogar. A partida começa assim que você escolher um mapa.');
+  const grid=el('section','mapSelect freePlayMapSelect');
+  const current=MAP_LIBRARY[SELECTED_MAP_ID]?SELECTED_MAP_ID:'nave';
+  for(const map of Object.values(MAP_LIBRARY))grid.appendChild(createMapCard(map,current,false,()=>startFreePlay(map.id)));
+  $('mbody').appendChild(grid);
 }
 function freePlayFunctionLabel(ch){
   const base=ch.function?({locator:'Localizador',sheriff:'Xerife',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso'}[ch.function]||ch.function):(ch.role==='imp'?'Infiltrado':'Tripulante');
@@ -2059,7 +2623,8 @@ function openFreePlayComputer(){
 
 function newGame(prepareOnline=false){
   closeModalSilent(); $('end').hidden=true; $('menu').hidden=true; $('meet').hidden=true; $('hud').hidden=false;
-  TID=0; doors.forEach(d=>d.closed=false); rebuildWalk(); G.walkVer++;
+  activateMapData(SELECTED_MAP_ID,true);G.mapId=ACTIVE_MAP_ID;G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
+  TID=0; resetMapDoors();
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); G.killT=null; $('ventPanel').hidden=true; VENT_DEFS.forEach(v=>v.flash=0);
   G.over=false; G.followTarget=null; G.tasks=[]; G.pin=null; G.bodies=[]; G.deadPets=[]; G.killSplashes=[]; G.spectralSmokes=[];G.spectralSmokeSeq=0; G.instructorTrails=[];G.instructorTrailSeq=0;G.instructorCd=0;G.instructorTargetId=null;INSTRUCTOR_SEEN_TRAILS.clear();SPECTRAL_SEEN_SMOKES.clear(); G.M=null; G.spec=null; G.fx=0; G.fixT=0; G.gt=0;
   G.sab={lights:0,reactor:0,comms:0,doors:0,cd:CFG.sab}; G.parasiteInfections={}; G.killCd=Math.min(CFG.kill,15); G.sheriffCd=0;G.sheriffT=null;G.delayedCd=0;G.delayedT=null;G.delayedMarks={}; G.meetCd=CFG.meet; G.cfgOpen=false; $('settings').hidden=true; G.vision=G.visionTarget=CFG.crewVision;
@@ -2117,9 +2682,9 @@ function newGame(prepareOnline=false){
   G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.parasite=G.player.function==='parasite';G.paramedic=G.player.function==='paramedic';G.paramedicCd=G.player.paramedicCd||0;G.paramedicT=null;G.sheriffCd=0;G.delayedCd=0;G.cleanerCd=0;G.cleanerUses=G.cleaner?CFG.cleanerUses:0;G.cleanerT=null;G.delayedT=null;G.delayedMarks={}; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
   if(G.freePlay){
-    placeChar(p,{x:SPAWN.x,y:SPAWN.y});
+    const freeSpawn=startSpawnPoints(1)[0];placeChar(p,freeSpawn||{x:SPAWN.x,y:SPAWN.y});
     G.chars.filter(c=>c.freeDummy).forEach(c=>placeChar(c,freePlayPointForRoom(ROOM_BY_ID[c.freeRoom])));
-  }else{const pts=cafePoints(G.chars.length); G.chars.forEach((c,i)=>placeChar(c,pts[i]))}
+  }else{const pts=startSpawnPoints(G.chars.length); G.chars.forEach((c,i)=>placeChar(c,pts[i]))}
   // As Tarefas Comuns são sorteadas uma única vez por partida e copiadas para todos.
   // Médias e Longas são sorteadas individualmente, variando entre jogadores e partidas.
   const commonTaskTemplates=taskTemplateSelection(TASK_POOLS.common,CFG.commonTasks);
@@ -2158,7 +2723,8 @@ function toMenu(){
   G.M=null; G.chars=[]; G.bodies=[]; G.deadPets=[]; G.killSplashes=[]; G.spectralSmokes=[];G.spectralSmokeSeq=0; G.instructorTrails=[];G.instructorTrailSeq=0;G.instructorCd=0;G.instructorTargetId=null; G.tasks=[]; G.pin=null; G.spec=null; G.imp=null; G.player=null; G.action=null; G.killT=null;
   G.fx=0; G.fixT=0; G.gt=0; G.killCd=0; G.meetCd=0; G.role='crew'; G.ghostMode='tasks'; G.freePlay=false; G.over=false; G.camCtx=null; G.adminCtx=null;
   G.sab={lights:0,reactor:0,comms:0,doors:0,cd:0}; TID=0;
-  doors.forEach(d=>d.closed=false); rebuildWalk(); G.walkVer++;
+  resetMapDoors();
+  G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
   joy.x=joy.y=0; keys.clear(); clearTimeout(toastT); $('toast').classList.remove('on');
   G.state='menu'; updateSabUI();
 }
@@ -2232,6 +2798,7 @@ function drawEmergencyButton(c){
 }
 function roomForWorldPoint(x,y){return ROOM_DEFS.find(r=>x>=r.x*TILE&&x<=(r.x+r.w)*TILE&&y>=r.y*TILE&&y<=(r.y+r.h)*TILE)||null}
 function roomCullOpacity(room,viewer){
+  if(ACTIVE_MAP_ID==='nexus')return 1;
   if(!room||!viewer||!Number.isFinite(+viewer.x)||!Number.isFinite(+viewer.y))return 1;
   const left=room.x*TILE,top=room.y*TILE,right=(room.x+room.w)*TILE,bottom=(room.y+room.h)*TILE;
   const nx=clamp(viewer.x,left,right),ny=clamp(viewer.y,top,bottom),d=Math.hypot(viewer.x-nx,viewer.y-ny);
@@ -2250,8 +2817,23 @@ function drawRoomStaticLayers(c,cx,cy,vw,vh,viewer){
   });
   return opacity;
 }
+let NEXUS_CLOUD_TILE=null;
+function nexusCloudTile(){
+  if(NEXUS_CLOUD_TILE)return NEXUS_CLOUD_TILE;
+  const cv=document.createElement('canvas');cv.width=720;cv.height=360;const c=cv.getContext('2d');
+  const clouds=[[105,78,1],[402,62,.86],[612,226,1.14],[252,258,.76]];
+  // Nuvens com sombra suave deixam o exterior da Nave legível sem clarear a iluminação interna.
+  c.fillStyle='rgba(92,126,154,.22)';for(const [x,y,sc] of clouds){c.beginPath();c.ellipse(x+6,y+15,96*sc,36*sc,0,0,6.283);c.ellipse(x+70*sc,y+20,74*sc,29*sc,0,0,6.283);c.ellipse(x-60*sc,y+23,62*sc,26*sc,0,0,6.283);c.fill()}
+  c.fillStyle='#f7fcff';c.globalAlpha=.84;for(const [x,y,sc] of clouds){c.beginPath();c.ellipse(x,y,92*sc,34*sc,0,0,6.283);c.ellipse(x+66*sc,y+6,72*sc,27*sc,0,0,6.283);c.ellipse(x-62*sc,y+10,60*sc,24*sc,0,0,6.283);c.fill()}
+  NEXUS_CLOUD_TILE=cv;return cv;
+}
+function drawNexusSky(c,cx,cy,vw,vh){
+  const g=c.createLinearGradient(0,cy,0,cy+vh);g.addColorStop(0,'#91c9e6');g.addColorStop(.55,'#c2e7f4');g.addColorStop(1,'#f1f9fc');c.fillStyle=g;c.fillRect(cx,cy,vw,vh);
+  const tile=nexusCloudTile(),drift=(G.t*13)%tile.width,startX=Math.floor((cx+drift)/tile.width)*tile.width-drift-tile.width,startY=Math.floor(cy/tile.height)*tile.height-tile.height;
+  c.save();c.globalAlpha=.78;for(let y=startY;y<cy+vh+tile.height;y+=tile.height)for(let x=startX;x<cx+vw+tile.width;x+=tile.width)c.drawImage(tile,x,y);c.restore();
+}
 function drawWorld(c,cx,cy,vw,vh,o){
-  c.fillStyle='#070816'; c.fillRect(cx,cy,vw,vh);
+  if(ACTIVE_MAP_ID==='nexus')drawNexusSky(c,cx,cy,vw,vh);else{c.fillStyle='#070816'; c.fillRect(cx,cy,vw,vh);}
   {  // desenha só a parte visível do mapa pré-renderizado (antes era a imagem inteira 3072x2208 a cada quadro)
     const sx=clamp(Math.floor(cx)-1,0,WORLD_W), sy=clamp(Math.floor(cy)-1,0,WORLD_H);
     const sw=Math.min(WORLD_W-sx,Math.ceil(vw)+3), sh=Math.min(WORLD_H-sy,Math.ceil(vh)+3);
@@ -2359,7 +2941,7 @@ function render(){
   const R=(G.vision*(G.sab.lights>0&&G.role==='crew'?0.34:1))*ZOOM/FOG_DIV;
   // Máscara de baixa resolução. Só células fora do piso (paredes reais do mapa)
   // bloqueiam a luz: decoração, caixas, mesas e estações não geram sombras.
-  fogC.globalCompositeOperation='source-over'; fogC.fillStyle='rgba(2,3,14,.94)'; fogC.fillRect(0,0,fogCv.width,fogCv.height);
+  fogC.globalCompositeOperation='source-over';const nexusAmbient=ACTIVE_MAP_ID==='nexus',lightsDown=(G.sab.lights>0&&G.role==='crew');fogC.fillStyle=nexusAmbient?(lightsDown?'rgba(4,8,18,.72)':'rgba(8,14,26,.43)'):'rgba(2,3,14,.94)'; fogC.fillRect(0,0,fogCv.width,fogCv.height);
   const rays=144, maxR=G.vision*(G.sab.lights>0&&G.role==='crew'?0.34:1);
   const traceWallLimitedLight=(wx,wy,radius,rayCount,screenX,screenY)=>{
     fogC.beginPath(); fogC.moveTo(screenX,screenY);
@@ -2391,7 +2973,7 @@ function render(){
     fogC.restore();
   };
   fogC.globalCompositeOperation='destination-out';
-  drawWallLimitedLight(f.x,f.y,maxR,rays,sx,sy,1,.86);
+  drawWallLimitedLight(f.x,f.y,maxR,rays,sx,sy,1,.74);
   // Somente a lanterna do personagem observado pelo jogador é desenhada.
   // As lanternas dos NPCs não são renderizadas aqui; seus dados e a lógica de IA/LOS permanecem intactos.
   fogC.globalCompositeOperation='source-over';
@@ -2436,10 +3018,44 @@ function closeMap(){
   G.mapOpen=false; document.body.classList.remove('observer-map-lock'); $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
 const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','4–7 jogadores: 1; 8–9 jogadores: 1–2; 10 ou mais: 1–3',''],['actionDistance','Distância para ações','Alcance comum para matar, localizar, trilhar e outras habilidades de proximidade',''],['commonTasks','Tarefas Comuns','Quantidade de tarefas simples iguais para todos os Tripulantes',''],['mediumTasks','Tarefas Médias','Quantidade de tarefas intermediárias sorteadas para cada jogador',''],['longTasks','Tarefas Longas','Quantidade de tarefas demoradas sorteadas para cada jogador',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Cooldown do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['obsChance','Chance de existir Observador','Porcentagem de chance de a função Observador existir na partida','%'],['obsMax','Quantidade de Observadores','Máximo de Observadores atribuídos aos Tripulantes',''],['instructorChance','Chance de Instrutores','Chance de um Tripulante morto despertar como Instrutor','%'],['instructorMax','Quantidade de Instrutores','Máximo de Instrutores por partida, limitado ao máximo de jogadores',''],['instructorCooldown','Recarga da trilha','Tempo até poder criar outra trilha','s'],['instructorDuration','Duração da trilha','Tempo que a trilha branca permanece visível','s'],['instructorMaxDistance','Distância máxima do jogador até o caminho','Comprimento máximo do percurso caminhável entre o jogador selecionado e o ponto marcado','px'],['cleanerChance','Chance de existir Faxineiro','Porcentagem de chance de a função Faxineiro existir na partida','%'],['cleanerMax','Quantidade de Faxineiros','Máximo de Faxineiros, limitado aos Infiltrados',''],['cleanerCooldown','Tempo de recarga para limpar','Tempo entre limpezas de corpos','s'],['cleanerUses','Usos da habilidade de limpar','Quantidade máxima de corpos que cada Faxineiro pode limpar',''],['parasiteChance','Chance de Parasitas na partida','Chance de a função Parasita existir na partida','%'],['parasiteMax','Quantidade de Parasitas','Máximo de Parasitas, limitado aos Infiltrados e a 3',''],['spectralChance','Chance de Espectrais','Chance de a função Espectral existir na partida','%'],['spectralMax','Quantidade de Espectrais','Máximo de Espectrais atribuídos entre Infiltrados',''],['spectralCooldown','Recarga da Invisibilidade','Tempo de recarga depois de reaparecer','s'],['spectralDuration','Duração da Invisibilidade','Tempo máximo invisível antes de reaparecer','s'],['spectralSpeed','Aumento de velocidade durante Invisibilidade','Bônus de velocidade somado à velocidade normal enquanto invisível','x'],['spectralIntangible','Intangibilidade ao ativar','Sim: atravessa colisões, perde o bônus de velocidade e a invisibilidade dura metade do tempo',''],['paramedicChance','Porcentagem de ser Paramédico','Chance de a função Paramédico existir na partida','%'],['paramedicMax','Quantidade de Paramédicos','Máximo de Paramédicos, limitado ao máximo de jogadores',''],['paramedicCooldown','Recarga para reviver','Tempo de recarga após uma ressurreição','s'],['paramedicTasksPerUse','Tarefas necessárias por uso','Tarefas completas exigidas para liberar cada uso',''],['paramedicMaxUses','Quantidade máxima de usos liberáveis','Máximo de usos que tarefas podem liberar por partida',''],['lazyChance','Chance de existir Preguiçoso','Chance de a função Preguiçoso existir entre Tripulantes vivos','%'],['lazyMax','Quantidade de Preguiçosos','Máximo de Preguiçosos, limitado ao máximo de jogadores',''],['lazySlowdown','Lentidão após concluir tarefas','Fator de lentidão aplicado permanentemente depois de concluir as tarefas do Preguiçoso','x'],['lazyTasks','Tarefas do Preguiçoso','Quantidade de tarefas aleatórias exclusivas recebidas pelo Preguiçoso',''],['delayedChance','Chance da função','Chance de a função Atrasado ser atribuída na partida','%'],['delayedMax','Quantidade de Atrasados','Máximo de Atrasados, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['engVentDuration','Tempo limite nos dutos','10–60 segundos; 61 representa tempo infinito','s'],['engChance','Chance de existir Engenheiro','Porcentagem de chance de atribuição','%'],['engMax','Quantidade de Engenheiros','Máximo de Engenheiros, limitado aos Tripulantes',''],['engCooldown','Cooldown do duto','Recarga do Engenheiro após sair dos dutos','s'],['marionCooldown','Cooldown de Controlar','Recarga da habilidade do Marionetista','s'],['marionDuration','Tempo limite do controle','Duração máxima do controle de outro jogador','s'],['marionChance','Chance de Marionetistas','Porcentagem de chance de atribuição','%'],['marionMax','Quantidade de Marionetistas','Máximo de Marionetistas, limitado aos Infiltrados','']];
+function selectedMapIdForConfig(){
+  if(typeof NET!=='undefined'&&NET.inRoom){
+    const id=NET.roomDraft?.mapId||NET.room?.settings?.mapId||SELECTED_MAP_ID;
+    return MAP_LIBRARY[id]?id:'nave';
+  }
+  return MAP_LIBRARY[SELECTED_MAP_ID]?SELECTED_MAP_ID:'nave';
+}
+function selectGameMap(id){
+  if(!MAP_LIBRARY[id])return;
+  const locked=(inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
+  if(locked)return;
+  SELECTED_MAP_ID=id;saveMapSelection(id);activateMapData(id,true);G.mapId=id;
+  if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.room?.status==='lobby'){
+    const d=netEnsureRoomDraft();d.mapId=id;NET.roomDraftDirty=true;
+    netSend({type:'room_config_notice',text:`⚙ Mapa → ${MAP_LIBRARY[id].name}`});
+    netSaveRoomSettings();
+  }
+  buildCfgUI();Snd.click();
+}
+function createMapCard(map,current,locked,onSelect){
+  const b=el('button','mapCard');b.type='button';b.disabled=!!locked;b.dataset.mapId=map.id;b.classList.toggle('selected',current===map.id);b.setAttribute('aria-pressed',current===map.id?'true':'false');b.setAttribute('aria-label',map.name);
+  const icon=el('img','mapIcon');icon.src=map.icon;icon.alt='';icon.loading='lazy';icon.decoding='async';
+  const txt=el('span');txt.append(el('b','',map.name),el('small','',map.subtitle));
+  b.append(icon,txt);if(onSelect)b.addEventListener('click',onSelect);return b;
+}
+function renderMapSelector(box,locked){
+  const section=el('section','mapSelect'),title=el('div','mapSelectTitle');
+  title.append(el('span','','🗺️ Mapa da partida'),el('small','',locked?'Seleção bloqueada':'Escolha o cenário'));
+  section.appendChild(title);
+  const current=selectedMapIdForConfig();
+  for(const map of Object.values(MAP_LIBRARY))section.appendChild(createMapCard(map,current,locked,()=>selectGameMap(map.id)));
+  box.appendChild(section);
+}
 function buildCfgUI(){
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
   if(G.cfgPage==='presets'){renderPresetCards(box);return}
   const locked=(inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
+  if(G.cfgPage==='settings')renderMapSelector(box,locked);
   $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnObserverSection').classList.toggle('alt',G.cfgFunctionTab!=='observer');$('btnInstructorSection').classList.toggle('alt',G.cfgFunctionTab!=='instructor');$('btnCleanerSection').classList.toggle('alt',G.cfgFunctionTab!=='cleaner');$('btnParasiteSection').classList.toggle('alt',G.cfgFunctionTab!=='parasite');$('btnSpectralSection').classList.toggle('alt',G.cfgFunctionTab!=='spectral');$('btnParamedicSection').classList.toggle('alt',G.cfgFunctionTab!=='paramedic');$('btnLazySection').classList.toggle('alt',G.cfgFunctionTab!=='lazy');$('btnEngineerSection').classList.toggle('alt',G.cfgFunctionTab!=='engineer');$('btnMarionetteSection').classList.toggle('alt',G.cfgFunctionTab!=='marionette');
   if(G.cfgPage==='functions'){
     const descriptions={locator:['🧭 Localizador','Rastreia no mapa um jogador vivo próximo por tempo limitado.'],sheriff:['🔫 Xerife','Pode atirar em jogadores: acerta o Infiltrado ou morre se errar.'],delayed:['🕓 Atrasado','Marca um Tripulante próximo para ser eliminado depois de alguns segundos.'],observer:['👀 Observador','Vê a posição dos jogadores vivos no mapa enquanto as Comunicações funcionam.'],instructor:['↔️ Instrutor','Após morrer, pode criar uma trilha para orientar um jogador vivo próximo.'],cleaner:['🧹 Faxineiro','Infiltrado que remove corpos próximos e apaga essa evidência.'],parasite:['🦠 Parasita','Infiltrado que infecta um Tripulante para convertê-lo após a reunião.'],spectral:['👻 Espectral','Infiltrado que fica invisível temporariamente, deixa fumaça como evidência e não pode matar enquanto invisível.'],paramedic:['⛑️ Paramédico','Tripulante que libera usos ao concluir tarefas e revive Tripulantes mortos por meio dos corpos.'],lazy:['🍕 Preguiçoso','Tripulante que recebe poucas tarefas; ao concluir todas, completa sua cota normal na barra e fica mais lento.'],engineer:['🔧 Engenheiro','Tripulante capaz de usar dutos por tempo limitado.'],marionette:['✋ Marionetista','Infiltrado que controla temporariamente um Tripulante próximo.']};
@@ -2524,15 +3140,13 @@ function renderTool(){
 const NAMES=['Aurora','Bruno','Caio','Duda','Eli','Fabi','Gael','Hugo','Iris','Jota','Lia','Mateus'];
 const D4=[[1,0],[-1,0],[0,1],[0,-1]];
 const FIX={
-  lights:{st:'circuits',game:'circuits',name:'Luzes apagadas'},
+  lights:{st:'circuits',game:'nx_circuit',name:'Luzes apagadas'},
   reactor:{st:'reactor',game:'stabilize',name:'Reator instável'},
-  comms:{st:'signal',game:'signal',name:'Comunicações fora do ar'},
+  comms:{st:'signal',game:'nx_frequency',name:'Comunicações fora do ar'},
   doors:{st:'unlock',game:'unlock',name:'Portas travadas'},
 };
-const ROOM_PREP={'Cafeteria':'na','Enfermaria':'na','Elétrica':'na','Administração':'na','Segurança':'na','Comunicações':'em','Armazém':'no','Reator':'no','Corredor Central':'no','Corredor':'no'};
+const ROOM_PREP={'Nave':'na','Corredor da Nave':'no','Cafeteria':'na','Enfermaria':'na','Descontaminação':'na','Visão':'na','Elétrica':'na','Administração':'na','Segurança':'na','Comunicações':'em','Armazém':'no','Reator':'no','Laboratório':'no','O2':'no','Varanda':'na','Corredor Central':'no','Corredor':'no'};
 const inRoom=n=>(ROOM_PREP[n]||'em')+' '+n;
-const TABLE={x:29,y:6,w:6,h:3};
-const FREEPLAY_COMPUTER={id:'freeplay_pc',room:'cafe',x:38,y:10,w:1,h:1,label:'Computador da Partida Livre'};
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const charById=id=>G.chars.find(c=>c.id===id);
 const roomName=(x,y)=>{const r=roomAtPx(x,y);return r?r.name:'Corredor'};
@@ -2583,14 +3197,17 @@ function nearestWalkablePosition(x,y){
   return best;
 }
 function instructorTrailLength(points){let d=0;for(let i=1;i<(points||[]).length;i++)d+=Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);return d}
-function findPath(sx,sy,isGoal){
+function deconDoorAtTile(tx,ty){
+  return doors.find(d=>d.decon&&tx>=d.x&&tx<d.x+d.w&&ty>=d.y&&ty<d.y+d.h)||null;
+}
+function findPath(sx,sy,isGoal,allowDecon=false){
   if(isGoal(sx,sy))return [];
   const start=sy*COLS+sx, prev=BFS_PREV, q=BFS_Q; prev.fill(-2); prev[start]=-1; q[0]=start; let qi=0, qn=1;
   while(qi<qn){
     const cur=q[qi++], cx=cur%COLS, cy=(cur/COLS)|0;
     for(let k=0;k<4;k++){
       const nx=cx+D4[k][0], ny=cy+D4[k][1]; if(nx<0||ny<0||nx>=COLS||ny>=ROWS)continue;
-      const ni=ny*COLS+nx; if(prev[ni]!==-2||!walk[ni])continue; prev[ni]=cur;
+      const ni=ny*COLS+nx; if(prev[ni]!==-2||(!walk[ni]&&!(allowDecon&&deconDoorAtTile(nx,ny))))continue; prev[ni]=cur;
       if(isGoal(nx,ny)){
         const path=[]; let c=ni;
         while(c!==start){path.push({x:(c%COLS)*TILE+TILE/2,y:((c/COLS)|0)*TILE+TILE/2-OFF_Y});c=prev[c]}
@@ -2601,7 +3218,7 @@ function findPath(sx,sy,isGoal){
   }
   return null;
 }
-const APP={};
+// APP é inicializado antes da primeira ativação do mapa para evitar TDZ no carregamento.
 function approachSet(key,rect){
   if(APP[key])return APP[key]; const s=new Set();
   const base=(x,y)=>x>=0&&y>=0&&x<COLS&&y<ROWS&&floor[y*COLS+x]&&!block[y*COLS+x];
@@ -2616,16 +3233,29 @@ function approachSet(key,rect){
 
 /* ---------- movimento dos NPCs ---------- */
 function goTo(ch,goal,isGoal){
-  const t=tileOf(ch), p=findPath(t.x,t.y,isGoal); if(p===null)return false;
+  const t=tileOf(ch), p=findPath(t.x,t.y,isGoal,ACTIVE_MAP_ID==='nexus'); if(p===null)return false;
   const ai=ch.ai; ai.path=p; ai.goal=goal; ai.isGoal=isGoal; ai.pathVer=G.walkVer; ai.state='walk'; ai.stuck=0; return true;
 }
 function repath(ch){
-  const ai=ch.ai, t=tileOf(ch), p=findPath(t.x,t.y,ai.isGoal); if(p===null)return false;
+  const ai=ch.ai, t=tileOf(ch), p=findPath(t.x,t.y,ai.isGoal,ACTIVE_MAP_ID==='nexus'); if(p===null)return false;
   ai.path=p; ai.pathVer=G.walkVer; return true;
+}
+function npcHandleDeconWaypoint(ch,w){
+  if(ACTIVE_MAP_ID!=='nexus'||!ch?.ai)return false;
+  const tx=Math.floor(w.x/TILE),ty=Math.floor((w.y+OFF_Y)/TILE),door=deconDoorAtTile(tx,ty);
+  if(!door||!door.closed)return false;
+  const side=door.id===deconDoorId('w')?'w':'e',inside=charInsideDecon(ch);
+  if(inside&&G.decon?.phase==='ready'){
+    const st=stationById[`decon_${side}_in`];if(st)useDeconButton(ch,st);
+  }else if(!inside&&G.decon?.phase==='idle'){
+    const st=stationById[`decon_${side}_out`];if(st)useDeconButton(ch,st);
+  }
+  ch.moving=false;ch.ai.stuck=0;ch.ai.wpT=0;return true;
 }
 function followPath(ch,dt){
   const ai=ch.ai; if(!ai.path.length){ch.moving=false;return true}
-  const w=ai.path[0], dx=w.x-ch.x, dy=w.y-ch.y, d=Math.hypot(dx,dy);
+  const w=ai.path[0];if(npcHandleDeconWaypoint(ch,w))return false;
+  const dx=w.x-ch.x, dy=w.y-ch.y, d=Math.hypot(dx,dy);
   ai.wpT=(ai.wpT||0)+dt;
   if(d<16||ai.wpT>2.5){ai.wpT=0;ai.path.shift(); if(!ai.path.length){ch.moving=false;return true} return false}
   const st=Math.min(d,moveSpeedFor(ch,ai.speed)*dt), ox=ch.x, oy=ch.y;
@@ -2733,7 +3363,7 @@ function instructorPathPoints(target,x,y){
   if(!target?.alive)return null;
   const startPos=nearestWalkablePosition(target.x,target.y),endPos=nearestWalkablePosition(x,y);if(!startPos||!endPos)return null;
   const a=tileOf(startPos),b=tileOf(endPos);let path=null;
-  try{path=findPath(a.x,a.y,(tx,ty)=>tx===b.x&&ty===b.y)}catch(e){}
+  try{path=findPath(a.x,a.y,(tx,ty)=>tx===b.x&&ty===b.y,ACTIVE_MAP_ID==='nexus')}catch(e){}
   if(path===null)return null;
   const pts=[{x:target.x,y:target.y}];for(const q of path)pts.push({x:q.x,y:q.y});
   const last=pts[pts.length-1];if(!last||Math.hypot(last.x-endPos.x,last.y-endPos.y)>1)pts.push({x:endPos.x,y:endPos.y});
@@ -2868,7 +3498,7 @@ function presetConfig(id){const cfg=presetBaseConfig();if(id==='chaos'||id==='he
   return normalizeCfgCaps(cfg)}
 function currentCfgMatchesPreset(id){const p=presetConfig(id);for(const k of NET_SETTING_KEYS){if(Number(CFG[k])!==Number(p[k]))return false}return true}
 function activePresetId(){for(const p of PRESET_DEFS)if(currentCfgMatchesPreset(p.id))return p.id;return ''}
-function applyPreset(id){const before={...CFG},cfg=presetConfig(id);for(const key of Object.keys(CFG_DEF))if(cfg[key]!==undefined)CFG[key]=cfg[key];normalizeCfgCaps(CFG);saveCfg();if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.room?.status==='lobby'){NET.roomDraft={...cfg,bots:NET.roomDraft?.bots??NET.room?.bots??0};NET.roomDraftDirty=true;for(const key of NET_SETTING_KEYS)if(before[key]!==CFG[key])netAnnounceConfigChange(key,CFG[key]);netSyncRoomControlsFromCFG()}buildCfgUI();Snd.click()}
+function applyPreset(id){const before={...CFG},cfg=presetConfig(id);for(const key of Object.keys(CFG_DEF))if(cfg[key]!==undefined)CFG[key]=cfg[key];normalizeCfgCaps(CFG);saveCfg();if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.room?.status==='lobby'){NET.roomDraft={mapId:SELECTED_MAP_ID,...cfg,bots:NET.roomDraft?.bots??NET.room?.bots??0};NET.roomDraftDirty=true;for(const key of NET_SETTING_KEYS)if(before[key]!==CFG[key])netAnnounceConfigChange(key,CFG[key]);netSyncRoomControlsFromCFG()}buildCfgUI();Snd.click()}
 function renderPresetCards(box){const grid=el('div','presetGrid');const active=activePresetId();PRESET_DEFS.forEach(p=>{const card=el('article','presetCard');card.dataset.theme=p.theme;card.classList.toggle('active',active===p.id);const art=el('div','presetArt');const img=document.createElement('img');img.alt='Arte da predefinição '+p.name;img.src=p.art;art.appendChild(img);const meta=el('div','presetMeta');meta.append(el('span','presetTag',p.tag),(()=>{const h=document.createElement('h3');h.textContent=p.name;return h})(),el('p','',p.desc));const foot=el('div','presetFoot');foot.append(el('span','presetState',active===p.id?'Ativa agora':'Aplicar conjunto completo'),(()=>{const b=el('button','big presetApply',active===p.id?'Reaplicar':'Aplicar');b.type='button';b.addEventListener('click',()=>applyPreset(p.id));return b})());card.append(art,meta,foot);grid.appendChild(card)});box.appendChild(grid)}
 const inGame=()=>G.state!=='menu';
 const uiBusy=()=>G.cfgOpen||G.confirmOpen;
@@ -2878,7 +3508,9 @@ const PERS={
   impulsivo:{gain:1.1,thr:.9,hear:1.2,direct:.9,call:2.8},
   observador:{gain:1,thr:2.2,hear:.6,direct:1.5,call:3.8},
 };
-const FAKE_STS=[...new Set(TASK_TEMPLATES.flatMap(t=>(t.steps||[]).map(s=>s.st)).concat(DIVERT_DESTS,['divert']))];
+function activeFakeStations(){
+  return [...new Set(activeTaskTemplates().flatMap(t=>(t.steps||[]).map(s=>s.st)).concat(DIVERT_DESTS,['divert']))].filter(id=>stationById[id]);
+}
 
 function makeNPC(name,color){
   const c=newChar(name,color,0,0,false);
@@ -2957,6 +3589,10 @@ function perceive(ch){
     if(npcCanSeeChar(ch,o)){
       vis.push(o); const rm=roomName(o.x,o.y); ai.seen[o.id]={room:rm,t:G.gt};
       const h=(ai.hist[o.id]=ai.hist[o.id]||[]), l=h[h.length-1];
+      if(ACTIVE_MAP_ID==='nexus'&&ch.role==='crew'&&l&&l.room!==rm){
+        const from=ROOM_DEFS.find(r=>r.name===l.room)?.id,to=ROOM_DEFS.find(r=>r.name===rm)?.id,hops=from&&to?roomDist(from,to):0,elapsed=G.gt-l.gt,key=`move:${o.id}:${l.room}>${rm}`;
+        if(hops>=2&&elapsed<Math.max(1.6,hops*1.15)&&!ai.alerted.has(key)){ai.alerted.add(key);addSusp(ch,o.id,Math.min(1.8,.45*hops),'contra',{room:rm,from:l.room});}
+      }
       if(!l||l.room!==rm||G.gt-l.gt>4){h.push({room:rm,gt:G.gt});if(h.length>16)h.shift()}
     }
   }
@@ -3011,8 +3647,8 @@ function chooseGoal(ch){
     if(v&&ventWitnesses(v,ch).length===0&&goTo(ch,{type:'vent',v},(x,y)=>Math.abs(x-v.x)+Math.abs(y-v.y)<=1))return;
   }
   if(ch.role==='imp'&&r<.65){   // impostor finge tarefas: para em pontos de tarefa sem somar progresso
-    const s=stationById[pick(FAKE_STS)], set=approachSet(s.id,s);
-    if(goTo(ch,{type:'task',t:{fake:true,steps:[],done:false},step:{done:false,st:s.id},s},(x,y)=>set.has(y*COLS+x)))return;
+    const fakeList=activeFakeStations(),sid=fakeList.length?pick(fakeList):null,s=sid?stationById[sid]:null;
+    if(s){const set=approachSet(s.id,s);if(goTo(ch,{type:'task',t:{fake:true,steps:[],done:false},step:{done:false,st:s.id},s},(x,y)=>set.has(y*COLS+x)))return}
   }
   if(Math.random()<.2&&G.gt>60){
     const set=approachSet('table',TABLE); if(goTo(ch,{type:'cafe'},(x,y)=>set.has(y*COLS+x)))return;
@@ -3300,7 +3936,7 @@ function impThink(ch,dt){
   if(d>160&&Math.random()<dt*2&&hasWitness(ch,v)){ai.hunt=null;ai.huntPause=3}
 }
 function aiSabotage(ch){
-  const opts=[['lights',2],['comms',2],['doors',1],['reactor',progress()>.5?4:1]];
+  const opts=ACTIVE_MAP_ID==='nexus'?[['lights',2],['comms',3.2],['doors',1.5],['reactor',progress()>.45?4.5:1.3]]:[['lights',2],['comms',2],['doors',1],['reactor',progress()>.5?4:1]];
   let r=Math.random()*opts.reduce((a,o)=>a+o[1],0), type='lights';
   for(const o of opts){r-=o[1];if(r<=0){type=o[0];break}}
   let by=ch;
@@ -3644,7 +4280,7 @@ function resolveSab(type){
   if(type==='doors')return; // Portas não possuem conserto: reabrem somente após os 12 s.
   if(!(G.sab[type]>0))return;
   G.sab[type]=0;G.sab.cd=CFG.sab; G.chars.forEach(c=>{if(c.ai&&c.ai.fix===type)c.ai.fix=null});
-  if(type==='doors'){doors.forEach(d=>d.closed=false);rebuildWalk();G.walkVer++}
+  if(type==='doors'){openSabotageDoors()}
   if(G.mini&&G.mini.task&&G.mini.task.fix===type&&!G.mini.finished)closeModal();   // reparo já resolvido: tarefa de emergência some na hora
   renderTasks();
   Snd.ok(); toast({lights:'Luzes restauradas.',reactor:'Reator estabilizado!',comms:'Comunicações restabelecidas.',doors:'Portas reabertas.'}[type]); updateSabUI();
@@ -3659,7 +4295,7 @@ function updateSab(dt){
   const S=G.sab; S.cd=Math.max(0,S.cd-dt);
   if(S.lights>0){S.lights-=dt;if(S.lights<=0){S.lights=0;S.cd=CFG.sab;renderTasks();toast('Luzes restauradas.')}}
   if(S.comms>0){S.comms-=dt;if(S.comms<=0){S.comms=0;S.cd=CFG.sab;renderTasks();toast('Comunicações restabelecidas.')}}
-  if(S.doors>0){S.doors-=dt;if(S.doors<=0){S.doors=0;S.cd=CFG.sab;doors.forEach(d=>d.closed=false);rebuildWalk();G.walkVer++;renderTasks();toast('Portas destravadas.')}}
+  if(S.doors>0){S.doors-=dt;if(S.doors<=0){S.doors=0;S.cd=CFG.sab;openSabotageDoors();renderTasks();toast('Portas destravadas.')}}
   if(S.reactor>0){S.reactor-=dt;if(S.reactor<=0){S.reactor=0;endGame('imp','O reator derreteu antes que a tripulação conseguisse estabilizá-lo.');return}}
   G.fixT-=dt;
   if(G.fixT<=0){G.fixT=3;['lights','reactor','comms'].forEach(t=>{
@@ -4189,7 +4825,7 @@ function callMeeting(caller,reason,body,forceSync=false){
   if(!forceSync&&(G.over||G.state==='meeting'||G.state==='role'||G.state==='over'||G.M))return;
   if(!forceSync&&reason==='emergency'){if(caller.emUses<=0||G.meetCd>0||G.sab.reactor>0)return; caller.emUses--}
   closeModalSilent(); G.state='meeting'; closeMap(); G.cfgOpen=false; $('settings').hidden=true;
-  if(G.sab.doors>0){G.sab.doors=0;doors.forEach(d=>d.closed=false);rebuildWalk();G.walkVer++}
+  if(G.sab.doors>0){G.sab.doors=0;openSabotageDoors()}
   G.chars.forEach(c=>{c.moving=false; if(c.vent){const v=ventById[c.vent];c.vent=null;c.x=v.px;c.y=v.py-OFF_Y} c.ventAnim=null});
   $('ventPanel').hidden=true;
   let evid=null;
@@ -4317,9 +4953,9 @@ function endMeeting(){
   if(G.freePlay){
     // Na Partida Livre os bots permanecem exatamente onde estavam antes da reunião.
     const alivePlayer=G.player&&G.player.alive?G.player:null;
-    if(alivePlayer){const pt=cafePoints(1)[0];if(pt)placeChar(alivePlayer,pt)}
+    if(alivePlayer){const pt=meetingSpawnPoints(1)[0];if(pt)placeChar(alivePlayer,pt)}
   }else{
-    const pts=cafePoints(G.chars.length); G.chars.filter(c=>c.alive).forEach((c,i)=>placeChar(c,pts[i]));
+    const pts=meetingSpawnPoints(G.chars.filter(c=>c.alive).length); G.chars.filter(c=>c.alive).forEach((c,i)=>placeChar(c,pts[i]));
   }
   G.meetCd=CFG.meet; G.killCd=CFG.kill; G.sheriffCd=CFG.sheriffCooldown; G.delayedCd=CFG.kill; G.cleanerCd=CFG.cleanerCooldown; G.paramedicCd=CFG.paramedicCooldown;if(G.player)G.player.paramedicCd=G.paramedicCd;
   G.sab.cd=CFG.sab;
@@ -4432,6 +5068,7 @@ function update(dt){
   if(simActive()){
     G.gt+=dt;if(!NET.inRoom||NET.isHost)updateSpectralStates(dt);updateSpectralSmokes(dt); G.killCd=Math.max(0,G.killCd-dt); G.sheriffCd=Math.max(0,G.sheriffCd-dt); G.delayedCd=Math.max(0,G.delayedCd-dt);G.cleanerCd=Math.max(0,G.cleanerCd-dt);if(G.player){G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses}G.chars.forEach(c=>{if(c.paramedicCd>0)c.paramedicCd=Math.max(0,c.paramedicCd-dt);if(c.isRemoteHuman){c.netDelayedCd=Math.max(0,(c.netDelayedCd||0)-dt);c.cleanCd=Math.max(0,(c.cleanCd||0)-dt)}});if(G.player){G.paramedicCd=G.player.paramedicCd||0} G.meetCd=Math.max(0,G.meetCd-dt); updateLocator(dt);updateDelayedMarks(dt);if(G.over)return;
     updateSab(dt); if(G.over)return;
+    if(!NET.inRoom||NET.isHost)updateDecon();
     if(!NET.inRoom||NET.isHost)updateInstructor(dt);
     updateNPCs(dt);
   }
@@ -4444,7 +5081,7 @@ function update(dt){
   const f=focus();
   const baseVision=G.role==='imp'?CFG.impVision:CFG.crewVision;
   G.visionTarget=!p.alive?Math.max(CFG.impVision,CFG.crewVision):(G.sab.lights>0&&G.role==='crew'?Math.max(110,baseVision*.34):baseVision);
-  G.vision+=(G.visionTarget-G.vision)*Math.min(1,dt*4);
+  G.vision+=(G.visionTarget-G.vision)*Math.min(1,dt*(ACTIVE_MAP_ID==='nexus'?18:4));
   const useNetVisual=NET.inRoom&&!NET.isHost&&f.id!==NET.id&&Number.isFinite(f.netVisualX)&&Number.isFinite(f.netVisualY);
   const fx=useNetVisual?f.netVisualX:f.x;
   const fy=useNetVisual?f.netVisualY:f.y;
@@ -4654,8 +5291,8 @@ function netUpdateVisualInterpolation(){
   }
 }
 const NET_SETTING_KEYS=['kill','sab','meet','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorDuration','instructorMaxDistance','cleanerChance','cleanerMax','cleanerCooldown','cleanerUses','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','spectralSpeed','spectralIntangible','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedEnabled','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','actionDistance','commonTasks','mediumTasks','longTasks','renderDist'];
-function netSettings(){const o={};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
-function netApplySettings(s){if(!s)return;let changed=false;for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){let v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(k==='spectralSpeed')v=clamp(Math.round(v/2)*2,0,20);if(k==='instructorMaxDistance')v=clamp(Math.round(v/100)*100,100,2000);if(k==='spectralIntangible')v=v?1:0;if(CFG[k]!==v){CFG[k]=v;changed=true}}}const cappedCleaner=Math.min(CFG.cleanerMax,CFG.impostors);if(CFG.cleanerMax!==cappedCleaner){CFG.cleanerMax=cappedCleaner;changed=true}const cappedParasite=Math.min(CFG.parasiteMax,CFG.impostors,3);if(CFG.parasiteMax!==cappedParasite){CFG.parasiteMax=cappedParasite;changed=true}const cappedSpectral=Math.min(CFG.spectralMax,configuredPlayerCount(),15);if(CFG.spectralMax!==cappedSpectral){CFG.spectralMax=cappedSpectral;changed=true}const cappedParamedic=Math.min(CFG.paramedicMax,configuredPlayerCount(),15);if(CFG.paramedicMax!==cappedParamedic){CFG.paramedicMax=cappedParamedic;changed=true}const cappedLazy=Math.min(CFG.lazyMax,configuredPlayerCount(),15);if(CFG.lazyMax!==cappedLazy){CFG.lazyMax=cappedLazy;changed=true}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
+function netSettings(){const o={mapId:SELECTED_MAP_ID};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
+function netApplySettings(s){if(!s)return;let changed=false;if(MAP_LIBRARY[s.mapId]&&s.mapId!==SELECTED_MAP_ID){SELECTED_MAP_ID=s.mapId;saveMapSelection(s.mapId);activateMapData(s.mapId,true);G.mapId=s.mapId;changed=true}for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){let v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(k==='spectralSpeed')v=clamp(Math.round(v/2)*2,0,20);if(k==='instructorMaxDistance')v=clamp(Math.round(v/100)*100,100,2000);if(k==='spectralIntangible')v=v?1:0;if(CFG[k]!==v){CFG[k]=v;changed=true}}}const cappedCleaner=Math.min(CFG.cleanerMax,CFG.impostors);if(CFG.cleanerMax!==cappedCleaner){CFG.cleanerMax=cappedCleaner;changed=true}const cappedParasite=Math.min(CFG.parasiteMax,CFG.impostors,3);if(CFG.parasiteMax!==cappedParasite){CFG.parasiteMax=cappedParasite;changed=true}const cappedSpectral=Math.min(CFG.spectralMax,configuredPlayerCount(),15);if(CFG.spectralMax!==cappedSpectral){CFG.spectralMax=cappedSpectral;changed=true}const cappedParamedic=Math.min(CFG.paramedicMax,configuredPlayerCount(),15);if(CFG.paramedicMax!==cappedParamedic){CFG.paramedicMax=cappedParamedic;changed=true}const cappedLazy=Math.min(CFG.lazyMax,configuredPlayerCount(),15);if(CFG.lazyMax!==cappedLazy){CFG.lazyMax=cappedLazy;changed=true}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
 if($('serverUrlIn'))$('serverUrlIn').value=netDefaultUrl();
 function netSend(o){if(NET.ws&&NET.ws.readyState===WebSocket.OPEN){try{NET.ws.send(JSON.stringify(o));return true}catch(e){}}return false}
@@ -4885,7 +5522,7 @@ function netCaptureSnapshot(){if(G.player){G.player.cleanCd=G.cleanerCd;G.player
   const bodies=G.bodies.map(b=>({id:b.id,victimId:b.victimId??b.id,name:b.name,color:b.color,cosmetics:cloneCosmetics(b.cosmetics),x:b.x,y:b.y,room:b.room,tKill:b.tKill,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null}));
   const deadPets=(G.deadPets||[]).map(p=>({id:p.id,ownerId:p.ownerId,pet:p.pet,x:p.x,y:p.y,face:p.face||1,phase:p.phase||0,sad:true}));
   const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chat:(G.M.chat||[]).map(m=>({fromId:m.fromId,text:m.text})),chatCount:$('meetChat').children.length}:null;
-  return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,deadPets,killSplashes:(G.killSplashes||[]).map(s=>({...s})),spectralSmokes:(G.spectralSmokes||[]).map(f=>({...f})),instructorTrails:(G.instructorTrails||[]).map(t=>({id:t.id,ownerId:t.ownerId,targetId:t.targetId,points:(t.points||[]).map(p=>({x:p.x,y:p.y})),t:t.t,max:t.max})),delayedMarks:{...G.delayedMarks},parasiteInfections:{...(G.parasiteInfections||{})},sab:{...G.sab},doors:doors.map(d=>!!d.closed),cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,observer:G.observer,cleaner:G.cleaner,parasite:G.parasite,paramedic:G.paramedic,lazy:G.player?.function==='lazy',selfParamedicCd:G.player?.paramedicCd||0,selfParamedicSpent:G.player?.paramedicSpent||0,selfParasiteReady:G.player?.parasiteReady!==false,selfInstructor:!!G.player?.instructor,selfInstructorCd:G.player?.instructorCd||0,selfInstructorTargetId:G.player?.instructorTargetId||null,selfCleanerCd:G.cleanerCd,selfCleanerUses:G.cleanerUses,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
+  return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,deadPets,killSplashes:(G.killSplashes||[]).map(s=>({...s})),spectralSmokes:(G.spectralSmokes||[]).map(f=>({...f})),instructorTrails:(G.instructorTrails||[]).map(t=>({id:t.id,ownerId:t.ownerId,targetId:t.targetId,points:(t.points||[]).map(p=>({x:p.x,y:p.y})),t:t.t,max:t.max})),delayedMarks:{...G.delayedMarks},parasiteInfections:{...(G.parasiteInfections||{})},sab:{...G.sab},doors:doors.map(d=>!!d.closed),decon:{...(G.decon||{})},cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,observer:G.observer,cleaner:G.cleaner,parasite:G.parasite,paramedic:G.paramedic,lazy:G.player?.function==='lazy',selfParamedicCd:G.player?.paramedicCd||0,selfParamedicSpent:G.player?.paramedicSpent||0,selfParasiteReady:G.player?.parasiteReady!==false,selfInstructor:!!G.player?.instructor,selfInstructorCd:G.player?.instructorCd||0,selfInstructorTargetId:G.player?.instructorTargetId||null,selfCleanerCd:G.cleanerCd,selfCleanerUses:G.cleanerUses,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
 }
 function netCaptureMotion(){
   const q=n=>Math.round((Number(n)||0)*10)/10;
@@ -4988,7 +5625,7 @@ function netApplySnapshot(s,force=false){
     const oldSplashes=new Map((G.killSplashes||[]).map(q=>[String(q.id),q]));G.killSplashes=Array.isArray(s.killSplashes)?s.killSplashes.map(q=>{const old=oldSplashes.get(String(q.id));return old?{...q,t:Math.min(Number(q.t)||0,Number(old.t)||0)}:{...q}}):[];const incomingSmoke=Array.isArray(s.spectralSmokes)?s.spectralSmokes:[];G.spectralSmokes=incomingSmoke.map(f=>({...f}));for(const f of G.spectralSmokes){if(!SPECTRAL_SEEN_SMOKES.has(f.id)){SPECTRAL_SEEN_SMOKES.add(f.id);spectralSoundNearby(f.x,f.y,f.phase==='show'?'done':'use')}}
     G.instructorTrails=Array.isArray(s.instructorTrails)?s.instructorTrails.map(t=>({...t,points:(t.points||[]).map(p=>({...p}))})):[];for(const tr of G.instructorTrails){if(!INSTRUCTOR_SEEN_TRAILS.has(tr.id)){INSTRUCTOR_SEEN_TRAILS.add(tr.id);const end=tr.points?.[tr.points.length-1];if(end){Snd.roleFx('instructor','done');if(String(tr.targetId)===String(G.player.id))toast('↔️ Um Instrutor marcou um caminho para você.',2400);else if(String(tr.ownerId)===String(G.player.id)){const tgt=charById(tr.targetId);toast('Trilha marcada'+(tgt?' para '+tgt.name:'')+'.',2200)}}}}
     G.delayedMarks=s.delayedMarks&&typeof s.delayedMarks==='object'?{...s.delayedMarks}:{};G.parasiteInfections=s.parasiteInfections&&typeof s.parasiteInfections==='object'?{...s.parasiteInfections}:{};
-    if(s.cfg)netApplySettings(s.cfg);G.sab={...s.sab};const doorsChanged=doors.some((d,i)=>d.closed!==!!s.doors[i]);doors.forEach((d,i)=>{d.closed=!!s.doors[i]});if(doorsChanged){rebuildWalk();G.walkVer++}
+    if(s.cfg)netApplySettings(s.cfg);G.sab={...s.sab};if(s.decon&&typeof s.decon==='object')G.decon={...s.decon};const doorsChanged=doors.some((d,i)=>d.closed!==!!s.doors[i]);doors.forEach((d,i)=>{d.closed=!!s.doors[i]});if(doorsChanged){rebuildWalk();G.walkVer++}
     G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;G.delayedCd=s.selfDelayedCd??G.player.netDelayedCd??s.delayedCd??G.delayedCd;G.player.netDelayedCd=G.delayedCd;NET.pendingSheriffShot=false;NET.pendingDelayedMark=false;NET.pendingControl=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.observer=!!(s.observer||G.player.function==='observer');G.cleaner=!!(s.cleaner||G.player.function==='cleaner');G.parasite=!!(s.parasite||G.player.function==='parasite');G.paramedic=!!(s.paramedic||G.player.function==='paramedic');G.player.paramedicCd=s.selfParamedicCd??G.player.paramedicCd??0;G.player.paramedicSpent=s.selfParamedicSpent??G.player.paramedicSpent??0;G.paramedicCd=G.player.paramedicCd;G.player.parasiteReady=s.selfParasiteReady??G.player.parasiteReady??true;G.player.instructor=!!(s.selfInstructor??G.player.instructor);G.player.instructorCd=s.selfInstructorCd??G.player.instructorCd??0;G.player.instructorTargetId=Object.prototype.hasOwnProperty.call(s,'selfInstructorTargetId')?s.selfInstructorTargetId:(G.player.instructorTargetId??null);G.instructorCd=G.player.instructorCd;G.instructorTargetId=G.player.instructorTargetId;G.cleanerCd=s.selfCleanerCd??G.player.cleanCd??G.cleanerCd;G.cleanerUses=s.selfCleanerUses??G.player.cleanUses??G.cleanerUses;G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){if(!G.player.controlledBy){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}else $('ventPanel').hidden=true}
     if(s.state==='meeting'){
       const sm=s.meeting;if(sm){const caller=charById(sm.callerId)||G.player;const body=sm.bodyId?G.bodies.find(b=>String(b.id)===String(sm.bodyId)):null;if(!G.M||oldState!=='meeting')callMeeting(caller,sm.reason,body,true);if(G.M){G.M.caller=caller;G.M.body=body;G.M.phase=sm.phase;G.M.t=sm.t;G.M.clock=sm.clock;G.M.dur=sm.dur;G.M.votes={...sm.votes};G.M.voteAt={...sm.voteAt};G.M.log=sm.log||[];G.M.result=(sm.phase==='result'||sm.phase==='eject')?{eject:sm.ejectId?charById(sm.ejectId):null,counts:sm.counts||{},skipN:sm.skipN||0,headline:sm.ejectHeadline||''}:null;G.M.resultHeadline=sm.resultHeadline||'';netPaintMeeting(sm)}}
@@ -5059,7 +5696,9 @@ function netHostCommand(m){
   const activePlay=['playing','task','tool'].includes(G.state);
   if(command==='input'){const inputSeq=Math.max(0,Math.floor(Number(m.inputSeq)||0));NET.remoteInputs.set(ch.id,{x:clamp(+m.x||0,-1,1),y:clamp(+m.y||0,-1,1),at:Date.now(),seq:inputSeq});ch.netInputAck=Math.max(ch.netInputAck||0,inputSeq);return}
   if(ch.controlledBy&&command!=='control_release')return;
-  if(command==='control'){const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&ch.alive&&ch.role==='imp'&&ch.function==='marionette'&&!ch.vent&&(ch.controlCd||0)<=0)startControl(ch,target)}
+  if(command==='decon_button'){
+    const st=stationById[String(m.stationId||'')];if(activePlay&&ch.alive&&st?.kind==='decon'&&stationDist(st,ch)<=88)useDeconButton(ch,st);
+  }else if(command==='control'){const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&ch.alive&&ch.role==='imp'&&ch.function==='marionette'&&!ch.vent&&(ch.controlCd||0)<=0)startControl(ch,target)}
   else if(command==='control_release'){if(ch.controlTargetId)stopControl(ch)}
   else if(command==='kill'){
     const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&ch.alive&&ch.role==='imp'&&ch.function!=='delayed'&&!ch.vent&&!ch.spectralInvisible&&(ch.netKillCd||0)<=0&&target&&target.alive&&target.id!==ch.controlTargetId&&target.role!=='imp'&&dist(ch,target)<=actionDistancePx('kill')&&losClear(ch.x,ch.y,target.x,target.y)){
@@ -5215,7 +5854,7 @@ const netOriginalStartSabotage=startSabotage;startSabotage=function(type,by){if(
 const netOriginalEnterVent=enterVent;enterVent=function(ch,v){if(NET.inRoom&&!NET.isHost&&ch===G.player&&!NET.applying){if(ch.function==='engineer'){emitRoleFx(ch.x,ch.y,'engineer');Snd.roleFx('engineer','use')}netSend({type:'action',action:'vent_enter',ventId:v.id});return true}return netOriginalEnterVent(ch,v)};
 const netOriginalVentMove=ventMove;ventMove=function(ch,id){if(NET.inRoom&&!NET.isHost&&ch===G.player&&!NET.applying){netSend({type:'action',action:'vent_move',ventId:id});return true}return netOriginalVentMove(ch,id)};
 const netOriginalExitVent=exitVent;exitVent=function(ch){if(NET.inRoom&&!NET.isHost&&ch===G.player&&!NET.applying){netSend({type:'action',action:'vent_exit'});return true}return netOriginalExitVent(ch)};
-const netOriginalDoInteract=doInteract;doInteract=function(a){if(NET.inRoom&&!NET.isHost&&a){if(a.type==='emergency'){netSend({type:'action',action:'emergency'});return}if(a.type==='vent'){netSend({type:'action',action:'vent_enter',ventId:a.vent.id});return}}return netOriginalDoInteract(a)};
+const netOriginalDoInteract=doInteract;doInteract=function(a){if(NET.inRoom&&!NET.isHost&&a){if(a.type==='emergency'){netSend({type:'action',action:'emergency'});return}if(a.type==='decon'){netSend({type:'action',action:'decon_button',stationId:a.station.id});return}if(a.type==='vent'){netSend({type:'action',action:'vent_enter',ventId:a.vent.id});return}}return netOriginalDoInteract(a)};
 const netOriginalSendSay=sendSay;sendSay=function(raw,claimOverride){if(NET.inRoom&&!NET.isHost&&!NET.applying){const text=String(raw||'').trim().slice(0,90);if(!text)return false;netSend({type:'action',action:'chat',text,claim:claimOverride||null});return true}return netOriginalSendSay(raw,claimOverride)};
 const netOriginalPlayerVote=playerVote;playerVote=function(id){if(NET.inRoom&&!NET.isHost&&!NET.applying){const M=G.M;if(!M||M.phase!=='vote'||!G.player?.alive||M.votes[G.player.id]!==undefined||M.voteSending)return;if(id!=='skip'){const t=charById(id);if(!t||!t.alive)return}M.pendingVote=null;M.voteSending=true;netSend({type:'action',action:'vote',targetId:id});$('btnSkip').disabled=true;$('meetStatus').textContent='Voto enviado...';renderMeetingVoteControls();return}return netOriginalPlayerVote(id)};
 const netOriginalPostMsg=postMsg;postMsg=function(from,text){netOriginalPostMsg(from,text);if(NET.inRoom&&NET.isHost&&!NET.applying&&from&&from.id)netSend({type:'meeting_chat',playerId:from.id,text:String(text||'').slice(0,180)})};
@@ -5239,7 +5878,7 @@ const netOriginalToMenu=toMenu;toMenu=function(){if(NET.inRoom)netLeaveRoom();re
 // Override end/rematch controls without changing offline behavior.
 $('btnAgain').addEventListener('click',e=>{if(NET.inRoom||NET.rematchWaiting||NET.rematchReadyCode){e.stopImmediatePropagation();netRequestRematch();return}},true);
 $('btnMenu').addEventListener('click',e=>{if(NET.inRoom){e.stopImmediatePropagation();netLeaveRoom();netOriginalToMenu();return}},true);
-$('btnFreePlay').addEventListener('click',startFreePlay);
+$('btnFreePlay').addEventListener('click',openFreePlayMapPicker);
 $('btnCreateRoom').addEventListener('click',()=>{$('joinPanel').hidden=true;$('createPanel').hidden=false;$('createSizeIn').focus()});
 $('btnCreateConfirm').addEventListener('click',netCreateRoom);$('btnCreateCancel').addEventListener('click',()=>$('createPanel').hidden=true);
 $('createSizeIn').addEventListener('input',()=>{const n=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createBotsIn').max=Math.max(0,n-1);if(+$('createBotsIn').value>n-1)$('createBotsIn').value=n-1});
