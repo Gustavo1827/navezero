@@ -39,7 +39,7 @@ test('fumaça, som próximo, NPCs e multiplayer do Espectral estão integrados',
 
 test('velocidade do Espectral usa passos de 0,2x e contagem autoritativa monotônica',()=>{
   assert.match(html,/if\(k==='spectralSpeed'\)\{wireRepeat\(minus,-2\);wireRepeat\(plus,2\)\}/);
-  assert.match(html,/spectralEndsAt=G\.gt\+CFG\.spectralDuration/);
+  assert.match(html,/spectralEndsAt=G\.gt\+duration/);
   assert.match(html,/function spectralRemaining\(ch\)/);
   assert.match(html,/proposed<ch\._spectralUiDeadline/);
   assert.match(html,/Voltar · \$\{Math\.max\(0,Math\.ceil\(time\)\)\}s/);

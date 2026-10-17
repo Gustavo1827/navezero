@@ -356,7 +356,7 @@ test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comuni
   assert.match(html, /function instructorNpcThink\(ch,dt\)/);
   assert.match(html, /action:'instructor_mark'/);
   assert.match(server, /'instructor_mark'/);
-  assert.match(server, /s\.instructorTrails=\(s\.instructorTrails\|\|\[\]\)\.filter\(t=>String\(t\.targetId\)===String\(recipientId\)\)/);
+  assert.match(server, /s\.instructorTrails=\(s\.instructorTrails\|\|\[\]\)\.filter\(t=>String\(t\.targetId\)===String\(recipientId\)\|\|String\(t\.ownerId\)===String\(recipientId\)\)/);
   assert.match(server, /recipient\?\.instructor[\s\S]*?c\.alive&&c\.role==='crew'\)c\.function=null/);
 });
 
