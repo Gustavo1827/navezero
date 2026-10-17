@@ -246,7 +246,7 @@ test('Faxineiro tem configuração, atribuição, limpeza autoritativa e memóri
 test('NPC Observador usa posições do mapa e Comunicações interrompe novas leituras', () => {
   assert.match(html, /ch\.function==='observer'&&\(G\.sab\.comms\|\|0\)<=0/);
   assert.match(html, /ai\.observerMap\[o\.id\]=\{room:rm,t:G\.gt\}/);
-  assert.match(html, /Pelo mapa de Observador, vi \$\{seen\.name\}/);
+  assert.match(html, /No mapa de observação, observei que \$\{seen\.name\} foi para \$\{r\.room\}/);
 });
 
 test('Engenheiro tem configuração, atribuição e sincronização multiplayer', () => {
@@ -324,7 +324,7 @@ test('Faxineiro é exclusivamente Infiltrado, usa identidade vermelha e respeita
   assert.match(html, /if\(k==='impostors'&&CFG\.cleanerMax>CFG\.impostors\)\{CFG\.cleanerMax=CFG\.impostors/);
   assert.match(html, /cleanerEligible=shuffle\(\[\.\.\.G\.imps\]\.filter\(ch=>ch\.role==='imp'&&!ch\.function\)\)/);
   assert.match(html, /cleanerLimit=Math\.min\(clamp\(CFG\.cleanerMax,0,CFG\.impostors\),G\.imps\.length,cleanerEligible\.length\)/);
-  assert.match(html, /const crewFns=\['locator','sheriff','observer','engineer','lazy'\], impFns=\['delayed','cleaner','marionette'\]/);
+  assert.match(html, /const crewFns=\['locator','sheriff','observer','engineer','lazy','seer'\], impFns=\['delayed','cleaner','marionette'\]/);
   assert.match(html, /cleaner=G\.role==='imp'&&p\.function==='cleaner'/);
   assert.match(server, /out\.cleanerMax=Math\.min\(out\.cleanerMax,out\.impostors\)/);
 });
@@ -335,7 +335,7 @@ test('Parasita é função de Infiltrado com infecção adiada até o fim da reu
   assert.match(html, /parasiteChance:\[0,100\]/);
   assert.match(html, /parasiteMax:\[0,3\]/);
   assert.match(html, /parasiteEligible=shuffle\(\[\.\.\.G\.imps\]\.filter\(ch=>ch\.role==='imp'&&!ch\.function\)\)/);
-  assert.match(html, /function infectTarget\(parasite,target\)[\s\S]*?G\.parasiteInfections\[target\.id\][\s\S]*?parasite\.parasiteReady=false/);
+  assert.match(html, /function infectTarget\(parasite,target\)[\s\S]*?G\.parasiteWinnerId=parasite\.id[\s\S]*?G\.parasiteInfections\[target\.id\][\s\S]*?c\.parasiteReady=false/);
   assert.match(html, /function resolveParasiteInfections\(\)[\s\S]*?t&&t\.alive&&t\.role==='crew'\)convertToImpostor\(t\)[\s\S]*?parasiteReady=true/);
   assert.match(html, /if\(ej\)killChar\(ej\);\s*resolveParasiteInfections\(\);\s*G\.bodies=\[\]/);
   assert.match(html, /target\.role='imp';target\.function=null/);
@@ -343,6 +343,25 @@ test('Parasita é função de Infiltrado com infecção adiada até o fim da reu
   assert.match(html, /parasiteBotThink\(ch,dt\)/);
   assert.match(html, /action:'parasite_infect'/);
   assert.match(server, /'parasite_infect'/);
+});
+
+test('Vidente inspeciona corpos com reconstituição privada e pistas factuais para NPCs', () => {
+  assert.match(html, /id="btnSeer"[^>]*>🔮<small>Inspecionar<\/small>/);
+  assert.match(html, /seerChance:\[0,100\]/);
+  assert.match(html, /seerMax:\[0,15\]/);
+  assert.match(html, /seerCooldown:\[10,45\]/);
+  assert.match(html, /seerDelay:\[0,5\]/);
+  assert.match(html, /seerDuration:\[5,10\]/);
+  assert.match(html, /function inspectBody\(seer,body\)/);
+  assert.match(html, /function drawSeerReplay\(c\)[\s\S]*?fillStyle='#050509'/);
+  assert.match(html, /const fadeIn=clamp\(elapsed\/.45,0,1\),fadeOut=clamp\(\(duration-elapsed\)\/.55,0,1\)/);
+  assert.doesNotMatch(html, /function drawSeerReplay\(c\)[\s\S]*?strokeStyle='rgba\(6,7,13,\.72\)'/);
+  assert.match(html, /\['marionette','✋ Marionetista'\]/);
+  assert.match(html, /\['engineer','🔧 Engenheiro'\]/);
+  assert.match(html, /Vi a silhueta de quem matou \$\{q\.victimName\}, entrou em um duto!/);
+  assert.match(html, /Vi a silhueta de quem matou \$\{q\.victimName\}, foi para \$\{q\.room\}/);
+  assert.match(server, /s\.selfSeerReplay=recipient\?\.alive!==false&&recipient\?\.role==='crew'&&recipient\?\.function==='seer'\?\(s\.seerReplays\?\.\[recipientId\]\|\|null\):null;delete s\.seerReplays;for\(const b of \(s\.bodies\|\|\[\]\)\)delete b\.killerTrace/);
+  assert.match(server, /'seer_inspect'/);
 });
 
 test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comunicações', () => {

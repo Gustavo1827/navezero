@@ -383,13 +383,13 @@ test('Paramédico no servidor respeita limites de configuração e máximo de jo
   const high=cleanSettings({paramedicChance:180,paramedicMax:15,paramedicCooldown:99,paramedicTasksPerUse:9,paramedicMaxUses:8},6);
   assert.equal(high.paramedicChance,100);
   assert.equal(high.paramedicMax,6);
-  assert.equal(high.paramedicCooldown,60);
+  assert.equal(high.paramedicCooldown,25);
   assert.equal(high.paramedicTasksPerUse,5);
   assert.equal(high.paramedicMaxUses,3);
   const low=cleanSettings({paramedicChance:-5,paramedicMax:-2,paramedicCooldown:1,paramedicTasksPerUse:0,paramedicMaxUses:0},4);
   assert.equal(low.paramedicChance,0);
   assert.equal(low.paramedicMax,0);
-  assert.equal(low.paramedicCooldown,20);
+  assert.equal(low.paramedicCooldown,5);
   assert.equal(low.paramedicTasksPerUse,1);
   assert.equal(low.paramedicMaxUses,1);
 });

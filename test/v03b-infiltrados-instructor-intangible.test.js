@@ -29,15 +29,13 @@ test('Instrutor cria percurso caminhável a partir do jogador e limita distânci
   assert.equal(s.instructorMaxDistance,1500);
 });
 
-test('Espectral intangível atravessa colisões, perde bônus, dura metade e reaparece em posição válida',()=>{
-  assert.match(html,/spectralIntangible:\[0,1\]/);
-  assert.match(html,/Intangibilidade ao ativar/);
-  assert.match(html,/function spectralActiveDuration\(\)\{return CFG\.spectralDuration\*\(CFG\.spectralIntangible \? \.5 : 1\)\}/);
-  assert.match(html,/spectralInvisible&&!CFG\.spectralIntangible\?\(1\+CFG\.spectralSpeed\/10\):1/);
-  assert.match(html,/if\(c\.ghost\|\|spectralIntangibilityActive\(c\)\)/);
-  assert.match(html,/CFG\.spectralIntangible&&boxBlocked\(ch\.x,ch\.y,false\)[\s\S]*?nearestWalkablePosition\(ch\.x,ch\.y\)/);
-  assert.match(server,/spectralIntangible:\[0,1\]/);
-  const s=cleanSettings({spectralIntangible:9,spectralSpeed:17},15);
-  assert.equal(s.spectralIntangible,1);
-  assert.equal(s.spectralSpeed,18);
+test('Espectral não possui mais Intangibilidade e usa bônus de velocidade de 0,0x a 1,0x',()=>{
+  assert.doesNotMatch(html,/spectralIntangible/);
+  assert.doesNotMatch(html,/Intangibilidade ao ativar/);
+  assert.match(html,/spectralSpeed:\[0,10\]/);
+  assert.match(html,/function spectralIntangibilityActive\(ch\)\{return false\}/);
+  assert.match(html,/spectralInvisible\?\(1\+CFG\.spectralSpeed\/10\):1/);
+  assert.doesNotMatch(server,/spectralIntangible/);
+  const s=cleanSettings({spectralSpeed:17},15);
+  assert.equal(s.spectralSpeed,10);
 });

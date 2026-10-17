@@ -11,7 +11,8 @@ test('Espectral tem configuração, aba e botão vermelhos',()=>{
   assert.match(html,/spectralChance:\[0,100\]/);
   assert.match(html,/spectralCooldown:\[5,20\]/);
   assert.match(html,/spectralDuration:\[10,90\]/);
-  assert.match(html,/spectralSpeed:\[0,20\]/);
+  assert.match(html,/spectralSpeed:\[0,10\]/);
+  assert.doesNotMatch(html,/spectralIntangible/);
   assert.match(html,/\.act2\.spectral,\.spectral-tab/);
 });
 
@@ -43,6 +44,7 @@ test('velocidade do Espectral usa passos de 0,2x e contagem autoritativa monotô
   assert.match(html,/function spectralRemaining\(ch\)/);
   assert.match(html,/proposed<ch\._spectralUiDeadline/);
   assert.match(html,/Voltar · \$\{Math\.max\(0,Math\.ceil\(time\)\)\}s/);
-  assert.match(server,/spectralSpeed:\[0,20\]/);
+  assert.match(server,/spectralSpeed:\[0,10\]/);
+  assert.doesNotMatch(server,/spectralIntangible/);
   assert.match(server,/Math\.round\(out\.spectralSpeed\/2\)\*2/);
 });
