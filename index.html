@@ -263,7 +263,7 @@ body.touch #stick{display:block}
 .meetp h2{margin:0;font-size:26px;font-weight:800}
 #meetDesc{margin:2px 0 10px;color:var(--ink2);font-size:16px}
 #meetGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.meetPlayerWrap{display:flex;flex-direction:column;gap:5px;min-width:0}.meetPlayerWrap>.pc{width:100%;min-height:100%}.meetingVoteButton,.meetingModVote{border:2px solid #10122a;border-radius:10px;color:#fff;font:800 11px/1.15 var(--font);padding:6px 5px}.meetingVoteButton{background:#2877d4;box-shadow:0 3px 0 #174b91}.meetingVoteButton[hidden]{display:none!important}.meetingVoteButton:disabled,.meetingModVote:disabled{opacity:.48;filter:grayscale(.25)}.meetingModVote{background:#b51f3d;box-shadow:0 3px 0 #711126}
+.meetPlayerWrap{display:flex;flex-direction:column;gap:5px;min-width:0}.meetPlayerWrap>.pc{width:100%;min-height:100%}.meetingVoteButton,.meetingModVote,.meetingVoteConfirm button{border:2px solid #10122a;border-radius:10px;color:#fff;font:800 11px/1.15 var(--font);padding:6px 5px}.meetingVoteButton{background:#2877d4;box-shadow:0 3px 0 #174b91}.meetingVoteButton[hidden]{display:none!important}.meetingVoteButton:disabled,.meetingModVote:disabled,.meetingVoteConfirm button:disabled{opacity:.48;filter:grayscale(.25)}.pc.vote-pending{outline:3px solid #5aa8ff;outline-offset:2px}.meetingVoteConfirm{display:flex;gap:6px}.meetingVoteConfirm[hidden]{display:none!important}.meetingVoteConfirm button{flex:1;font-size:17px;padding:5px}.meetingVoteConfirm .voteConfirmYes{background:#259b56;box-shadow:0 3px 0 #146437}.meetingVoteConfirm .voteConfirmNo{background:#656b80;box-shadow:0 3px 0 #363b4d}.meetingModWrap{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:6px}.meetingModWrap[hidden]{display:none!important}.meetingModVote{height:34px;background:#2877d4;box-shadow:0 3px 0 #174b91;font-size:18px;padding:4px}.meetingModProgress{position:relative;height:28px;border:2px solid #10122a;border-radius:9px;overflow:hidden;background:#151a38;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}.meetingModProgress i{position:absolute;inset:0 auto 0 0;width:0;background:#2877d4;transition:width .18s ease}.meetingModProgress span{position:relative;z-index:1;display:flex;height:100%;align-items:center;justify-content:center;font:800 10px/1 var(--font);color:#fff;text-shadow:0 1px 2px #000}.meetingModVote.voted{background:#245d9d}
 .pc{position:relative;display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;border-radius:14px;border:2.5px solid var(--edge);background:var(--panel2);box-shadow:0 4px 0 #0a0c26;font-size:15px;font-weight:700}
 .pc canvas{width:60px;height:60px;display:block}
 .pc.me{border-color:var(--sky)}
@@ -546,7 +546,7 @@ body.touch #stick{display:block}
 
 <div id="meet" hidden>
   <div class="mpanel meetp" role="dialog" aria-modal="true" aria-labelledby="meetTitle">
-    <header><h2 id="meetTitle"></h2><div class="row"><button class="modWarn" id="btnMeetingModeration" type="button" aria-label="Votação de expulsão" aria-pressed="false" hidden>⚠️</button><span class="chip" id="meetTimer">3s</span></div></header>
+    <header><h2 id="meetTitle"></h2><div class="row"><button class="modWarn" id="btnMeetingModeration" type="button" aria-label="Votação de expulsão" aria-pressed="false" hidden>🦶</button><span class="chip" id="meetTimer">3s</span></div></header>
     <p id="meetDesc"></p>
     <div id="voteBreakdown" hidden aria-live="polite"></div><div id="skipVoteDots" class="skip-vote-dots" hidden aria-label="Cores dos jogadores que pularam a votação"></div>
     <div id="meetGrid"></div>
@@ -4107,7 +4107,7 @@ function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
 
 function cardClick(id){
   const M=G.M; if(!M||!G.player.alive)return;
-  if(M.phase==='vote'){playerVote(id);return}
+  if(M.phase==='vote'){selectMeetingVote(id);return}
   if(M.phase==='discuss'){
     const c=charById(id); if(!c||!c.alive||c.isPlayer)return;
     M.sel=(M.sel===id?null:id); Object.values(M.cards).forEach(b=>b.classList.remove('sel')); if(M.sel)M.cards[id].classList.add('sel');
@@ -4201,18 +4201,35 @@ function buildMeetUI(){
     if(!G.player.alive&&ch.role==='imp')pn.style.color='#ff6b7e';
     if(!G.player.alive){const fl={sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',__hidden:'Tripulante'}[G.player.instructor&&ch.alive&&ch.role==='crew'?'__hidden':ch.function]|| (ch.role==='imp'?'Infiltrado':'Tripulante');const roleLine=el('small','pfunction',fl);b.append(cv,roleLine,pn,pv,dots)}else b.append(cv,pn,pv,dots); b.pvEl=pv; b.dotsEl=dots;
     b.addEventListener('click',()=>cardClick(ch.id));wrap.appendChild(b);M.cards[ch.id]=b;
-    const voteBtn=el('button','meetingVoteButton','Votar');voteBtn.type='button';voteBtn.dataset.targetId=ch.id;voteBtn.hidden=true;voteBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();playerVote(ch.id)});wrap.appendChild(voteBtn);
+    const voteBtn=el('button','meetingVoteButton','Votar');voteBtn.type='button';voteBtn.dataset.targetId=ch.id;voteBtn.hidden=true;voteBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();selectMeetingVote(ch.id)});wrap.appendChild(voteBtn);
+    const confirm=el('div','meetingVoteConfirm');confirm.dataset.targetId=ch.id;confirm.hidden=true;
+    const yes=el('button','voteConfirmYes','✔️'),no=el('button','voteConfirmNo','❌');yes.type=no.type='button';yes.title='Confirmar voto';no.title='Cancelar voto';yes.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();confirmMeetingVote(ch.id)});no.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();cancelMeetingVote()});confirm.append(yes,no);wrap.appendChild(confirm);
     const onlineHuman=!!(NET.inRoom&&NET.room?.players?.some(p=>String(p.id)===String(ch.id)));
-    if(onlineHuman&&String(ch.id)!==String(NET.id)){const mb=el('button','meetingModVote','Votar para expulsar');mb.type='button';mb.dataset.targetId=ch.id;mb.hidden=!NET.modMeetingOpen;mb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();meetingModerationVote(ch.id)});wrap.appendChild(mb)}
+    if(onlineHuman&&String(ch.id)!==String(NET.id)){
+      const mw=el('div','meetingModWrap');mw.dataset.targetId=ch.id;mw.hidden=true;
+      const mb=el('button','meetingModVote','🦶');mb.type='button';mb.dataset.targetId=ch.id;mb.title='Votar para expulsar da sala';mb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();meetingModerationVote(ch.id)});
+      const prog=el('div','meetingModProgress'),fill=el('i'),txt=el('span','', '0/0 votos');prog.append(fill,txt);mw.append(mb,prog);wrap.appendChild(mw);
+    }
     grid.appendChild(wrap);
   });
   $('btnMeetingModeration').hidden=!NET.inRoom;$('btnMeetingModeration').setAttribute('aria-pressed',String(!!NET.modMeetingOpen));renderMeetingModerationControls();
   renderMeetingIntro();
 }
 function renderMeetingVoteControls(){
-  const M=G.M;if(!M)return;const canVote=M.phase==='vote'&&!!G.player?.alive&&M.votes[G.player.id]===undefined;
+  const M=G.M;if(!M)return;const canVote=M.phase==='vote'&&!!G.player?.alive&&M.votes[G.player.id]===undefined&&!M.voteSending;
+  if(!canVote)M.pendingVote=null;
   document.querySelectorAll('.meetingVoteButton').forEach(btn=>{const target=charById(btn.dataset.targetId);btn.hidden=!(canVote&&target?.alive);btn.disabled=!canVote||!target?.alive;});
+  document.querySelectorAll('.meetingVoteConfirm').forEach(panel=>{const target=charById(panel.dataset.targetId),selected=canVote&&target?.alive&&String(M.pendingVote)===String(panel.dataset.targetId);panel.hidden=!selected;});
+  document.querySelectorAll('#meetGrid .pc').forEach(card=>card.classList.remove('vote-pending'));
+  if(canVote&&M.pendingVote&&M.cards[M.pendingVote])M.cards[M.pendingVote].classList.add('vote-pending');
 }
+function selectMeetingVote(id){
+  const M=G.M;if(!M||M.phase!=='vote'||!G.player?.alive||M.votes[G.player.id]!==undefined||M.voteSending)return;
+  const target=charById(id);if(!target||!target.alive)return;
+  M.pendingVote=id;Snd.click();$('meetStatus').textContent=`Selecionado: ${target.name}. Confirme em ✔️ ou cancele em ❌.`;renderMeetingVoteControls();
+}
+function confirmMeetingVote(id){const M=G.M;if(!M||String(M.pendingVote)!==String(id))return;playerVote(id)}
+function cancelMeetingVote(){const M=G.M;if(!M)return;M.pendingVote=null;$('meetStatus').textContent='Escolha seu voto.';Snd.click();renderMeetingVoteControls()}
 function setMeetPhase(ph){
   const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive; $('meet').classList.toggle('vote-reveal',ph==='result');$('meet').classList.toggle('space-result',false);
   $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';if(ph!=='result'){$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML=''}
@@ -4319,7 +4336,7 @@ function castVote(voter,target){
 function playerVote(id){
   const M=G.M; if(!M||M.phase!=='vote'||!G.player.alive||M.votes[G.player.id]!==undefined)return;
   if(id!=='skip'){const t=charById(id); if(!t||!t.alive)return}
-  castVote(G.player.id,id); Snd.click(); if(id!=='skip')M.cards[id].classList.add('pick');
+  M.pendingVote=null;M.voteSending=false;castVote(G.player.id,id); Snd.click(); if(id!=='skip')M.cards[id].classList.add('pick');
   $('btnSkip').disabled=true; $('meetStatus').textContent=id==='skip'?'Você pulou o voto.':'Voto registrado em '+charById(id).name+'.';renderMeetingVoteControls();
 }
 function renderSkipVoteDots(log){
@@ -4594,7 +4611,7 @@ const NET_CLIENT_KEY=loadNetClientKey();
 /* =====================================================================
    MULTIPLAYER ONLINE — autoridade da sala no host + snapshots/requisições
    ===================================================================== */
-const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,motionSeq:0,recvMotionSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,preparedRound:0,revealPending:false,startRequested:false,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,motionTimer:0,lastSnapshotAt:0,lastMotionAt:0,snapshotBlendDuration:.15,inputSeq:0,inputAck:0,reconcileX:0,reconcileY:0,authX:null,authY:null,lastServerMsgAt:0,pingProbe:null,modLobbyOpen:false,modMeetingOpen:false,moderationState:null};
+const NET={ws:null,id:null,inRoom:false,isHost:false,room:null,roomDraft:null,roomDraftDirty:false,applying:false,seq:0,recvSeq:0,motionSeq:0,recvMotionSeq:0,pendingTasks:new Set(),remoteInputs:new Map(),lastState:null,connecting:false,afterWelcome:null,localReadySent:false,lastSnapshots:0,lastSentInput:0,ownWasAlive:true,round:0,preparedRound:0,revealPending:false,startRequested:false,rematchWaiting:false,rematchReadyCode:null,matchImpIds:new Set(),departedImpIds:new Set(),countdownUiTimer:0,inputTimer:0,motionTimer:0,lastSnapshotAt:0,lastMotionAt:0,snapshotBlendDuration:.15,inputSeq:0,inputAck:0,reconcileX:0,reconcileY:0,authX:null,authY:null,lastServerMsgAt:0,pingProbe:null,modLobbyOpen:false,modMeetingOpen:false,moderationState:null};
 function netVisualState(ch){
   // O jogador local usa previsão imediata. Interpolação visual fica apenas para os outros jogadores.
   if(!NET.inRoom||NET.isHost||ch.id===NET.id||G.player?.controlTargetId===ch.id||!Number.isFinite(ch.netVisualX)||!Number.isFinite(ch.netVisualY))return null;
@@ -4638,13 +4655,13 @@ function netConnect(action){
     ws.onopen=()=>{NET.connecting=false;NET.lastServerMsgAt=performance.now();ws.send(JSON.stringify({type:'hello',name:String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante',color:G.cfg.color,clientKey:NET_CLIENT_KEY}))};
     ws.onmessage=e=>{netMarkAlive();let m;try{m=JSON.parse(e.data)}catch{return}netHandleMessage(m)};
     ws.onerror=()=>{NET.connecting=false;if(NET.joinPending)setJoinError('Não foi possível conectar ao servidor multiplayer.');else toast('Não foi possível conectar ao servidor multiplayer. Confira o endereço e se o servidor está ligado.',4200)};
-    ws.onclose=()=>{NET.connecting=false;netStopSilentProbe();const wasRoom=NET.inRoom,wasJoining=!!NET.joinPending;NET.joinPending=false;if(wasJoining&&!wasRoom)setJoinError('Não foi possível conectar à sala. Tente novamente.');NET.ws=null;NET.id=null;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.remoteInputs.clear();NET.pendingTasks.clear();NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastMotionAt=0;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.matchImpIds.clear();NET.departedImpIds.clear();netHideWait();if(wasRoom){$('roomLobby').hidden=true;toast('Conexão com o servidor perdida. A partida online foi desconectada.',4000)}};
+    ws.onclose=()=>{NET.connecting=false;netStopSilentProbe();const wasRoom=NET.inRoom,wasJoining=!!NET.joinPending;NET.joinPending=false;if(wasJoining&&!wasRoom)setJoinError('Não foi possível conectar à sala. Tente novamente.');NET.ws=null;NET.id=null;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.remoteInputs.clear();NET.pendingTasks.clear();NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastMotionAt=0;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.rematchWaiting=false;NET.rematchReadyCode=null;NET.matchImpIds.clear();NET.departedImpIds.clear();netHideWait();if(wasRoom){$('roomLobby').hidden=true;toast('Conexão com o servidor perdida. A partida online foi desconectada.',4000)}};
   }catch(e){NET.connecting=false;if(NET.joinPending){NET.joinPending=false;setJoinError('Não foi possível conectar à sala. Tente novamente.')}else toast('Falha ao abrir a conexão multiplayer.');}
 }
 function netRoomPayload(){const size=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createSizeIn').value=size;const bots=clamp(Math.round(+$('createBotsIn').value||0),0,size-1);$('createBotsIn').value=bots;return {size,bots,settings:netSettings(),cosmetics:cloneCosmetics(PLAYER_COSMETICS)}}
 function netCreateRoom(){Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';$('createPanel').hidden=true;netConnect(()=>netSend({type:'create_room',name:G.cfg.name,color:G.cfg.color,...netRoomPayload()}))}
 function netJoinRoom(){const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);setJoinError('');if(!/^[A-Z0-9]{6}$/.test(code)){setJoinError('Código inválido. Tente novamente');Snd.err();return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';NET.joinPending=true;netConnect(()=>netSend({type:'join_room',code,name:G.cfg.name,color:G.cfg.color,cosmetics:cloneCosmetics(PLAYER_COSMETICS)}))}
-function netLeaveRoom(){closeCosmetics();if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;netHideWait();$('roomLobby').hidden=true}
+function netLeaveRoom(){closeCosmetics();if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.rematchWaiting=false;NET.rematchReadyCode=null;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;netHideWait();$('roomLobby').hidden=true}
 function netTotal(room=NET.room){return room?(room.players.length+(room.bots||0)):0}
 function moderationTargetState(id){return NET.moderationState?.targets?.find(x=>String(x.targetId)===String(id))||null}
 function toggleLobbyModeration(){if(!NET.inRoom||!NET.isHost||NET.room?.status!=='lobby')return;NET.modLobbyOpen=!NET.modLobbyOpen;$('btnLobbyModeration').setAttribute('aria-pressed',String(NET.modLobbyOpen));netRenderRoom();Snd.click()}
@@ -4653,7 +4670,37 @@ function lobbyModerate(targetId,action){if(!NET.isHost||!['kick','ban'].includes
 function meetingModerationVote(targetId){if(!NET.inRoom||G.state!=='meeting'||String(targetId)===String(NET.id))return;netSend({type:'moderation_vote',targetId})}
 function renderMeetingModerationControls(){
   const top=$('btnMeetingModeration');if(top){top.hidden=!(NET.inRoom&&G.state==='meeting');top.setAttribute('aria-pressed',String(!!NET.modMeetingOpen))}
-  document.querySelectorAll('.meetingModVote').forEach(btn=>{const id=btn.dataset.targetId,st=moderationTargetState(id),own=!!st?.voters?.includes(NET.id);btn.hidden=!NET.modMeetingOpen;const suffix=st?`${st.count}/${st.required}${st.hostRequired&&!st.hostVoted?' · host necessário':''}`:'aguardando';btn.textContent=own?`Voto enviado · ${suffix}`:`Votar para expulsar · ${suffix}`;btn.disabled=own||!G.player?.alive||st?.possible===false;});
+  document.querySelectorAll('.meetingModWrap').forEach(wrap=>{
+    const id=wrap.dataset.targetId,st=moderationTargetState(id),own=!!st?.voters?.includes(NET.id),btn=wrap.querySelector('.meetingModVote'),fill=wrap.querySelector('.meetingModProgress i'),txt=wrap.querySelector('.meetingModProgress span');
+    const eligible=!!st&&st.possible!==false&&String(id)!==String(NET.id),canLocalVote=!!G.player?.alive;wrap.hidden=!(NET.modMeetingOpen&&eligible&&canLocalVote);
+    if(!st)return;
+    const required=Math.max(1,Number(st.required)||1),count=Math.max(0,Number(st.count)||0),pct=Math.max(0,Math.min(100,count/required*100));
+    if(fill)fill.style.width=pct+'%';if(txt)txt.textContent=`${count}/${required} votos`;
+    if(btn){btn.textContent='🦶';btn.classList.toggle('voted',own);btn.title=own?'Seu voto para expulsar já foi registrado.':'Votar para expulsar este jogador da sala';btn.disabled=own||!G.player?.alive||!eligible;}
+  });
+}
+function netEnterRematchLobby(){
+  NET.rematchWaiting=false;NET.rematchReadyCode=null;$('btnAgain').disabled=false;$('btnAgain').textContent='Jogar de novo';
+  $('end').hidden=true;$('meet').hidden=true;$('meetingIntro').hidden=true;$('role').hidden=true;$('hud').hidden=true;G.mapOpen=false;$('mapView').hidden=true;closeModalSilent();
+  netShowRoom();
+}
+function netRequestRematch(){
+  if(!NET.inRoom&&NET.rematchReadyCode){
+    NET.rematchWaiting=true;$('btnAgain').disabled=true;$('btnAgain').textContent='Entrando na sala…';
+    const ok=netSend({type:'join_room',code:NET.rematchReadyCode,name:G.cfg.name,color:G.cfg.color,cosmetics:cloneCosmetics(PLAYER_COSMETICS)});
+    if(!ok){NET.rematchWaiting=false;$('btnAgain').disabled=false;$('btnAgain').textContent='Jogar de novo'}
+    return true;
+  }
+  if(!NET.inRoom||!NET.room)return false;
+  const status=NET.room.status;
+  if(NET.isHost){
+    if(status==='ended'){NET.startRequested=false;NET.rematchWaiting=false;netSend({type:'rematch'});$('btnAgain').disabled=true;$('btnAgain').textContent='Recriando sala…';return true}
+    if(status==='lobby'){netEnterRematchLobby();return true}
+    return true;
+  }
+  if(['lobby','countdown','loading'].includes(status)){netEnterRematchLobby();return true}
+  if(status==='ended'){NET.rematchWaiting=true;netSend({type:'rematch'});$('btnAgain').disabled=true;$('btnAgain').textContent='Aguardando host…';$('endMsg').textContent='Aguardando o host recriar a sala com o mesmo código.';return true}
+  return true;
 }
 function netRenderRoom(){
   const r=NET.room;if(!r)return;
@@ -4666,7 +4713,7 @@ function netRenderRoom(){
   $('roomLobbyHint').textContent=NET.isHost?'Você é o host. Ajuste a sala e inicie quando houver pelo menos 4 participantes contando os bots.':'Aguardando o host iniciar. Só o host pode alterar configurações ou reiniciar a partida.';
   $('btnStartRoom').hidden=!NET.isHost||r.status!=='lobby';$('btnStartRoom').disabled=!NET.isHost||r.status!=='lobby'||netTotal(r)<4||netTotal(r)>r.size;if(r.status!=='lobby')closeCosmetics();
   $('btnStartRoom').textContent=r.status==='countdown'?'Contagem em andamento…':'Iniciar partida ('+netTotal(r)+'/'+r.size+')';
-  const canAgain=NET.isHost&&r.status==='ended';$('btnAgain').disabled=!!(NET.inRoom&&!canAgain);$('btnAgain').title=NET.inRoom&&!NET.isHost?'Aguardando o host reiniciar a partida':'';
+  const rematchScreen=!$('end').hidden,canAgain=r.status==='ended'||(r.status==='lobby'&&rematchScreen);$('btnAgain').disabled=!!(NET.inRoom&&(!canAgain||NET.rematchWaiting));$('btnAgain').title=NET.inRoom&&!NET.isHost&&r.status==='ended'?'Se o host ainda não recriou a sala, você ficará aguardando.':'';if(!NET.rematchWaiting)$('btnAgain').textContent='Jogar de novo';
   if(NET.isHost&&r.status==='lobby'){
     const st=(NET.isHost&&NET.roomDraftDirty&&NET.roomDraft)?NET.roomDraft:(r.settings||{});
     $('roomSizeIn').value=r.size;$('roomSizeIn').disabled=true;if(!G.cfgOpen)$('roomBotsIn').value=st.bots??r.bots;$('roomBotsIn').max=Math.max(0,r.size-r.players.length);$('roomBotsIn').disabled=!NET.isHost||r.status!=='lobby';
@@ -4693,19 +4740,26 @@ function netHandleMessage(m){
   if(m.type==='pong'){return}
   if(m.type==='welcome'){NET.id=m.id;NET.connecting=false;if(NET.afterWelcome){const f=NET.afterWelcome;NET.afterWelcome=null;f()}return}
   if(m.type==='moderation_state'){NET.moderationState=m.state||null;renderMeetingModerationControls();return}
+  if(m.type==='rematch_waiting'){NET.rematchWaiting=true;$('btnAgain').disabled=true;$('btnAgain').textContent='Aguardando host…';return}
+  if(m.type==='rematch_available'){NET.inRoom=false;NET.isHost=false;NET.rematchWaiting=false;NET.rematchReadyCode=String(m.code||'');$('btnAgain').disabled=false;$('btnAgain').textContent='Jogar de novo';return}
   if(m.type==='system_notice'){const text=String(m.text||'').slice(0,160);if(text)toast(text,4200);return}
   if(m.type==='moderation_removed'){const reason=m.reason;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;toMenu();toast(reason==='ban'?'Você foi banido desta sala.':'Você foi expulso da sala.',4200);return}
-  if(m.type==='room_error'){const msg=m.message||'Não foi possível entrar na sala.';if(NET.joinPending)setJoinError(msg);else toast(msg,3500);NET.joinPending=false;$('btnJoinConfirm').disabled=false;$('btnCreateRoom').disabled=false;return}
+  if(m.type==='room_error'){const msg=m.message||'Não foi possível entrar na sala.';if(NET.rematchWaiting&&NET.rematchReadyCode){NET.rematchWaiting=false;$('btnAgain').disabled=false;$('btnAgain').textContent='Jogar de novo';$('endMsg').textContent=msg;return}if(NET.joinPending)setJoinError(msg);else toast(msg,3500);NET.joinPending=false;$('btnJoinConfirm').disabled=false;$('btnCreateRoom').disabled=false;return}
   if(m.type==='room_state'){
-    const wasHost=NET.isHost;NET.room=m.room;NET.inRoom=!!m.room;NET.isHost=!!(m.room&&m.room.hostId===NET.id);if(!NET.isHost)NET.modLobbyOpen=false;
-    if(!m.room){NET.inRoom=false;NET.isHost=false;$('roomLobby').hidden=true;return}
-    const ownRoomPlayer=m.room.players?.find(p=>p.id===NET.id);if(ownRoomPlayer){G.cfg.name=ownRoomPlayer.name;G.cfg.color=ownRoomPlayer.color;PLAYER_COSMETICS=cloneCosmetics(ownRoomPlayer.cosmetics);savePlayerCosmetics();$('nameIn').value=ownRoomPlayer.name;syncMenuColorSelection();if(!$('cosmeticsOverlay').hidden)renderCosmeticsCatalog()}
-    if(['lobby','countdown'].includes(m.room.status))netShowRoom();else{$('roomLobby').hidden=true;$('menu').hidden=true;if(m.room.status==='loading')netShowLoading()}
+    const wasHost=NET.isHost,previousStatus=NET.room?.status;NET.room=m.room;NET.inRoom=!!m.room;NET.isHost=!!(m.room&&m.room.hostId===NET.id);if(!NET.isHost)NET.modLobbyOpen=false;
+    if(!m.room){NET.inRoom=false;NET.isHost=false;NET.rematchWaiting=false;NET.rematchReadyCode=null;$('roomLobby').hidden=true;return}
+    const ownRoomPlayer=m.room.players?.find(p=>p.id===NET.id);if(ownRoomPlayer){NET.rematchReadyCode=null;G.cfg.name=ownRoomPlayer.name;G.cfg.color=ownRoomPlayer.color;PLAYER_COSMETICS=cloneCosmetics(ownRoomPlayer.cosmetics);savePlayerCosmetics();$('nameIn').value=ownRoomPlayer.name;syncMenuColorSelection();if(!$('cosmeticsOverlay').hidden)renderCosmeticsCatalog()}
+    const recreatedFromEnd=previousStatus==='ended'&&m.room.status==='lobby';
+    if(['lobby','countdown'].includes(m.room.status)){
+      if(recreatedFromEnd&&!NET.isHost&&!NET.rematchWaiting){$('roomLobby').hidden=true;$('menu').hidden=true}
+      else if(recreatedFromEnd||NET.rematchWaiting)netEnterRematchLobby();
+      else netShowRoom();
+    }else{$('roomLobby').hidden=true;$('menu').hidden=true;if(m.room.status==='loading')netShowLoading()}
     if(m.room.settings){if(NET.isHost&&NET.roomDraftDirty&&m.room.status==='lobby'){if(NET.roomDraft)netApplySettings(NET.roomDraft)}else{NET.roomDraft={...m.room.settings,bots:m.room.bots};NET.roomDraftDirty=false;netApplySettings(m.room.settings)}}
     if(!wasHost&&NET.isHost&&m.room.status!=='lobby'&&m.room.status!=='countdown'&&m.room.status!=='loading')netBecomeHost();
     netRenderRoom();return;
   }
-  if(m.type==='left'){NET.inRoom=false;NET.isHost=false;NET.room=null;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;$('roomLobby').hidden=true;netHideWait();return}
+  if(m.type==='left'){NET.inRoom=false;NET.isHost=false;NET.room=null;NET.rematchWaiting=false;NET.rematchReadyCode=null;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;$('roomLobby').hidden=true;netHideWait();return}
   if(m.type==='player_left'){
     showPlayerLeaveNotice(m.name,m.reason);
     if(NET.isHost&&G.chars.length){const c=G.chars.find(x=>x.id===m.playerId);if(c&&c.role==='imp')NET.departedImpIds.add(c.id);if(NET.matchImpIds.has(m.playerId)&&!c?.isBot)NET.departedImpIds.add(m.playerId);if(c){G.chars=G.chars.filter(x=>x.id!==m.playerId);G.tasks=G.tasks.filter(t=>t.owner!==m.playerId);NET.remoteInputs.delete(m.playerId);if(G.M&&G.M.cards)delete G.M.cards[m.playerId];if(G.M&&G.M.votes){delete G.M.votes[m.playerId];delete G.M.voteAt[m.playerId];G.M.log=G.M.log.filter(v=>v.voter!==m.playerId&&v.target!==m.playerId)}if(G.player&&G.player.id===m.playerId)G.player=null;checkEnd()}}
@@ -4728,7 +4782,7 @@ function netHandleMessage(m){
   }
   if(m.type==='countdown_cancelled'){NET.startRequested=false;NET.preparedRound=0;NET.revealPending=false;netHideWait();toast(m.reason||'Contagem cancelada.',2400);if(NET.room&&['lobby','countdown'].includes(NET.room.status))netShowRoom();return}
   if(m.type==='game_start'){
-    NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.matchImpIds.clear();NET.departedImpIds.clear();NET.startRequested=false;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;
+    NET.room=m.room;NET.inRoom=true;NET.isHost=m.room.hostId===NET.id;NET.roomDraft={...(m.room.settings||{}),bots:m.room.bots};NET.roomDraftDirty=false;NET.round=m.round||NET.round+1;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.matchImpIds.clear();NET.departedImpIds.clear();NET.startRequested=false;NET.rematchWaiting=false;NET.rematchReadyCode=null;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;
     const own=m.room.players.find(p=>p.id===NET.id);if(own){G.cfg.name=own.name;G.cfg.color=own.color;PLAYER_COSMETICS=cloneCosmetics(own.cosmetics);savePlayerCosmetics();$('nameIn').value=own.name;if(!$('cosmeticsOverlay').hidden)renderCosmeticsCatalog()}
     netApplySettings(m.room.settings);
     $('roomLobby').hidden=true;$('joinPanel').hidden=true;$('menu').hidden=true;
@@ -4930,7 +4984,7 @@ function netApplySnapshot(s,force=false){
 }
 function netPaintMeeting(sm){
   const M=G.M;if(!M)return;const ph=sm.phase;
-  syncMeetingChatFromSnapshot(sm.chat||[]);
+  syncMeetingChatFromSnapshot(sm.chat||[]);if(ph!=='vote'){M.pendingVote=null;M.voteSending=false}else if(M.votes[G.player.id]!==undefined){M.pendingVote=null;M.voteSending=false}
   $('meetTimer').textContent=Math.max(0,Math.ceil((sm.dur||0)-(sm.t||0)))+'s';
   $('meetingIntro').hidden=ph!=='intro';$('meet').hidden=ph==='intro';
   $('meet').classList.toggle('vote-reveal',ph==='result');
@@ -5139,7 +5193,7 @@ const netOriginalVentMove=ventMove;ventMove=function(ch,id){if(NET.inRoom&&!NET.
 const netOriginalExitVent=exitVent;exitVent=function(ch){if(NET.inRoom&&!NET.isHost&&ch===G.player&&!NET.applying){netSend({type:'action',action:'vent_exit'});return true}return netOriginalExitVent(ch)};
 const netOriginalDoInteract=doInteract;doInteract=function(a){if(NET.inRoom&&!NET.isHost&&a){if(a.type==='emergency'){netSend({type:'action',action:'emergency'});return}if(a.type==='vent'){netSend({type:'action',action:'vent_enter',ventId:a.vent.id});return}}return netOriginalDoInteract(a)};
 const netOriginalSendSay=sendSay;sendSay=function(raw,claimOverride){if(NET.inRoom&&!NET.isHost&&!NET.applying){const text=String(raw||'').trim().slice(0,90);if(!text)return false;netSend({type:'action',action:'chat',text,claim:claimOverride||null});return true}return netOriginalSendSay(raw,claimOverride)};
-const netOriginalPlayerVote=playerVote;playerVote=function(id){if(NET.inRoom&&!NET.isHost&&!NET.applying){netSend({type:'action',action:'vote',targetId:id});$('btnSkip').disabled=true;$('meetStatus').textContent='Voto enviado...';document.querySelectorAll('.meetingVoteButton').forEach(b=>{b.hidden=true;b.disabled=true});return}return netOriginalPlayerVote(id)};
+const netOriginalPlayerVote=playerVote;playerVote=function(id){if(NET.inRoom&&!NET.isHost&&!NET.applying){const M=G.M;if(!M||M.phase!=='vote'||!G.player?.alive||M.votes[G.player.id]!==undefined||M.voteSending)return;if(id!=='skip'){const t=charById(id);if(!t||!t.alive)return}M.pendingVote=null;M.voteSending=true;netSend({type:'action',action:'vote',targetId:id});$('btnSkip').disabled=true;$('meetStatus').textContent='Voto enviado...';renderMeetingVoteControls();return}return netOriginalPlayerVote(id)};
 const netOriginalPostMsg=postMsg;postMsg=function(from,text){netOriginalPostMsg(from,text);if(NET.inRoom&&NET.isHost&&!NET.applying&&from&&from.id)netSend({type:'meeting_chat',playerId:from.id,text:String(text||'').slice(0,180)})};
 function closeRoomChat(){const panel=$('roomChatPanel'),btn=$('btnRoomChat');if(panel)panel.hidden=true;if(btn)btn.setAttribute('aria-expanded','false')}
 function appendRoomChatMessage(m){
@@ -5159,7 +5213,7 @@ $('roomChatForm').addEventListener('submit',e=>{e.preventDefault();if(!NET.inRoo
 const netOriginalHandleRoomChat=netHandleMessage;netHandleMessage=function(m){if(m.type==='room_chat_message'){if(NET.inRoom&&NET.room?.status==='lobby'&&m.roomCode===NET.room.code)appendRoomChatMessage(m);return}if(m.type==='room_config_notice'){if(NET.inRoom&&NET.room?.status==='lobby'&&m.roomCode===NET.room.code)appendRoomConfigNotice(m);return}if(m.type==='room_state'&&m.room?.code!==NET.room?.code){closeRoomChat();$('roomChatMessages').innerHTML=''}if(m.type==='game_start'&&NET.room?.code===m.room?.code){$('roomChatMessages').innerHTML='';closeRoomChat()}return netOriginalHandleRoomChat(m)};
 const netOriginalToMenu=toMenu;toMenu=function(){if(NET.inRoom)netLeaveRoom();return netOriginalToMenu()};
 // Override end/rematch controls without changing offline behavior.
-$('btnAgain').addEventListener('click',e=>{if(NET.inRoom){e.stopImmediatePropagation();if(!NET.isHost){toast('Somente o host pode reiniciar a partida.');return}NET.startRequested=true;if(!netSend({type:'rematch'}))NET.startRequested=false;return}},true);
+$('btnAgain').addEventListener('click',e=>{if(NET.inRoom||NET.rematchWaiting||NET.rematchReadyCode){e.stopImmediatePropagation();netRequestRematch();return}},true);
 $('btnMenu').addEventListener('click',e=>{if(NET.inRoom){e.stopImmediatePropagation();netLeaveRoom();netOriginalToMenu();return}},true);
 $('btnFreePlay').addEventListener('click',startFreePlay);
 $('btnCreateRoom').addEventListener('click',()=>{$('joinPanel').hidden=true;$('createPanel').hidden=false;$('createSizeIn').focus()});

@@ -79,12 +79,12 @@ function error(ws,message){send(ws,{type:'room_error',message})}
 function snapshotAlive(room,id){const ch=room.lastSnapshot?.chars?.find(c=>String(c.id)===String(id));return ch?ch.alive!==false:true}
 function ensureModeration(room){if(!(room.modVotes instanceof Map))room.modVotes=new Map();if(!(room.banned instanceof Set))room.banned=new Set();return room.modVotes}
 function moderationRule(room,targetId){
+  // Apenas jogadores humanos online e vivos podem votar; o alvo nunca entra no cálculo.
+  // A expulsão exige maioria absoluta dos elegíveis: piso(n / 2) + 1.
   const eligible=room.players.filter(p=>p.id!==targetId&&snapshotAlive(room,p.id));
   const maxVotes=eligible.length;
-  const hostRequired=room.hostId!==targetId&&eligible.some(p=>p.id===room.hostId);
-  let required=maxVotes>=2?(hostRequired&&maxVotes>=4?4:Math.min(3,maxVotes)):2;
-  required=Math.max(2,required);
-  return {eligible:eligible.map(p=>p.id),maxVotes,required,hostRequired,possible:maxVotes>=2};
+  const required=Math.floor(maxVotes/2)+1;
+  return {eligible:eligible.map(p=>p.id),maxVotes,required,hostRequired:false,possible:maxVotes>0};
 }
 function pruneModeration(room){
   const votes=ensureModeration(room),playerIds=new Set(room.players.map(p=>p.id));
@@ -109,7 +109,7 @@ function evaluateModeration(room){
   pruneModeration(room);const votes=ensureModeration(room);
   for(const [targetId,set] of [...votes.entries()]){
     const rule=moderationRule(room,targetId);if(!rule.possible)continue;
-    if(set.size>=rule.required&&(!rule.hostRequired||set.has(room.hostId))){votes.delete(targetId);removePlayerByModeration(room,targetId,'vote_kick');return true}
+    if(set.size>=rule.required){votes.delete(targetId);removePlayerByModeration(room,targetId,'vote_kick');return true}
   }
   broadcastModeration(room);return false;
 }
@@ -127,7 +127,7 @@ function detachFromRoom(client,reason='leave'){
   const removed=room.players.find(p=>p.id===client.id);if(!removed){client.roomCode=null;return}
   const wasHost=room.hostId===client.id;
   const cancelled=invalidateCountdown(room);
-  room.players=room.players.filter(p=>p.id!==client.id);client.roomCode=null;
+  room.players=room.players.filter(p=>p.id!==client.id);if(room.rematchWaiters instanceof Set)room.rematchWaiters.delete(client.id);client.roomCode=null;
   if(room.players.length===0){rooms.delete(room.code);send(client.ws,{type:'left'});return}
   if(wasHost)room.hostId=room.players[0].id;
   pruneModeration(room);
@@ -166,7 +166,7 @@ function startGameNow(room, rematch=false){
   if(total<4 && !(rematch && total===3)){error(clients.get(room.hostId)?.ws,'Adicione bots ou espere mais jogadores: uma nova partida precisa de pelo menos 4 participantes.');return false}
   if(total>room.size||total>15){error(clients.get(room.hostId)?.ws,'A quantidade total excede o limite da sala.');return false}
   if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);
-  room.countdownTimer=null;room.loadingTimer=null;room.status='playing';room.round++;room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.countdownRoster=null;
+  room.countdownTimer=null;room.loadingTimer=null;room.status='playing';room.round++;room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=false;room.countdownRoster=null;
   sendRoomState(room);
   broadcast(room,{type:'game_start',room:roomPublic(room),round:room.round,rematch});
   return true;
@@ -212,7 +212,7 @@ function handle(ws, raw, timings={}){
     const size=Math.min(15,Math.max(4,Math.round(Number(m.size)||10)));
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
     const code=makeCode();
-    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,createdAt:Date.now(),countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};
+    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,createdAt:Date.now(),countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,rematchLobby:false,rematchWaiters:new Set(),botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};
     room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmetics(m.cosmetics)});
     c.name=room.players[0].name;c.color=room.players[0].color;c.roomCode=code;rooms.set(code,room);
     sendRoomState(room);return;
@@ -281,7 +281,7 @@ function handle(ws, raw, timings={}){
   if(m.type==='start_game'){
     if(!isHost)return error(ws,'Somente o host pode iniciar a partida.');
     if(room.status!=='lobby')return error(ws,'Esta sala não está aguardando início.');
-    startGame(room,false,timings);return;
+    startGame(room,!!room.rematchLobby,timings);return;
   }
   if(m.type==='cancel_start'){
     if(!isHost)return error(ws,'Somente o host pode cancelar o início.');
@@ -290,9 +290,28 @@ function handle(ws, raw, timings={}){
     return;
   }
   if(m.type==='rematch'){
-    if(!isHost)return error(ws,'Somente o host pode reiniciar a partida.');
+    // Jogar de Novo recria a sala de espera no MESMO código. Quem pedir antes do
+    // host fica em espera; quem pedir depois entra novamente pela sala recriada.
+    if(!isHost){
+      if(room.status!=='ended')return error(ws,'A nova sala ainda não está disponível.');
+      if(!(room.rematchWaiters instanceof Set))room.rematchWaiters=new Set();
+      room.rematchWaiters.add(c.id);send(ws,{type:'rematch_waiting',code:room.code});return;
+    }
     if(room.status!=='ended')return error(ws,'A partida ainda não terminou.');
-    startGame(room,true,timings);return;
+    invalidateCountdown(room);
+    const previousPlayers=room.players.map(p=>({...p,cosmetics:cleanCosmetics(p.cosmetics)}));
+    const hostPlayer=previousPlayers.find(p=>p.id===room.hostId);const waiters=room.rematchWaiters instanceof Set?new Set(room.rematchWaiters):new Set();
+    room.status='lobby';room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=true;room.countdownRoster=null;
+    room.modVotes=new Map();room.modStateSig='';room.players=[];
+    if(hostPlayer){hostPlayer.ready=false;room.players.push(hostPlayer);const hc=clients.get(hostPlayer.id);if(hc)hc.roomCode=room.code}
+    // Os demais deixam a partida encerrada. Quem já apertou Jogar de Novo é
+    // reanexado imediatamente; os outros recebem o mesmo código para entrar ao clicar.
+    for(const p of previousPlayers){
+      if(p.id===room.hostId)continue;const target=clients.get(p.id);if(!target)continue;target.roomCode=null;
+      if(waiters.has(p.id)&&room.players.length+room.bots<room.size){p.ready=false;room.players.push(p);target.roomCode=room.code}
+      else send(target.ws,{type:'rematch_available',code:room.code});
+    }
+    room.rematchWaiters=new Set();sendRoomState(room);return;
   }
   if(m.type==='game_end'){
     if(!isHost)return;
