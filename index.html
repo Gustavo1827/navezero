@@ -263,7 +263,7 @@ body.touch #stick{display:block}
 .meetp h2{margin:0;font-size:26px;font-weight:800}
 #meetDesc{margin:2px 0 10px;color:var(--ink2);font-size:16px}
 #meetGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.meetPlayerWrap{display:flex;flex-direction:column;gap:5px;min-width:0}.meetPlayerWrap>.pc{width:100%;min-height:100%}.meetingVoteButton,.meetingModVote,.meetingVoteConfirm button{border:2px solid #10122a;border-radius:10px;color:#fff;font:800 11px/1.15 var(--font);padding:6px 5px}.meetingVoteButton{background:#2877d4;box-shadow:0 3px 0 #174b91}.meetingVoteButton[hidden]{display:none!important}.meetingVoteButton:disabled,.meetingModVote:disabled,.meetingVoteConfirm button:disabled{opacity:.48;filter:grayscale(.25)}.pc.vote-pending{outline:3px solid #5aa8ff;outline-offset:2px}.meetingVoteConfirm{display:flex;gap:6px}.meetingVoteConfirm[hidden]{display:none!important}.meetingVoteConfirm button{flex:1;font-size:17px;padding:5px}.meetingVoteConfirm .voteConfirmYes{background:#259b56;box-shadow:0 3px 0 #146437}.meetingVoteConfirm .voteConfirmNo{background:#656b80;box-shadow:0 3px 0 #363b4d}.meetingModWrap{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:6px}.meetingModWrap[hidden]{display:none!important}.meetingModVote{height:34px;background:#2877d4;box-shadow:0 3px 0 #174b91;font-size:18px;padding:4px}.meetingModProgress{position:relative;height:28px;border:2px solid #10122a;border-radius:9px;overflow:hidden;background:#151a38;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}.meetingModProgress i{position:absolute;inset:0 auto 0 0;width:0;background:#2877d4;transition:width .18s ease}.meetingModProgress span{position:relative;z-index:1;display:flex;height:100%;align-items:center;justify-content:center;font:800 10px/1 var(--font);color:#fff;text-shadow:0 1px 2px #000}.meetingModVote.voted{background:#245d9d}
+.meetPlayerWrap{display:flex;flex-direction:column;gap:5px;min-width:0}.meetingCardSlot{position:relative;min-width:0}.meetingCardSlot>.pc{width:100%;min-height:100%}.meetingModVote,.meetingVoteConfirm button{border:2px solid #10122a;border-radius:10px;color:#fff;font:800 11px/1.15 var(--font);padding:6px 5px}.meetingModVote:disabled,.meetingVoteConfirm button:disabled{opacity:.48;filter:grayscale(.25)}.pc.vote-pending{outline:3px solid #5aa8ff;outline-offset:2px;padding-bottom:43px}.meetingVoteConfirm{position:absolute;left:6px;right:6px;bottom:7px;z-index:4;display:flex;gap:6px}.meetingVoteConfirm[hidden]{display:none!important}.meetingVoteConfirm button{flex:1;font-size:17px;padding:5px}.meetingVoteConfirm .voteConfirmYes{background:#259b56;box-shadow:0 3px 0 #146437}.meetingVoteConfirm .voteConfirmNo{background:#656b80;box-shadow:0 3px 0 #363b4d}.meetingModWrap{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:6px}.meetingModWrap[hidden]{display:none!important}.meetingModVote{height:34px;background:#2877d4;box-shadow:0 3px 0 #174b91;font-size:18px;padding:4px}.meetingModProgress{position:relative;height:28px;border:2px solid #10122a;border-radius:9px;overflow:hidden;background:#151a38;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}.meetingModProgress i{position:absolute;inset:0 auto 0 0;width:0;background:#2877d4;transition:width .18s ease}.meetingModProgress span{position:relative;z-index:1;display:flex;height:100%;align-items:center;justify-content:center;font:800 10px/1 var(--font);color:#fff;text-shadow:0 1px 2px #000}.meetingModVote.voted{background:#245d9d}
 .pc{position:relative;display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;border-radius:14px;border:2.5px solid var(--edge);background:var(--panel2);box-shadow:0 4px 0 #0a0c26;font-size:15px;font-weight:700}
 .pc canvas{width:60px;height:60px;display:block}
 .pc.me{border-color:var(--sky)}
@@ -342,7 +342,6 @@ body.touch #stick{display:block}
 #sayChips .phrase{font-size:13.5px;line-height:1.15;padding:5px 9px;white-space:normal;max-width:100%}
 #sayChips .phrase.target{border-color:#58b8ff;color:#d8edff}
 #sayChips .phrase.cancel{border-color:#ff5468;color:#ffb3bd}
-.pc.sel{border-color:var(--sky);background:#1f3560}
 .chips{flex-wrap:wrap;justify-content:flex-end}
 @media (max-width:700px){#topRight{max-width:46vw}}
 .chips{flex-wrap:wrap;justify-content:flex-end;max-width:min(300px,56vw)}
@@ -3749,6 +3748,8 @@ function npcStatement(ch,M){
   const spectralMyst=(ai.spectralMysteries||[]).filter(e=>G.gt-e.gt<90);if(spectralMyst.length&&Math.random()<.46){const e=spectralMyst[spectralMyst.length-1];return {from:ch,text:pick([`Acho que vi um Espectral. Surgiu uma fumaça estranha ${inRoom(e.room)}.`,`Vi uma fumaça estranha ${inRoom(e.room)}. Pode existir um Espectral.`]),claim:{from:ch.id,kind:'theory',role:'spectral'}}}
   if(ch.function==='observer'&&(G.sab.comms||0)<=0){const recs=Object.entries(ai.observerMap||{}).filter(([id,r])=>r&&G.gt-r.t<35&&charById(id)?.alive);if(recs.length&&Math.random()<.24){const [id,r]=pick(recs),seen=charById(id);if(seen)return {from:ch,text:`Pelo mapa de Observador, vi ${seen.name} ${inRoom(r.room)} pouco antes da reunião.`,claim:{from:ch.id,kind:'sight',target:seen.id,room:r.room,time:r.t,strong:false,role:'observer'}}}}
   if(M.body&&Math.random()<.12)return {from:ch,text:pick([`Sim. O corpo de ${M.body.name} foi encontrado ${inRoom(M.body.room)}.`,`Isso é verdade: encontramos ${M.body.name} ${inRoom(M.body.room)}.`]),claim:{from:ch.id,kind:'ask',bodyInquiry:true}};
+  const ownRealTasks=G.tasks.filter(t=>t.owner===ch.id&&!t.fake),allOwnTasksDone=ownRealTasks.length>0&&ownRealTasks.every(t=>t.done);
+  if(ch.role==='crew'&&allOwnTasksDone&&!ai.reportedTasksDone&&Math.random()<.55){ai.reportedTasksDone=true;return {from:ch,text:'Terminei minhas tarefas.',claim:{from:ch.id,kind:'taskDone'}}}
   const recentTask=ai.state==='work'&&ai.goal?.type==='task'&&!ai.goal.t?.fake?ai.goal.t.name:(ai.lastTaskName&&G.gt-(ai.lastTaskAt||0)<30?ai.lastTaskName:null);
   const unseen=G.chars.filter(x=>x.alive&&x!==ch&&(!ai.seen[x.id]||G.gt-(ai.seen[x.id].t||0)>22));
   const unseenTarget=unseen.length?pick(unseen):null;
@@ -3878,6 +3879,18 @@ function hear(L,claim){
       if(supports){text=pick(['Sim.','Verdade.',`Eu também vi ${T.name} usar algo compatível com ${roleName}.`]);prio=4}
       else{const hostile=['imp','cleaner','parasite','spectral','delayed','marionette'].includes(claim.role);if(!imp&&hostile)addSusp(L,T.id,.45*heard,'claim',{by:sp.id,role:claim.role});text=pick(['Você não tem provas','Eu não vi isso acontecer.',`Não consigo confirmar que ${T.name} seja ${roleName}.`]);prio=2}
     }
+  }else if(claim.kind==='roleUseSelf'||claim.kind==='roleUseTarget'){
+    const roleNames={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',delayed:'Atrasado',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',instructor:'Instrutor'},roleName=roleNames[claim.role]||'essa função';
+    const hostile=['imp','cleaner','parasite','spectral','delayed','marionette'].includes(claim.role);
+    if(hostile&&!imp){addSusp(L,sp.id,1.2*heard,'claim',{role:claim.role});text=claim.kind==='roleUseTarget'&&T?`Você usou ${roleName} em ${T.name}? Isso é muito suspeito.`:`Você está dizendo que usou ${roleName}? Isso é muito suspeito.`;prio=4}
+    else if(claim.kind==='roleUseTarget'&&T){text=pick([`Boa! Então você usou ${roleName} em ${T.name}.`,`Muito bem ${sp.name}. Isso pode ajudar a entender o que aconteceu.`,`Certo. ${T.name} consegue confirmar isso?`]);prio=2}
+    else{text=pick(['Boa!','Certo, isso pode ajudar.','Muito bem. Alguém consegue confirmar?']);prio=2}
+  }else if(claim.kind==='taskDone'){
+    const own=ai.susp[sp.id]||0;
+    if(own>=P.thr*.7){text=pick([`Boa, mas ainda preciso entender as suspeitas sobre ${sp.name}.`,`Terminar tarefas ajuda, mas ainda quero esclarecer o que aconteceu.`]);prio=2}
+    else{text=pick(['Boa!',`Muito bem ${sp.name}`,`${sp.name} terminou as tarefas. Boa!`]);prio=2}
+  }else if(claim.kind==='praise'){
+    if(T===L){text=pick(['Valeu!','Boa!']);prio=1}
   }else if(claim.kind==='ask'&&claim.role&&T){
     const sawMarion=(ai.controlSaw?.id===T.id||ai.controlVictimSaw?.id===T.id),sawEngineer=ai.engineerSaw?.id===T.id,sawCleaner=ai.cleanSaw?.id===T.id,sawParamedic=ai.reviveSaw?.medicId===T.id;
     const roleNames={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',delayed:'Atrasado',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico'};
@@ -3984,6 +3997,11 @@ const PRESET_PHRASES=[
   {id:'playerOnly',label:'[jogador]',target:true},
   {id:'foundBodyExact',label:'Encontrei o corpo de [morto] em [sala]',target:true,targetDead:true,room:true},
   {id:'sawRoleUse',label:'Vi [jogador/alguém] usar a função de [função]!',target:true,allowSomeone:true,roleChoice:true},
+  {id:'roleUsedSelf',label:'Usei a função de [função]',roleChoice:true},
+  {id:'roleUsedTarget',label:'Usei a função de [função] em [jogador]',target:true,roleChoice:true},
+  {id:'tasksDone',label:'Terminei minhas tarefas.'},
+  {id:'good',label:'Boa!'},
+  {id:'praiseTarget',label:'Muito bem [jogador]',target:true},
   {id:'noProof',label:'Você não tem provas'},
   {id:'expelTargetBang',label:'Vamos expulsar [jogador] do jogo!',target:true},
   {id:'expelTargetAsk',label:'Vamos expulsar [jogador] do jogo?',target:true}
@@ -4097,6 +4115,15 @@ function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
     case 'sawRoleUse': {
       const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',delayed:'Atrasado',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',instructor:'Instrutor'};const role=roles[rolePicked];if(!role)return;text=T?`Vi ${T.name} usar a função de ${role}!`:`Vi alguém usar a função de ${role}!`;claim={from:G.player.id,kind:'roleSight',target:T?.id||null,role:rolePicked,strong:!!T};break;
     }
+    case 'roleUsedSelf': case 'roleUsedTarget': {
+      const roles={crew:'Tripulante',imp:'Infiltrado',sheriff:'Xerife',locator:'Localizador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',delayed:'Atrasado',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',instructor:'Instrutor'};const role=roles[rolePicked];if(!role)return;
+      if(id==='roleUsedTarget'){if(!T)return;text=`Usei a função de ${role} em ${T.name}`;claim={from:G.player.id,kind:'roleUseTarget',target:T.id,role:rolePicked,strong:false}}
+      else{text=`Usei a função de ${role}`;claim={from:G.player.id,kind:'roleUseSelf',role:rolePicked,strong:false}}
+      break;
+    }
+    case 'tasksDone': text='Terminei minhas tarefas.'; claim={from:G.player.id,kind:'taskDone'}; break;
+    case 'good': text='Boa!'; claim={from:G.player.id,kind:'praise'}; break;
+    case 'praiseTarget': if(!T)return; text=`Muito bem ${T.name}`; claim={from:G.player.id,kind:'praise',target:T.id}; break;
     case 'noProof': text='Você não tem provas'; claim={from:G.player.id,kind:'caution'}; break;
     case 'expelTargetBang': if(!T)return; text=`Vamos expulsar ${T.name} do jogo!`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:true}; break;
     case 'expelTargetAsk': if(!T)return; text=`Vamos expulsar ${T.name} do jogo?`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:false}; break;
@@ -4107,12 +4134,7 @@ function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
 
 function cardClick(id){
   const M=G.M; if(!M||!G.player.alive)return;
-  if(M.phase==='vote'){selectMeetingVote(id);return}
-  if(M.phase==='discuss'){
-    const c=charById(id); if(!c||!c.alive||c.isPlayer)return;
-    M.sel=(M.sel===id?null:id); Object.values(M.cards).forEach(b=>b.classList.remove('sel')); if(M.sel)M.cards[id].classList.add('sel');
-    Snd.click(); $('meetStatus').textContent=M.sel?'Selecionado: '+c.name+'. Use os atalhos ou escreva.':'';
-  }
+  if(M.phase==='vote')selectMeetingVote(id);
 }
 function npcChoose(ch){
   const M=G.M, ai=ch.ai, P=PERS[ai.pers], cand=G.chars.filter(c=>c.alive&&c!==ch);
@@ -4200,10 +4222,10 @@ function buildMeetUI(){
     const pv=el('span','pv',ch.alive?'':'Eliminado'), dots=el('span','dots'), pn=el('span','pn',ch.name);
     if(!G.player.alive&&ch.role==='imp')pn.style.color='#ff6b7e';
     if(!G.player.alive){const fl={sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',__hidden:'Tripulante'}[G.player.instructor&&ch.alive&&ch.role==='crew'?'__hidden':ch.function]|| (ch.role==='imp'?'Infiltrado':'Tripulante');const roleLine=el('small','pfunction',fl);b.append(cv,roleLine,pn,pv,dots)}else b.append(cv,pn,pv,dots); b.pvEl=pv; b.dotsEl=dots;
-    b.addEventListener('click',()=>cardClick(ch.id));wrap.appendChild(b);M.cards[ch.id]=b;
-    const voteBtn=el('button','meetingVoteButton','Votar');voteBtn.type='button';voteBtn.dataset.targetId=ch.id;voteBtn.hidden=true;voteBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();selectMeetingVote(ch.id)});wrap.appendChild(voteBtn);
+    b.addEventListener('click',()=>cardClick(ch.id));M.cards[ch.id]=b;
+    const cardSlot=el('div','meetingCardSlot');cardSlot.appendChild(b);
     const confirm=el('div','meetingVoteConfirm');confirm.dataset.targetId=ch.id;confirm.hidden=true;
-    const yes=el('button','voteConfirmYes','✔️'),no=el('button','voteConfirmNo','❌');yes.type=no.type='button';yes.title='Confirmar voto';no.title='Cancelar voto';yes.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();confirmMeetingVote(ch.id)});no.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();cancelMeetingVote()});confirm.append(yes,no);wrap.appendChild(confirm);
+    const yes=el('button','voteConfirmYes','✔️'),no=el('button','voteConfirmNo','❌');yes.type=no.type='button';yes.title='Confirmar voto';no.title='Cancelar voto';yes.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();confirmMeetingVote(ch.id)});no.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();cancelMeetingVote()});confirm.append(yes,no);cardSlot.appendChild(confirm);wrap.appendChild(cardSlot);
     const onlineHuman=!!(NET.inRoom&&NET.room?.players?.some(p=>String(p.id)===String(ch.id)));
     if(onlineHuman&&String(ch.id)!==String(NET.id)){
       const mw=el('div','meetingModWrap');mw.dataset.targetId=ch.id;mw.hidden=true;
@@ -4218,7 +4240,6 @@ function buildMeetUI(){
 function renderMeetingVoteControls(){
   const M=G.M;if(!M)return;const canVote=M.phase==='vote'&&!!G.player?.alive&&M.votes[G.player.id]===undefined&&!M.voteSending;
   if(!canVote)M.pendingVote=null;
-  document.querySelectorAll('.meetingVoteButton').forEach(btn=>{const target=charById(btn.dataset.targetId);btn.hidden=!(canVote&&target?.alive);btn.disabled=!canVote||!target?.alive;});
   document.querySelectorAll('.meetingVoteConfirm').forEach(panel=>{const target=charById(panel.dataset.targetId),selected=canVote&&target?.alive&&String(M.pendingVote)===String(panel.dataset.targetId);panel.hidden=!selected;});
   document.querySelectorAll('#meetGrid .pc').forEach(card=>card.classList.remove('vote-pending'));
   if(canVote&&M.pendingVote&&M.cards[M.pendingVote])M.cards[M.pendingVote].classList.add('vote-pending');
@@ -4692,14 +4713,17 @@ function netRequestRematch(){
     return true;
   }
   if(!NET.inRoom||!NET.room)return false;
-  const status=NET.room.status;
+  const status=NET.room.status,endScreen=!$('end').hidden||G.state==='over';
   if(NET.isHost){
-    if(status==='ended'){NET.startRequested=false;NET.rematchWaiting=false;netSend({type:'rematch'});$('btnAgain').disabled=true;$('btnAgain').textContent='Recriando sala…';return true}
+    // O fim local pode aparecer alguns milissegundos antes do room_state "ended".
+    // O game_end e este pedido usam o mesmo WebSocket, então a ordem é preservada
+    // no servidor e o clique não precisa esperar a atualização visual da sala.
+    if(status==='ended'||endScreen){NET.startRequested=false;NET.rematchWaiting=false;const ok=netSend({type:'rematch'});if(ok){$('btnAgain').disabled=true;$('btnAgain').textContent='Recriando sala…'}return true}
     if(status==='lobby'){netEnterRematchLobby();return true}
     return true;
   }
   if(['lobby','countdown','loading'].includes(status)){netEnterRematchLobby();return true}
-  if(status==='ended'){NET.rematchWaiting=true;netSend({type:'rematch'});$('btnAgain').disabled=true;$('btnAgain').textContent='Aguardando host…';$('endMsg').textContent='Aguardando o host recriar a sala com o mesmo código.';return true}
+  if(status==='ended'||endScreen){NET.rematchWaiting=true;const ok=netSend({type:'rematch'});if(ok){$('btnAgain').disabled=true;$('btnAgain').textContent='Aguardando host…';$('endMsg').textContent='Aguardando o host recriar a sala com o mesmo código.'}else{NET.rematchWaiting=false;$('btnAgain').disabled=false}$('btnAgain').textContent=ok?'Aguardando host…':'Jogar de novo';return true}
   return true;
 }
 function netRenderRoom(){
@@ -4713,7 +4737,7 @@ function netRenderRoom(){
   $('roomLobbyHint').textContent=NET.isHost?'Você é o host. Ajuste a sala e inicie quando houver pelo menos 4 participantes contando os bots.':'Aguardando o host iniciar. Só o host pode alterar configurações ou reiniciar a partida.';
   $('btnStartRoom').hidden=!NET.isHost||r.status!=='lobby';$('btnStartRoom').disabled=!NET.isHost||r.status!=='lobby'||netTotal(r)<4||netTotal(r)>r.size;if(r.status!=='lobby')closeCosmetics();
   $('btnStartRoom').textContent=r.status==='countdown'?'Contagem em andamento…':'Iniciar partida ('+netTotal(r)+'/'+r.size+')';
-  const rematchScreen=!$('end').hidden,canAgain=r.status==='ended'||(r.status==='lobby'&&rematchScreen);$('btnAgain').disabled=!!(NET.inRoom&&(!canAgain||NET.rematchWaiting));$('btnAgain').title=NET.inRoom&&!NET.isHost&&r.status==='ended'?'Se o host ainda não recriou a sala, você ficará aguardando.':'';if(!NET.rematchWaiting)$('btnAgain').textContent='Jogar de novo';
+  const rematchScreen=!$('end').hidden,canAgain=rematchScreen||r.status==='ended';$('btnAgain').disabled=!!(NET.inRoom&&(!canAgain||NET.rematchWaiting));$('btnAgain').title=NET.inRoom&&!NET.isHost&&(r.status==='ended'||rematchScreen)?'Se o host ainda não recriou a sala, você ficará aguardando.':'';if(!NET.rematchWaiting)$('btnAgain').textContent='Jogar de novo';
   if(NET.isHost&&r.status==='lobby'){
     const st=(NET.isHost&&NET.roomDraftDirty&&NET.roomDraft)?NET.roomDraft:(r.settings||{});
     $('roomSizeIn').value=r.size;$('roomSizeIn').disabled=true;if(!G.cfgOpen)$('roomBotsIn').value=st.bots??r.bots;$('roomBotsIn').max=Math.max(0,r.size-r.players.length);$('roomBotsIn').disabled=!NET.isHost||r.status!=='lobby';

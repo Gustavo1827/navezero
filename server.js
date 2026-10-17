@@ -127,7 +127,7 @@ function detachFromRoom(client,reason='leave'){
   const removed=room.players.find(p=>p.id===client.id);if(!removed){client.roomCode=null;return}
   const wasHost=room.hostId===client.id;
   const cancelled=invalidateCountdown(room);
-  room.players=room.players.filter(p=>p.id!==client.id);if(room.rematchWaiters instanceof Set)room.rematchWaiters.delete(client.id);client.roomCode=null;
+  room.players=room.players.filter(p=>p.id!==client.id);if(room.rematchWaiters instanceof Set)room.rematchWaiters.delete(client.id);client.roomCode=null;client.rematchCode=null;client.rematchProfile=null;
   if(room.players.length===0){rooms.delete(room.code);send(client.ws,{type:'left'});return}
   if(wasHost)room.hostId=room.players[0].id;
   pruneModeration(room);
@@ -228,10 +228,24 @@ function handle(ws, raw, timings={}){
     if(room.players.length+room.bots>=room.size)return error(ws,'Sala lotada. O host precisa remover bots para liberar uma vaga.');
     const cancelled=invalidateCountdown(room);
     const player={id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmetics(m.cosmetics)};
-    room.players.push(player);c.name=player.name;c.color=player.color;c.roomCode=code;
+    room.players.push(player);c.name=player.name;c.color=player.color;c.roomCode=code;c.rematchCode=null;c.rematchProfile=null;
     sendRoomState(room);
     if(cancelled)broadcast(room,{type:'countdown_cancelled',reason:'Um jogador entrou. A contagem foi cancelada.'});
     return;
+  }
+  // Um jogador pode apertar "Jogar de Novo" exatamente no intervalo entre o
+  // host recriar a sala e o aviso de revanche chegar ao navegador. Nesse caso ele
+  // já não possui roomCode, mas ainda tem uma vaga/perfil vinculados à mesma sala.
+  // Aceitamos o pedido diretamente para não exigir um segundo clique.
+  if(m.type==='rematch'&&!c.roomCode&&c.rematchCode){
+    const code=String(c.rematchCode||''),rematchRoom=rooms.get(code);
+    if(!rematchRoom||rematchRoom.status!=='lobby'||!rematchRoom.rematchLobby){c.rematchCode=null;c.rematchProfile=null;return error(ws,'A nova sala não está mais disponível.')}
+    if(rematchRoom.players.some(p=>p.id===c.id)){c.roomCode=code;c.rematchCode=null;c.rematchProfile=null;sendRoomState(rematchRoom);return}
+    if(rematchRoom.players.length+rematchRoom.bots>=rematchRoom.size)return error(ws,'Sala lotada. O host precisa remover bots para liberar uma vaga.');
+    const saved=c.rematchProfile&&typeof c.rematchProfile==='object'?c.rematchProfile:{};
+    const player={id:c.id,name:safeText(saved.name||c.name),color:pickColor(saved.color||c.color,rematchRoom),ready:false,cosmetics:cleanCosmetics(saved.cosmetics)};
+    rematchRoom.players.push(player);c.name=player.name;c.color=player.color;c.roomCode=code;c.rematchCode=null;c.rematchProfile=null;
+    sendRoomState(rematchRoom);return;
   }
   const room=roomFor(c);
   if(m.type==='leave_room'){detachFromRoom(c);return}
@@ -303,12 +317,13 @@ function handle(ws, raw, timings={}){
     const hostPlayer=previousPlayers.find(p=>p.id===room.hostId);const waiters=room.rematchWaiters instanceof Set?new Set(room.rematchWaiters):new Set();
     room.status='lobby';room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=true;room.countdownRoster=null;
     room.modVotes=new Map();room.modStateSig='';room.players=[];
-    if(hostPlayer){hostPlayer.ready=false;room.players.push(hostPlayer);const hc=clients.get(hostPlayer.id);if(hc)hc.roomCode=room.code}
+    if(hostPlayer){hostPlayer.ready=false;room.players.push(hostPlayer);const hc=clients.get(hostPlayer.id);if(hc){hc.roomCode=room.code;hc.rematchCode=null;hc.rematchProfile=null}}
     // Os demais deixam a partida encerrada. Quem já apertou Jogar de Novo é
-    // reanexado imediatamente; os outros recebem o mesmo código para entrar ao clicar.
+    // reanexado imediatamente; os outros guardam uma referência temporária da
+    // revanche para que um clique feito durante a transição não seja perdido.
     for(const p of previousPlayers){
-      if(p.id===room.hostId)continue;const target=clients.get(p.id);if(!target)continue;target.roomCode=null;
-      if(waiters.has(p.id)&&room.players.length+room.bots<room.size){p.ready=false;room.players.push(p);target.roomCode=room.code}
+      if(p.id===room.hostId)continue;const target=clients.get(p.id);if(!target)continue;target.roomCode=null;target.rematchCode=room.code;target.rematchProfile={...p,cosmetics:cleanCosmetics(p.cosmetics)};
+      if(waiters.has(p.id)&&room.players.length+room.bots<room.size){p.ready=false;room.players.push(p);target.roomCode=room.code;target.rematchCode=null;target.rematchProfile=null}
       else send(target.ws,{type:'rematch_available',code:room.code});
     }
     room.rematchWaiters=new Set();sendRoomState(room);return;

@@ -59,3 +59,9 @@ Os cosméticos usam artes vetoriais originais do Nave Zero, ajustadas a partir d
 - Novas tarefas e cadeias de etapas foram integradas às estações existentes do mapa.
 - Diálogo de NPCs recebeu novas respostas curtas, relatos de corpo, hipóteses de função e chamadas de voto ligadas às memórias/evidências do NPC.
 - Mantidos os ajustes anteriores de distância para ações, descrições de funções, texto de função para fantasmas e visibilidade de portas sabotadas.
+
+## Correção — Jogar de Novo
+
+- O botão de revanche online agora aceita o clique assim que a tela de fim aparece, sem depender de a atualização `ended` da sala já ter chegado ao navegador.
+- Foi corrigida a corrida em que o host recriava a sala no mesmo instante em que outro jogador apertava “Jogar de Novo”. O servidor mantém temporariamente o código e o perfil daquele jogador e consegue reanexá-lo à sala recriada sem exigir um segundo clique.
+- Código da sala, configurações, quantidade/cadastro de bots e fluxo multiplayer existente continuam preservados.
