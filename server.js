@@ -349,6 +349,12 @@ function handle(ws, raw, timings={}){
     for(const k of ['targetId','x','y','sabotage','ventId','taskId','stepId','fix','text','claim'])if(m[k]!==undefined)allowedData[k]=m[k];if(m.bodyId!==undefined)allowedData.bodyId=m.bodyId;
     send(host.ws,{type:'host_command',...allowedData});return;
   }
+  if(m.type==='room_config_notice'){
+    if(!isHost)return error(ws,'Somente o host pode anunciar alterações de configuração.');
+    if(room.status!=='lobby')return;
+    const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,220);if(!text)return;
+    broadcast(room,{type:'room_config_notice',roomCode:room.code,text,at:Date.now()});return;
+  }
   if(m.type==='room_chat'){
     if(room.status!=='lobby')return error(ws,'O chat escrito só fica disponível na sala de espera.');
     const player=room.players.find(p=>p.id===c.id);if(!player)return;

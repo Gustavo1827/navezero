@@ -263,7 +263,7 @@ body.touch #stick{display:block}
 .meetp h2{margin:0;font-size:26px;font-weight:800}
 #meetDesc{margin:2px 0 10px;color:var(--ink2);font-size:16px}
 #meetGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.meetPlayerWrap{display:flex;flex-direction:column;gap:5px;min-width:0}.meetPlayerWrap>.pc{width:100%;min-height:100%}.meetingModVote{border:2px solid #10122a;border-radius:10px;background:#b51f3d;color:#fff;font:800 11px/1.15 var(--font);padding:6px 5px;box-shadow:0 3px 0 #711126}.meetingModVote:disabled{opacity:.48;filter:grayscale(.25)}
+.meetPlayerWrap{display:flex;flex-direction:column;gap:5px;min-width:0}.meetPlayerWrap>.pc{width:100%;min-height:100%}.meetingVoteButton,.meetingModVote{border:2px solid #10122a;border-radius:10px;color:#fff;font:800 11px/1.15 var(--font);padding:6px 5px}.meetingVoteButton{background:#2877d4;box-shadow:0 3px 0 #174b91}.meetingVoteButton[hidden]{display:none!important}.meetingVoteButton:disabled,.meetingModVote:disabled{opacity:.48;filter:grayscale(.25)}.meetingModVote{background:#b51f3d;box-shadow:0 3px 0 #711126}
 .pc{position:relative;display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;border-radius:14px;border:2.5px solid var(--edge);background:var(--panel2);box-shadow:0 4px 0 #0a0c26;font-size:15px;font-weight:700}
 .pc canvas{width:60px;height:60px;display:block}
 .pc.me{border-color:var(--sky)}
@@ -402,6 +402,7 @@ body.touch #stick{display:block}
 @keyframes mpPulse{50%{opacity:.76;transform:scale(.985)}}
 #btnSaveRoomConfig{display:block;margin:4px auto}
 @media(max-width:480px){.roomCard{padding:15px}.roomFields{grid-template-columns:1fr 1fr}.roomCodeLine{font-size:16px}#roomCodeText{font-size:24px}}
+#gameSettingsOverlay{position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,5,18,.86)}#gameSettingsOverlay[hidden]{display:none!important}.gameSettingsCard{width:min(440px,100%)}.gameSettingRow{display:grid;gap:10px;margin:18px 0}.gameSettingRow label{display:flex;justify-content:space-between;gap:12px;font-weight:800}.gameSettingRow input[type=range]{width:100%}
 
 </style>
 </head>
@@ -416,7 +417,7 @@ body.touch #stick{display:block}
     <canvas id="pv" width="280" height="260"></canvas>
     <div class="field"><label for="nameIn">Seu nome</label><input id="nameIn" maxlength="12" value="Você" autocomplete="off"></div>
     <div class="row onlineMenu"><button class="big" id="btnCreateRoom">Criar sala</button><button class="big alt" id="btnJoinRoom">Entrar na sala</button></div>
-    <div class="row" style="justify-content:center;margin-top:8px"><button class="chip" id="btnFreePlay" type="button">Partida Livre</button><button class="chip" id="btnCosmetics" type="button">Inventário</button><button class="chip desktopOnly" id="btnKeys" type="button">Teclas ⌨️</button></div>
+    <div class="row" style="justify-content:center;margin-top:8px"><button class="chip" id="btnFreePlay" type="button">Partida Livre</button><button class="chip" id="btnCosmetics" type="button">Inventário</button><button class="chip" id="btnGameSettings" type="button">Configurações de jogo</button><button class="chip desktopOnly" id="btnKeys" type="button">Teclas ⌨️</button></div>
     <div id="createPanel" hidden>
       <h3 style="margin:0 0 10px;color:var(--amber)">Preparar sala</h3>
       <div class="createFields">
@@ -471,6 +472,15 @@ body.touch #stick{display:block}
 </div>
 
 
+<div id="gameSettingsOverlay" hidden aria-live="polite">
+  <div class="card gameSettingsCard" role="dialog" aria-modal="true" aria-labelledby="gameSettingsTitle">
+    <h2 id="gameSettingsTitle">Configurações de jogo</h2>
+    <p class="phase">Preferências deste dispositivo. As alterações são salvas automaticamente.</p>
+    <div class="gameSettingRow"><label for="gameVolumeIn"><span>Volume do jogo</span><b id="gameVolumeValue">100%</b></label><input id="gameVolumeIn" type="range" min="0" max="100" step="1" value="100"></div>
+    <div class="row"><button class="big" id="btnGameSettingsClose" type="button">Fechar</button></div>
+  </div>
+</div>
+
 <div id="cosmeticsOverlay" hidden aria-live="polite">
   <div class="cosmeticsCard" role="dialog" aria-modal="true" aria-labelledby="cosmeticsTitle">
     <div class="cosmeticsHead"><h2 id="cosmeticsTitle">Inventário</h2><button class="chip" id="btnCosmeticsClose" type="button" aria-label="Fechar inventário">✕</button></div>
@@ -504,7 +514,7 @@ body.touch #stick{display:block}
     </div>
   </div>
   <div id="topRight">
-    <div class="chips"><button class="chip" id="btnMap" aria-pressed="false">Mapa</button><button class="chip" id="btnRoomChat" aria-expanded="false" aria-controls="roomChatPanel" hidden>Chat</button><button class="chip" id="btnSound">Som: ligado</button><button class="chip" id="btnExit">Sair do jogo</button></div>
+    <div class="chips"><button class="chip" id="btnMap" aria-pressed="false">Mapa</button><button class="chip" id="btnRoomChat" aria-expanded="false" aria-controls="roomChatPanel" hidden>Chat</button><button class="chip" id="btnExit">Sair do jogo</button></div>
     <div class="info">Seu papel: <b id="roleName">-</b></div>
   </div>
   <div id="toast" role="status"></div>
@@ -1292,12 +1302,14 @@ const NAME_BUB={};
 const keys=new Set(); const joy={x:0,y:0};
 
 /* ---------- som ---------- */
-const Snd={ctx:null,on:true,
+function loadGameVolume(){try{const v=Number(localStorage.getItem('navezero_game_volume_v1'));return Number.isFinite(v)?clamp(v,0,1):1}catch{return 1}}
+function saveGameVolume(v){try{localStorage.setItem('navezero_game_volume_v1',String(clamp(v,0,1)))}catch{}}
+const Snd={ctx:null,on:true,volume:loadGameVolume(),
   init(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}} if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume()},
   tone(f,d=.12,type='sine',vol=.08,slide=0,delay=0){
-    if(!this.on||!this.ctx)return; const c=this.ctx,t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
+    if(!this.on||!this.ctx||this.volume<=0)return; const c=this.ctx,t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
     o.type=type;o.frequency.setValueAtTime(f,t); if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);
-    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(g).connect(c.destination); o.start(t); o.stop(t+d+.02)},
+    g.gain.setValueAtTime(Math.max(.0001,vol*this.volume),t); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(g).connect(c.destination); o.start(t); o.stop(t+d+.02)},
   click(){this.tone(520,.06,'square',.04)},
   ok(){[523,659,784,1047].forEach((f,i)=>this.tone(f,.16,'triangle',.09,0,i*.08))},
   err(){this.tone(180,.25,'sawtooth',.08,-90)},
@@ -2857,7 +2869,7 @@ function presetConfig(id){const cfg=presetBaseConfig();if(id==='chaos'||id==='he
   return normalizeCfgCaps(cfg)}
 function currentCfgMatchesPreset(id){const p=presetConfig(id);for(const k of NET_SETTING_KEYS){if(Number(CFG[k])!==Number(p[k]))return false}return true}
 function activePresetId(){for(const p of PRESET_DEFS)if(currentCfgMatchesPreset(p.id))return p.id;return ''}
-function applyPreset(id){const cfg=presetConfig(id);for(const key of Object.keys(CFG_DEF))if(cfg[key]!==undefined)CFG[key]=cfg[key];normalizeCfgCaps(CFG);saveCfg();if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.room?.status==='lobby'){NET.roomDraft={...cfg,bots:NET.roomDraft?.bots??NET.room?.bots??0};NET.roomDraftDirty=true;netSyncRoomControlsFromCFG()}buildCfgUI();Snd.click()}
+function applyPreset(id){const before={...CFG},cfg=presetConfig(id);for(const key of Object.keys(CFG_DEF))if(cfg[key]!==undefined)CFG[key]=cfg[key];normalizeCfgCaps(CFG);saveCfg();if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.room?.status==='lobby'){NET.roomDraft={...cfg,bots:NET.roomDraft?.bots??NET.room?.bots??0};NET.roomDraftDirty=true;for(const key of NET_SETTING_KEYS)if(before[key]!==CFG[key])netAnnounceConfigChange(key,CFG[key]);netSyncRoomControlsFromCFG()}buildCfgUI();Snd.click()}
 function renderPresetCards(box){const grid=el('div','presetGrid');const active=activePresetId();PRESET_DEFS.forEach(p=>{const card=el('article','presetCard');card.dataset.theme=p.theme;card.classList.toggle('active',active===p.id);const art=el('div','presetArt');const img=document.createElement('img');img.alt='Arte da predefinição '+p.name;img.src=p.art;art.appendChild(img);const meta=el('div','presetMeta');meta.append(el('span','presetTag',p.tag),(()=>{const h=document.createElement('h3');h.textContent=p.name;return h})(),el('p','',p.desc));const foot=el('div','presetFoot');foot.append(el('span','presetState',active===p.id?'Ativa agora':'Aplicar conjunto completo'),(()=>{const b=el('button','big presetApply',active===p.id?'Reaplicar':'Aplicar');b.type='button';b.addEventListener('click',()=>applyPreset(p.id));return b})());card.append(art,meta,foot);grid.appendChild(card)});box.appendChild(grid)}
 const inGame=()=>G.state!=='menu';
 const uiBusy=()=>G.cfgOpen||G.confirmOpen;
@@ -4189,12 +4201,17 @@ function buildMeetUI(){
     if(!G.player.alive&&ch.role==='imp')pn.style.color='#ff6b7e';
     if(!G.player.alive){const fl={sheriff:'Xerife',locator:'Localizador',delayed:'Atrasado',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',lazy:'Preguiçoso',__hidden:'Tripulante'}[G.player.instructor&&ch.alive&&ch.role==='crew'?'__hidden':ch.function]|| (ch.role==='imp'?'Infiltrado':'Tripulante');const roleLine=el('small','pfunction',fl);b.append(cv,roleLine,pn,pv,dots)}else b.append(cv,pn,pv,dots); b.pvEl=pv; b.dotsEl=dots;
     b.addEventListener('click',()=>cardClick(ch.id));wrap.appendChild(b);M.cards[ch.id]=b;
+    const voteBtn=el('button','meetingVoteButton','Votar');voteBtn.type='button';voteBtn.dataset.targetId=ch.id;voteBtn.hidden=true;voteBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();playerVote(ch.id)});wrap.appendChild(voteBtn);
     const onlineHuman=!!(NET.inRoom&&NET.room?.players?.some(p=>String(p.id)===String(ch.id)));
     if(onlineHuman&&String(ch.id)!==String(NET.id)){const mb=el('button','meetingModVote','Votar para expulsar');mb.type='button';mb.dataset.targetId=ch.id;mb.hidden=!NET.modMeetingOpen;mb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();meetingModerationVote(ch.id)});wrap.appendChild(mb)}
     grid.appendChild(wrap);
   });
   $('btnMeetingModeration').hidden=!NET.inRoom;$('btnMeetingModeration').setAttribute('aria-pressed',String(!!NET.modMeetingOpen));renderMeetingModerationControls();
   renderMeetingIntro();
+}
+function renderMeetingVoteControls(){
+  const M=G.M;if(!M)return;const canVote=M.phase==='vote'&&!!G.player?.alive&&M.votes[G.player.id]===undefined;
+  document.querySelectorAll('.meetingVoteButton').forEach(btn=>{const target=charById(btn.dataset.targetId);btn.hidden=!(canVote&&target?.alive);btn.disabled=!canVote||!target?.alive;});
 }
 function setMeetPhase(ph){
   const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive; $('meet').classList.toggle('vote-reveal',ph==='result');$('meet').classList.toggle('space-result',false);
@@ -4218,6 +4235,7 @@ function setMeetPhase(ph){
   }
   $('meetSay').hidden=!(al&&ph==='discuss'); $('sayChips').hidden=!(al&&ph==='discuss');renderMeetingModerationControls();
   if(ph!=='discuss')$('sayChips').innerHTML='';
+  renderMeetingVoteControls();
   Snd.open();
 }
 function updateMeeting(dt){
@@ -4302,7 +4320,7 @@ function playerVote(id){
   const M=G.M; if(!M||M.phase!=='vote'||!G.player.alive||M.votes[G.player.id]!==undefined)return;
   if(id!=='skip'){const t=charById(id); if(!t||!t.alive)return}
   castVote(G.player.id,id); Snd.click(); if(id!=='skip')M.cards[id].classList.add('pick');
-  $('btnSkip').disabled=true; $('meetStatus').textContent=id==='skip'?'Você pulou o voto.':'Voto registrado em '+charById(id).name+'.';
+  $('btnSkip').disabled=true; $('meetStatus').textContent=id==='skip'?'Você pulou o voto.':'Voto registrado em '+charById(id).name+'.';renderMeetingVoteControls();
 }
 function renderSkipVoteDots(log){
   const box=$('skipVoteDots');box.innerHTML='';
@@ -4498,8 +4516,10 @@ $('mapView').addEventListener('pointerdown',e=>{if(e.target===$('mapView'))close
 $('mclose').addEventListener('click',closeModal);
 $('modal').addEventListener('pointerdown',e=>{if(e.target===$('modal'))closeModal()});
 $('tpHead').addEventListener('click',()=>$('tasksPanel').classList.toggle('fold'));
-$('btnSound').addEventListener('click',()=>{Snd.on=!Snd.on;$('btnSound').textContent='Som: '+(Snd.on?'ligado':'desligado');Snd.click()});
 $('btnExit').addEventListener('click',()=>{Snd.click();askExit()});
+function syncGameSettingsUI(){const inp=$('gameVolumeIn'),out=$('gameVolumeValue');if(inp)inp.value=Math.round(Snd.volume*100);if(out)out.textContent=Math.round(Snd.volume*100)+'%'}
+function openGameSettings(){syncGameSettingsUI();$('gameSettingsOverlay').hidden=false;Snd.init();Snd.open()}function closeGameSettings(){$('gameSettingsOverlay').hidden=true;Snd.click()}
+$('btnGameSettings').addEventListener('click',openGameSettings);$('btnGameSettingsClose').addEventListener('click',closeGameSettings);$('gameSettingsOverlay').addEventListener('pointerdown',e=>{if(e.target===$('gameSettingsOverlay'))closeGameSettings()});$('gameVolumeIn').addEventListener('input',()=>{Snd.volume=clamp(Number($('gameVolumeIn').value)/100,0,1);saveGameVolume(Snd.volume);syncGameSettingsUI()});$('gameVolumeIn').addEventListener('change',()=>{Snd.init();Snd.click()});
 $('btnKeys').addEventListener('click',openKeysMenu);$('btnKeysClose').addEventListener('click',closeKeysMenu);$('btnKeysDefaults').addEventListener('click',()=>{KEY_BINDINGS={...DEFAULT_KEYS};saveKeyBindings();KEY_EDIT=null;renderKeyMenu();Snd.click()});
 $('cfmStay').addEventListener('click',()=>{closeConfirm();Snd.click()});
 $('cfmLeave').addEventListener('click',()=>{Snd.click();toMenu()});
@@ -4744,19 +4764,25 @@ function netHandleMessage(m){
   }
   if(m.type==='room_closed'){toMenu();toast('A sala foi encerrada porque todos os jogadores saíram.',3000);return}
 }
+const ROOM_CFG_LABELS=Object.fromEntries(CFG_ROWS.map(([k,l,,u])=>[k,{label:l,unit:u}]));
+const ROOM_CFG_ICONS={locMax:'🧭',locChance:'🧭',locCooldown:'🧭',locDuration:'🧭',sheriffCooldown:'🔫',sheriffChance:'🔫',sheriffMax:'🔫',delayedChance:'🕓',delayedMax:'🕓',delayedDuration:'🕓',obsChance:'👀',obsMax:'👀',instructorChance:'↔️',instructorMax:'↔️',instructorCooldown:'↔️',instructorDuration:'↔️',instructorMaxDistance:'↔️',cleanerChance:'🧹',cleanerMax:'🧹',cleanerCooldown:'🧹',cleanerUses:'🧹',parasiteChance:'🦠',parasiteMax:'🦠',spectralChance:'👻',spectralMax:'👻',spectralCooldown:'👻',spectralDuration:'👻',spectralSpeed:'👻',spectralIntangible:'👻',paramedicChance:'⛑️',paramedicMax:'⛑️',paramedicCooldown:'⛑️',paramedicTasksPerUse:'⛑️',paramedicMaxUses:'⛑️',lazyChance:'🍕',lazyMax:'🍕',lazySlowdown:'🍕',lazyTasks:'🍕',engVentDuration:'🔧',engChance:'🔧',engMax:'🔧',engCooldown:'🔧',marionCooldown:'✋',marionDuration:'✋',marionChance:'✋',marionMax:'✋'};
+const ROOM_CFG_NOTICE_TIMERS=new Map();
+function roomCfgDisplayValue(key,value){if(key==='spectralIntangible')return value?'Sim':'Não';if(key==='speed')return (Number(value)/120).toFixed(1)+'x';if(key==='spectralSpeed'||key==='lazySlowdown')return (Number(value)/10).toFixed(1)+'x';if(key==='actionDistance')return ACTION_DISTANCE_LABELS[clamp(Number(value)||0,0,2)];const meta=ROOM_CFG_LABELS[key];return String(value)+(meta?.unit?meta.unit:'')}
+function netAnnounceConfigChange(key,value){if(!NET.inRoom||!NET.isHost||NET.room?.status!=='lobby')return;const meta=ROOM_CFG_LABELS[key]||{label:key};const icon=ROOM_CFG_ICONS[key]||'⚙️';const text=`${icon} ${meta.label} → ${roomCfgDisplayValue(key,value)}`;clearTimeout(ROOM_CFG_NOTICE_TIMERS.get(key));ROOM_CFG_NOTICE_TIMERS.set(key,setTimeout(()=>{ROOM_CFG_NOTICE_TIMERS.delete(key);netSend({type:'room_config_notice',text})},120));}
+function netAnnounceBots(value){if(!NET.inRoom||!NET.isHost||NET.room?.status!=='lobby')return;netSend({type:'room_config_notice',text:`⚙ Bots → ${value}`})}
 function netEnsureRoomDraft(){if(!NET.room)return null;if(!NET.roomDraft)NET.roomDraft={...(NET.room.settings||netSettings()),bots:NET.room.bots};return NET.roomDraft}
 function netNoteRoomSetting(key,value){
   if(!NET.inRoom||!NET.isHost||!NET.room||NET.room.status!=='lobby'||!NET_SETTING_KEYS.includes(key))return;
   const baseLim=CFG_LIM[key];if(!baseLim||!Number.isFinite(+value))return;
-  const d=netEnsureRoomDraft();const roomMax=Math.max(1,Math.min(15,Number(NET.room?.size)||configuredPlayerCount()));const lim=key==='cleanerMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,baseLim[1]))]:key==='parasiteMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,3))]:key==='paramedicMax'||key==='lazyMax'?[0,roomMax]:baseLim;d[key]=clamp(Math.round(+value),lim[0],lim[1]);if(key==='impostors'){if(Number(d.cleanerMax)>d.impostors)d.cleanerMax=d.impostors;if(Number(d.parasiteMax)>d.impostors)d.parasiteMax=d.impostors;}if(Number(d.paramedicMax)>roomMax)d.paramedicMax=roomMax;if(Number(d.lazyMax)>roomMax)d.lazyMax=roomMax;NET.roomDraftDirty=true;
+  const d=netEnsureRoomDraft();const roomMax=Math.max(1,Math.min(15,Number(NET.room?.size)||configuredPlayerCount()));const lim=key==='cleanerMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,baseLim[1]))]:key==='parasiteMax'?[0,Math.max(0,Math.min(Number(d.impostors??CFG.impostors)||1,3))]:key==='paramedicMax'||key==='lazyMax'?[0,roomMax]:baseLim;d[key]=clamp(Math.round(+value),lim[0],lim[1]);if(key==='impostors'){if(Number(d.cleanerMax)>d.impostors)d.cleanerMax=d.impostors;if(Number(d.parasiteMax)>d.impostors)d.parasiteMax=d.impostors;}if(Number(d.paramedicMax)>roomMax)d.paramedicMax=roomMax;if(Number(d.lazyMax)>roomMax)d.lazyMax=roomMax;NET.roomDraftDirty=true;netAnnounceConfigChange(key,d[key]);
   const field={speed:'roomSpeedIn',kill:'roomKillIn',sab:'roomSabIn',meet:'roomMeetIn',discussion:'roomDiscussionIn',voting:'roomVotingIn',crewVision:'roomCrewVisionIn'}[key];if(field&&$(field)&&document.activeElement!==$(field))$(field).value=d[key];
 }
 function netNoteRoomControl(key,value){
   if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;const lim=CFG_LIM[key];if(!lim||!Number.isFinite(+value))return;
-  const d=netEnsureRoomDraft();d[key]=clamp(Math.round(+value),lim[0],lim[1]);CFG[key]=d[key];NET.roomDraftDirty=true;
+  const d=netEnsureRoomDraft();d[key]=clamp(Math.round(+value),lim[0],lim[1]);CFG[key]=d[key];NET.roomDraftDirty=true;netAnnounceConfigChange(key,d[key]);
 }
 function netNoteRoomBots(value){
-  if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;const max=Math.max(0,NET.room.size-NET.room.players.length);const d=netEnsureRoomDraft();d.bots=clamp(Math.round(+value||0),0,max);NET.roomDraftDirty=true;
+  if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;const max=Math.max(0,NET.room.size-NET.room.players.length);const d=netEnsureRoomDraft();d.bots=clamp(Math.round(+value||0),0,max);NET.roomDraftDirty=true;netAnnounceBots(d.bots);
 }
 function netRoomSettingsFromControls(){
   const players=NET.room?.players.length||1, fixedSize=NET.room?.size||10;
@@ -4936,6 +4962,7 @@ function netPaintMeeting(sm){
     card.dotsEl.innerHTML='';
     if(ph==='eject')card.classList.remove('pick');
   }
+  renderMeetingVoteControls();
   renderMeetingModerationControls();
   if(ph==='result'){
     (sm.log||[]).forEach(v=>{
@@ -5112,7 +5139,7 @@ const netOriginalVentMove=ventMove;ventMove=function(ch,id){if(NET.inRoom&&!NET.
 const netOriginalExitVent=exitVent;exitVent=function(ch){if(NET.inRoom&&!NET.isHost&&ch===G.player&&!NET.applying){netSend({type:'action',action:'vent_exit'});return true}return netOriginalExitVent(ch)};
 const netOriginalDoInteract=doInteract;doInteract=function(a){if(NET.inRoom&&!NET.isHost&&a){if(a.type==='emergency'){netSend({type:'action',action:'emergency'});return}if(a.type==='vent'){netSend({type:'action',action:'vent_enter',ventId:a.vent.id});return}}return netOriginalDoInteract(a)};
 const netOriginalSendSay=sendSay;sendSay=function(raw,claimOverride){if(NET.inRoom&&!NET.isHost&&!NET.applying){const text=String(raw||'').trim().slice(0,90);if(!text)return false;netSend({type:'action',action:'chat',text,claim:claimOverride||null});return true}return netOriginalSendSay(raw,claimOverride)};
-const netOriginalPlayerVote=playerVote;playerVote=function(id){if(NET.inRoom&&!NET.isHost&&!NET.applying){netSend({type:'action',action:'vote',targetId:id});$('btnSkip').disabled=true;$('meetStatus').textContent='Voto enviado...';return}return netOriginalPlayerVote(id)};
+const netOriginalPlayerVote=playerVote;playerVote=function(id){if(NET.inRoom&&!NET.isHost&&!NET.applying){netSend({type:'action',action:'vote',targetId:id});$('btnSkip').disabled=true;$('meetStatus').textContent='Voto enviado...';document.querySelectorAll('.meetingVoteButton').forEach(b=>{b.hidden=true;b.disabled=true});return}return netOriginalPlayerVote(id)};
 const netOriginalPostMsg=postMsg;postMsg=function(from,text){netOriginalPostMsg(from,text);if(NET.inRoom&&NET.isHost&&!NET.applying&&from&&from.id)netSend({type:'meeting_chat',playerId:from.id,text:String(text||'').slice(0,180)})};
 function closeRoomChat(){const panel=$('roomChatPanel'),btn=$('btnRoomChat');if(panel)panel.hidden=true;if(btn)btn.setAttribute('aria-expanded','false')}
 function appendRoomChatMessage(m){
@@ -5121,11 +5148,15 @@ function appendRoomChatMessage(m){
   label.style.color=COLOR_BY[m.color]?.main||'#eef0ff';row.append(label,body);box.appendChild(row);
   while(box.children.length>60)box.removeChild(box.firstElementChild);box.scrollTop=box.scrollHeight;
 }
+function appendRoomConfigNotice(m){
+  if(!m||!NET.room||m.roomCode!==NET.room.code||!$('roomChatMessages'))return;
+  const box=$('roomChatMessages'),row=el('div','roomChatMsg roomConfigNotice'),body=el('span','',String(m.text||'').slice(0,220));body.style.color='#fff';body.style.fontWeight='800';row.append(body);box.appendChild(row);while(box.children.length>60)box.removeChild(box.firstElementChild);box.scrollTop=box.scrollHeight;
+}
 function toggleRoomChat(){if(!NET.inRoom||NET.room?.status!=='lobby')return;const panel=$('roomChatPanel');panel.hidden=!panel.hidden;if(!panel.hidden){$('roomChatInput').focus();$('roomChatMessages').scrollTop=$('roomChatMessages').scrollHeight}}
 $('btnRoomChat').addEventListener('click',toggleRoomChat);$('btnRoomChatLobby').addEventListener('click',toggleRoomChat);
 $('btnRoomChatClose').addEventListener('click',closeRoomChat);
 $('roomChatForm').addEventListener('submit',e=>{e.preventDefault();if(!NET.inRoom||NET.room?.status!=='lobby'||!NET.ws||NET.ws.readyState!==WebSocket.OPEN){toast('O chat escrito só funciona na sala de espera.');return}const input=$('roomChatInput'),text=String(input.value||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;if(netSend({type:'room_chat',text}))input.value=''});
-const netOriginalHandleRoomChat=netHandleMessage;netHandleMessage=function(m){if(m.type==='room_chat_message'){if(NET.inRoom&&NET.room?.status==='lobby'&&m.roomCode===NET.room.code)appendRoomChatMessage(m);return}if(m.type==='room_state'&&m.room?.code!==NET.room?.code){closeRoomChat();$('roomChatMessages').innerHTML=''}if(m.type==='game_start'&&NET.room?.code===m.room?.code){$('roomChatMessages').innerHTML='';closeRoomChat()}return netOriginalHandleRoomChat(m)};
+const netOriginalHandleRoomChat=netHandleMessage;netHandleMessage=function(m){if(m.type==='room_chat_message'){if(NET.inRoom&&NET.room?.status==='lobby'&&m.roomCode===NET.room.code)appendRoomChatMessage(m);return}if(m.type==='room_config_notice'){if(NET.inRoom&&NET.room?.status==='lobby'&&m.roomCode===NET.room.code)appendRoomConfigNotice(m);return}if(m.type==='room_state'&&m.room?.code!==NET.room?.code){closeRoomChat();$('roomChatMessages').innerHTML=''}if(m.type==='game_start'&&NET.room?.code===m.room?.code){$('roomChatMessages').innerHTML='';closeRoomChat()}return netOriginalHandleRoomChat(m)};
 const netOriginalToMenu=toMenu;toMenu=function(){if(NET.inRoom)netLeaveRoom();return netOriginalToMenu()};
 // Override end/rematch controls without changing offline behavior.
 $('btnAgain').addEventListener('click',e=>{if(NET.inRoom){e.stopImmediatePropagation();if(!NET.isHost){toast('Somente o host pode reiniciar a partida.');return}NET.startRequested=true;if(!netSend({type:'rematch'}))NET.startRequested=false;return}},true);
