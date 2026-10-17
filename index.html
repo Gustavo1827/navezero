@@ -2450,7 +2450,7 @@ function roleNameForPlayer(p){
 }
 function roleMessageForPlayer(p){
   if(!p)return '';
-  const messages={parasite:'Parasita - Contamine a tripulação e transforme Inocentes em Infiltrados.',spectral:'Espectral - Fique invisível e engane a tripulação.',cleaner:'Faxineiro - Limpe corpos e suma com as evidências.',engineer:'Engenheiro - Pode usar os sustos',marionette:'Marionetista - Controle Tripulantes e cause confusão na nave.',observer:'Observador - Veja a Tripulação no seu mapa a qualquer momento.',sheriff:'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.',locator:'Localizador — Rastreie um Tripulante com seu mapa.',delayed:'Atrasado — Mate suas vítimas lentamente.',paramedic:'Paramédico - Reviva Tripulantes por meio de seus corpos.',seer:'Vidente 🔮 — Veja quem e como os corpos foram mortos',lazy:'Preguiçoso - Suas tarefas são fáceis, complete elas e ajude a Tripulação.'};
+  const messages={parasite:'Parasita - Contamine a tripulação e transforme Inocentes em Infiltrados.',spectral:'Espectral - Fique invisível e engane a tripulação.',cleaner:'Faxineiro - Limpe corpos e suma com as evidências.',engineer:'Engenheiro - Pode usar os dutos',marionette:'Marionetista - Controle Tripulantes e cause confusão na nave.',observer:'Observador - Veja a Tripulação no seu mapa a qualquer momento.',sheriff:'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.',locator:'Localizador — Rastreie um Tripulante com seu mapa.',delayed:'Atrasado — Mate suas vítimas lentamente.',paramedic:'Paramédico - Reviva Tripulantes por meio de seus corpos.',seer:'Vidente 🔮 — Veja quem e como os corpos foram mortos',lazy:'Preguiçoso - Suas tarefas são fáceis, complete elas e ajude a Tripulação.'};
   return messages[p.function]||(p.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.');
 }
 function showLocalRoleReveal(resetTimer=false){
@@ -3036,7 +3036,9 @@ function selectedMapIdForConfig(){
 }
 function selectGameMap(id){
   if(!MAP_LIBRARY[id])return;
-  const locked=(inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
+  // Na Partida Livre, o mapa é escolhido antes de iniciar e permanece fixo até sair da partida.
+  if(G.freePlay)return;
+  const locked=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
   if(locked)return;
   SELECTED_MAP_ID=id;saveMapSelection(id);activateMapData(id,true);G.mapId=id;
   if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.room?.status==='lobby'){
@@ -3054,10 +3056,11 @@ function createMapCard(map,current,locked,onSelect){
 }
 function renderMapSelector(box,locked){
   const section=el('section','mapSelect'),title=el('div','mapSelectTitle');
-  title.append(el('span','','🗺️ Mapa da partida'),el('small','',locked?'Seleção bloqueada':'Escolha o cenário'));
+  const freePlayLocked=!!G.freePlay;
+  title.append(el('span','','🗺️ Mapa da partida'),el('small','',freePlayLocked?'Mapa fixo na Partida Livre':(locked?'Seleção bloqueada':'Escolha o cenário')));
   section.appendChild(title);
   const current=selectedMapIdForConfig();
-  for(const map of Object.values(MAP_LIBRARY))section.appendChild(createMapCard(map,current,locked,()=>selectGameMap(map.id)));
+  for(const map of Object.values(MAP_LIBRARY))section.appendChild(createMapCard(map,current,locked||freePlayLocked,()=>selectGameMap(map.id)));
   box.appendChild(section);
 }
 function buildCfgUI(){
@@ -5102,7 +5105,10 @@ function updateButtons(){
   // O conjunto extra de ações do Marionetista não pode ocupar a área física do joystick em telas estreitas.
   $('actions').classList.toggle('marionette-controls',marionette&&p.alive&&G.state==='playing');
   const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(directKill&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bdel,!(delayed&&p.alive)); hv(bcl,!(cleaner&&p.alive)); hv(bp,!(parasite&&p.alive)); hv(bspec,!(spectral&&p.alive)); hv(bpa,!(paramedic&&p.alive)); hv(bse,!(seer&&p.alive)); hv(bi,!(G.state==='playing'&&!p.alive&&!!p.instructor)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));hv(be,!(G.state==='playing'&&p.alive&&engineer));hv(bc,!(G.state==='playing'&&p.alive&&marionette));
-  const ventReady=!!p.vent||((G.sab.comms||0)<=0&&(p.engVentCd||0)<=0&&!!nearestVentFor(p,84));be.disabled=!p.vent&&!ventReady;be.classList.toggle('ready',ventReady);const ventLabel=p.vent?'Sair do duto':((p.engVentCd||0)>0?String(Math.ceil(p.engVentCd)):'Dutar');if(be._l!==ventLabel){be._l=ventLabel;be.innerHTML=ventLabel==='Dutar'?'🔧<small>Dutar</small>':ventLabel==='Sair do duto'?'↗<small>Sair</small>':ventLabel}
+  const ventReady=!!p.vent||((G.sab.comms||0)<=0&&(p.engVentCd||0)<=0&&!!nearestVentFor(p,84));be.disabled=!p.vent&&!ventReady;be.classList.toggle('ready',ventReady);
+  const finiteEngineerVent=p.vent&&p.function==='engineer'&&Number.isFinite(p.engVentTime)&&p.engVentTime<=60;
+  const ventLabel=p.vent?(finiteEngineerVent?String(Math.ceil(Math.max(0,p.engVentTime)))+'s':'Sair'):((p.engVentCd||0)>0?String(Math.ceil(p.engVentCd)):'Dutar');
+  if(be._l!==ventLabel){be._l=ventLabel;if(p.vent)be.innerHTML='🔧<small>'+ventLabel+'</small>';else be.innerHTML=ventLabel==='Dutar'?'🔧<small>Dutar</small>':ventLabel}
   if(!bspec.hidden){const cd=p.spectralCd||0,time=p.spectralInvisible?spectralRemaining(p):0,lab=p.spectralInvisible?'Voltar':(cd>0?String(Math.ceil(cd)):'Sumir');bspec.disabled=!p.spectralInvisible&&cd>0;setCls(bspec,'ready',!bspec.disabled);setCls(bspec,'cooldown-label',cd>0&&!p.spectralInvisible);if(bspec._l!==lab||bspec._sec!==Math.ceil(time)){bspec._l=lab;bspec._sec=Math.ceil(time);bspec.innerHTML=lab==='Sumir'?'👻<small>Sumir</small>':lab==='Voltar'?`👻<small>Voltar · ${Math.max(0,Math.ceil(time))}s</small>`:lab}}
   const ctlTarget=controlTargetFor(p,actionDistancePx('control')),ctlLabel=p.controlTargetId?('Controlando '+Math.ceil(p.controlTime)+'s'):((p.controlCd||0)>0?String(Math.ceil(p.controlCd)):(NET?.pendingControl?'…':'Controlar'));bc.disabled=!p.controlTargetId&&(!ctlTarget||(p.controlCd||0)>0);bc.classList.toggle('ready',!!ctlTarget&&!(p.controlCd||0)&&!p.controlTargetId);if(bc._l!==ctlLabel){bc._l=ctlLabel;bc.innerHTML=ctlLabel==='Controlar'?'✋<small>Controlar</small>':ctlLabel}
   const fb=$('btnFollow'); hv(fb,!(G.state==='playing'&&!p.alive&&!p.instructor)); if(!fb.hidden){const t=G.followTarget&&charById(G.followTarget);fb.innerHTML=t&&t.alive?'Seguindo<br>'+t.name:'Seguir<br>jogador';fb.title=t&&t.alive?'Toque para trocar de alvo; toque duas vezes para cancelar':'Toque para começar a seguir';}
