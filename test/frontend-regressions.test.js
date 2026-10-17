@@ -257,10 +257,13 @@ test('Engenheiro tem configuração, atribuição e sincronização multiplayer'
   assert.match(html, /engVentDuration:\[10,61\]/);
   assert.match(html, /engCooldown:\[5,25\]/);
   assert.match(html, /id="btnEngineerSection"[^>]*>🔧 Engenheiro/);
-  assert.match(html, /Engenheiro - Pode usar os sustos/);
+  assert.match(html, /Engenheiro - Pode usar os dutos/);
   assert.match(html, /function noteEngineerVentSeen\(ch,v,act\)[\s\S]*?addSusp\(o,ch\.id,-1\.2,'clear'/);
   assert.match(html, /ai\.engineerSaw&&G\.gt-ai\.engineerSaw\.gt<45/);
   assert.match(html, /\(ai\.vents\|\|\[\]\)\.some\(v=>v\.id===t\.id&&!v\.engineer\)/);
+  assert.match(html, /const finiteEngineerVent=p\.vent&&p\.function==='engineer'/);
+  assert.match(html, /be\.innerHTML='🔧<small>'\+ventLabel\+'<\/small>'/);
+  assert.match(html, /if\(G\.freePlay\)return;[\s\S]*?const locked=inGame\(\)/);
 });
 
 test('NPCs usam falas contextuais e jogadores mortos veem funções sem revelar aos vivos', () => {
