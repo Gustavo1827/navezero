@@ -48,6 +48,7 @@ test('cenário da Nexus permanece visível, mas personagens continuam limitados 
   assert.match(html,/if\(ACTIVE_MAP_ID==='nexus'\)return 1;/);
   assert.match(html,/nexusAmbient\?\(lightsDown\?'rgba\(4,8,18,\.72\)':'rgba\(8,14,26,\.43\)'\)/);
   assert.match(html,/if\(d>rng\|\|!losClear\(o\.viewer\.x,o\.viewer\.y,ch\.x,ch\.y\)\)return 0;/);
+  assert.match(html,/OUTSIDE_VOID\[ty\*COLS\+tx\]/,'o céu externo da Nexus deve ficar fora da névoa de iluminação');
 
   assert.match(html,/\{id:'decon_w',x:24,y:22,w:1,h:2,decon:true\},\{id:'decon_e',x:29,y:22,w:1,h:2,decon:true\}/);
   assert.doesNotMatch(html,/\{x:24,y:26,w:6,h:[2-9]\}/,'Descontaminação não deve ter uma terceira abertura vertical');
@@ -95,9 +96,17 @@ test('Nexus usa minigames próprios e exatamente a rede de dutos planejada',()=>
     ['v_admin','v_o2'],['v_elec','v_o2']
   ].map(norm);
   assert.deepEqual([...got].sort(),expected.sort());
+  const rectOverlap=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+  for(const v of m.vents){
+    for(const st of m.stations.filter(st=>st.kind!=='decon'))assert.equal(rectOverlap({x:v.x,y:v.y,w:1,h:1},st),false,`${v.id} não pode ficar em cima da tarefa ${st.id}`);
+    for(const d of m.decor.filter(d=>!['decon','balcony_hq'].includes(d.k)))assert.equal(rectOverlap({x:v.x,y:v.y,w:1,h:1},d),false,`${v.id} não pode ficar dentro da decoração ${d.k}`);
+  }
+  assert.doesNotMatch(html,/const d=roomDist\(from\.room,to\.room\).*return false/,'ligações diretas da rede de dutos não podem ser bloqueadas pela distância dos corredores');
   for(const game of ['nx_anomaly','nx_weather','nx_gases','nx_core','nx_circuit','nx_frequency','nx_landing','nx_cargo','nx_medscan','nx_records','nx_lenses','nx_supplies','nx_decon']){
     assert.match(html,new RegExp(`GAMES\\.${game}=`),`minigame ${game} deve existir`);
   }
   assert.match(html,/key:'nx_vision_lenses'.*game:'nx_lenses'/s);
   assert.match(html,/key:'nx_lab_anomaly'.*game:'nx_anomaly'/s);
+  assert.match(html,/Atual: \$\{r\.value\}/,'controles de quantidade devem mostrar o valor atual ao jogador');
+  assert.match(html,/if\(best\?\.type!=='decon'.*Entrar no duto/s,'controles da Descontaminação devem ter prioridade sobre dutos próximos');
 });

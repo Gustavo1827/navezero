@@ -781,10 +781,11 @@ const MAP_LIBRARY={
       {id:'comm_channels',room:'comm',x:59,y:29,w:2,h:1,label:'Canais de comunicação'},
     ],
     vents:[
-      {id:'v_ship',room:'ship',x:13,y:28},{id:'v_reactor',room:'reactor',x:27,y:40},{id:'v_lab',room:'lab',x:31,y:40},
-      {id:'v_decon',room:'decon',x:25,y:25},{id:'v_vision',room:'vision',x:33,y:25},{id:'v_med',room:'med',x:12,y:13},
-      {id:'v_balcony',room:'balcony',x:62,y:44},{id:'v_cafe',room:'cafe',x:61,y:37},{id:'v_admin',room:'admin',x:44,y:19},
-      {id:'v_elec',room:'elec',x:62,y:19},{id:'v_o2',room:'o2',x:47,y:8},
+      // Dutos ficam em piso livre e separados de tarefas, móveis e equipamentos sólidos.
+      {id:'v_ship',room:'ship',x:3,y:18},{id:'v_reactor',room:'reactor',x:18,y:40},{id:'v_lab',room:'lab',x:32,y:40},
+      {id:'v_decon',room:'decon',x:27,y:24},{id:'v_vision',room:'vision',x:33,y:24},{id:'v_med',room:'med',x:13,y:12},
+      {id:'v_balcony',room:'balcony',x:55,y:44},{id:'v_cafe',room:'cafe',x:61,y:36},{id:'v_admin',room:'admin',x:50,y:18},
+      {id:'v_elec',room:'elec',x:60,y:18},{id:'v_o2',room:'o2',x:60,y:6},
     ],
     roomEdges:[
       ['ship','shiphall'],['shiphall','med'],['shiphall','decon'],['decon','vision'],['reactor','lab'],
@@ -807,7 +808,7 @@ const MAP_LIBRARY={
 function loadMapSelection(){try{const id=localStorage.getItem('navezero_map_v1');return MAP_LIBRARY[id]?id:'nave'}catch{return'nave'}}
 function saveMapSelection(id){try{localStorage.setItem('navezero_map_v1',MAP_LIBRARY[id]?id:'nave')}catch{}}
 let SELECTED_MAP_ID=loadMapSelection(),ACTIVE_MAP_ID=SELECTED_MAP_ID;
-let ROOM_DEFS=[],CORRIDORS=[],GLASS_RECTS=[],DOOR_DEFS=[],DECOR=[],STATION_DEFS=[],VENT_DEFS=[],ROOM_EDGES=[],VENT_LINKS=[],SPAWN={x:31,y:11},TABLE={x:29,y:6,w:6,h:3},FREEPLAY_COMPUTER={id:'freeplay_pc',room:'cafe',x:38,y:10,w:1,h:1,label:'Computador da Partida Livre'},CAMS=[];
+let ROOM_DEFS=[],CORRIDORS=[],GLASS_RECTS=[],DOOR_DEFS=[],DECOR=[],STATION_DEFS=[],VENT_DEFS=[],ROOM_EDGES=[],VENT_LINKS=[],SPAWN={x:31,y:11},TABLE={x:29,y:6,w:6,h:3},FREEPLAY_COMPUTER={id:'freeplay_pc',room:'cafe',x:38,y:10,w:1,h:1,label:'Computador da Partida Livre'},CAMS=[],OUTSIDE_VOID=new Uint8Array(COLS*ROWS);
 let ROOM_BY_ID={},stationById={},ventById={},VENT_ADJ={},doors=[];
 // Compatibilidade estrutural da malha clássica: const floor=new Uint8Array(COLS*ROWS), block=new Uint8Array(COLS*ROWS), walk=new Uint8Array(COLS*ROWS)
 let floor=new Uint8Array(COLS*ROWS),block=new Uint8Array(COLS*ROWS),walk=new Uint8Array(COLS*ROWS),baseWalk=new Uint8Array(COLS*ROWS),roomAt=new Int16Array(COLS*ROWS).fill(-1);
@@ -859,6 +860,14 @@ function activateMapData(id,rebuildVisual=false){
         if(edge&&!doorTile[i]){floor[i]=0;roomAt[i]=-1}
       }
     }
+  }
+  // Marca apenas o vazio conectado às bordas do mundo. Na Nexus esse espaço é o céu
+  // externo, então a névoa de visão não deve escurecer as nuvens do lado de fora.
+  OUTSIDE_VOID=new Uint8Array(COLS*ROWS);
+  if(ACTIVE_MAP_ID==='nexus'){
+    const q=[],push=(x,y)=>{if(x<0||y<0||x>=COLS||y>=ROWS)return;const i=y*COLS+x;if(floor[i]||OUTSIDE_VOID[i])return;OUTSIDE_VOID[i]=1;q.push(i)};
+    for(let x=0;x<COLS;x++){push(x,0);push(x,ROWS-1)}for(let y=0;y<ROWS;y++){push(0,y);push(COLS-1,y)}
+    for(let h=0;h<q.length;h++){const i=q[h],x=i%COLS,y=(i/COLS)|0;push(x+1,y);push(x-1,y);push(x,y+1);push(x,y-1)}
   }
   DECOR.forEach(d=>{if(ACTIVE_MAP_ID==='nexus'&&['decon','balcony_hq'].includes(d.k))return;fillR(block,d.x,d.y,d.w,d.h,1)});STATION_DEFS.forEach(st=>{if(st.kind==='decon')return;fillR(block,st.x,st.y,st.w,st.h,1)});
   rebuildWalk();
@@ -1826,14 +1835,20 @@ function bestAction(){
   if(G.player.vent||G.player.controlledBy)return null;
   let best=null,bd=1e9;
   if(G.freePlay){const d=stationDist(FREEPLAY_COMPUTER,G.player);if(d<=72){best={type:'freecomputer',station:FREEPLAY_COMPUTER,label:'Usar computador'};bd=d}}
+  // Os quatro controles da Descontaminação têm prioridade perto das portas. Isso evita
+  // que uma tarefa vizinha capture o botão Usar e faça o controle parecer sem resposta.
+  if(ACTIVE_MAP_ID==='nexus'&&G.player.alive)for(const s of STATION_DEFS){if(s.kind!=='decon')continue;const d=stationDist(s,G.player);if(d<=78&&d<bd){best={type:'decon',station:s,label:s.label};bd=d}}
   for(const s of STATION_DEFS){
-    const d=stationDist(s,G.player),reach=s.kind==='decon'?80:62; if(d>reach||d>=bd)continue;
+    if(s.kind==='decon')continue;
+    const d=stationDist(s,G.player); if(d>62||d>=bd)continue;
     const a=actionFor(s); if(a&&(G.player.alive||(G.role==='crew'&&G.player.ghost&&a.type==='task'))){best=a;bd=d}
   }
   const dt=stationDist(TABLE,G.player);
   if(G.player.alive&&!sabotageActive()&&dt<=62&&dt<bd)best={type:'emergency',station:TABLE,label:'Botão de emergência'};
   const P=G.player;
-  if(P.alive&&G.role==='imp'&&P.ventCd<=0&&!P.ventAnim)for(const v of VENT_DEFS){const d=Math.hypot(P.x-v.px,P.y+4-v.py); if(d<=62&&d<bd){bd=d;best={type:'vent',vent:v,station:{x:v.x,y:v.y,w:1,h:1},label:'Entrar no duto'}}}
+  // Dentro da Descontaminação, o controle da porta deve vencer o duto próximo.
+  // Assim o jogador nunca perde o botão de abrir/liberar a câmara por estar ao lado da grade.
+  if(best?.type!=='decon'&&P.alive&&G.role==='imp'&&P.ventCd<=0&&!P.ventAnim)for(const v of VENT_DEFS){const d=Math.hypot(P.x-v.px,P.y+4-v.py); if(d<=62&&d<bd){bd=d;best={type:'vent',vent:v,station:{x:v.x,y:v.y,w:1,h:1},label:'Entrar no duto'}}}
   return best;
 }
 function setDoorClosedById(id,closed){
@@ -1850,36 +1865,26 @@ function useDeconButton(ch,st){
   if(ACTIVE_MAP_ID!=='nexus'||!ch?.alive||!st||st.kind!=='decon')return false;
   const D=G.decon||(G.decon={phase:'idle',until:0,exitSide:null,entrySide:null});
   if(D.phase==='idle'&&!st.inside){
-    D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+4.5;
+    D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+2.4;
     setDoorClosedById(deconDoorId(D.entrySide),false);setDoorClosedById(deconDoorId(D.exitSide),true);
     toast('Descontaminação: entrada liberada.',1500);Snd.click();return true;
   }
   if(D.phase==='ready'&&st.inside&&charInsideDecon(ch)){
-    D.exitSide=st.side;D.phase='exit';D.until=G.gt+4;setDoorClosedById(deconDoorId(D.exitSide),false);
+    D.exitSide=st.side;D.phase='exit';D.until=G.gt+2.5;setDoorClosedById(deconDoorId(D.exitSide),false);
     toast('Descontaminação concluída: saída liberada.',1700);Snd.ok();return true;
   }
   return false;
 }
 function updateDecon(){
   if(ACTIVE_MAP_ID!=='nexus'||!G.decon)return;
-  const D=G.decon,inside=G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c)&&!(G.freePlay&&c.freeDummy));
+  const D=G.decon;if(!(D.until>0)||G.gt<D.until)return;
   if(D.phase==='entry'){
-    // A porta permanece aberta até alguém realmente entrar. Isso evita falhas por atraso de rede ou passagem estreita.
-    if(inside){
-      setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true);
-      D.phase='cleaning';D.until=G.gt+2.6;toast('Ciclo de descontaminação em andamento.',1400);return;
-    }
-    if(D.until>0&&G.gt>=D.until)resetDeconState();
-    return;
+    setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true);
+    if(!G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c))){resetDeconState();return}
+    D.phase='cleaning';D.until=G.gt+2.6;toast('Ciclo de descontaminação em andamento.',1400);return;
   }
-  if(D.phase==='cleaning'){
-    if(D.until>0&&G.gt>=D.until){D.phase='ready';D.until=0;toast('Ciclo concluído. Use o botão interno para sair.',1800)}
-    return;
-  }
-  if(D.phase==='exit'){
-    // Fecha assim que a câmara estiver vazia; o limite evita uma porta presa aberta caso alguém fique parado dentro.
-    if(!inside||(D.until>0&&G.gt>=D.until))resetDeconState();
-  }
+  if(D.phase==='cleaning'){D.phase='ready';D.until=0;toast('Ciclo concluído. Use o botão interno para sair.',1800);return}
+  if(D.phase==='exit'){resetDeconState()}
 }
 function doInteract(a){
   if(G.player?.controlledBy||G.state!=='playing'||uiBusy()||!a)return;
@@ -2225,7 +2230,7 @@ GAMES.scan={
    a cada abertura para evitar tarefas meramente renomeadas.
    ===================================================================== */
 const nxBox=(title='')=>{const w=el('div');w.style.cssText='width:min(470px,94vw);padding:14px;border:3px solid #10122a;border-radius:16px;background:linear-gradient(180deg,#13264a,#09152e);box-sizing:border-box';if(title)w.appendChild(el('div','mstatus',title));return w};
-const nxRange=(label,min,max,value)=>{const w=el('div');w.style.cssText='margin:10px 0';const l=el('div','lab');l.append(el('span','',label));const r=document.createElement('input');r.type='range';r.min=min;r.max=max;r.value=value;r.className='range';r.style.width='100%';w.append(l,r);return{w,r,l}};
+const nxRange=(label,min,max,value)=>{const w=el('div');w.style.cssText='margin:10px 0';const l=el('div','lab'),name=el('span','',label),cur=el('strong','',`Atual: ${value}`);l.append(name,cur);const r=document.createElement('input');r.type='range';r.min=min;r.max=max;r.value=value;r.className='range';r.style.width='100%';r.addEventListener('input',()=>{cur.textContent=`Atual: ${r.value}`});w.append(l,r);return{w,r,l,valueEl:cur}};
 
 GAMES.nx_anomaly={
   desc:()=>'Compare as leituras das amostras e selecione a única com comportamento anômalo.',
@@ -2246,18 +2251,7 @@ GAMES.nx_weather={
   run(body,step,api){
     const wrap=nxBox('☁️ Estação atmosférica');const collect=el('button','big','Iniciar coleta');const st=el('div','mstatus','Sensores aguardando');wrap.append(collect,st);body.appendChild(wrap);
     collect.addEventListener('click',()=>{collect.disabled=true;let p=0;const pb=el('div','pbar'),bar=el('i');pb.appendChild(bar);wrap.insertBefore(pb,st);const tick=()=>{if(!api.alive())return;p+=8;bar.style.width=p+'%';st.textContent=`Coletando dados... ${Math.min(100,p)}%`;if(p<100)api.later(tick,70);else setup()};tick()});
-    function setup(){
-      st.textContent='Ajuste os três sensores';
-      const targets=[rand(30,70),rand(25,75),rand(20,80)],vals=[50,50,50],names=['Pressão','Vento','Temperatura'],rows=[];
-      const labelFor=(i)=>`${names[i]} · atual ${vals[i]} · pedido ${targets[i]-4}–${targets[i]+4}`;
-      targets.forEach((t,i)=>{
-        const o=nxRange(labelFor(i),0,100,vals[i]);
-        o.r.addEventListener('input',()=>{vals[i]=+o.r.value;o.l.firstChild.textContent=labelFor(i);check()});
-        wrap.insertBefore(o.w,st);rows.push(o)
-      });
-      const send=el('button','big','Enviar dados');send.disabled=true;send.addEventListener('click',()=>api.done());wrap.appendChild(send);
-      function check(){const ok=vals.every((v,i)=>Math.abs(v-targets[i])<=4);send.disabled=!ok;st.textContent=ok?'Leituras estáveis — pronto para enviar':'Ajuste os sensores às quantidades pedidas'}
-    }
+    function setup(){st.textContent='Ajuste os três sensores';const targets=[rand(30,70),rand(25,75),rand(20,80)],vals=[50,50,50],names=['Pressão','Vento','Temperatura'],rows=[];targets.forEach((t,i)=>{const o=nxRange(`${names[i]} · alvo ${t}±4`,0,100,vals[i]);o.r.addEventListener('input',()=>{vals[i]=+o.r.value;check()});wrap.insertBefore(o.w,st);rows.push(o)});const send=el('button','big','Enviar dados');send.disabled=true;send.addEventListener('click',()=>api.done());wrap.appendChild(send);function check(){const ok=vals.every((v,i)=>Math.abs(v-targets[i])<=4);send.disabled=!ok;st.textContent=ok?'Leituras estáveis — pronto para enviar':'Ajuste os sensores às faixas indicadas'}}
   }
 };
 
@@ -3007,6 +3001,14 @@ function render(){
   };
   fogC.globalCompositeOperation='destination-out';
   drawWallLimitedLight(f.x,f.y,maxR,rays,sx,sy,1,.74);
+  if(ACTIVE_MAP_ID==='nexus'){
+    // O céu externo não recebe a camada de iluminação: nuvens continuam claras do lado de
+    // fora da torre, enquanto salas, personagens e corpos mantêm a visibilidade normal.
+    const x0=Math.max(0,Math.floor(G.cam.x/TILE)-2),x1=Math.min(COLS-1,Math.ceil((G.cam.x+VW)/TILE)+2),y0=Math.max(0,Math.floor(G.cam.y/TILE)-2),y1=Math.min(ROWS-1,Math.ceil((G.cam.y+VH)/TILE)+2),sc=ZOOM/FOG_DIV;
+    fogC.save();fogC.globalCompositeOperation='destination-out';fogC.fillStyle='#000';
+    for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++)if(OUTSIDE_VOID[ty*COLS+tx])fogC.fillRect((tx*TILE-G.cam.x)*sc-1,(ty*TILE-G.cam.y)*sc-1,TILE*sc+2,TILE*sc+2);
+    fogC.restore();
+  }
   // Somente a lanterna do personagem observado pelo jogador é desenhada.
   // As lanternas dos NPCs não são renderizadas aqui; seus dados e a lógica de IA/LOS permanecem intactos.
   fogC.globalCompositeOperation='source-over';
@@ -3199,8 +3201,7 @@ const tileOf=c=>({x:clamp(Math.floor(c.x/TILE),0,COLS-1),y:clamp(Math.floor((c.y
 /* ---------- visão e caminhos ---------- */
 function doorClosedAt(tx,ty){return doors.some(d=>d.closed&&tx>=d.x&&tx<d.x+d.w&&ty>=d.y&&ty<d.y+d.h)}
 function losClear(x1,y1,x2,y2){
-  // Amostragem mais curta evita vazamentos de visão em cantos, paredes finas e portas.
-  const d=Math.hypot(x2-x1,y2-y1), n=Math.max(1,Math.ceil(d/10));
+  const d=Math.hypot(x2-x1,y2-y1), n=Math.ceil(d/20);
   for(let i=1;i<n;i++){const t=i/n, tx=Math.floor((x1+(x2-x1)*t)/TILE), ty=Math.floor((y1+(y2-y1)*t)/TILE);
     if(!isFloor(tx,ty)||doorClosedAt(tx,ty))return false}
   return true;
@@ -3806,7 +3807,9 @@ function enterVent(ch,v){if(ch?.function==='engineer'&&ch===G.player){emitRoleFx
 function ventMove(ch,toId){
   if(!ch.vent||ch.ventAnim||ch.ventMv>0)return false;
   const from=ventById[ch.vent], to=ventById[toId];
-  if(!to||!VENT_ADJ[ch.vent].includes(toId))return false;   // a rede de dutos define exatamente os destinos diretos permitidos
+  if(!to||!VENT_ADJ[ch.vent].includes(toId))return false;   // só destinos realmente conectados
+  // A rede de dutos já define as conexões permitidas. Não use a distância dos corredores
+  // para recusá-las: Nave↔Reator e Enfermaria↔Varanda são ligações diretas do duto.
   ch.vent=toId; ch.x=to.px; ch.y=to.py-OFF_Y; ch.ventMv=.8;const puppet=ch.controlTargetId&&charById(ch.controlTargetId);if(puppet){puppet.vent=toId;puppet.x=ch.x;puppet.y=ch.y;puppet.ventMv=.8} Snd.tone(220,.15,'triangle',.05);
   if(ch.isPlayer){refreshVentPanel();toast('Duto: '+ROOM_BY_ID[to.room].name,1200)}
   return true;
