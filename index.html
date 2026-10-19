@@ -218,12 +218,12 @@ body.touch #stick{display:block}
 .judgeVoteBtn{background:#2387e8!important;color:#fff!important;box-shadow:0 4px 0 #14569b!important;font-size:21px!important;min-width:45px!important}
 #noisyAlert{position:fixed;inset:0;z-index:150;pointer-events:none;display:flex;align-items:center;justify-content:center}
 #noisyAlert[hidden]{display:none}
-#judgePronounce{position:fixed;inset:0;z-index:260;display:flex;align-items:center;justify-content:center;background:rgba(4,6,20,.76);pointer-events:none}#judgePronounce[hidden]{display:none}#judgePronounce .judgePronounceCard{font-size:clamp(30px,7vw,64px);font-weight:900;text-align:center;color:#fff;text-shadow:0 5px 0 #123e78;background:#1f76d2;border:4px solid #8dccff;border-radius:26px;padding:26px 34px;box-shadow:0 12px 0 #0b2448,0 24px 70px rgba(0,0,0,.55)}
-.noisyAlertCard{position:relative;display:flex;align-items:center;gap:12px;padding:12px 18px;border:3px solid #ff4158;border-radius:22px;background:rgba(14,11,31,.88);box-shadow:0 0 0 4px rgba(255,65,88,.18),0 10px 34px rgba(0,0,0,.45);animation:noisyPulse .6s ease-in-out infinite alternate}
-.noisyAlertArrow{font-size:36px;color:#ff4158;transform:rotate(var(--noisy-angle,0deg));filter:drop-shadow(0 2px 0 #57101d)}
-.noisyAlertBody{font-size:38px;filter:drop-shadow(0 2px 0 #57101d)}
-.noisyAlertText{font-weight:900;color:#fff;font-size:18px;line-height:1.05}.noisyAlertText small{display:block;color:#ff9baa;font-size:12px;margin-top:3px}
-@keyframes noisyPulse{from{transform:scale(.97)}to{transform:scale(1.035)}}
+#judgePronounce{position:fixed;inset:0;z-index:260;display:flex;align-items:center;justify-content:center;background:transparent;pointer-events:none}#judgePronounce[hidden]{display:none}#judgePronounce .judgePronounceCard{font-size:clamp(30px,7vw,64px);font-weight:900;text-align:center;color:rgba(255,255,255,.94);text-shadow:0 3px 0 rgba(18,62,120,.85),0 0 18px rgba(92,174,255,.45);background:rgba(31,118,210,.16);border:3px solid rgba(141,204,255,.34);border-radius:26px;padding:22px 30px;box-shadow:0 10px 34px rgba(0,0,0,.18);backdrop-filter:blur(2px)}
+.noisyAlertCard{position:relative;display:flex;align-items:center;justify-content:center;width:112px;height:112px;animation:noisyPulse .6s ease-in-out infinite alternate;transform:scale(var(--noisy-scale,1));transform-origin:center}
+.noisyAlertArrow{position:absolute;left:-8px;top:34px;font-size:42px;line-height:1;color:#ff2037;transform:rotate(var(--noisy-angle,0deg));transform-origin:64px 22px;filter:drop-shadow(0 2px 0 #57101d) drop-shadow(0 0 8px rgba(255,32,55,.48))}
+.noisyAlertBody{position:absolute;left:39px;top:44px;font-size:42px;line-height:1;filter:sepia(1) saturate(8) hue-rotate(315deg) brightness(1.08) drop-shadow(0 2px 0 #57101d) drop-shadow(0 0 8px rgba(255,32,55,.48))}
+.noisyAlertSignal{position:absolute;left:28px;top:2px;width:62px;height:44px;border-top:8px solid #ff2037;border-radius:50%;filter:drop-shadow(0 0 6px rgba(255,32,55,.38))}.noisyAlertSignal:before{content:'';position:absolute;left:10px;top:9px;width:40px;height:28px;border-top:7px solid #ff2037;border-radius:50%}.noisyAlertSignal:after{content:'';position:absolute;left:24px;top:21px;width:12px;height:12px;background:#ff2037;clip-path:polygon(50% 100%,0 0,100% 0);transform:rotate(180deg)}
+@keyframes noisyPulse{from{opacity:.88}to{opacity:1}}
 .act2.locator.active{filter:none;outline:3px solid #65d8ff;outline-offset:2px}
 #sabBar{position:absolute;left:50%;top:calc(64px + var(--st));transform:translateX(-50%);max-width:min(440px,70vw);text-align:center;background:#2a0f1e;border:2.5px solid var(--coral);border-radius:14px;padding:3px 14px 1px;font-weight:700;font-size:16px;line-height:1.3;animation:sabpulse 1s ease-in-out infinite;pointer-events:none}
 @keyframes sabpulse{50%{border-color:#7a1b2a}}
@@ -530,7 +530,7 @@ body.touch #stick{display:block}
     <div class="chips"><button class="chip" id="btnMap" aria-pressed="false">Mapa</button><button class="chip" id="btnRoomChat" aria-expanded="false" aria-controls="roomChatPanel" hidden>Chat</button><button class="chip" id="btnExit">Sair do jogo</button></div>
     <div class="info">Seu papel: <b id="roleName">-</b></div>
   </div>
-  <div id="toast" role="status"></div><div id="noisyAlert" hidden aria-live="assertive"><div class="noisyAlertCard"><span class="noisyAlertArrow">➤</span><span class="noisyAlertBody">🩸</span><span class="noisyAlertText">BARULHENTO!<small>Um corpo foi localizado</small></span></div></div>
+  <div id="toast" role="status"></div><div id="noisyAlert" hidden aria-hidden="true"><div class="noisyAlertCard"><span class="noisyAlertSignal" aria-hidden="true"></span><span class="noisyAlertArrow" aria-hidden="true">➤</span><span class="noisyAlertBody" aria-hidden="true">🩸</span></div></div>
   <div id="ventPanel" class="panel" hidden><div class="vt">Dentro do duto</div><div class="vs" id="ventHere"></div><div id="ventList"></div><button class="chip exit" id="ventExit">Sair do duto</button></div>
   <div id="sabBar" hidden></div>
   <div id="stick"><i id="knob"></i></div>
@@ -4100,13 +4100,14 @@ function noisyAudienceAllowed(){return !!G.player&&(CFG.noisyImpostorVisible||G.
 function triggerNoisyAlert(ch){
   if(!ch||ch.function!=='noisy'||ch.noisyTriggered)return;ch.noisyTriggered=true;G.noisyAlerts=Array.isArray(G.noisyAlerts)?G.noisyAlerts:[];
   const a={id:'noisy_'+(++G.noisySeq)+'_'+String(ch.id),ownerId:ch.id,x:ch.x,y:ch.y,until:G.gt+CFG.noisyDuration};G.noisyAlerts.push(a);
-  if(noisyAudienceAllowed()){NOISY_SEEN_ALERTS.add(a.id);Snd.noisyAlarm();toast('🔊 Um Barulhento morreu!',2200)}
+  if(noisyAudienceAllowed()){NOISY_SEEN_ALERTS.add(a.id);Snd.noisyAlarm()}
   for(const o of G.chars){if(o.ai&&o.alive&&(CFG.noisyImpostorVisible||o.role!=='imp')){o.ai.noisyAlert={x:a.x,y:a.y,t:G.gt,ownerId:ch.id};if(o.role==='crew'&&!o.vent&&Math.random()<.7){const tx=Math.floor(a.x/TILE),ty=Math.floor((a.y+OFF_Y)/TILE);if(tx>=0&&ty>=0&&tx<COLS&&ty<ROWS&&walk[ty*COLS+tx])goTo(o,{type:'noisy_alert',x:a.x,y:a.y},(x,y)=>Math.abs(x-tx)+Math.abs(y-ty)<=2)}}}
 }
 function updateNoisyAlertUI(){
   const box=$('noisyAlert');if(!box)return;G.noisyAlerts=(G.noisyAlerts||[]).filter(a=>G.gt<(a.until||0));const a=noisyAudienceAllowed()?G.noisyAlerts[G.noisyAlerts.length-1]:null;if(!a){box.hidden=true;return}
   if(!NOISY_SEEN_ALERTS.has(a.id)){NOISY_SEEN_ALERTS.add(a.id);Snd.noisyAlarm()}
-  const f=focus(),ang=Math.atan2(a.y-f.y,a.x-f.x)*180/Math.PI;box.style.setProperty('--noisy-angle',ang+'deg');const small=box.querySelector('small');if(small)small.textContent='Corpo '+inRoom(roomName(a.x,a.y));box.hidden=false;
+  const f=focus(),dx=a.x-f.x,dy=a.y-f.y,dist=Math.hypot(dx,dy),ang=Math.atan2(dy,dx)*180/Math.PI;
+  const scale=clamp(.72+dist/900*.68,.72,1.48);box.style.setProperty('--noisy-angle',ang+'deg');box.style.setProperty('--noisy-scale',scale.toFixed(3));box.hidden=false;
 }
 function judgeTaskProgress(ch){const list=G.tasks.filter(t=>t.owner===ch.id&&!t.fake);if(!list.length)return 1;return list.filter(t=>t.done).length/list.length}
 function judgeUnlocked(ch){return !!ch&&ch.alive&&ch.role==='crew'&&ch.function==='judge'&&!ch.judgeUsed&&judgeTaskProgress(ch)*100+1e-6>=CFG.judgeTaskPct}
@@ -5032,7 +5033,7 @@ function confirmMeetingVote(id){const M=G.M;if(!M||String(M.pendingVote)!==Strin
 function useJudgeVote(id){const M=G.M,target=charById(id);if(!M||String(M.pendingVote)!==String(id)||!target)return;if(NET.inRoom&&!NET.isHost){M.voteSending=true;netSend({type:'action',action:'judge_vote',targetId:id});$('meetStatus').textContent='Decisão do Juiz enviada...';renderMeetingVoteControls();return}if(registerJudgeDecision(G.player,target)){M.pendingVote=null;$('btnSkip').disabled=true;$('meetStatus').textContent='Voto registrado.';Snd.roleFx('judge','use');renderMeetingVoteControls()}else{toast('⚖️ Complete as tarefas necessárias para liberar o Juiz.',2200)}}
 function cancelMeetingVote(){const M=G.M;if(!M)return;M.pendingVote=null;$('meetStatus').textContent='Escolha seu voto.';Snd.click();renderMeetingVoteControls()}
 function setMeetPhase(ph){
-  const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive;const judgeOverlay=$('judgePronounce');if(judgeOverlay)judgeOverlay.hidden=ph!=='judge'; $('meet').classList.toggle('vote-reveal',ph==='result');$('meet').classList.toggle('space-result',false);
+  const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive;const judgeOverlay=$('judgePronounce');if(judgeOverlay)judgeOverlay.hidden=!(M.judge&&['judge','result','eject'].includes(ph)); $('meet').classList.toggle('vote-reveal',ph==='result');$('meet').classList.toggle('space-result',false);
   $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';if(ph!=='result'){$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML=''}
   if(ph==='discuss'){
     $('meetTitle').textContent='Discussão'; $('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';
@@ -5797,7 +5798,7 @@ function netApplySnapshot(s,force=false){
   }catch(e){console.error('Falha ao aplicar estado online',e)}finally{NET.applying=false}
 }
 function netPaintMeeting(sm){
-  const M=G.M;if(!M)return;const ph=sm.phase;const judgeOverlay=$('judgePronounce');if(judgeOverlay)judgeOverlay.hidden=ph!=='judge';
+  const M=G.M;if(!M)return;const ph=sm.phase;const judgeOverlay=$('judgePronounce');if(judgeOverlay)judgeOverlay.hidden=!(M.judge&&['judge','result','eject'].includes(ph));
   syncMeetingChatFromSnapshot(sm.chat||[]);if(ph!=='vote'){M.pendingVote=null;M.voteSending=false}else if(M.votes[G.player.id]!==undefined){M.pendingVote=null;M.voteSending=false}
   $('meetTimer').textContent=Math.max(0,Math.ceil((sm.dur||0)-(sm.t||0)))+'s';
   $('meetingIntro').hidden=ph!=='intro';$('meet').hidden=ph==='intro';
