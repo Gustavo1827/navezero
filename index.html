@@ -2945,6 +2945,7 @@ function drawWorld(c,cx,cy,vw,vh,o){
   const tgt=ch=>{
     if(!o.viewer||ch===o.viewer)return 1;
     const d=dist(ch,o.viewer); if(d>rng||!losClear(o.viewer.x,o.viewer.y,ch.x,ch.y))return 0;
+    if(ACTIVE_MAP_ID==='nexus'&&!visionLosClear(o.viewer.x,o.viewer.y,ch.x,ch.y))return 0;
     return d<rng-260?1:(rng-d)/260;
   };
   drawInstructorTrails(c);drawRoleFx(c);drawSpectralSmokes(c,tgt,opacityForPoint);
@@ -3009,19 +3010,22 @@ function render(){
   // Nave e Nexus compartilham exatamente a mesma névoa, sombras e bloqueio por paredes.
   // A única adaptação da Nexus acontece depois, somente no vazio externo conectado ao céu.
   fogC.fillStyle='rgba(2,3,14,.94)'; fogC.fillRect(0,0,fogCv.width,fogCv.height);
-  const rays=144, maxR=G.vision*(G.sab.lights>0&&G.role==='crew'?0.34:1);
+  // A Nexus usa interseção exata com a malha de paredes para a visão. O antigo
+  // avanço em passos podia pular quinas/divisórias e deixar pequenas frestas de luz.
+  const rays=240, maxR=G.vision*(G.sab.lights>0&&G.role==='crew'?0.34:1);
   const traceWallLimitedLight=(wx,wy,radius,rayCount,screenX,screenY)=>{
     fogC.beginPath(); fogC.moveTo(screenX,screenY);
     for(let i=0;i<=rayCount;i++){
-      const a=i/rayCount*Math.PI*2; let dist=0, ex=wx, ey=wy;
-      for(dist=0;dist<radius;dist+=18){
-        ex=wx+Math.cos(a)*dist; ey=wy+Math.sin(a)*dist;
-        const tx=Math.floor(ex/TILE),ty=Math.floor(ey/TILE);
-        // Portas fechadas por sabotagem bloqueiam a lanterna como paredes reais.
-        // Quando reabrem, doorClosedAt volta a false e a visão atravessa normalmente.
-        if(tx<0||ty<0||tx>=COLS||ty>=ROWS||!isFloor(tx,ty)||doorClosedAt(tx,ty)){dist=Math.max(0,dist-10);break}
-      }
-      ex=wx+Math.cos(a)*Math.min(dist,radius); ey=wy+Math.sin(a)*Math.min(dist,radius);
+      const a=i/rayCount*Math.PI*2,dx=Math.cos(a),dy=Math.sin(a);
+      const dist=ACTIVE_MAP_ID==='nexus'?visionRayDistance(wx,wy,dx,dy,radius):(()=>{
+        let d=0;
+        for(;d<radius;d+=18){
+          const tx=Math.floor((wx+dx*d)/TILE),ty=Math.floor((wy+dy*d)/TILE);
+          if(tx<0||ty<0||tx>=COLS||ty>=ROWS||!isFloor(tx,ty)||doorClosedAt(tx,ty)){d=Math.max(0,d-10);break}
+        }
+        return Math.min(d,radius);
+      })();
+      const ex=wx+dx*dist,ey=wy+dy*dist;
       fogC.lineTo((ex-G.cam.x)*ZOOM/FOG_DIV,(ey-G.cam.y)*ZOOM/FOG_DIV);
     }
     fogC.closePath();
@@ -3048,7 +3052,20 @@ function render(){
     const x0=Math.max(0,Math.floor(G.cam.x/TILE)-2),x1=Math.min(COLS-1,Math.ceil((G.cam.x+VW)/TILE)+2),y0=Math.max(0,Math.floor(G.cam.y/TILE)-2),y1=Math.min(ROWS-1,Math.ceil((G.cam.y+VH)/TILE)+2),sc=ZOOM/FOG_DIV;
     const exteriorReveal=lightsDown?.55:.72;
     fogC.save();fogC.globalCompositeOperation='destination-out';fogC.fillStyle=`rgba(0,0,0,${exteriorReveal})`;
-    for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++)if(OUTSIDE_VOID[ty*COLS+tx])fogC.fillRect((tx*TILE-G.cam.x)*sc-1,(ty*TILE-G.cam.y)*sc-1,TILE*sc+2,TILE*sc+2);
+    // Desenha o céu externo em uma única máscara por faixas contínuas. Preencher cada
+    // tile separadamente fazia as bordas receberem alpha mais de uma vez, formando a
+    // grade/quadrados visíveis sobre as nuvens.
+    fogC.beginPath();
+    for(let ty=y0;ty<=y1;ty++){
+      let tx=x0;
+      while(tx<=x1){
+        while(tx<=x1&&!OUTSIDE_VOID[ty*COLS+tx])tx++;
+        if(tx>x1)break;
+        const runStart=tx;while(tx<=x1&&OUTSIDE_VOID[ty*COLS+tx])tx++;
+        fogC.rect((runStart*TILE-G.cam.x)*sc,(ty*TILE-G.cam.y)*sc,(tx-runStart)*TILE*sc,TILE*sc);
+      }
+    }
+    fogC.fill();
     fogC.restore();
   }
   // Somente a lanterna do personagem observado pelo jogador é desenhada.
@@ -3244,6 +3261,31 @@ const tileOf=c=>({x:clamp(Math.floor(c.x/TILE),0,COLS-1),y:clamp(Math.floor((c.y
 
 /* ---------- visão e caminhos ---------- */
 function doorClosedAt(tx,ty){return doors.some(d=>d.closed&&tx>=d.x&&tx<d.x+d.w&&ty>=d.y&&ty<d.y+d.h)}
+function visionTileBlocked(tx,ty){return tx<0||ty<0||tx>=COLS||ty>=ROWS||!isFloor(tx,ty)||doorClosedAt(tx,ty)}
+function visionRayDistance(x,y,dx,dy,maxDist){
+  if(!Number.isFinite(maxDist)||maxDist<=0)return 0;
+  let tx=Math.floor(x/TILE),ty=Math.floor(y/TILE);if(visionTileBlocked(tx,ty))return 0;
+  const sx=dx>0?1:dx<0?-1:0,sy=dy>0?1:dy<0?-1:0;
+  const adx=Math.abs(dx),ady=Math.abs(dy),tdx=adx>1e-9?TILE/adx:Infinity,tdy=ady>1e-9?TILE/ady:Infinity;
+  let tmx=sx>0?((tx+1)*TILE-x)/adx:sx<0?(x-tx*TILE)/adx:Infinity;
+  let tmy=sy>0?((ty+1)*TILE-y)/ady:sy<0?(y-ty*TILE)/ady:Infinity;
+  while(true){
+    let t;
+    if(Math.abs(tmx-tmy)<1e-7){
+      t=tmx;if(t>=maxDist)return maxDist;
+      const nx=tx+sx,ny=ty+sy;
+      // Supercover: uma quina fechada também bloqueia a visão, evitando enxergar
+      // diagonalmente entre duas paredes que apenas se tocam pelo canto.
+      if((sx&&visionTileBlocked(nx,ty))||(sy&&visionTileBlocked(tx,ny))||visionTileBlocked(nx,ny))return Math.max(0,t-.5);
+      tx=nx;ty=ny;tmx+=tdx;tmy+=tdy;
+    }else if(tmx<tmy){
+      t=tmx;if(t>=maxDist)return maxDist;tx+=sx;if(visionTileBlocked(tx,ty))return Math.max(0,t-.5);tmx+=tdx;
+    }else{
+      t=tmy;if(t>=maxDist)return maxDist;ty+=sy;if(visionTileBlocked(tx,ty))return Math.max(0,t-.5);tmy+=tdy;
+    }
+  }
+}
+function visionLosClear(x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy);return d<1||visionRayDistance(x1,y1,dx/d,dy/d,d)>=d-.75}
 function losClear(x1,y1,x2,y2){
   const d=Math.hypot(x2-x1,y2-y1), n=Math.ceil(d/20);
   for(let i=1;i<n;i++){const t=i/n, tx=Math.floor((x1+(x2-x1)*t)/TILE), ty=Math.floor((y1+(y2-y1)*t)/TILE);
