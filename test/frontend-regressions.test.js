@@ -340,7 +340,7 @@ test('Parasita é função de Infiltrado com infecção adiada até o fim da reu
   assert.match(html, /parasiteMax:\[0,3\]/);
   assert.match(html, /parasiteEligible=shuffle\(\[\.\.\.G\.imps\]\.filter\(ch=>ch\.role==='imp'&&!ch\.function\)\)/);
   assert.match(html, /function infectTarget\(parasite,target\)[\s\S]*?G\.parasiteWinnerId=parasite\.id[\s\S]*?G\.parasiteInfections\[target\.id\][\s\S]*?c\.parasiteReady=false/);
-  assert.match(html, /function resolveParasiteInfections\(\)[\s\S]*?t&&t\.alive&&t\.role==='crew'\)convertToImpostor\(t\)[\s\S]*?parasiteReady=true/);
+  assert.match(html, /function resolveParasiteInfections\(\)[\s\S]*?t&&t\.alive&&t\.role==='crew'[\s\S]*?consumeGuardianProtection\(t,'parasite'\)[\s\S]*?convertToImpostor\(t\)[\s\S]*?parasiteReady=false/);
   assert.match(html, /if\(ej\)killChar\(ej\);\s*resolveParasiteInfections\(\);\s*G\.bodies=\[\]/);
   assert.match(html, /target\.role='imp';target\.function=null/);
   assert.match(html, /G\.tasks\.filter\(t=>t\.owner===target\.id\)\.forEach\(t=>t\.fake=true\)/);
@@ -374,15 +374,15 @@ test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comuni
   assert.match(html, /instructorMax:\[0,15\]/);
   assert.match(html, /instructorCooldown:\[20,60\]/);
   assert.match(html, /instructorDuration:\[5,15\]/);
-  assert.match(html, /function maybeActivateInstructor\(ch\)[\s\S]*?ch\.alive[\s\S]*?ch\.role!=='crew'[\s\S]*?ch\.instructor=true/);
-  assert.match(html, /function killChar\(c\)[\s\S]*?maybeActivateInstructor\(c\)/);
+  assert.match(html, /function activateInstructor\(ch\)[\s\S]*?ch\.alive[\s\S]*?ch\.role!=='crew'[\s\S]*?ch\.instructor=true/);
+  assert.match(html, /function killChar\(c\)[\s\S]*?maybeActivateGhostRole\(c\)/);
   assert.match(html, /function createInstructorTrail\(owner,target,x,y\)[\s\S]*?targetId:target\.id[\s\S]*?CFG\.instructorDuration/);
   assert.match(html, /if\(type==='comms'\)\{G\.instructorTrails\.length=0/);
   assert.match(html, /function instructorNpcThink\(ch,dt\)/);
   assert.match(html, /action:'instructor_mark'/);
   assert.match(server, /'instructor_mark'/);
   assert.match(server, /s\.instructorTrails=\(s\.instructorTrails\|\|\[\]\)\.filter\(t=>String\(t\.targetId\)===String\(recipientId\)\|\|String\(t\.ownerId\)===String\(recipientId\)\)/);
-  assert.match(server, /recipient\?\.instructor[\s\S]*?c\.alive&&c\.role==='crew'\)c\.function=null/);
+  assert.match(server, /recipient\?\.instructor\|\|recipient\?\.guardian[\s\S]*?c\.alive&&c\.role==='crew'\)c\.function=null/);
 });
 
 test('Instrutor só pode selecionar jogadores vivos próximos', () => {
