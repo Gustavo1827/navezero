@@ -1862,7 +1862,7 @@ function useDeconButton(ch,st){
 }
 function updateDecon(){
   if(ACTIVE_MAP_ID!=='nexus'||!G.decon)return;
-  const D=G.decon,inside=G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c));
+  const D=G.decon,inside=G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c)&&!(G.freePlay&&c.freeDummy));
   if(D.phase==='entry'){
     // A porta permanece aberta até alguém realmente entrar. Isso evita falhas por atraso de rede ou passagem estreita.
     if(inside){
