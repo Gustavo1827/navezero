@@ -1,6 +1,6 @@
-# Nave Zero Online — 0.3b-s74
+# Nave Zero Online — 0.3b-s75
 
-**Versão atual:** `0.3b-s74`
+**Versão atual:** `0.3b-s75`
 
 Este pacote mantém a estrutura do jogo e reúne as correções multiplayer existentes com os ajustes solicitados para Xerife, Atrasado, Engenheiro, Marionetista, identificação dos mortos, falas dos NPCs, chat escrito e revanche.
 

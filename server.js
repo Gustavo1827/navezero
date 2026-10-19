@@ -23,10 +23,10 @@ const DEFAULT_COSMETICS={hat:'none',pet:'none',outfit:'none',visor:'none'};
 function cleanCosmetics(input={}){const src=input&&typeof input==='object'?input:{};const out={};for(const key of Object.keys(DEFAULT_COSMETICS)){const id=String(src[key]||'none');out[key]=COSMETIC_ALLOWED[key].has(id)?id:'none'}return out}
 const LIMITS = {
   kill:[10,60], sab:[10,90], meet:[10,60], emergencyUses:[0,10], speed:[100,280], impVision:[260,900], crewVision:[260,900],
-  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], obsChance:[0,100], obsMax:[0,15], instructorChance:[0,100], instructorMax:[0,15], instructorCooldown:[20,60], instructorDuration:[5,15], instructorMaxDistance:[100,2000], cleanerChance:[0,100], cleanerMax:[0,15], cleanerCooldown:[10,60], cleanerUses:[1,15], parasiteChance:[0,100], parasiteMax:[0,3], spectralChance:[0,100], spectralMax:[0,15], spectralCooldown:[5,20], spectralDuration:[10,90], spectralSpeed:[0,10], paramedicChance:[0,100], paramedicMax:[0,15], paramedicCooldown:[5,25], paramedicTasksPerUse:[1,5], paramedicMaxUses:[1,3], seerChance:[0,100], seerMax:[0,15], seerCooldown:[10,45], seerDelay:[0,5], seerDuration:[5,10], noisyDuration:[5,15], noisyChance:[0,100], noisyMax:[0,15], noisyImpostorVisible:[0,1], judgeChance:[0,100], judgeMax:[0,15], judgeTaskPct:[0,100], lazyChance:[0,100], lazyMax:[0,15], lazySlowdown:[5,20], lazyTasks:[1,3], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], engVentDuration:[10,61], engChance:[0,100], engMax:[0,15], engCooldown:[5,25], marionCooldown:[15,60], marionDuration:[5,30], marionChance:[0,100], marionMax:[0,3], actionDistance:[0,2], commonTasks:[0,5], mediumTasks:[0,5], longTasks:[0,5], renderDist:[500,1500]
+  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], obsChance:[0,100], obsMax:[0,15], instructorChance:[0,100], instructorMax:[0,15], instructorCooldown:[20,60], instructorDuration:[5,15], instructorMaxDistance:[100,2000], guardianDuration:[10,30], guardianChance:[0,100], guardianMax:[0,15], guardianImpostorVisible:[0,1], cleanerChance:[0,100], cleanerMax:[0,15], cleanerCooldown:[10,60], cleanerUses:[1,15], parasiteChance:[0,100], parasiteMax:[0,3], spectralChance:[0,100], spectralMax:[0,15], spectralCooldown:[5,20], spectralDuration:[10,90], spectralSpeed:[0,10], paramedicChance:[0,100], paramedicMax:[0,15], paramedicCooldown:[5,25], paramedicTasksPerUse:[1,5], paramedicMaxUses:[1,3], seerChance:[0,100], seerMax:[0,15], seerCooldown:[10,45], seerDelay:[0,5], seerDuration:[5,10], noisyDuration:[5,15], noisyChance:[0,100], noisyMax:[0,15], noisyImpostorVisible:[0,1], judgeChance:[0,100], judgeMax:[0,15], judgeTaskPct:[0,100], lazyChance:[0,100], lazyMax:[0,15], lazySlowdown:[5,20], lazyTasks:[1,3], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], engVentDuration:[10,61], engChance:[0,100], engMax:[0,15], engCooldown:[5,25], marionCooldown:[15,60], marionDuration:[5,30], marionChance:[0,100], marionMax:[0,3], actionDistance:[0,2], commonTasks:[0,5], mediumTasks:[0,5], longTasks:[0,5], renderDist:[500,1500]
 };
 const MAP_IDS=new Set(['nave','nexus']);
-const DEFAULT_SETTINGS = {mapId:'nave',kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorDuration:8,instructorMaxDistance:2000,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,spectralSpeed:4,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,seerDuration:7,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
+const DEFAULT_SETTINGS = {mapId:'nave',kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorDuration:8,instructorMaxDistance:2000,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerUses:2,parasiteChance:0,parasiteMax:1,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,spectralSpeed:4,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,seerDuration:7,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
 const BOT_NAMES = ['João','Duda','Lia','Maria','Fernando','Caio','Aurora','Bruno','Iris','Mateus','Nina','Ravi','Bia','Theo','Yasmin','Gael','Luna','Cecília','Miguel','Helena','Enzo','Rafa','Alice','Pedro','Sofia','Lucas','Maya','Noah','Lara','Vitor'];
 const nameKey = value => String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]/g,'');
 function ensureBotRoster(room){
@@ -60,6 +60,7 @@ function cleanSettings(input={}, playerCount=15) {
   out.cleanerMax=Math.min(out.cleanerMax,out.impostors);
   out.parasiteMax=Math.min(out.parasiteMax,out.impostors,3);
   out.instructorMax=Math.min(out.instructorMax,Math.max(0,Math.min(15,playerCount)));
+  out.guardianMax=Math.min(out.guardianMax,Math.max(0,Math.min(15,playerCount)));
   out.paramedicMax=Math.min(out.paramedicMax,Math.max(0,Math.min(15,playerCount)));
   out.seerMax=Math.min(out.seerMax,Math.max(0,Math.min(15,playerCount)));
   out.noisyMax=Math.min(out.noisyMax,Math.max(0,Math.min(15,playerCount)));
@@ -77,7 +78,10 @@ function pickColor(requested, room) {
   if(COLORS.includes(requested) && !used.has(requested))return requested;
   return COLORS.find(c=>!used.has(c)) || COLORS[0];
 }
-function roomPublic(room){ensureBotRoster(room);return {code:room.code,hostId:room.hostId,size:room.size,bots:room.bots,botRoster:room.botRoster.map(b=>({...b})),status:room.status,round:room.round,settings:{...room.settings},players:room.players.map(p=>({id:p.id,name:p.name,color:p.color,ready:!!p.ready,cosmetics:cleanCosmetics(p.cosmetics)}))};}
+function resetLobbyExpiry(room,maxMs=600000){room.lobbyMaxMs=Math.max(1000,Number(maxMs)||600000);room.lobbyRemainingMs=room.lobbyMaxMs;room.createdAt=Date.now();room.lobbyExpiresAt=room.createdAt+room.lobbyRemainingMs}
+function pauseLobbyExpiry(room){if(!room||room.status!=='lobby')return;const now=Date.now();room.lobbyRemainingMs=Math.max(0,Number(room.lobbyExpiresAt||now)-now);room.lobbyExpiresAt=null}
+function resumeLobbyExpiry(room){if(!room||room.status!=='lobby')return;const remain=Math.max(0,Number(room.lobbyRemainingMs??room.lobbyMaxMs??600000));room.lobbyExpiresAt=Date.now()+remain}
+function roomPublic(room){ensureBotRoster(room);const waiting=['lobby','countdown','loading'].includes(room.status),expires=waiting?(Number(room.lobbyExpiresAt)||null):null,remaining=expires?Math.max(0,expires-Date.now()):null;return {code:room.code,hostId:room.hostId,size:room.size,bots:room.bots,botRoster:room.botRoster.map(b=>({...b})),status:room.status,round:room.round,lobbyExpiresAt:expires,lobbyRemainingMs:remaining,settings:{...room.settings},players:room.players.map(p=>({id:p.id,name:p.name,color:p.color,ready:!!p.ready,cosmetics:cleanCosmetics(p.cosmetics)}))};}
 function sendRoomState(room){const pub=roomPublic(room);for(const p of room.players){const c=clients.get(p.id);if(c)send(c.ws,{type:'room_state',room:pub,youId:p.id})}}
 function roomFor(client){return client.roomCode?rooms.get(client.roomCode):null}
 function error(ws,message){send(ws,{type:'room_error',message})}
@@ -149,22 +153,23 @@ function personalizeSnapshot(snapshot, recipientId){
   const recipient=s.chars?.find(c=>c.id===recipientId);
   if(!ended && recipient?.alive!==false){
     const recipientIsImp=recipient?.role==='imp';
-    for(const c of (s.chars||[])){if(c.id!==recipientId)c.instructor=false;if(c.id!==recipientId && !(recipientIsImp&&c.role==='imp')){c.role='crew';c.function=null}}
-  }else if(!ended && recipient?.instructor){
-    // Instrutores mortos não recebem as funções dos Tripulantes vivos no snapshot privado.
-    for(const c of (s.chars||[])){if(c.id!==recipientId)c.instructor=false;if(c.alive&&c.role==='crew')c.function=null}
+    for(const c of (s.chars||[])){if(c.id!==recipientId){c.instructor=false;c.guardian=false}if(c.id!==recipientId && !(recipientIsImp&&c.role==='imp')){c.role='crew';c.function=null}}
+  }else if(!ended && (recipient?.instructor||recipient?.guardian)){
+    // Funções de fantasma ajudam sem receber as funções secretas dos Tripulantes vivos.
+    for(const c of (s.chars||[])){if(c.id!==recipientId){c.instructor=false;c.guardian=false}if(c.alive&&c.role==='crew')c.function=null}
   }
   // Marcações são privadas: só o Atrasado que marcou recebe seus cronômetros.
   const privateMarks={};for(const [victimId,mark] of Object.entries(s.delayedMarks||{})){if(mark&&mark.killerId===recipientId)privateMarks[victimId]={victimId, killerId:recipientId, remaining:Math.max(0,Number(mark.remaining)||0)}}s.delayedMarks=privateMarks;
+  const canSeeGuardianProtection=recipient?.alive===false||!!recipient?.guardian||(recipient?.alive!==false&&recipient?.role==='imp'&&Number(s.cfg?.guardianImpostorVisible)!==0);if(!canSeeGuardianProtection)s.guardianProtections={};
   s.parasiteInfections={};s.instructorTrails=(s.instructorTrails||[]).filter(t=>String(t.targetId)===String(recipientId)||String(t.ownerId)===String(recipientId));s.selfSeerReplay=recipient?.alive!==false&&recipient?.role==='crew'&&recipient?.function==='seer'?(s.seerReplays?.[recipientId]||null):null;delete s.seerReplays;for(const b of (s.bodies||[]))delete b.killerTrace;
-  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.observer=recipient.function==='observer';s.cleaner=recipient.function==='cleaner';s.parasite=recipient.function==='parasite';s.paramedic=recipient.function==='paramedic';s.seer=recipient.function==='seer';s.lazy=recipient.function==='lazy';s.spectral=recipient.function==='spectral';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.selfCleanerCd=recipient.cleanCd||0;s.selfCleanerUses=recipient.cleanUses||0;s.selfParamedicCd=recipient.paramedicCd||0;s.selfParamedicSpent=recipient.paramedicSpent||0;s.selfSeerCd=recipient.seerCd||0;s.selfParasiteReady=recipient.parasiteReady!==false;s.selfInstructor=!!recipient.instructor;s.selfInstructorCd=recipient.instructorCd||0;s.selfInstructorTargetId=recipient.instructorTargetId||null;}
+  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.observer=recipient.function==='observer';s.cleaner=recipient.function==='cleaner';s.parasite=recipient.function==='parasite';s.paramedic=recipient.function==='paramedic';s.seer=recipient.function==='seer';s.lazy=recipient.function==='lazy';s.spectral=recipient.function==='spectral';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.selfCleanerCd=recipient.cleanCd||0;s.selfCleanerUses=recipient.cleanUses||0;s.selfParamedicCd=recipient.paramedicCd||0;s.selfParamedicSpent=recipient.paramedicSpent||0;s.selfSeerCd=recipient.seerCd||0;s.selfParasiteReady=recipient.parasiteReady!==false;s.selfGuardian=!!recipient.guardian;s.selfGuardianTargetId=recipient.guardianTargetId||null;s.selfInstructor=!!recipient.instructor;s.selfInstructorCd=recipient.instructorCd||0;s.selfInstructorTargetId=recipient.instructorTargetId||null;}
   return s;
 }
 function snapshotForNewHost(snapshot, recipientId){
   const s=JSON.parse(JSON.stringify(snapshot));
   const recipient=s.chars?.find(c=>c.id===recipientId);
   s.selfSeerReplay=s.seerReplays?.[recipientId]||null;
-  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.observer=recipient.function==='observer';s.cleaner=recipient.function==='cleaner';s.parasite=recipient.function==='parasite';s.paramedic=recipient.function==='paramedic';s.seer=recipient.function==='seer';s.lazy=recipient.function==='lazy';s.spectral=recipient.function==='spectral';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.selfCleanerCd=recipient.cleanCd||0;s.selfCleanerUses=recipient.cleanUses||0;s.selfParamedicCd=recipient.paramedicCd||0;s.selfParamedicSpent=recipient.paramedicSpent||0;s.selfSeerCd=recipient.seerCd||0;s.selfParasiteReady=recipient.parasiteReady!==false;s.selfInstructor=!!recipient.instructor;s.selfInstructorCd=recipient.instructorCd||0;s.selfInstructorTargetId=recipient.instructorTargetId||null;}
+  if(recipient){s.role=recipient.role;s.locator=recipient.function==='locator';s.sheriff=recipient.function==='sheriff';s.observer=recipient.function==='observer';s.cleaner=recipient.function==='cleaner';s.parasite=recipient.function==='parasite';s.paramedic=recipient.function==='paramedic';s.seer=recipient.function==='seer';s.lazy=recipient.function==='lazy';s.spectral=recipient.function==='spectral';s.delayed=recipient.function==='delayed';s.trackTarget=recipient.netTrackTarget||null;s.trackTime=recipient.netTrackTime||0;s.trackCd=recipient.netTrackCd||0;s.selfKillCd=recipient.netKillCd||0;s.selfSheriffCd=recipient.netSheriffCd||0;s.selfDelayedCd=recipient.netDelayedCd||0;s.selfCleanerCd=recipient.cleanCd||0;s.selfCleanerUses=recipient.cleanUses||0;s.selfParamedicCd=recipient.paramedicCd||0;s.selfParamedicSpent=recipient.paramedicSpent||0;s.selfSeerCd=recipient.seerCd||0;s.selfParasiteReady=recipient.parasiteReady!==false;s.selfGuardian=!!recipient.guardian;s.selfGuardianTargetId=recipient.guardianTargetId||null;s.selfInstructor=!!recipient.instructor;s.selfInstructorCd=recipient.instructorCd||0;s.selfInstructorTargetId=recipient.instructorTargetId||null;}
   return s;
 }
 function startGameNow(room, rematch=false){
@@ -172,7 +177,7 @@ function startGameNow(room, rematch=false){
   if(total<4 && !(rematch && total===3)){error(clients.get(room.hostId)?.ws,'Adicione bots ou espere mais jogadores: uma nova partida precisa de pelo menos 4 participantes.');return false}
   if(total>room.size||total>15){error(clients.get(room.hostId)?.ws,'A quantidade total excede o limite da sala.');return false}
   if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);
-  room.countdownTimer=null;room.loadingTimer=null;room.status='playing';room.round++;room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=false;room.countdownRoster=null;
+  room.countdownTimer=null;room.loadingTimer=null;room.status='playing';room.lobbyExpiresAt=null;room.round++;room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=false;room.countdownRoster=null;
   sendRoomState(room);
   broadcast(room,{type:'game_start',room:roomPublic(room),round:room.round,rematch});
   return true;
@@ -218,7 +223,7 @@ function handle(ws, raw, timings={}){
     const size=Math.min(15,Math.max(4,Math.round(Number(m.size)||10)));
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
     const code=makeCode();
-    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,createdAt:Date.now(),countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,rematchLobby:false,rematchWaiters:new Set(),botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};
+    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,createdAt:Date.now(),lobbyMaxMs:Math.max(1000,Number(timings.lobbyMaxMs)||600000),lobbyRemainingMs:0,lobbyExpiresAt:null,countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,rematchLobby:false,rematchWaiters:new Set(),botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};resetLobbyExpiry(room,room.lobbyMaxMs);
     room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmetics(m.cosmetics)});
     c.name=room.players[0].name;c.color=room.players[0].color;c.roomCode=code;rooms.set(code,room);
     sendRoomState(room);return;
@@ -321,7 +326,7 @@ function handle(ws, raw, timings={}){
     invalidateCountdown(room);
     const previousPlayers=room.players.map(p=>({...p,cosmetics:cleanCosmetics(p.cosmetics)}));
     const hostPlayer=previousPlayers.find(p=>p.id===room.hostId);const waiters=room.rematchWaiters instanceof Set?new Set(room.rematchWaiters):new Set();
-    room.status='lobby';room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=true;room.countdownRoster=null;
+    room.status='lobby';room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=true;room.countdownRoster=null;resetLobbyExpiry(room,room.lobbyMaxMs||timings.lobbyMaxMs||600000);
     room.modVotes=new Map();room.modStateSig='';room.players=[];
     if(hostPlayer){hostPlayer.ready=false;room.players.push(hostPlayer);const hc=clients.get(hostPlayer.id);if(hc){hc.roomCode=room.code;hc.rematchCode=null;hc.rematchProfile=null}}
     // Os demais deixam a partida encerrada. Quem já apertou Jogar de Novo é
@@ -431,14 +436,15 @@ function createGameServer(opts={}){
     res.writeHead(404,{'content-type':'text/plain; charset=utf-8'});res.end('Não encontrado');
   });
   const wss=new WebSocketServer({server,maxPayload:2*1024*1024});
+  const lobbySweep=setInterval(()=>{const now=Date.now();for(const [code,room] of rooms){if(!['lobby','countdown','loading'].includes(room.status)||!Number.isFinite(Number(room.lobbyExpiresAt))||Number(room.lobbyExpiresAt)>now)continue;if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);room.countdownTimer=null;room.loadingTimer=null;const message='A Sala de Espera expirou após 10 minutos sem iniciar uma partida.';for(const p of [...room.players]){const cl=clients.get(p.id);if(!cl)continue;send(cl.ws,{type:'room_expired',code,message});cl.roomCode=null;cl.rematchCode=null;cl.rematchProfile=null}rooms.delete(code)}},Math.max(100,Math.min(1000,Number(opts.lobbySweepMs)||500)));
   wss.on('connection',ws=>{
     ws.client={id:null,roomCode:null,name:'Tripulante',color:'azul',clientKey:null,ws};
-    ws.on('message',data=>handle(ws,data,{countdownMs:opts.countdownMs??5000,loadingMs:opts.loadingMs??1200}));
+    ws.on('message',data=>handle(ws,data,{countdownMs:opts.countdownMs??5000,loadingMs:opts.loadingMs??1200,lobbyMaxMs:opts.lobbyMaxMs??600000}));
     ws.on('close',()=>{const c=ws.client;if(c.id){detachFromRoom(c,'disconnect');clients.delete(c.id)}});
     ws.on('error',()=>{});
   });
   server.listen(port,host);
-  server.on('close',()=>{for(const c of clients.values())try{c.ws.close()}catch{};rooms.clear();clients.clear()});
+  server.on('close',()=>{clearInterval(lobbySweep);for(const c of clients.values())try{c.ws.close()}catch{};rooms.clear();clients.clear()});
   return {server,wss,rooms,clients};
 }
 if(require.main===module){
