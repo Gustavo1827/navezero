@@ -1541,7 +1541,7 @@ function drawStationBody(c,s){
 /* =====================================================================
    ESTADO DO JOGO
    ===================================================================== */
-const G={mapId:ACTIVE_MAP_ID,decon:{phase:'idle',until:0,exitSide:null,entrySide:null,entryBaseline:[]},cfgFunctionTab:'locator',state:'menu',t:0,chars:[],player:null,tasks:[],pin:null,mini:null,tok:0,tool:null,
+const G={mapId:ACTIVE_MAP_ID,decon:{phase:'idle',until:0,exitSide:null,entrySide:null},cfgFunctionTab:'locator',state:'menu',t:0,chars:[],player:null,tasks:[],pin:null,mini:null,tok:0,tool:null,
   cam:{x:0,y:0},vision:820,visionTarget:820,cfg:{name:'Você',color:'azul'},over:false,lastRoom:null,action:null,
   role:'crew',imp:null,locator:false,observer:false,cleaner:false,parasite:false,paramedic:false,seer:false,paramedicT:null,paramedicCd:0,seerT:null,seerReplay:null,parasiteWinnerId:null,parasiteInfections:{},instructorTrails:[],instructorTrailSeq:0,instructorCd:0,instructorTargetId:null,cleanerCd:0,cleanerUses:0,cleanerT:null,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,delayedCd:0,delayedT:null,delayedMarks:{},controlTargetId:null,controlTime:0,controlCd:0,bodies:[],deadPets:[],killSplashes:[],spectralSmokes:[],spectralSmokeSeq:0,sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,freePlay:false,dt:.016};
 // Mantém a visibilidade do painel de configurações sincronizada com cfgOpen desde a inicialização.
@@ -1827,7 +1827,7 @@ function bestAction(){
   let best=null,bd=1e9;
   if(G.freePlay){const d=stationDist(FREEPLAY_COMPUTER,G.player);if(d<=72){best={type:'freecomputer',station:FREEPLAY_COMPUTER,label:'Usar computador'};bd=d}}
   for(const s of STATION_DEFS){
-    const d=stationDist(s,G.player),reach=s.kind==='decon'?96:62; if(d>reach||d>=bd)continue;
+    const d=stationDist(s,G.player),reach=s.kind==='decon'?80:62; if(d>reach||d>=bd)continue;
     const a=actionFor(s); if(a&&(G.player.alive||(G.role==='crew'&&G.player.ghost&&a.type==='task'))){best=a;bd=d}
   }
   const dt=stationDist(TABLE,G.player);
@@ -1842,47 +1842,32 @@ function setDoorClosedById(id,closed){
 }
 function deconDoorId(side){const meta=MAP_LIBRARY[ACTIVE_MAP_ID]?.decon;return side==='w'?meta?.doorW:meta?.doorE}
 function resetDeconState(){
-  G.decon={phase:'idle',until:0,exitSide:null,entrySide:null,entryBaseline:[]};
+  G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
   if(ACTIVE_MAP_ID==='nexus'){setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true)}
 }
 function charInsideDecon(ch){return roomAtPx(ch.x,ch.y)?.id==='decon'}
-function deconInsideChars(){return (G.chars||[]).filter(c=>c?.alive&&!c.vent&&charInsideDecon(c))}
 function useDeconButton(ch,st){
   if(ACTIVE_MAP_ID!=='nexus'||!ch?.alive||!st||st.kind!=='decon')return false;
-  const D=G.decon||(G.decon={phase:'idle',until:0,exitSide:null,entrySide:null,entryBaseline:[]});
+  const D=G.decon||(G.decon={phase:'idle',until:0,exitSide:null,entrySide:null});
   if(D.phase==='idle'&&!st.inside){
-    D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+5.5;
-    // Um jogador pode estar dentro da câmara por duto. Ele não deve fazer a porta de entrada fechar
-    // instantaneamente quando outra pessoa aperta o botão do lado de fora.
-    D.entryBaseline=deconInsideChars().map(c=>String(c.id));
+    D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+4.5;
     setDoorClosedById(deconDoorId(D.entrySide),false);setDoorClosedById(deconDoorId(D.exitSide),true);
     toast('Descontaminação: entrada liberada.',1500);Snd.click();return true;
   }
-  // Apertar novamente o mesmo botão de entrada apenas renova a janela, sem reiniciar o ciclo.
-  if(D.phase==='entry'&&!st.inside&&st.side===D.entrySide){
-    D.until=G.gt+5.5;setDoorClosedById(deconDoorId(D.entrySide),false);Snd.click();return true;
-  }
   if(D.phase==='ready'&&st.inside&&charInsideDecon(ch)){
-    D.exitSide=st.side;D.phase='exit';D.until=G.gt+5;setDoorClosedById(deconDoorId(D.exitSide),false);
+    D.exitSide=st.side;D.phase='exit';D.until=G.gt+4;setDoorClosedById(deconDoorId(D.exitSide),false);
     toast('Descontaminação concluída: saída liberada.',1700);Snd.ok();return true;
-  }
-  // O botão interno também pode renovar a abertura enquanto alguém ainda está saindo.
-  if(D.phase==='exit'&&st.inside&&charInsideDecon(ch)&&st.side===D.exitSide){
-    D.until=G.gt+5;setDoorClosedById(deconDoorId(D.exitSide),false);Snd.click();return true;
   }
   return false;
 }
 function updateDecon(){
   if(ACTIVE_MAP_ID!=='nexus'||!G.decon)return;
-  const D=G.decon,insideChars=deconInsideChars(),inside=insideChars.length>0;
+  const D=G.decon,inside=G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c));
   if(D.phase==='entry'){
-    const baseline=new Set((D.entryBaseline||[]).map(String));
-    const entrant=insideChars.some(c=>!baseline.has(String(c.id)));
-    // Fecha somente quando alguém novo realmente atravessa a entrada. Assim, um personagem que já
-    // estava na câmara (por exemplo após sair de um duto) não invalida o botão externo.
-    if(entrant){
+    // A porta permanece aberta até alguém realmente entrar. Isso evita falhas por atraso de rede ou passagem estreita.
+    if(inside){
       setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true);
-      D.phase='cleaning';D.until=G.gt+2.6;D.entryBaseline=[];toast('Ciclo de descontaminação em andamento.',1400);return;
+      D.phase='cleaning';D.until=G.gt+2.6;toast('Ciclo de descontaminação em andamento.',1400);return;
     }
     if(D.until>0&&G.gt>=D.until)resetDeconState();
     return;
@@ -1892,7 +1877,7 @@ function updateDecon(){
     return;
   }
   if(D.phase==='exit'){
-    // Fecha quando a câmara esvazia ou depois da margem de segurança.
+    // Fecha assim que a câmara estiver vazia; o limite evita uma porta presa aberta caso alguém fique parado dentro.
     if(!inside||(D.until>0&&G.gt>=D.until))resetDeconState();
   }
 }
@@ -2667,7 +2652,7 @@ function openFreePlayComputer(){
 
 function newGame(prepareOnline=false){
   closeModalSilent(); $('end').hidden=true; $('menu').hidden=true; $('meet').hidden=true; $('hud').hidden=false;
-  activateMapData(SELECTED_MAP_ID,true);G.mapId=ACTIVE_MAP_ID;G.decon={phase:'idle',until:0,exitSide:null,entrySide:null,entryBaseline:[]};
+  activateMapData(SELECTED_MAP_ID,true);G.mapId=ACTIVE_MAP_ID;G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
   TID=0; resetMapDoors();
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); G.killT=null; $('ventPanel').hidden=true; VENT_DEFS.forEach(v=>v.flash=0);
   G.over=false; G.followTarget=null; G.tasks=[]; G.pin=null; G.bodies=[]; G.deadPets=[]; G.killSplashes=[]; G.spectralSmokes=[];G.spectralSmokeSeq=0; G.instructorTrails=[];G.instructorTrailSeq=0;G.instructorCd=0;G.instructorTargetId=null;INSTRUCTOR_SEEN_TRAILS.clear();SPECTRAL_SEEN_SMOKES.clear(); G.M=null; G.spec=null; G.fx=0; G.fixT=0; G.gt=0;
@@ -2771,7 +2756,7 @@ function toMenu(){
   G.fx=0; G.fixT=0; G.gt=0; G.killCd=0; G.meetCd=0; G.role='crew'; G.ghostMode='tasks'; G.freePlay=false; G.over=false; G.camCtx=null; G.adminCtx=null;
   G.sab={lights:0,reactor:0,comms:0,doors:0,cd:0}; TID=0;
   resetMapDoors();
-  G.decon={phase:'idle',until:0,exitSide:null,entrySide:null,entryBaseline:[]};
+  G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
   joy.x=joy.y=0; keys.clear(); clearTimeout(toastT); $('toast').classList.remove('on');
   G.state='menu'; updateSabUI();
 }
@@ -2913,7 +2898,6 @@ function drawWorld(c,cx,cy,vw,vh,o){
     STATION_DEFS.forEach(s=>{
       if(!pendingAt(s.id)||!infoOn())return;const ro=roomOpacity.get(s.room)??1;if(ro<=.02)return;
       const x=(s.x+s.w/2)*TILE, y=s.y*TILE-6-Math.abs(Math.sin(G.t*4))*7;
-      if(ACTIVE_MAP_ID==='nexus'&&o.viewer&&!visualLosClear(o.viewer.x,o.viewer.y,x,(s.y+s.h/2)*TILE))return;
       c.save();c.globalAlpha=ro;c.translate(x,y-10); c.fillStyle='#ffc233'; c.strokeStyle='#10122a'; c.lineWidth=3; rr(c,-12,-16,24,26,8); c.fill(); c.stroke();
       c.beginPath(); c.moveTo(-5,10); c.lineTo(0,18); c.lineTo(5,10); c.fill(); c.stroke();
       c.fillStyle='#2a1b00'; c.font='800 20px "Baloo 2",sans-serif'; c.textAlign='center'; c.fillText('!',0,6); c.restore();
@@ -2922,7 +2906,7 @@ function drawWorld(c,cx,cy,vw,vh,o){
       rr(c,s.x*TILE-3,s.y*TILE-3,s.w*TILE+6,s.h*TILE+6,12); c.stroke(); c.restore()}}
   }
   if(o.markers&&G.role==='crew'&&G.player.alive)FIX_KEYS.forEach(t=>{
-    if(!(G.sab[t]>0))return; const st=stationById[FIX[t].st],ro=roomOpacity.get(st.room)??1;if(ro<=.02)return;const sp=stationPos(FIX[t].st);if(ACTIVE_MAP_ID==='nexus'&&o.viewer&&!visualLosClear(o.viewer.x,o.viewer.y,sp.x,sp.y))return;const y=st.y*TILE-6-Math.abs(Math.sin(G.t*6))*8;
+    if(!(G.sab[t]>0))return; const st=stationById[FIX[t].st],ro=roomOpacity.get(st.room)??1;if(ro<=.02)return;const sp=stationPos(FIX[t].st), y=st.y*TILE-6-Math.abs(Math.sin(G.t*6))*8;
     c.save();c.globalAlpha=ro;c.translate(sp.x,y-10); c.fillStyle='#ff5468'; c.strokeStyle='#10122a'; c.lineWidth=3; rr(c,-12,-16,24,26,8); c.fill(); c.stroke();
     c.beginPath(); c.moveTo(-5,10); c.lineTo(0,18); c.lineTo(5,10); c.fill(); c.stroke();
     c.fillStyle='#33050d'; c.font='800 20px "Baloo 2",sans-serif'; c.textAlign='center'; c.fillText('!',0,6); c.restore();
@@ -2931,7 +2915,6 @@ function drawWorld(c,cx,cy,vw,vh,o){
   const tgt=ch=>{
     if(!o.viewer||ch===o.viewer)return 1;
     const d=dist(ch,o.viewer); if(d>rng||!losClear(o.viewer.x,o.viewer.y,ch.x,ch.y))return 0;
-    if(ACTIVE_MAP_ID==='nexus'&&!visualLosClear(o.viewer.x,o.viewer.y,ch.x,ch.y))return 0;
     return d<rng-260?1:(rng-d)/260;
   };
   drawInstructorTrails(c);drawRoleFx(c);drawSpectralSmokes(c,tgt,opacityForPoint);
@@ -3027,20 +3010,6 @@ function render(){
   // Somente a lanterna do personagem observado pelo jogador é desenhada.
   // As lanternas dos NPCs não são renderizadas aqui; seus dados e a lógica de IA/LOS permanecem intactos.
   fogC.globalCompositeOperation='source-over';
-  if(nexusAmbient){
-    // O céu exterior não recebe a névoa de visão. Jogadores, corpos e outros elementos dinâmicos
-    // continuam ocultos separadamente por distância/linha de visão em drawWorld().
-    fogC.save();fogC.globalCompositeOperation='destination-out';fogC.fillStyle='#000';
-    const tx0=clamp(Math.floor(G.cam.x/TILE)-1,0,COLS-1),ty0=clamp(Math.floor(G.cam.y/TILE)-1,0,ROWS-1),tx1=clamp(Math.ceil((G.cam.x+VW)/TILE)+1,0,COLS),ty1=clamp(Math.ceil((G.cam.y+VH)/TILE)+1,0,ROWS);
-    for(let ty=ty0;ty<ty1;ty++)for(let tx=tx0;tx<tx1;tx++)if(!isFloor(tx,ty)){
-      // Só o vazio exterior puro fica sem névoa. Células de parede (vizinhas ao piso) mantêm
-      // a iluminação, impedindo que o céu claro recorte a borda e revele o interior da sala.
-      let nearFloor=false;for(let oy=-1;oy<=1&&!nearFloor;oy++)for(let ox=-1;ox<=1;ox++)if((ox||oy)&&isFloor(tx+ox,ty+oy)){nearFloor=true;break}
-      if(nearFloor)continue;
-      const fx=(tx*TILE-G.cam.x)*ZOOM/FOG_DIV,fy=(ty*TILE-G.cam.y)*ZOOM/FOG_DIV,fw=TILE*ZOOM/FOG_DIV;fogC.fillRect(fx,fy,fw+.5,fw+.5);
-    }
-    fogC.restore();
-  }
   c.setTransform(DPR,0,0,DPR,0,0); c.imageSmoothingEnabled=true;
   c.drawImage(fogCv,0,0,fogCv.width*FOG_DIV,fogCv.height*FOG_DIV);
   }
@@ -3230,18 +3199,11 @@ const tileOf=c=>({x:clamp(Math.floor(c.x/TILE),0,COLS-1),y:clamp(Math.floor((c.y
 /* ---------- visão e caminhos ---------- */
 function doorClosedAt(tx,ty){return doors.some(d=>d.closed&&tx>=d.x&&tx<d.x+d.w&&ty>=d.y&&ty<d.y+d.h)}
 function losClear(x1,y1,x2,y2){
-  const d=Math.hypot(x2-x1,y2-y1), n=Math.ceil(d/20);
+  // Amostragem mais curta evita vazamentos de visão em cantos, paredes finas e portas.
+  const d=Math.hypot(x2-x1,y2-y1), n=Math.max(1,Math.ceil(d/10));
   for(let i=1;i<n;i++){const t=i/n, tx=Math.floor((x1+(x2-x1)*t)/TILE), ty=Math.floor((y1+(y2-y1)*t)/TILE);
     if(!isFloor(tx,ty)||doorClosedAt(tx,ty))return false}
   return true;
-}
-function visualLosClear(x1,y1,x2,y2){
-  if(!losClear(x1,y1,x2,y2))return false;
-  if(ACTIVE_MAP_ID!=='nexus')return true;
-  const dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy)||1,px=-dy/d*8,py=dx/d*8;
-  // Duas linhas paralelas estreitas evitam que personagens e corpos vazem visualmente por
-  // frestas diagonais/cantos, sem alterar colisão, IA ou alcance das habilidades.
-  return losClear(x1+px,y1+py,x2+px,y2+py)&&losClear(x1-px,y1-py,x2-px,y2-py);
 }
 // Percepção visual autoritativa dos NPCs. Tripulantes sofrem a mesma redução de Luzes dos jogadores.
 function npcVisionRange(ch){
@@ -4090,7 +4052,6 @@ function spawnKillSplash(k,v){
 function updateKillSplashes(dt){if(!Array.isArray(G.killSplashes))G.killSplashes=[];for(const s of G.killSplashes)s.t=Math.max(0,(s.t||0)-dt);G.killSplashes=G.killSplashes.filter(s=>(s.t||0)>0)}
 function drawKillSplashes(c){
   for(const s of G.killSplashes||[]){
-    if(ACTIVE_MAP_ID==='nexus'&&G.player?.alive&&!visualLosClear(G.player.x,G.player.y,s.x,s.y))continue;
     const col=COLOR_BY[s.color]||COLOR_BY.vermelho,k=1-(s.t||0)/(s.max||.62),alpha=Math.max(0,1-k),dx=s.dx||1,dy=s.dy||0;
     c.save();c.globalAlpha=alpha*.88;c.fillStyle=col.main;c.strokeStyle=col.dark;c.lineWidth=1.2;
     for(let i=0;i<7;i++){
@@ -5836,7 +5797,7 @@ function netHostCommand(m){
   if(command==='input'){const inputSeq=Math.max(0,Math.floor(Number(m.inputSeq)||0));NET.remoteInputs.set(ch.id,{x:clamp(+m.x||0,-1,1),y:clamp(+m.y||0,-1,1),at:Date.now(),seq:inputSeq});ch.netInputAck=Math.max(ch.netInputAck||0,inputSeq);return}
   if(ch.controlledBy&&command!=='control_release')return;
   if(command==='decon_button'){
-    const st=stationById[String(m.stationId||'')];if(activePlay&&ch.alive&&st?.kind==='decon'&&stationDist(st,ch)<=108)useDeconButton(ch,st);
+    const st=stationById[String(m.stationId||'')];if(activePlay&&ch.alive&&st?.kind==='decon'&&stationDist(st,ch)<=88)useDeconButton(ch,st);
   }else if(command==='control'){const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&ch.alive&&ch.role==='imp'&&ch.function==='marionette'&&!ch.vent&&(ch.controlCd||0)<=0)startControl(ch,target)}
   else if(command==='control_release'){if(ch.controlTargetId)stopControl(ch)}
   else if(command==='kill'){
