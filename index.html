@@ -1806,6 +1806,13 @@ function stationDist(s,p){
   const sx=s.x*TILE,sy=s.y*TILE,ex=sx+s.w*TILE,ey=sy+s.h*TILE, py=p.y+4;
   const dx=Math.max(sx-p.x,0,p.x-ex), dy=Math.max(sy-py,0,py-ey); return Math.hypot(dx,dy);
 }
+function stationUseRange(s){
+  if(ACTIVE_MAP_ID!=='nexus')return 62;
+  if(s?.kind==='decon')return 88;
+  // Algumas bancadas da Nexus ficam encostadas nas paredes/decoração. Um alcance ligeiramente
+  // maior evita que o personagem pare no limite da colisão e o botão Usar fique sem ação.
+  return pendingAt(s?.id)?82:68;
+}
 const FAKE_GAME={wires_cafe:{game:'wires'},wires_elec:{game:'wires'},wires_stor:{game:'wires'},circuits:{game:'circuits'},code_admin:{game:'code'},code_cafe:{game:'code'},
   divert:{game:'divert',mode:'lever',dest:'pow_cafe'},signal:{game:'signal'},unlock:{game:'unlock'},fuel:{game:'fuel',mode:'fill'},fuel_reactor:{game:'fuel',mode:'pour'},reactor:{game:'reactor'},scan:{game:'scan'}};
 DIVERT_DESTS.forEach(d=>{FAKE_GAME[d]={game:'divert',mode:'accept',dest:d}});
@@ -1837,10 +1844,10 @@ function bestAction(){
   if(G.freePlay){const d=stationDist(FREEPLAY_COMPUTER,G.player);if(d<=72){best={type:'freecomputer',station:FREEPLAY_COMPUTER,label:'Usar computador'};bd=d}}
   // Os quatro controles da Descontaminação têm prioridade perto das portas. Isso evita
   // que uma tarefa vizinha capture o botão Usar e faça o controle parecer sem resposta.
-  if(ACTIVE_MAP_ID==='nexus'&&G.player.alive)for(const s of STATION_DEFS){if(s.kind!=='decon')continue;const d=stationDist(s,G.player);if(d<=78&&d<bd){best={type:'decon',station:s,label:s.label};bd=d}}
+  if(ACTIVE_MAP_ID==='nexus'&&G.player.alive)for(const s of STATION_DEFS){if(s.kind!=='decon')continue;const d=stationDist(s,G.player);if(d<=stationUseRange(s)&&d<bd){best={type:'decon',station:s,label:s.label};bd=d}}
   for(const s of STATION_DEFS){
     if(s.kind==='decon')continue;
-    const d=stationDist(s,G.player); if(d>62||d>=bd)continue;
+    const d=stationDist(s,G.player); if(d>stationUseRange(s)||d>=bd)continue;
     const a=actionFor(s); if(a&&(G.player.alive||(G.role==='crew'&&G.player.ghost&&a.type==='task'))){best=a;bd=d}
   }
   const dt=stationDist(TABLE,G.player);
@@ -2892,6 +2899,9 @@ function drawWorld(c,cx,cy,vw,vh,o){
     STATION_DEFS.forEach(s=>{
       if(!pendingAt(s.id)||!infoOn())return;const ro=roomOpacity.get(s.room)??1;if(ro<=.02)return;
       const x=(s.x+s.w/2)*TILE, y=s.y*TILE-6-Math.abs(Math.sin(G.t*4))*7;
+      // Além do !, destaca a própria bancada. Isso torna tarefas encostadas nas paredes,
+      // como Trocar fusíveis, fáceis de identificar sem depender da posição do marcador.
+      c.save();c.globalAlpha=ro*(.72+.18*Math.sin(G.t*5));c.strokeStyle='rgba(255,194,51,.98)';c.lineWidth=4;c.setLineDash([8,5]);c.lineDashOffset=-G.t*24;rr(c,s.x*TILE-5,s.y*TILE-5,s.w*TILE+10,s.h*TILE+10,11);c.stroke();c.restore();
       c.save();c.globalAlpha=ro;c.translate(x,y-10); c.fillStyle='#ffc233'; c.strokeStyle='#10122a'; c.lineWidth=3; rr(c,-12,-16,24,26,8); c.fill(); c.stroke();
       c.beginPath(); c.moveTo(-5,10); c.lineTo(0,18); c.lineTo(5,10); c.fill(); c.stroke();
       c.fillStyle='#2a1b00'; c.font='800 20px "Baloo 2",sans-serif'; c.textAlign='center'; c.fillText('!',0,6); c.restore();
@@ -3037,12 +3047,12 @@ function drawMapView(c,w,h,labels,all,showChars=true,personalMap=false){
   if(personalMap&&G.locator&&G.trackTarget&&G.trackTime>0){const tr=charById(G.trackTarget);if(tr&&tr.alive){const x=(Math.round(tr.x/TILE/3)*3+1.5)*k,y=(Math.round(tr.y/TILE/3)*3+1.5)*k,col=COLOR_BY[tr.color]||{main:'#fff'};c.save();c.strokeStyle='#65d8ff';c.fillStyle='rgba(101,216,255,.18)';c.lineWidth=2.5;c.beginPath();c.arc(x,y,Math.max(7,k*2.1),0,Math.PI*2);c.fill();c.stroke();c.beginPath();c.arc(x,y,Math.max(3.5,k*.95),0,Math.PI*2);c.fillStyle=col.main;c.fill();c.strokeStyle='#10122a';c.lineWidth=1.5;c.stroke();c.restore()}}
   if(labels){c.font='700 11px "Baloo 2",sans-serif';c.textAlign='center';c.fillStyle='rgba(255,255,255,.75)';
     ROOM_DEFS.forEach(r=>c.fillText(r.name,(r.x+r.w/2)*k,(r.y+r.h/2)*k+4))}
-  if(showChars) G.chars.forEach(ch=>{ if(!ch.alive)return; if(!all&&!ch.isPlayer)return; const observerReveal=personalMap&&G.player?.alive&&G.player?.function==='observer'&&(G.sab.comms||0)<=0;if(observerReveal&&ch.spectralInvisible)return; if(ch.vent&&!ch.isPlayer&&!specRoles()&&!observerReveal)return; const col=COLOR_BY[ch.color];
+  if(showChars) G.chars.forEach(ch=>{ const ownGhost=personalMap&&ch.isPlayer&&!ch.alive; if(!ch.alive&&!ownGhost)return; if(!all&&!ch.isPlayer)return; const observerReveal=personalMap&&G.player?.alive&&G.player?.function==='observer'&&(G.sab.comms||0)<=0;if(observerReveal&&ch.spectralInvisible)return; if(ch.vent&&!ch.isPlayer&&!specRoles()&&!observerReveal)return; const col=COLOR_BY[ch.color];
     const rv=specRoles(); c.fillStyle=col.main; c.strokeStyle=rv?(ch.role==='imp'?'#ff5468':'#3fe0a0'):(ch.isPlayer?'#fff':'#10122a'); c.lineWidth=(rv||ch.isPlayer)?2:1.5;
     c.beginPath(); c.arc(ch.x/TILE*k,ch.y/TILE*k,Math.max(3.5,k*.95),0,6.283); c.fill(); c.stroke()});
 }
 const mapc=$('mapCv').getContext('2d');
-function drawMapPanel(){mapc.setTransform(1,0,0,1,0,0);const observerAlive=!!(G.player?.alive&&G.player?.role==='crew'&&G.player?.function==='observer');const commsDown=(G.sab.comms||0)>0;const showAll=!G.player.alive||(observerAlive&&!commsDown);const showChars=!(observerAlive&&commsDown);drawMapView(mapc,512,368,true,showAll,showChars,true)}
+function drawMapPanel(){mapc.setTransform(1,0,0,1,0,0);const observerAlive=!!(G.player?.alive&&G.player?.role==='crew'&&G.player?.function==='observer');const commsDown=(G.sab.comms||0)>0;const showAll=observerAlive&&!commsDown;const showChars=!(observerAlive&&commsDown);drawMapView(mapc,512,368,true,showAll,showChars,true)}
 function openMap(){
   if(G.player?.function==='observer'){emitRoleFx(G.player.x,G.player.y,'observer');Snd.roleFx('observer','use')}
   if(G.state!=='playing'||G.mapOpen)return;
@@ -5262,8 +5272,8 @@ addEventListener('keydown',e=>{
     else if(isBind('quickChat'))toggleQuickChatKey();
     else if(G.player.controlledBy){if(use||isBind('killMark')||isBind('report')||isBind('sabotage'))e.preventDefault()}
     else if(G.player.vent){if(use)exitVent(G.player); else if(isBind('sabotage'))playerSab()}
-    else if(!G.player.alive){if(use&&G.freePlay&&G.action?.type==='freecomputer')doInteract(G.action);else if(isBind('sabotage')&&G.role==='imp')playerSab(); else if(use)cycleSpec();else if(isBind('function'))triggerFunctionKey()}
-    else if(use)doInteract(G.action);
+    else if(!G.player.alive){const liveAction=use?bestAction():null;if(use&&G.freePlay&&liveAction?.type==='freecomputer')doInteract(liveAction);else if(use&&G.role==='crew'&&liveAction?.type==='task')doInteract(liveAction);else if(isBind('sabotage')&&G.role==='imp')playerSab(); else if(use)cycleSpec();else if(isBind('function'))triggerFunctionKey()}
+    else if(use){G.action=bestAction();doInteract(G.action)}
     else if(isBind('killMark')){if(G.role==='imp'){if(G.player?.function==='delayed')playerDelayedMark();else playerKill()}}
     else if(isBind('function'))triggerFunctionKey();
     else if(isBind('report'))playerReport();
@@ -5275,7 +5285,7 @@ addEventListener('keydown',e=>{
 });
 addEventListener('keyup',e=>keys.delete(e.code));
 addEventListener('blur',()=>keys.clear());
-$('btnUse').addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();const p=G.player,a=G.action;if(!p.alive&&!(a&&a.type==='freecomputer')&&!(G.role==='crew'&&p.ghost&&a&&a.type==='task')){toast('Morto só pode realizar tarefas permitidas.');return;}doInteract(a)});
+$('btnUse').addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();const p=G.player,a=bestAction();G.action=a;if(!p.alive&&!(a&&a.type==='freecomputer')&&!(G.role==='crew'&&p.ghost&&a&&a.type==='task')){toast('Morto só pode realizar tarefas permitidas.');return;}doInteract(a)});
 $('btnKill').addEventListener('pointerdown',e=>{e.preventDefault();playerKill()});$('btnSheriff').addEventListener('pointerdown',e=>{e.preventDefault();playerSheriffShot()});$('btnDelayed').addEventListener('pointerdown',e=>{e.preventDefault();playerDelayedMark()});$('btnCleaner').addEventListener('pointerdown',e=>{e.preventDefault();playerCleanBody()});$('btnParamedic').addEventListener('pointerdown',e=>{e.preventDefault();playerRevive()});$('btnSeer').addEventListener('pointerdown',e=>{e.preventDefault();playerSeerInspect()});$('btnEngineerVent').addEventListener('pointerdown',e=>{e.preventDefault();playerEngineerVent()});$('btnControl').addEventListener('pointerdown',e=>{e.preventDefault();playerControl()});
 $('btnSab').addEventListener('pointerdown',e=>{e.preventDefault();playerSab()});
 $('btnReport').addEventListener('pointerdown',e=>{e.preventDefault();playerReport()});$('btnInstructor').addEventListener('pointerdown',e=>{e.preventDefault();playerInstructorAction()});$('btnParasite').addEventListener('pointerdown',e=>{e.preventDefault();playerInfect()});$('btnSpectral').addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();playerSpectralToggle()});$('btnLocator').addEventListener('pointerdown',e=>{e.preventDefault();startLocator()});
@@ -5331,7 +5341,7 @@ cv.addEventListener('pointerdown',e=>{
   Snd.init();
   const a=actionFor(s);
   if(!a){toast(s.label+': nada a fazer aqui.');return}
-  if(stationDist(s,G.player)>62){toast('Chegue mais perto: '+s.label);return}
+  if(stationDist(s,G.player)>stationUseRange(s)){toast('Chegue mais perto: '+s.label);return}
   doInteract(a);
 });
 // joystick

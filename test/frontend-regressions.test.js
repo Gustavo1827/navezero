@@ -61,7 +61,8 @@ test('Observador usa o mapa dos vivos, some em Comunicações e bloqueia movimen
   assert.match(html, /observerEligible\.slice\(0,clamp\(CFG\.obsMax,0,15\)\)/);
   assert.match(html, /const observerAlive=!!\(G\.player\?\.alive&&G\.player\?\.role==='crew'&&G\.player\?\.function==='observer'\)/);
   assert.match(html, /const commsDown=\(G\.sab\.comms\|\|0\)>0/);
-  assert.match(html, /const showAll=!G\.player\.alive\|\|\(observerAlive&&!commsDown\)/);
+  assert.match(html, /const showAll=observerAlive&&!commsDown/);
+  assert.match(html, /const ownGhost=personalMap&&ch\.isPlayer&&!ch\.alive/);
   assert.match(html, /const showChars=!\(observerAlive&&commsDown\)/);
   assert.match(html, /const observerMapLock=!!\(G\.mapOpen&&p\.alive&&p\.role==='crew'&&p\.function==='observer'\)/);
   assert.match(html, /body\.observer-map-lock #stick\{[^}]*transform:translateY\(88px\)[^}]*pointer-events:none/);

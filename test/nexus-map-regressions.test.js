@@ -110,3 +110,11 @@ test('Nexus usa minigames próprios e exatamente a rede de dutos planejada',()=>
   assert.match(html,/Atual: \$\{r\.value\}/,'controles de quantidade devem mostrar o valor atual ao jogador');
   assert.match(html,/if\(best\?\.type!=='decon'.*Entrar no duto/s,'controles da Descontaminação devem ter prioridade sobre dutos próximos');
 });
+
+test('interação das tarefas da Nexus é recalculada e fantasmas veem somente a própria posição no mapa',()=>{
+  assert.match(html,/function stationUseRange\(s\)[\s\S]*ACTIVE_MAP_ID!=='nexus'[\s\S]*pendingAt\(s\?\.id\)\?82:68/);
+  assert.match(html,/btnUse'\)\.addEventListener\('pointerdown'[\s\S]*const p=G\.player,a=bestAction\(\);G\.action=a/);
+  assert.match(html,/Trocar fusíveis, fáceis de identificar[\s\S]*setLineDash\(\[8,5\]\)/);
+  assert.match(html,/const showAll=observerAlive&&!commsDown/);
+  assert.match(html,/const ownGhost=personalMap&&ch\.isPlayer&&!ch\.alive/);
+});
