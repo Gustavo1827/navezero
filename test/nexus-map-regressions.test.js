@@ -46,9 +46,10 @@ test('Nexus usa Nave no início, Cafeteria após reuniões e spawn válido na Pa
 
 test('cenário da Nexus permanece visível, mas personagens continuam limitados por linha de visão',()=>{
   assert.match(html,/if\(ACTIVE_MAP_ID==='nexus'\)return 1;/);
-  assert.match(html,/nexusAmbient\?\(lightsDown\?'rgba\(4,8,18,\.72\)':'rgba\(8,14,26,\.43\)'\)/);
+  assert.match(html,/fogC\.fillStyle='rgba\(2,3,14,\.94\)'/,'a Nexus deve reutilizar a mesma névoa base da Nave');
   assert.match(html,/if\(d>rng\|\|!losClear\(o\.viewer\.x,o\.viewer\.y,ch\.x,ch\.y\)\)return 0;/);
-  assert.match(html,/OUTSIDE_VOID\[ty\*COLS\+tx\]/,'o céu externo da Nexus deve ficar fora da névoa de iluminação');
+  assert.match(html,/const exteriorReveal=lightsDown\?\.55:\.72/,'o céu externo da Nexus deve permanecer visível com escurecimento translúcido');
+  assert.match(html,/OUTSIDE_VOID\[ty\*COLS\+tx\]/,'a adaptação externa deve continuar limitada ao vazio conectado ao céu');
 
   assert.match(html,/\{id:'decon_w',x:24,y:22,w:1,h:2,decon:true\},\{id:'decon_e',x:29,y:22,w:1,h:2,decon:true\}/);
   assert.doesNotMatch(html,/\{x:24,y:26,w:6,h:[2-9]\}/,'Descontaminação não deve ter uma terceira abertura vertical');
