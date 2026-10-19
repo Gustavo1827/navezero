@@ -20,6 +20,10 @@ Este pacote mantém a estrutura do jogo e reúne as correções multiplayer exis
 - **Nomes únicos e persistentes dos bots:** cada sala tem um cadastro estável de IDs e nomes, sem colisão com nomes humanos na sala; a revanche mantém esse cadastro. A partida offline também reutiliza os nomes enquanto o jogador local mantém o mesmo nome.
 - **Jogar de novo:** o host pode reiniciar a mesma sala e o servidor mantém o código, participantes que ainda estão conectados, quantidade de bots e configurações. O reinício continua passando pela validação e pelo fluxo sincronizado já existente.
 - **Xerife:** intervalo para atirar configurável de 50 a 120 segundos. Ao acertar, apenas o Infiltrado morre; ao errar contra um inocente, apenas o Xerife morre. Ao terminar uma reunião, todos os cooldowns de habilidades entram em recarga completa, incluindo eliminação, sabotagem, dutos, Xerife, Atrasado e Localizador.
+- **Anjo Guardião 🪽:** função pós-morte de Tripulante. Pode proteger um jogador vivo contra eliminações de Infiltrados e Atrasados, infecção do Parasita e controle do Marionetista. A proteção possui duração configurável e agora também **recarga para proteger de 35 a 60 segundos**; a visibilidade do escudo para Infiltrados continua configurável.
+- **Barulhento 🔊:** Tripulante que, ao morrer, dispara um alerta visual e sonoro apontando para o local da morte. A duração do alerta, a quantidade/chance da função e a possibilidade de Infiltrados enxergarem o alerta são configuráveis.
+- **Juiz ⚖️:** Tripulante que desbloqueia sua decisão após atingir a porcentagem configurada de tarefas. Em uma reunião, pode usar sua decisão uma vez: se escolher um Infiltrado, o alvo é expulso; se acusar um inocente, o próprio Juiz é expulso.
+- **Ascensão dos Mortos 👻:** o cartão da predefinição agora usa o ícone PNG próprio incluído em `assets/presets/preset_ascensao_mortos.png`.
 
 ## Correção de movimento do Marionetista
 
