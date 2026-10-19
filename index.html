@@ -530,7 +530,7 @@ body.touch #stick{display:block}
     <div class="chips"><button class="chip" id="btnMap" aria-pressed="false">Mapa</button><button class="chip" id="btnRoomChat" aria-expanded="false" aria-controls="roomChatPanel" hidden>Chat</button><button class="chip" id="btnExit">Sair do jogo</button></div>
     <div class="info">Seu papel: <b id="roleName">-</b></div>
   </div>
-  <div id="toast" role="status"></div><div id="noisyAlert" hidden aria-hidden="true"><div class="noisyAlertCard"><span class="noisyAlertSignal" aria-hidden="true"></span><span class="noisyAlertArrow" aria-hidden="true">➤</span><span class="noisyAlertBody" aria-hidden="true">🩸</span></div></div>
+  <div id="toast" role="status"></div><div id="noisyAlert" hidden aria-hidden="true"></div>
   <div id="ventPanel" class="panel" hidden><div class="vt">Dentro do duto</div><div class="vs" id="ventHere"></div><div id="ventList"></div><button class="chip exit" id="ventExit">Sair do duto</button></div>
   <div id="sabBar" hidden></div>
   <div id="stick"><i id="knob"></i></div>
@@ -2913,9 +2913,7 @@ function drawWorld(c,cx,cy,vw,vh,o){
     STATION_DEFS.forEach(s=>{
       if(!pendingAt(s.id)||!infoOn())return;const ro=roomOpacity.get(s.room)??1;if(ro<=.02)return;
       const x=(s.x+s.w/2)*TILE, y=s.y*TILE-6-Math.abs(Math.sin(G.t*4))*7;
-      // Além do !, destaca a própria bancada. Isso torna tarefas encostadas nas paredes,
-      // como Trocar fusíveis, fáceis de identificar sem depender da posição do marcador.
-      c.save();c.globalAlpha=ro*(.72+.18*Math.sin(G.t*5));c.strokeStyle='rgba(255,194,51,.98)';c.lineWidth=4;c.setLineDash([8,5]);c.lineDashOffset=-G.t*24;rr(c,s.x*TILE-5,s.y*TILE-5,s.w*TILE+10,s.h*TILE+10,11);c.stroke();c.restore();
+      // O marcador ! permanece constante; o delineado da bancada aparece apenas por proximidade (G.action).
       c.save();c.globalAlpha=ro;c.translate(x,y-10); c.fillStyle='#ffc233'; c.strokeStyle='#10122a'; c.lineWidth=3; rr(c,-12,-16,24,26,8); c.fill(); c.stroke();
       c.beginPath(); c.moveTo(-5,10); c.lineTo(0,18); c.lineTo(5,10); c.fill(); c.stroke();
       c.fillStyle='#2a1b00'; c.font='800 20px "Baloo 2",sans-serif'; c.textAlign='center'; c.fillText('!',0,6); c.restore();
@@ -3052,6 +3050,7 @@ function render(){
     c.restore();
   }
   if(G.fx>0){c.fillStyle=`rgba(255,40,70,${Math.min(.4,G.fx*.35)})`; c.fillRect(0,0,innerWidth,innerHeight)}
+  c.save();c.setTransform(DPR*ZOOM,0,0,DPR*ZOOM,-G.cam.x*DPR*ZOOM,-G.cam.y*DPR*ZOOM);drawNoisyAlertIndicator(c);c.restore();
 }
 
 /* ---------- minimapa ---------- */
@@ -4096,6 +4095,7 @@ function drawKillSplashes(c){
   }
 }
 const NOISY_SEEN_ALERTS=new Set();
+const NOISY_ALERT_IMAGE=new Image();NOISY_ALERT_IMAGE.decoding='async';NOISY_ALERT_IMAGE.src='assets/noisy-alert.png';
 function noisyAudienceAllowed(){return !!G.player&&(CFG.noisyImpostorVisible||G.player.role!=='imp')}
 function triggerNoisyAlert(ch){
   if(!ch||ch.function!=='noisy'||ch.noisyTriggered)return;ch.noisyTriggered=true;G.noisyAlerts=Array.isArray(G.noisyAlerts)?G.noisyAlerts:[];
@@ -4104,10 +4104,22 @@ function triggerNoisyAlert(ch){
   for(const o of G.chars){if(o.ai&&o.alive&&(CFG.noisyImpostorVisible||o.role!=='imp')){o.ai.noisyAlert={x:a.x,y:a.y,t:G.gt,ownerId:ch.id};if(o.role==='crew'&&!o.vent&&Math.random()<.7){const tx=Math.floor(a.x/TILE),ty=Math.floor((a.y+OFF_Y)/TILE);if(tx>=0&&ty>=0&&tx<COLS&&ty<ROWS&&walk[ty*COLS+tx])goTo(o,{type:'noisy_alert',x:a.x,y:a.y},(x,y)=>Math.abs(x-tx)+Math.abs(y-ty)<=2)}}}
 }
 function updateNoisyAlertUI(){
-  const box=$('noisyAlert');if(!box)return;G.noisyAlerts=(G.noisyAlerts||[]).filter(a=>G.gt<(a.until||0));const a=noisyAudienceAllowed()?G.noisyAlerts[G.noisyAlerts.length-1]:null;if(!a){box.hidden=true;return}
+  const box=$('noisyAlert');G.noisyAlerts=(G.noisyAlerts||[]).filter(a=>G.gt<(a.until||0));const a=noisyAudienceAllowed()?G.noisyAlerts[G.noisyAlerts.length-1]:null;
+  if(box)box.hidden=true;if(!a)return;
   if(!NOISY_SEEN_ALERTS.has(a.id)){NOISY_SEEN_ALERTS.add(a.id);Snd.noisyAlarm()}
-  const f=focus(),dx=a.x-f.x,dy=a.y-f.y,dist=Math.hypot(dx,dy),ang=Math.atan2(dy,dx)*180/Math.PI;
-  const scale=clamp(.72+dist/900*.68,.72,1.48);box.style.setProperty('--noisy-angle',ang+'deg');box.style.setProperty('--noisy-scale',scale.toFixed(3));box.hidden=false;
+}
+function drawNoisyAlertIndicator(c){
+  const p=G.player,a=noisyAudienceAllowed()?(G.noisyAlerts||[])[(G.noisyAlerts||[]).length-1]:null;
+  if(!p||!a||G.gt>=(a.until||0)||!NOISY_ALERT_IMAGE.complete||!NOISY_ALERT_IMAGE.naturalWidth)return;
+  const dx=a.x-p.x,dy=a.y-p.y,dist=Math.hypot(dx,dy);if(dist<1)return;
+  const ang=Math.atan2(dy,dx),ux=dx/dist,uy=dy/dist;
+  // A arte original aponta para baixo: giramos o conjunto para que a frente/ponteira
+  // aponte para o corpo e a parte traseira do sinal permaneça voltada ao observador.
+  const scale=clamp(.56+dist/900*.78,.56,1.46),w=92*scale,h=w*(149/185);
+  const radius=Math.min(112,Math.max(48,dist*.46));
+  const x=p.x+ux*radius,y=p.y+uy*radius;
+  c.save();c.translate(x,y);c.rotate(ang-Math.PI/2);c.globalAlpha=.96;c.shadowColor='rgba(255,20,45,.38)';c.shadowBlur=8*scale;
+  c.drawImage(NOISY_ALERT_IMAGE,-w/2,-h/2,w,h);c.restore();
 }
 function judgeTaskProgress(ch){const list=G.tasks.filter(t=>t.owner===ch.id&&!t.fake);if(!list.length)return 1;return list.filter(t=>t.done).length/list.length}
 function judgeUnlocked(ch){return !!ch&&ch.alive&&ch.role==='crew'&&ch.function==='judge'&&!ch.judgeUsed&&judgeTaskProgress(ch)*100+1e-6>=CFG.judgeTaskPct}
