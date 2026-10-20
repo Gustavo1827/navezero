@@ -14,7 +14,7 @@ const COLORS = ['vermelho','azul','amarelo','verde','rosa','roxo','laranja','mar
 const LEGACY_COLORS={marinho:'azul_claro'};
 const normalizeColor=value=>LEGACY_COLORS[String(value||'')]||String(value||'');
 const COSMETIC_ALLOWED={
-  hat:new Set(['none','antenna_lunar','cap_orbital','crown_scrap','sprout_solar','halo_signal','navigator_band','hat_traveler','hat_tide','hat_nightcap','hat_signal','hat_bow','hat_cosmic','hat_colorcap','hat_nyah','hat_orbit_badge','hat_eye_pod','hat_comet_mane','hat_void_topper','hat_dune_brim','hat_solar_peak','hat_nova_fold','hat_dust_spire','hat_polar_brim','hat_winter_comet']),
+  hat:new Set(['none','antenna_lunar','cap_orbital','crown_scrap','sprout_solar','halo_signal','navigator_band','hat_traveler','hat_tide','hat_nightcap','hat_signal','hat_bow','hat_cosmic','hat_colorcap','hat_nyah','hat_orbit_badge','hat_eye_pod','hat_comet_mane','hat_void_topper','hat_dune_brim','hat_solar_peak','hat_nova_fold','hat_dust_spire','hat_polar_brim','hat_winter_comet','hat_signal_balloon','hat_micro_party','hat_ruby_knit','hat_supply_roll','hat_black_ranger','hat_rose_bucket','hat_bean_scout','hat_frost_basket']),
   pet:new Set(['none','drone_pingo','cube_bot','comet_pup','luna_bug','beacon_orb','pet_scout','pet_mini','pet_signal_orb','pet_pocket_eye']),
   outfit:new Set(['none','tech_vest','command_jacket','utility_belt','polar_wrap','explorer_harness','outfit_cadet','outfit_orbit_collar','outfit_signal_wrap']),
   visor:new Set(['none','hud_grid','prism_strip','data_monocle','star_sticker','scan_bar','visor_eclipse','visor_scope'])
@@ -151,8 +151,6 @@ function personalizeSnapshot(snapshot, recipientId){
   const s=JSON.parse(JSON.stringify(snapshot));
   const ended=s.state==='over'||s.over;
   const recipient=s.chars?.find(c=>c.id===recipientId);
-  // O chat dos vivos nunca é enviado no snapshot de reunião para jogadores mortos.
-  if(!ended && recipient?.alive===false && s.meeting){s.meeting.chat=[];s.meeting.chatCount=0}
   if(!ended && recipient?.alive!==false){
     const recipientIsImp=recipient?.role==='imp';
     for(const c of (s.chars||[])){if(c.id!==recipientId){c.instructor=false;c.guardian=false}if(c.id!==recipientId && !(recipientIsImp&&c.role==='imp')){c.role='crew';c.function=null}}
@@ -179,7 +177,7 @@ function startGameNow(room, rematch=false){
   if(total<4 && !(rematch && total===3)){error(clients.get(room.hostId)?.ws,'Adicione bots ou espere mais jogadores: uma nova partida precisa de pelo menos 4 participantes.');return false}
   if(total>room.size||total>15){error(clients.get(room.hostId)?.ws,'A quantidade total excede o limite da sala.');return false}
   if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);
-  room.countdownTimer=null;room.loadingTimer=null;room.status='playing';room.lobbyExpiresAt=null;room.round++;room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=false;room.countdownRoster=null;
+  room.countdownTimer=null;room.loadingTimer=null;room.status='playing';room.lobbyExpiresAt=null;room.round++;room.lastSnapshot=null;room.ghostChatHistory=[];room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=false;room.countdownRoster=null;
   sendRoomState(room);
   broadcast(room,{type:'game_start',room:roomPublic(room),round:room.round,rematch});
   return true;
@@ -225,7 +223,7 @@ function handle(ws, raw, timings={}){
     const size=Math.min(15,Math.max(4,Math.round(Number(m.size)||10)));
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
     const code=makeCode();
-    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,createdAt:Date.now(),lobbyMaxMs:Math.max(1000,Number(timings.lobbyMaxMs)||600000),lobbyRemainingMs:0,lobbyExpiresAt:null,countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,rematchLobby:false,rematchWaiters:new Set(),botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};resetLobbyExpiry(room,room.lobbyMaxMs);
+    const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,ghostChatHistory:[],createdAt:Date.now(),lobbyMaxMs:Math.max(1000,Number(timings.lobbyMaxMs)||600000),lobbyRemainingMs:0,lobbyExpiresAt:null,countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,rematchLobby:false,rematchWaiters:new Set(),botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};resetLobbyExpiry(room,room.lobbyMaxMs);
     room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmetics(m.cosmetics)});
     c.name=room.players[0].name;c.color=room.players[0].color;c.roomCode=code;rooms.set(code,room);
     sendRoomState(room);return;
@@ -328,7 +326,7 @@ function handle(ws, raw, timings={}){
     invalidateCountdown(room);
     const previousPlayers=room.players.map(p=>({...p,cosmetics:cleanCosmetics(p.cosmetics)}));
     const hostPlayer=previousPlayers.find(p=>p.id===room.hostId);const waiters=room.rematchWaiters instanceof Set?new Set(room.rematchWaiters):new Set();
-    room.status='lobby';room.lastSnapshot=null;room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=true;room.countdownRoster=null;resetLobbyExpiry(room,room.lobbyMaxMs||timings.lobbyMaxMs||600000);
+    room.status='lobby';room.lastSnapshot=null;room.ghostChatHistory=[];room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=true;room.countdownRoster=null;resetLobbyExpiry(room,room.lobbyMaxMs||timings.lobbyMaxMs||600000);
     room.modVotes=new Map();room.modStateSig='';room.players=[];
     if(hostPlayer){hostPlayer.ready=false;room.players.push(hostPlayer);const hc=clients.get(hostPlayer.id);if(hc){hc.roomCode=room.code;hc.rematchCode=null;hc.rematchProfile=null}}
     // Os demais deixam a partida encerrada. Quem já apertou Jogar de Novo é
@@ -352,9 +350,17 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='state_snapshot'){
     if(!isHost||!['loading','playing'].includes(room.status)||!m.snapshot||typeof m.snapshot!=='object')return;
-    const wasMeeting=room.lastSnapshot?.state==='meeting',isMeeting=m.snapshot.state==='meeting';
+    const previousSnapshot=room.lastSnapshot;
+    const wasMeeting=previousSnapshot?.state==='meeting',isMeeting=m.snapshot.state==='meeting';
     const meetingStarted=!wasMeeting&&isMeeting&&m.snapshot.meeting;
     room.lastSnapshot=m.snapshot;
+    // Quando um humano passa a morto, recebe o histórico privado do canal dos mortos.
+    // Esse histórico nunca é incluído no room_state/snapshot enviado aos vivos.
+    for(const p of room.players){
+      const before=previousSnapshot?.chars?.find(ch=>String(ch.id)===String(p.id));
+      const after=m.snapshot?.chars?.find(ch=>String(ch.id)===String(p.id));
+      if(after?.alive===false&&before?.alive!==false){const target=clients.get(p.id);if(target)send(target.ws,{type:'ghost_chat_history',messages:Array.isArray(room.ghostChatHistory)?room.ghostChatHistory:[]})}
+    }
     ensureModeration(room);if(wasMeeting!==isMeeting)room.modVotes=new Map();
     if(isMeeting){if(!evaluateModeration(room)){} }else if(wasMeeting!==isMeeting)broadcastModeration(room);
     if(!clients.get(c.id)||c.roomCode!==room.code)return;
@@ -390,11 +396,23 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='action'){
     if(isHost||room.status!=='playing')return;
-    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','dead_chat','decon_button']);if(!allowed.has(action))return;
+    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','decon_button']);if(!allowed.has(action))return;
+    if(action==='chat'){const now=Date.now();if(now-(c.lastMeetingChatAt||0)<3000)return;c.lastMeetingChatAt=now}
     const host=clients.get(room.hostId);if(!host)return;
     const allowedData={command:action,playerId:c.id};
     for(const k of ['targetId','x','y','sabotage','ventId','stationId','taskId','stepId','fix','text','claim'])if(m[k]!==undefined)allowedData[k]=m[k];if(m.bodyId!==undefined)allowedData.bodyId=m.bodyId;
     send(host.ws,{type:'host_command',...allowedData});return;
+  }
+  if(m.type==='ghost_chat'){
+    if(room.status!=='playing')return;
+    const player=room.players.find(p=>p.id===c.id);if(!player||snapshotAlive(room,c.id))return;
+    const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;
+    const now=Date.now();if(now-(c.lastGhostChatAt||0)<3000)return;c.lastGhostChatAt=now;
+    if(!Array.isArray(room.ghostChatHistory))room.ghostChatHistory=[];
+    const entry={roomCode:room.code,playerId:c.id,name:player.name,color:player.color,text,at:now};room.ghostChatHistory.push(entry);if(room.ghostChatHistory.length>80)room.ghostChatHistory.splice(0,room.ghostChatHistory.length-80);
+    // Privacidade real do canal: o servidor envia a mensagem apenas para humanos mortos.
+    for(const p of room.players){if(snapshotAlive(room,p.id))continue;const target=clients.get(p.id);if(target)send(target.ws,{type:'ghost_chat_message',...entry})}
+    return;
   }
   if(m.type==='room_config_notice'){
     if(!isHost)return error(ws,'Somente o host pode anunciar alterações de configuração.');
@@ -406,19 +424,12 @@ function handle(ws, raw, timings={}){
     if(room.status!=='lobby')return error(ws,'O chat escrito só fica disponível na sala de espera.');
     const player=room.players.find(p=>p.id===c.id);if(!player)return;
     const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;
-    const now=Date.now();if(now-(c.lastRoomChatAt||0)<3000)return error(ws,'Aguarde 3 segundos antes de enviar outra mensagem.');c.lastRoomChatAt=now;
+    const now=Date.now();if(now-(c.lastRoomChatAt||0)<3000)return;c.lastRoomChatAt=now;
     broadcast(room,{type:'room_chat_message',roomCode:room.code,playerId:c.id,name:player.name,color:player.color,text,at:now});return;
   }
   if(m.type==='meeting_chat'){
     if(!isHost)return;
-    const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;
-    const chars=Array.isArray(room.lastSnapshot?.chars)?room.lastSnapshot.chars:[];
-    for(const p of room.players){if(p.id===c.id)continue;const ch=chars.find(x=>String(x.id)===String(p.id));if(ch&&ch.alive===false)continue;const rc=clients.get(p.id);if(rc)send(rc.ws,{type:'meeting_chat',playerId:String(m.playerId||''),text})}
-    return;
-  }
-  if(m.type==='dead_chat_broadcast'){
-    if(!isHost)return;const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;
-    const allowed=new Set((Array.isArray(m.recipientIds)?m.recipientIds:[]).map(String));for(const p of room.players){if(!allowed.has(String(p.id)))continue;const rc=clients.get(p.id);if(rc)send(rc.ws,{type:'dead_chat_message',playerId:String(m.playerId||''),text})}return;
+    broadcast(room,{type:'meeting_chat',playerId:String(m.playerId||''),text:String(m.text||'').slice(0,180)},c.id);return;
   }
   if(m.type==='ready'){
     const p=room.players.find(p=>p.id===c.id);if(p)p.ready=true;sendRoomState(room);return;
