@@ -1,83 +1,234 @@
-# Nave Zero Online — 0.3b-s75
+# NAVE ZERO ONLINE — RESUMO DO JOGO
 
-**Versão atual:** `0.3b-s75`
+**Versão de referência: 0.3-b**
 
-Este pacote mantém a estrutura do jogo e reúne as correções multiplayer existentes com os ajustes solicitados para Xerife, Atrasado, Engenheiro, Marionetista, identificação dos mortos, falas dos NPCs, chat escrito e revanche.
+Nave Zero Online é um jogo independente de dedução social, tarefas, sabotagens e funções especiais. O projeto é **sem fins lucrativos**, criado de forma experimental **com auxílio de Inteligência Artificial** e inspirado em jogos do gênero, especialmente **Among Us**.
 
-## Alterações incluídas
+Este é um projeto de fã, não oficial e sem vínculo com a Innersloth. Among Us e suas marcas pertencem aos respectivos proprietários. O Nave Zero possui implementação, sistemas, interface, regras e conteúdos próprios desenvolvidos para o projeto.
 
-- **Ícone do Xerife:** substituído por um SVG de arma no estilo visual do jogo.
-- **Atrasado sem eliminação direta:** o botão e o comando genérico de eliminação bloqueiam essa função. O Atrasado continua podendo sabotar e usar apenas a habilidade de marcação.
-- **Cronômetro privado do Atrasado:** o host mantém a marcação autoritativa; os snapshots enviados a cada cliente incluem a contagem regressiva somente para quem fez a marcação. A vítima e os outros jogadores não recebem esses metadados.
-- **Configurações do Atrasado:** chance de 0–100% e quantidade de 0–3; a atribuição fica limitada à quantidade real de Infiltrados. A função permanece sujeita à opção geral de ativação já existente.
-- **Chat escrito apenas na sala de espera:** o botão aparece no lobby e desaparece ao iniciar a contagem/partida. O servidor rejeita mensagens fora da sala de espera; mensagens de até 180 caracteres são sanitizadas, limitadas por taxa e retransmitidas apenas aos membros da mesma sala.
-- **Bots e funções:** bots podem receber Xerife ou Atrasado conforme os limites configurados; Xerifes bots usam a habilidade dentro das condições de suspeita, alcance, linha de visão e cooldown. Bots Atrasados marcam vítimas em vez de eliminá-las diretamente.
-- **Falas contextuais dos NPCs:** frases sobre corpos e locais, perguntas, concordância/discordância, tarefas, suspeitas e sabotagens, condicionadas ao estado da partida e às memórias disponíveis. Testemunhos de dutos e controle só são registrados quando observados; suspeitas e alibis usam o histórico de salas conhecido pela IA.
-- **Engenheiro (Tripulante):** pode usar e atravessar dutos por 10–60 segundos; o valor 61 representa tempo infinito. A saída inicia cooldown de 5–25 segundos, e o uso é bloqueado durante sabotagem de comunicações. A configuração limita a quantidade aos Tripulantes elegíveis. A tela de função usa o título “Você é um Tripulante” e a descrição “Engenheiro - Pode usar os sustos”.
-- **Marionetista (Infiltrado):** pode controlar um Tripulante próximo por 5–30 segundos, com cooldown de 15–60 segundos. Durante a posse, a vítima não pode agir por conta própria; ao terminar, recupera o controle onde estiver e sai automaticamente do duto se necessário. O Marionetista retorna à posição original. A quantidade vai de 0 a 3 e nunca ultrapassa os Infiltrados elegíveis. A tela usa a descrição solicitada “Marionetista - Controle Tripulantes e cause confusão na nave.”
-- **Segurança do controle e memória de NPCs:** o host valida ações multiplayer; inputs e habilidades próprias da vítima controlada são bloqueados. A IA descarta rotas antigas ao iniciar/encerrar posse, registra a sala percorrida e permite que a vítima NPC relate o controle em reuniões. NPCs também reconhecem o uso de dutos por Engenheiros sem tratar isso automaticamente como prova de Infiltrado.
-- **Identificação para jogadores mortos:** jogadores mortos veem a função e o nome de cada participante acima do personagem e nas cartas da reunião (por exemplo, “Xerife — Tripulante 1”). Os nomes dos Infiltrados permanecem vermelhos. Para jogadores vivos, as funções dos outros participantes continuam ocultas pelos snapshots personalizados do servidor.
-- **Nomes únicos e persistentes dos bots:** cada sala tem um cadastro estável de IDs e nomes, sem colisão com nomes humanos na sala; a revanche mantém esse cadastro. A partida offline também reutiliza os nomes enquanto o jogador local mantém o mesmo nome.
-- **Jogar de novo:** o host pode reiniciar a mesma sala e o servidor mantém o código, participantes que ainda estão conectados, quantidade de bots e configurações. O reinício continua passando pela validação e pelo fluxo sincronizado já existente.
-- **Xerife:** intervalo para atirar configurável de 50 a 120 segundos. Ao acertar, apenas o Infiltrado morre; ao errar contra um inocente, apenas o Xerife morre. Ao terminar uma reunião, todos os cooldowns de habilidades entram em recarga completa, incluindo eliminação, sabotagem, dutos, Xerife, Atrasado e Localizador.
-- **Anjo Guardião 🪽:** função pós-morte de Tripulante. Pode proteger um jogador vivo contra eliminações de Infiltrados e Atrasados, infecção do Parasita e controle do Marionetista. A proteção possui duração configurável e agora também **recarga para proteger de 35 a 60 segundos**; a visibilidade do escudo para Infiltrados continua configurável.
-- **Barulhento 🔊:** Tripulante que, ao morrer, dispara um alerta visual e sonoro apontando para o local da morte. A duração do alerta, a quantidade/chance da função e a possibilidade de Infiltrados enxergarem o alerta são configuráveis.
-- **Juiz ⚖️:** Tripulante que desbloqueia sua decisão após atingir a porcentagem configurada de tarefas. Em uma reunião, pode usar sua decisão uma vez: se escolher um Infiltrado, o alvo é expulso; se acusar um inocente, o próprio Juiz é expulso.
-- **Ascensão dos Mortos 👻:** o cartão da predefinição agora usa o ícone PNG próprio incluído em `assets/presets/preset_ascensao_mortos.png`.
+---
 
-## Correção de movimento do Marionetista
+## COMO FUNCIONA
 
-- A causa encontrada nesta versão era **sobreposição de interface no celular**, não erro de normalização do vetor. Com quatro ações visíveis, a fileira de botões do Marionetista avançava sobre a área do joystick. Por isso o `pointerdown` do joystick só começava na faixa esquerda que permanecia descoberta.
-- Em telas de até 560 px, as ações do Marionetista agora usam no máximo duas colunas à direita. Em telas extremamente estreitas, passam para uma coluna. Assim, os botões não cobrem a área física do joystick.
-- A mudança é ativada somente enquanto o jogador local é um Marionetista vivo em partida; o layout das outras funções permanece como estava.
-- A lógica existente de direção, velocidade, colisão, previsão local e snapshots não foi reescrita para mascarar o defeito.
-- Os testes específicos do Marionetista presentes na versão recebida foram removidos conforme solicitado. Nenhum teste novo dessa função foi criado.
+Os jogadores são divididos principalmente entre **Tripulantes** e **Infiltrados**.
 
-## Testes executados
+- **Tripulantes** devem completar tarefas, reparar sabotagens, observar comportamentos suspeitos e descobrir quem são os Infiltrados.
+- **Infiltrados** tentam eliminar a tripulação, sabotar a nave, enganar os outros jogadores e sobreviver às reuniões.
 
-- `node --check server.js`
-- `node --check websocket.js`
-- Extração do JavaScript inline de `index.html` e `node --check` do script extraído.
-- `npm test`: **38 testes automatizados aprovados, 0 falhas** após a remoção dos testes específicos do Marionetista.
-- Verificação estática do layout móvel: em 320 px de largura a fileira do Marionetista fica separada do joystick; em 360 px a separação é de aproximadamente 46 px.
-- Não foi realizado teste em joystick físico nem partida multiplayer real em dispositivos separados neste ambiente.
+Os Tripulantes vencem ao concluir todas as tarefas ou eliminar todos os Infiltrados. Os Infiltrados vencem ao alcançar vantagem decisiva sobre os Tripulantes vivos.
 
-## Executar localmente
+A partida pode misturar **jogadores reais e NPCs**, com suporte a partidas online, bots e Partida Livre.
 
-Requer Node.js 20 ou superior.
+---
 
-```bash
-npm install
-npm start
-```
+## PREDEFINIÇÕES
 
-Abra `http://localhost:8080`. O endpoint `/health` verifica se o servidor está respondendo.
+O host pode usar predefinições para configurar rapidamente uma partida:
 
+### Recursos básicos
+Experiência padrão do Nave Zero, sem funções especiais. Indicada para partidas mais simples e focadas em tarefas, suspeitas, reuniões e sabotagens.
 
-## Cosméticos
+### Funções aos montes
+Ativa diversas funções especiais. Inclui funções de Tripulante garantidas em quantidade reduzida e aumenta a presença de funções especiais de Infiltrado.
 
-Os cosméticos usam artes vetoriais originais do Nave Zero, ajustadas a partir de referências visuais fornecidas apenas para direção de variedade, escala e posicionamento. A lógica de gameplay permanece independente da aparência.
+### Todos ajudam
+A tripulação recebe várias funções de apoio, enquanto os Infiltrados também ganham funções especiais. É uma configuração mais intensa, com grande variedade de habilidades em uma mesma partida.
 
+### Loucura dos Infiltrados
+Predefinição focada nos Infiltrados. Em partidas com três Infiltrados, os três começam como **Parasitas**. As demais funções de Infiltrado ficam com **25% de chance**, enquanto Parasita fica em **100%**.
 
-## Atualização — tarefas por categoria e falas contextuais
-- Configurações: Tarefas Comuns, Médias e Longas (0–5 cada).
-- Comuns são sorteadas uma vez por partida e compartilhadas por todos; Médias/Longas variam por jogador.
-- Novas tarefas e cadeias de etapas foram integradas às estações existentes do mapa.
-- Diálogo de NPCs recebeu novas respostas curtas, relatos de corpo, hipóteses de função e chamadas de voto ligadas às memórias/evidências do NPC.
-- Mantidos os ajustes anteriores de distância para ações, descrições de funções, texto de função para fantasmas e visibilidade de portas sabotadas.
+As configurações continuam editáveis manualmente pelo host; ao alterar valores, a sala deixa de corresponder exatamente à predefinição original.
 
-## Correção — Jogar de Novo
+---
 
-- O botão de revanche online agora aceita o clique assim que a tela de fim aparece, sem depender de a atualização `ended` da sala já ter chegado ao navegador.
-- Foi corrigida a corrida em que o host recriava a sala no mesmo instante em que outro jogador apertava “Jogar de Novo”. O servidor mantém temporariamente o código e o perfil daquele jogador e consegue reanexá-lo à sala recriada sem exigir um segundo clique.
-- Código da sala, configurações, quantidade/cadastro de bots e fluxo multiplayer existente continuam preservados.
+## FUNÇÕES DOS TRIPULANTES
 
-## Novo mapa — Nexus HQ ☁️🏢
+### Tripulante
+Função básica. Faz tarefas, repara sabotagens, reporta corpos, participa de reuniões e tenta descobrir os Infiltrados.
 
-- O jogo agora possui dois mapas selecionáveis na Sala de Espera: **Nave** e **Nexus HQ**. A escolha do host é sincronizada com a sala, salva junto às demais configurações e preservada ao usar **Jogar de Novo**.
-- A **Nexus HQ** é uma torre tecnológica acima das nuvens, com corredores e áreas envidraçadas, Nave de pouso, Enfermaria, Descontaminação, Visão, Cafeteria, Armazém, Varanda, Reator, Laboratório, O2, Administração, Elétrica e Comunicações.
-- A Descontaminação possui ciclo próprio com portas e botões de entrada/saída. NPCs conhecem o fluxo da câmara e usam a navegação do mapa sem atravessar paredes.
-- O mapa adiciona tarefas interativas próprias em seus setores, reaproveitando e ampliando a infraestrutura de minigames existente.
-- Sabotagens, reuniões, corpos, denúncias, funções, fantasmas, trilhas do Instrutor, visão, colisões, Comunicações e multiplayer usam os sistemas já existentes e foram integrados ao mapa.
-- NPCs usam rotas específicas da Nexus HQ, reconhecem os setores em que encontraram jogadores e podem considerar deslocamentos incompatíveis como evidência contextual, sem receber informações que não tenham observado.
-- A arte do mapa é própria do Nave Zero, inspirada apenas no conceito geral de uma base aérea/corporativa tecnológica.
+### 🧭 Localizador
+Pode rastrear temporariamente um jogador próximo e acompanhar sua posição aproximada pelo mapa.
+
+### 🔫 Xerife
+Pode atirar em outro jogador. Se acertar um Infiltrado, elimina o alvo; se atirar em um inocente, o próprio Xerife é eliminado.
+
+### 👀 Observador
+Pode acompanhar a posição dos jogadores vivos pelo mapa. A habilidade é afetada pela sabotagem de Comunicações.
+
+### ↔️ Instrutor
+Função especial obtida após a morte. O Instrutor seleciona um jogador vivo, voa até um local do mapa e marca um ponto. O jogo cria uma **trilha branca brilhante por um percurso caminhável**, respeitando corredores, salas e obstáculos. A trilha é visível para o Instrutor e para o jogador selecionado.
+
+### ⛑️ Paramédico
+Libera usos de sua habilidade ao concluir tarefas e pode reviver Tripulantes mortos por meio de seus corpos, respeitando seus limites e recargas.
+
+### 🍕 Preguiçoso
+Recebe uma quantidade menor de tarefas próprias. Ao completar todas, contribui com sua cota de tarefas para a tripulação, mas passa a sofrer lentidão.
+
+### 🔧 Engenheiro
+Tripulante capaz de usar os dutos por tempo limitado. Possui duração e recarga configuráveis e não pode utilizar a habilidade normalmente durante sabotagem de Comunicações.
+
+### 🪽 Anjo Guardião
+Função especial obtida após a morte. O Anjo Guardião pode proteger um jogador vivo contra eliminações de Infiltrados, eliminações do Atrasado, infecção do Parasita e controle do Marionetista. A proteção possui duração configurável e **recarga para proteger de 35 a 60 segundos**. Também é possível configurar se os Infiltrados vivos podem enxergar a proteção.
+
+### 🔊 Barulhento
+Tripulante que, ao morrer, dispara um alerta visual e sonoro apontando para o local da morte. A duração do alerta, a chance e a quantidade da função são configuráveis, assim como a possibilidade de os Infiltrados enxergarem o alerta.
+
+### ⚖️ Juiz
+Tripulante que desbloqueia sua decisão ao atingir a porcentagem configurada de tarefas. Durante uma reunião, pode usar sua decisão uma vez: se escolher um Infiltrado, o alvo é expulso; se acusar um inocente, o próprio Juiz é expulso.
+
+---
+
+## FUNÇÕES DOS INFILTRADOS
+
+### Infiltrado
+Função básica. Pode eliminar Tripulantes, usar dutos, fingir tarefas e realizar sabotagens.
+
+### 🕓 Atrasado
+Não usa a eliminação comum. Em vez disso, marca um Tripulante; após o tempo configurado, a vítima é eliminada automaticamente caso a marca continue válida.
+
+### 🧹 Faxineiro
+Pode limpar corpos e remover evidências antes que sejam reportadas. Possui limite de usos e tempo de recarga configuráveis.
+
+### 🦠 Parasita
+Infecta um Tripulante. A infecção pode transformar a vítima em um novo Infiltrado após a reunião, seguindo as regras da função.
+
+### 👻 Espectral
+Pode ficar invisível temporariamente. Enquanto invisível, não pode realizar a eliminação normal e pode deixar indícios visuais.
+
+A opção **Intangibilidade** permite atravessar colisões do mapa durante a invisibilidade. Quando ativada, remove o bônus de velocidade e reduz a duração da invisibilidade pela metade. Ao reaparecer dentro de um obstáculo, o jogador é reposicionado no ponto caminhável válido mais próximo.
+
+### ✋ Marionetista
+Pode controlar temporariamente um Tripulante próximo. Durante o controle, a vítima perde o comando do próprio personagem e o Marionetista conduz seus movimentos. Ao terminar, os controles e posições são restaurados conforme as regras da habilidade.
+
+---
+
+## TAREFAS
+
+O Nave Zero possui tarefas distribuídas pela nave e separadas em categorias:
+
+- **Tarefas Comuns:** compartilhadas pela tripulação.
+- **Tarefas Médias:** atividades intermediárias sorteadas individualmente.
+- **Tarefas Longas:** tarefas mais demoradas ou com múltiplas etapas.
+
+O host pode definir quantas tarefas de cada categoria serão usadas. Tripulantes mortos continuam podendo ajudar a equipe completando tarefas quando as regras da partida permitirem.
+
+---
+
+## SABOTAGENS
+
+Os Infiltrados podem prejudicar a tripulação usando sabotagens como:
+
+- **Luzes**, reduzindo a visão dos Tripulantes.
+- **Reator**, criando uma emergência que precisa ser resolvida.
+- **Comunicações**, bloqueando ou limitando sistemas e algumas habilidades.
+- **Portas**, fechando acessos e alterando temporariamente a circulação pelo mapa.
+
+NPCs também entendem sabotagens e podem tentar repará-las conforme a situação.
+
+---
+
+## REUNIÕES E VOTAÇÃO
+
+Corpos podem ser reportados e reuniões de emergência podem ser convocadas quando permitido.
+
+As reuniões possuem fase de discussão e votação. Ao selecionar um jogador para votar, aparecem **✔️ Confirmar** e **❌ Cancelar** dentro da caixa do jogador, evitando votos acidentais.
+
+Jogadores mortos e participantes sem direito a voto respeitam as limitações atuais da partida. Funções especiais continuam seguindo suas próprias regras.
+
+O jogo também possui um sistema separado de **votação para expulsar jogadores da sala**, quando habilitado. Esse voto não se mistura com a votação normal das reuniões. O limite é uma maioria absoluta dos jogadores elegíveis, sem contar o próprio alvo:
+
+**votos necessários = piso(jogadores elegíveis ÷ 2) + 1**
+
+O progresso aparece em tempo real, como **2/4 votos**.
+
+---
+
+## CHAT E COMUNICAÇÃO
+
+O jogo possui frases rápidas e falas contextuais, incluindo suspeitas, relatos e mensagens como:
+
+- Usei a função de [função].
+- Usei a função de [função] em [jogador].
+- Terminei minhas tarefas.
+- Boa!
+- Muito bem [jogador].
+
+NPCs interpretam essas falas de acordo com o contexto, suas memórias, suspeitas e informações observadas durante a partida.
+
+Na Sala de Espera há também chat escrito. Alterações feitas pelo host nas configurações aparecem no feed em branco, por exemplo:
+
+**⚙ Velocidade dos jogadores → 1.5x**
+
+Configurações ligadas a funções usam o ícone correspondente, como **👻** ou **🦠**.
+
+---
+
+## NPCs E INTELIGÊNCIA DO JOGO
+
+Os NPCs não funcionam apenas como personagens aleatórios. Eles possuem comportamento contextual e podem:
+
+- realizar tarefas e fingir tarefas;
+- observar jogadores e salas;
+- criar suspeitas com base em acontecimentos;
+- lembrar informações relevantes;
+- encontrar e reportar corpos;
+- convocar reuniões em determinadas situações;
+- votar de acordo com suas suspeitas;
+- reagir a dutos, habilidades e comportamentos estranhos;
+- usar várias funções especiais quando recebem uma delas;
+- conversar usando falas adequadas ao que aconteceu na partida.
+
+A IA dos NPCs trabalha com informações que eles realmente puderam observar ou aprender dentro do jogo, evitando conhecimento total injustificado sempre que possível.
+
+---
+
+## MULTIPLAYER ONLINE
+
+O Nave Zero Online utiliza salas com código e sincronização entre host e jogadores conectados.
+
+O host controla o estado autoritativo da partida e as principais ações são sincronizadas para os demais participantes. Configurações, habilidades, votos, tarefas, reuniões, movimentação e acontecimentos importantes são compartilhados entre os jogadores online.
+
+O sistema **Jogar de Novo** permite ao host recriar a mesma sala após uma partida, mantendo o código e as configurações. Os jogadores anteriores podem retornar à sala recriada sem criar uma partida separada.
+
+---
+
+## SALA DE ESPERA E CONFIGURAÇÕES
+
+Antes da partida, o host pode ajustar diversos parâmetros, como:
+
+- quantidade de Infiltrados;
+- velocidade e visão;
+- tempos de eliminação, sabotagem, reunião, discussão e votação;
+- quantidade de tarefas;
+- distância das ações;
+- chance, quantidade, duração e recarga das funções especiais;
+- quantidade de bots;
+- predefinições de partida.
+
+As alterações são sincronizadas com os jogadores da sala.
+
+O menu **Configurações de jogo** da tela inicial também permite controlar o volume. Preferências locais, como volume e teclas personalizadas, permanecem salvas no navegador.
+
+---
+
+## PARTIDA LIVRE
+
+A Partida Livre permite testar o mapa, tarefas, funções e habilidades com maior liberdade. É útil para experimentar mecânicas sem depender de uma sala multiplayer completa.
+
+---
+
+## PERSONALIZAÇÃO
+
+O jogo possui seleção de cores e cosméticos para os personagens, além de nomes persistentes para bots dentro das regras da sala. Há também suporte a atalhos de teclado configuráveis.
+
+---
+
+## SOBRE O PROJETO
+
+Nave Zero Online é um **projeto experimental de IA e desenvolvimento de jogos, sem fins lucrativos**, criado para aprendizado, diversão e exploração de ideias de gameplay.
+
+O projeto é inspirado principalmente em **Among Us** e no gênero de dedução social, mas busca desenvolver suas próprias funções, NPCs, sistemas, interfaces, predefinições e regras.
+
+**Projeto independente e não oficial.**
+
+Discord para mods: Discord: https://discord.gg/fPM5Djc5M3

@@ -3125,7 +3125,7 @@ function selectGameMap(id){
   if(!MAP_LIBRARY[id])return;
   // Na Partida Livre, o mapa é escolhido antes de iniciar e permanece fixo até sair da partida.
   if(G.freePlay)return;
-  const locked=inGame()||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
+  const locked=inGame()?cfgEditingLocked():(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
   if(locked)return;
   SELECTED_MAP_ID=id;saveMapSelection(id);activateMapData(id,true);G.mapId=id;
   if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.room?.status==='lobby'){
@@ -3153,7 +3153,7 @@ function renderMapSelector(box,locked){
 function buildCfgUI(){
   const box=$('cfgRows'); box.innerHTML=''; $('cfgFunctionFooter').hidden=G.cfgPage!=='functions';
   if(G.cfgPage==='presets'){renderPresetCards(box);return}
-  const locked=(inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
+  const locked=cfgEditingLocked();
   if(G.cfgPage==='settings')renderMapSelector(box,locked);
   $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnObserverSection').classList.toggle('alt',G.cfgFunctionTab!=='observer');$('btnInstructorSection').classList.toggle('alt',G.cfgFunctionTab!=='instructor');$('btnGuardianSection').classList.toggle('alt',G.cfgFunctionTab!=='guardian');$('btnCleanerSection').classList.toggle('alt',G.cfgFunctionTab!=='cleaner');$('btnParasiteSection').classList.toggle('alt',G.cfgFunctionTab!=='parasite');$('btnSpectralSection').classList.toggle('alt',G.cfgFunctionTab!=='spectral');$('btnParamedicSection').classList.toggle('alt',G.cfgFunctionTab!=='paramedic');$('btnSeerSection').classList.toggle('alt',G.cfgFunctionTab!=='seer');$('btnNoisySection').classList.toggle('alt',G.cfgFunctionTab!=='noisy');$('btnJudgeSection').classList.toggle('alt',G.cfgFunctionTab!=='judge');$('btnLazySection').classList.toggle('alt',G.cfgFunctionTab!=='lazy');$('btnEngineerSection').classList.toggle('alt',G.cfgFunctionTab!=='engineer');$('btnMarionetteSection').classList.toggle('alt',G.cfgFunctionTab!=='marionette');
   if(G.cfgPage==='functions'){
@@ -3208,7 +3208,7 @@ function setCfgPage(page){
   $('cfgTabFunctions').classList.toggle('alt',G.cfgPage!=='functions');
   $('cfgTabPresets').classList.toggle('alt',G.cfgPage!=='presets');
   buildCfgUI();
-  const lk=(inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby'));
+  const lk=cfgEditingLocked();
   $('cfgReset').disabled=lk;$('cfgNote').classList.toggle('lock',lk);
   $('cfgNote').textContent=lk?(inGame()?'Bloqueado durante a partida. Para alterar, saia do jogo e volte ao menu principal.':'Somente o host pode editar as configurações antes de iniciar a partida.'):(G.cfgPage==='functions'?(G.cfgFunctionTab==='sheriff'?'Configure o alcance temporal e a distribuição da função Xerife.':G.cfgFunctionTab==='delayed'?'Ative a função Atrasado e configure o tempo até a eliminação.':G.cfgFunctionTab==='observer'?'Configure a chance de existir Observador e a quantidade máxima de Observadores.':G.cfgFunctionTab==='cleaner'?'Configure chance, quantidade, recarga e usos do Faxineiro.':G.cfgFunctionTab==='parasite'?'Configure chance e quantidade da função Parasita.':G.cfgFunctionTab==='guardian'?'Configure recarga, duração, chance, quantidade e visibilidade da proteção do Anjo Guardião.':G.cfgFunctionTab==='spectral'?'Configure chance, quantidade, recarga, duração e aumento de velocidade da invisibilidade do Espectral.':G.cfgFunctionTab==='seer'?'Configure quantidade, chance, recarga, atraso e duração da reconstituição do Vidente.':G.cfgFunctionTab==='noisy'?'Configure duração, chance, quantidade e visibilidade do alerta do Barulhento.':G.cfgFunctionTab==='judge'?'Configure chance, quantidade e exigência de tarefas do Juiz.':G.cfgFunctionTab==='lazy'?'Configure chance, quantidade, tarefas e lentidão do Preguiçoso.':'Configure os limites e os tempos da função especial Localizador.'):G.cfgPage==='presets'?'Aplique um pacote completo de configurações da sala. Se você alterar algo manualmente depois, a predefinição deixa de aparecer como ativa.':(typeof NET!=='undefined'&&NET.inRoom?'Configure os parâmetros desta sala. As alterações serão salvas ao fechar este menu.':'Configure os tempos em segundos. Discussão e votação são independentes e valem em todas as reuniões.'));
 }
@@ -3557,7 +3557,15 @@ function createInstructorTrail(owner,target,x,y){
   const routeDistance=instructorTrailLength(points);if(routeDistance>CFG.instructorMaxDistance+1){if(owner===G.player){toast('O caminho está longe demais: máximo de '+CFG.instructorMaxDistance+'px.');Snd.err()}return false}
   const tr={id:'trail_'+(++G.instructorTrailSeq),ownerId:owner.id,targetId:target.id,points,t:CFG.instructorDuration,max:CFG.instructorDuration};
   G.instructorTrails.push(tr);owner.instructorCd=CFG.instructorCooldown;owner.instructorTargetId=null;owner.instructorPoint=null;
-  const end=points[points.length-1];if(owner===G.player){G.instructorCd=owner.instructorCd;G.instructorTargetId=null;Snd.roleFx('instructor','done');emitRoleFx(end.x,end.y,'instructor',1);toast('Trilha marcada para '+target.name+'.',2200)}
+  const end=points[points.length-1];
+  if(target.ai){
+    const hintRoom=roomName(end.x,end.y),hintTarget=G.chars.filter(c=>c.alive&&!c.vent&&c!==target&&Math.hypot(c.x-end.x,c.y-end.y)<=actionDistancePx('instructor')&&losClear(end.x,end.y,c.x,c.y)).sort((a,b)=>Math.hypot(a.x-end.x,a.y-end.y)-Math.hypot(b.x-end.x,b.y-end.y))[0]||null;
+    const hints=target.ai.instructorTrailHints=Array.isArray(target.ai.instructorTrailHints)?target.ai.instructorTrailHints:[];
+    hints.push({id:tr.id,ownerId:owner.id,room:hintRoom,targetId:hintTarget?.id||null,gt:G.gt,reported:false});if(hints.length>6)hints.shift();
+    // A trilha é uma pista, não uma confirmação. Só aumenta levemente a suspeita do próprio NPC que a recebeu.
+    if(target.role==='crew'&&hintTarget)addSusp(target,hintTarget.id,.7,'trail',{room:hintRoom,trailId:tr.id,ownerId:owner.id});
+  }
+  if(owner===G.player){G.instructorCd=owner.instructorCd;G.instructorTargetId=null;Snd.roleFx('instructor','done');emitRoleFx(end.x,end.y,'instructor',1);toast('Trilha marcada para '+target.name+'.',2200)}
   if(target===G.player){Snd.roleFx('instructor','done');toast('↔️ Um Instrutor marcou um caminho para você.',2400)}
   return true;
 }
@@ -3690,6 +3698,10 @@ function activePresetId(){for(const p of PRESET_DEFS)if(currentCfgMatchesPreset(
 function applyPreset(id){const before={...CFG},cfg=presetConfig(id);for(const key of Object.keys(CFG_DEF))if(cfg[key]!==undefined)CFG[key]=cfg[key];normalizeCfgCaps(CFG);saveCfg();if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&NET.room?.status==='lobby'){NET.roomDraft={mapId:SELECTED_MAP_ID,...cfg,bots:NET.roomDraft?.bots??NET.room?.bots??0};NET.roomDraftDirty=true;for(const key of NET_SETTING_KEYS)if(before[key]!==CFG[key])netAnnounceConfigChange(key,CFG[key]);netSyncRoomControlsFromCFG()}buildCfgUI();Snd.click()}
 function renderPresetCards(box){const grid=el('div','presetGrid');const active=activePresetId();PRESET_DEFS.forEach(p=>{const card=el('article','presetCard');card.dataset.theme=p.theme;card.classList.toggle('active',active===p.id);const art=el('div','presetArt');const img=document.createElement('img');img.alt='Arte da predefinição '+p.name;img.src=p.art;art.appendChild(img);const meta=el('div','presetMeta');meta.append(el('span','presetTag',p.tag),(()=>{const h=document.createElement('h3');h.textContent=p.name;return h})(),el('p','',p.desc));const foot=el('div','presetFoot');foot.append(el('span','presetState',active===p.id?'Ativa agora':'Aplicar conjunto completo'),(()=>{const b=el('button','big presetApply',active===p.id?'Reaplicar':'Aplicar');b.type='button';b.addEventListener('click',()=>applyPreset(p.id));return b})());card.append(art,meta,foot);grid.appendChild(card)});box.appendChild(grid)}
 const inGame=()=>G.state!=='menu';
+function cfgEditingLocked(){
+  if(typeof NET!=='undefined'&&NET.inRoom)return !NET.isHost||NET.room?.status!=='lobby';
+  return inGame()&&!G.freePlay;
+}
 const uiBusy=()=>G.cfgOpen||G.confirmOpen;
 const PERS={
   desconfiado:{gain:1.3,thr:1.5,hear:1,direct:1,call:3.2},
@@ -3708,7 +3720,7 @@ function makeNPC(name,color){
     reactT:0,bodySeen:null,ignore:new Set(),seen:{},trail:[],speed:CFG.speed*(0.88+Math.random()*.18),wanderP:.15+Math.random()*.25,skipW:.5+Math.random()*1.3,
     killCd:14,huntPause:0,hunt:null,huntT:1,repT:0,sabT:3,fix:null,witnessOf:null,lastVote:null,
     pers:pick(Object.keys(PERS)),susp:{},reasons:{},hist:{},my:[],ling:{},follow:{},scanT:{},incidents:0,nextEm:0,
-    vents:[],ventSaw:null,cleanSaw:null,cleanMysteries:[],reviveSaw:null,seerClue:null,seerReportBody:null,spectralSeen:null,spectralMysteries:[],observerMap:{},alerted:new Set(),ventHops:0,ventT:0,ventStay:0,sayT:0,bodiesFound:[],sabs:[],heard:[],avoid:null};
+    vents:[],ventSaw:null,cleanSaw:null,cleanMysteries:[],reviveSaw:null,seerClue:null,seerReportBody:null,spectralSeen:null,spectralMysteries:[],observerMap:{},instructorTrailHints:[],alerted:new Set(),ventHops:0,ventT:0,ventStay:0,sayT:0,bodiesFound:[],sabs:[],heard:[],avoid:null};
   return c;
 }
 function resetAI(c){
@@ -4621,6 +4633,7 @@ const LINES={
   clean:[(x)=>`Vi ${x} junto do corpo quando ele desapareceu. Pode ser um Faxineiro.`,(x)=>`${x} estava colado no corpo quando ele sumiu; isso parece uma limpeza.`,(x)=>`O corpo desapareceu bem quando ${x} estava ali. Suspeito de Faxineiro.`],
   contra:[(x)=>`${x} mudou a história. Isso não combina com o que eu vi.`,(x)=>`A versão de ${x} não bate com o que vimos.`,(x)=>`${x} disse uma coisa, mas o que eu vi foi outra.`,(x)=>`Isso não combina com o que vimos antes, ${x}.`],
   claim:[(x)=>`Várias pessoas citaram ${x}. Vale conferir.`,(x)=>`Estão falando de ${x}. Vale olhar com mais cuidado.`,(x)=>`Ouvi coisas sobre ${x}, mas quero confirmar.`],
+  trail:[(x,r)=>`Recebi uma trilha que apontava a ${x}.`,(x,r)=>`Recebi uma trilha que levava a ${r}, perto de ${x}.`],
 };
 const NEUTRAL={
   cauteloso:['Acho melhor investigarmos antes de votar.','Sem provas, melhor não arriscar o voto.','Não temos provas suficientes para acusar alguém.','Precisamos discutir o que aconteceu antes de votar.','Vamos com calma: um voto errado ajuda o Infiltrado.','Prefiro ouvir todo mundo antes de decidir.','Se ninguém tem certeza, pular o voto não é loucura.','Cada um conte onde estava, sem pressa.'],
@@ -4630,6 +4643,7 @@ const NEUTRAL={
 };
 function reasonClaim(ch,id,rs){
   const near=rs.type==='nearBody';
+  if(rs.type==='trail')return {from:ch.id,kind:'instructorTrail',target:id,room:rs.room,near:false,time:rs.t??G.M.gt0,strong:false,trail:true};
   return {from:ch.id,kind:near?'sight':'accuse',target:id,room:rs.room,near,time:G.M.body?G.M.body.tKill:G.M.gt0,strong:rs.type==='kill'||rs.type==='vent',vent:rs.type==='vent'};
 }
 function reasonText(ch,id,rs,strong){
@@ -4638,6 +4652,14 @@ function reasonText(ch,id,rs,strong){
   if(!strong&&rs.type!=='kill'&&rs.type!=='vent'&&Math.random()<.6)t=pick(['Não tenho certeza, mas ','Pode ser coisa minha, mas ','Talvez eu esteja errado, mas '])+t.charAt(0).toLowerCase()+t.slice(1);
   return t;
 }
+function crewEliminationsUntilLoss(){
+  const aliveImps=G.chars.filter(c=>c.alive&&c.role==='imp').length,crewAlive=G.chars.filter(c=>c.alive&&c.role==='crew').length;
+  if(!aliveImps||!crewAlive)return 0;
+  for(let n=1;n<=crewAlive;n++){const left=crewAlive-n;if(aliveImps>left||(aliveImps===1&&left===1))return n}
+  return 0;
+}
+function lossWarningText(n=crewEliminationsUntilLoss()){return n>0?`Não podemos perder mais Tripulantes, mais ${n} ${n===1?'eliminação':'eliminações'} e nós perdemos!`:''}
+
 function alibiMsg(ch,M,room){
   const t=M.body?M.body.tKill:M.gt0, rm=room||myRoomAt(ch,t);
   const text=M.body?pickLine([`Quando o corpo apareceu eu estava ${inRoom(rm)}.`,`Na hora do abate eu estava ${inRoom(rm)} fazendo tarefa.`,`Eu estava ${inRoom(rm)} quando tudo aconteceu.`,`Tenho certeza: eu estava ${inRoom(rm)} nessa hora.`,`Estava em ${rm}.`])
@@ -4650,6 +4672,11 @@ function npcStatement(ch,M){
   if(M.body&&Math.random()<.12)return {from:ch,text:`Onde que mataram ${M.body.name}?`,claim:{from:ch.id,kind:'ask',bodyInquiry:true}};
   if(G.sab.reactor>0&&Math.random()<.35)return {from:ch,text:'Cuidado! Vamos resolver o reator!',claim:null};
   const lastSab=ai.sabs[ai.sabs.length-1];if(lastSab&&G.sab[lastSab.type]>0&&G.gt-lastSab.gt<18&&Math.random()<.22){if(lastSab.type==='doors')return {from:ch,text:'As portas estão travadas. Temos que esperar abrir!',claim:null};const sn={lights:'as luzes',comms:'as comunicações',reactor:'o reator'}[lastSab.type]||'a sabotagem';return {from:ch,text:`Cuidado! Vamos resolver ${sn}!`,claim:null}}
+  // Só relata trilhas que este NPC realmente recebeu do Instrutor.
+  const trailHint=(ai.instructorTrailHints||[]).slice().reverse().find(h=>!h.reported&&G.gt-(Number(h.gt)||0)<240);
+  if(trailHint){trailHint.reported=true;const pointed=trailHint.targetId?charById(trailHint.targetId):null;if(pointed&&pointed.alive)return {from:ch,text:`Recebi uma trilha que apontava a ${pointed.name}.`,claim:{from:ch.id,kind:'instructorTrail',target:pointed.id,room:trailHint.room,time:trailHint.gt,strong:false,trail:true}};if(trailHint.room)return {from:ch,text:`Recebi uma trilha que levava a ${trailHint.room}.`,claim:{from:ch.id,kind:'instructorTrail',room:trailHint.room,time:trailHint.gt,strong:false,trail:true}}}
+  // Pergunta o motivo sobretudo quando outra pessoa chamou uma reunião de emergência sem contexto evidente para este NPC.
+  if(M.reason==='emergency'&&M.caller!==ch&&!M.evid&&Math.random()<.28)return {from:ch,text:'Por que você chamou a reunião?',claim:{from:ch.id,kind:'ask',meetingReason:true,target:M.caller?.id||null}};
   if(ai.controlVictimSaw&&G.gt-ai.controlVictimSaw.gt<45&&Math.random()<.55){const seen=charById(ai.controlVictimSaw.id);if(seen)return {from:ch,text:pick([`Vi ${seen.name} usar a função de Marionetista!`,`${seen.name} é Marionetista!!!`,`${seen.name} me controlou! Acho que é Marionetista.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:true,role:'marionette'}}}
   if(ai.controlSaw&&G.gt-ai.controlSaw.gt<35&&Math.random()<.22){const seen=charById(ai.controlSaw.id);if(seen)return {from:ch,text:pick([`${seen.name} é Infiltrado? Eu vi algo estranho durante o controle.`,`${seen.name} é Marionetista? O comportamento durante o controle foi estranho.`]),claim:{from:ch.id,kind:'accuse',target:seen.id,strong:false}}}
   if(ai.engineerSaw&&G.gt-ai.engineerSaw.gt<45&&Math.random()<.20){const seen=charById(ai.engineerSaw.id);if(seen)return {from:ch,text:pick([`Vi ${seen.name} a entrar em um duto. Pode ser Engenheiro ou Infiltrado.`,`Vi ${seen.name} usando um duto, mas isso sozinho não prova a função.`]),claim:{from:ch.id,kind:'suspicion',target:seen.id,vent:true,strong:false}}}
@@ -4668,6 +4695,8 @@ function npcStatement(ch,M){
   const unseen=G.chars.filter(x=>x.alive&&x!==ch&&(!ai.seen[x.id]||G.gt-(ai.seen[x.id].t||0)>22));
   const unseenTarget=unseen.length?pick(unseen):null;
   const knownTop=topSuspect(ch);
+  // Uma suspeita moderada sobre o corpo vira pergunta, nunca confirmação de autoria.
+  if(M.body&&knownTop&&knownTop.s>0&&knownTop.s<P.thr*.95&&Math.random()<.34){const suspect=charById(knownTop.id);if(suspect)return {from:ch,text:`${suspect.name} matou ${M.body.name}?`,claim:{from:ch.id,kind:'suspicion',target:suspect.id,victimId:M.body.id,strong:false}}}
   // Em reuniões, Tripulantes com suspeita concreta falam primeiro sobre quem acreditam ser o Infiltrado.
   // Isso mantém a discussão ligada à memória individual do NPC, em vez de cair em fala genérica por acaso.
   if(ch.role==='crew'&&knownTop&&knownTop.s>=Math.max(.9,P.thr*.45)){
@@ -4679,6 +4708,9 @@ function npcStatement(ch,M){
   }
   const recentSeen=Object.entries(ai.seen||{}).map(([id,rec])=>({id,rec})).filter(x=>x.rec&&x.rec.room&&G.gt-(Number(x.rec.t)||0)<30&&charById(x.id)?.alive);
   if(recentSeen.length&&Math.random()<.16){const hit=pick(recentSeen),seen=charById(hit.id);if(seen)return {from:ch,text:`${seen.name} estava ${inRoom(hit.rec.room)}.`,claim:{from:ch.id,kind:'sight',target:seen.id,room:hit.rec.room,time:hit.rec.t,strong:false}}}
+  const trusted=G.chars.filter(x=>x.alive&&x!==ch&&(ai.susp[x.id]||0)<=-.65);if(ch.role==='crew'&&trusted.length&&Math.random()<.22){const t=pick(trusted);return {from:ch,text:`Não desconfio de ${t.name}.`,claim:{from:ch.id,kind:'defend',target:t.id,strong:false}}}
+  const danger=crewEliminationsUntilLoss();if(ch.role==='crew'&&danger>0&&danger<=2&&Math.random()<.34)return {from:ch,text:lossWarningText(danger),claim:{from:ch.id,kind:'caution',eliminationsRemaining:danger}};
+  if(ch.role==='crew'&&(ai.pers==='cauteloso'||ai.pers==='observador')&&(!knownTop||knownTop.s<P.thr)&&Math.random()<.26)return {from:ch,text:'Devemos votar com cuidado!',claim:{from:ch.id,kind:'caution'}};
   if(M.body&&Math.random()<.24){
     // Não usa `body.cause`: NPCs só discutem o que poderiam observar ou ouvir.
     return {from:ch,text:pickLine(['Não sei qual habilidade causou isso; precisamos de testemunhas.','Uma eliminação pode ter várias causas. Só dá para concluir com evidências.','Alguém viu alguma habilidade ou comportamento estranho perto do corpo?']),claim:{from:ch.id,kind:'theory',cause:'unknown'}};
@@ -4799,6 +4831,10 @@ function hear(L,claim){
     if(hostile&&!imp){addSusp(L,sp.id,1.2*heard,'claim',{role:claim.role});text=claim.kind==='roleUseTarget'&&T?`Você usou ${roleName} em ${T.name}? Isso é muito suspeito.`:`Você está dizendo que usou ${roleName}? Isso é muito suspeito.`;prio=4}
     else if(claim.kind==='roleUseTarget'&&T){text=pick([`Boa! Então você usou ${roleName} em ${T.name}.`,`Muito bem ${sp.name}. Isso pode ajudar a entender o que aconteceu.`,`Certo. ${T.name} consegue confirmar isso?`]);prio=2}
     else{text=pick(['Boa!','Certo, isso pode ajudar.','Muito bem. Alguém consegue confirmar?']);prio=2}
+  }else if(claim.kind==='instructorTrail'){
+    const ownTrail=(ai.instructorTrailHints||[]).slice().reverse().find(h=>(!claim.target||String(h.targetId||'')===String(claim.target))&&(!claim.room||h.room===claim.room));
+    if(T){if(!imp)addSusp(L,T.id,(ownTrail?.7:.2)*heard,'claim',{by:sp.id,trail:true});text=ownTrail?pick(['Eu também recebi uma trilha parecida.','Isso combina com a trilha que eu recebi.']):pick([`Pode ser uma pista sobre ${T.name}, mas não é confirmação.`,`Entendi. Vamos tratar a trilha sobre ${T.name} como pista, não como prova.`]);prio=ownTrail?3:2}
+    else if(claim.room){text=ownTrail?`Também recebi uma trilha que levava a ${claim.room}.`:`Entendi. A trilha para ${claim.room} pode ajudar a investigar.`;prio=ownTrail?3:1}
   }else if(claim.kind==='taskDone'){
     const own=ai.susp[sp.id]||0;
     if(own>=P.thr*.7){text=pick([`Boa, mas ainda preciso entender as suspeitas sobre ${sp.name}.`,`Terminar tarefas ajuda, mas ainda quero esclarecer o que aconteceu.`]);prio=2}
@@ -4918,11 +4954,26 @@ const PRESET_PHRASES=[
   {id:'praiseTarget',label:'Muito bem [jogador]',target:true},
   {id:'noProof',label:'Você não tem provas'},
   {id:'expelTargetBang',label:'Vamos expulsar [jogador] do jogo!',target:true},
-  {id:'expelTargetAsk',label:'Vamos expulsar [jogador] do jogo?',target:true}
+  {id:'expelTargetAsk',label:'Vamos expulsar [jogador] do jogo?',target:true},
+  {id:'trailRoom',label:'Recebi uma trilha que levava a [local].',room:true},
+  {id:'trailPlayer',label:'Recebi uma trilha que apontava a [jogador].',target:true},
+  {id:'deadHelp',label:'Mortos, nos ajudem!'},
+  {id:'meetingBecause',label:'Chamei a reunião porque [outra fala].',reasonChoice:true},
+  {id:'meetingBecauseSuspicious',label:'Vi alguém suspeito.',meetingReason:true,hiddenMain:true},
+  {id:'meetingBecauseSuspect',label:'Suspeito de [jogador].',target:true,meetingReason:true,hiddenMain:true},
+  {id:'meetingBecauseKill',label:'Vi [jogador] a matar.',target:true,meetingReason:true,hiddenMain:true},
+  {id:'meetingBecauseVent',label:'Vi [jogador] a entrar em um duto.',target:true,meetingReason:true,hiddenMain:true},
+  {id:'meetingBecauseRoomChange',label:'Alguém mudou de sala muito rápido; pode ter usado um duto.',meetingReason:true,hiddenMain:true},
+  {id:'meetingBecauseTasks',label:'Precisamos confirmar quem realmente fez tarefas.',meetingReason:true,hiddenMain:true},
+  {id:'whyMeeting',label:'Por que você chamou a reunião?'},
+  {id:'killDoubt',label:'[jogador] matou [morto]?',target:true,secondDead:true},
+  {id:'notSuspect',label:'Não desconfio de [jogador].',target:true},
+  {id:'voteCareful',label:'Devemos votar com cuidado!'},
+  {id:'lossWarning',label:'Não podemos perder mais Tripulantes, mais [quantidade] eliminação(ões) e nós perdemos!'}
 ];
 function renderQuickPhrases(){
   const box=$('sayChips'); box.innerHTML='';
-  PRESET_PHRASES.forEach(p=>{
+  PRESET_PHRASES.filter(p=>!p.hiddenMain).forEach(p=>{
     const b=el('button','chip phrase'+(p.target?' target':''),p.label); b.type='button';
     b.addEventListener('click',()=>choosePresetPhrase(p.id)); box.appendChild(b);
   });
@@ -4934,12 +4985,23 @@ function renderPhraseTargets(phraseId){
   G.chars.filter(c=>(phrase.targetDead?!c.alive:c.alive)&&c.id!==G.player.id).forEach(ch=>{
     const b=el('button','chip phrase target',ch.name); b.type='button';
     b.addEventListener('click',()=>{
-      if(phrase.roleChoice)renderPhraseRoles(phraseId,ch.id);
+      if(phrase.secondDead)renderPhraseDeadTargets(phraseId,ch.id);
+      else if(phrase.roleChoice)renderPhraseRoles(phraseId,ch.id);
       else if(phrase.room)renderPhraseRooms(phraseId,ch.id);
       else sendPresetPhrase(phraseId,ch.id,null);
     }); box.appendChild(b);
   });
   const cancel=el('button','chip phrase cancel','Cancelar'); cancel.type='button'; cancel.addEventListener('click',renderQuickPhrases); box.appendChild(cancel);
+}
+function renderPhraseDeadTargets(phraseId,targetId){
+  const box=$('sayChips');box.innerHTML='';const title=el('span','mstatus','Escolha o jogador morto:');title.style.width='100%';box.appendChild(title);
+  G.chars.filter(c=>!c.alive&&String(c.id)!==String(targetId)).forEach(ch=>{const b=el('button','chip phrase target',ch.name);b.type='button';b.addEventListener('click',()=>sendPresetPhrase(phraseId,targetId,null,null,ch.id));box.appendChild(b)});
+  const cancel=el('button','chip phrase cancel','Voltar');cancel.type='button';cancel.addEventListener('click',()=>renderPhraseTargets(phraseId));box.appendChild(cancel);
+}
+function renderMeetingReasonPhrases(){
+  const box=$('sayChips');box.innerHTML='';const title=el('span','mstatus','Complete o motivo da reunião:');title.style.width='100%';box.appendChild(title);
+  PRESET_PHRASES.filter(p=>p.meetingReason).forEach(p=>{const b=el('button','chip phrase'+(p.target?' target':''),p.label);b.type='button';b.addEventListener('click',()=>{if(p.target)renderPhraseTargets(p.id);else if(p.room)renderPhraseRooms(p.id);else sendPresetPhrase(p.id,null,null)});box.appendChild(b)});
+  const cancel=el('button','chip phrase cancel','Voltar');cancel.type='button';cancel.addEventListener('click',renderQuickPhrases);box.appendChild(cancel);
 }
 function renderPhraseRoles(phraseId,targetId=null){
   const box=$('sayChips');box.innerHTML='';
@@ -4966,15 +5028,17 @@ function renderPhraseRooms(phraseId,targetId=null){
 function choosePresetPhrase(id){
   const M=G.M; if(!M||M.phase!=='discuss'||!G.player.alive)return;
   const p=PRESET_PHRASES.find(x=>x.id===id); if(!p)return;
+  if(p.reasonChoice){renderMeetingReasonPhrases();$('meetStatus').textContent='Escolha a fala que explica o motivo da reunião.';return}
   if(p.target){renderPhraseTargets(id);$('meetStatus').textContent='Escolha quem deseja mencionar.';return}
   if(p.roleChoice){renderPhraseRoles(id);$('meetStatus').textContent='Escolha a função que deseja mencionar.';return}
   if(p.room){renderPhraseRooms(id);$('meetStatus').textContent='Escolha a sala que deseja mencionar.';return}
   sendPresetPhrase(id,null,null);
 }
-function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
+function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null,secondTargetId=null){
   const M=G.M; if(!M||M.phase!=='discuss'||!G.player.alive)return;
-  const def=PRESET_PHRASES.find(x=>x.id===id),T=targetId?charById(targetId):null;
+  const def=PRESET_PHRASES.find(x=>x.id===id),T=targetId?charById(targetId):null,D=secondTargetId?charById(secondTargetId):null;
   if(targetId&&(!T||T.isPlayer||(def?.targetDead?T.alive:!T.alive)))return;
+  if(secondTargetId&&(!D||D.alive))return;
   const rm=roomNamePicked||null;
   let text='',claim={from:G.player.id,kind:'other'};
   switch(id){
@@ -5041,6 +5105,20 @@ function sendPresetPhrase(id,targetId,roomNamePicked,rolePicked=null){
     case 'noProof': text='Você não tem provas'; claim={from:G.player.id,kind:'caution'}; break;
     case 'expelTargetBang': if(!T)return; text=`Vamos expulsar ${T.name} do jogo!`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:true}; break;
     case 'expelTargetAsk': if(!T)return; text=`Vamos expulsar ${T.name} do jogo?`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:false}; break;
+    case 'trailRoom': if(!rm)return; text=`Recebi uma trilha que levava a ${rm}.`; claim={from:G.player.id,kind:'instructorTrail',room:rm,time:M.gt0,strong:false,trail:true}; break;
+    case 'trailPlayer': if(!T)return; text=`Recebi uma trilha que apontava a ${T.name}.`; claim={from:G.player.id,kind:'instructorTrail',target:T.id,time:M.gt0,strong:false,trail:true}; break;
+    case 'deadHelp': text='Mortos, nos ajudem!'; claim={from:G.player.id,kind:'ask',ghostHelp:true}; break;
+    case 'meetingBecauseSuspicious': text='Chamei a reunião porque vi alguém suspeito.'; claim={from:G.player.id,kind:'suspicion',meetingReason:true}; break;
+    case 'meetingBecauseSuspect': if(!T)return; text=`Chamei a reunião porque suspeito de ${T.name}.`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:false,meetingReason:true}; break;
+    case 'meetingBecauseKill': if(!T)return; text=`Chamei a reunião porque vi ${T.name} a matar.`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:true,meetingReason:true}; break;
+    case 'meetingBecauseVent': if(!T)return; text=`Chamei a reunião porque vi ${T.name} a entrar em um duto.`; claim={from:G.player.id,kind:'accuse',target:T.id,strong:true,vent:true,meetingReason:true}; break;
+    case 'meetingBecauseRoomChange': text='Chamei a reunião porque alguém mudou de sala muito rápido; pode ter usado um duto.'; claim={from:G.player.id,kind:'suspicion',vent:true,meetingReason:true}; break;
+    case 'meetingBecauseTasks': text='Chamei a reunião porque precisamos confirmar quem realmente fez tarefas.'; claim={from:G.player.id,kind:'suspicion',meetingReason:true}; break;
+    case 'whyMeeting': text='Por que você chamou a reunião?'; claim={from:G.player.id,kind:'ask',meetingReason:true}; break;
+    case 'killDoubt': if(!T||!D)return; text=`${T.name} matou ${D.name}?`; claim={from:G.player.id,kind:'suspicion',target:T.id,victimId:D.id,strong:false}; break;
+    case 'notSuspect': if(!T)return; text=`Não desconfio de ${T.name}.`; claim={from:G.player.id,kind:'defend',target:T.id,strong:false}; break;
+    case 'voteCareful': text='Devemos votar com cuidado!'; claim={from:G.player.id,kind:'caution'}; break;
+    case 'lossWarning': {const n=crewEliminationsUntilLoss();if(!(n>0))return;text=lossWarningText(n);claim={from:G.player.id,kind:'caution',eliminationsRemaining:n};break}
     default: return;
   }
   if(sendSay(text,claim))renderQuickPhrases();
@@ -5230,6 +5308,8 @@ function endMeeting(){
   // A reunião cancela qualquer efeito pendente do Atrasado.
   G.delayedMarks={};G.delayedT=null;
   G.M=null; G.state='playing';
+  // Reuniões interrompem qualquer ciclo em andamento. A câmara volta ao estado inicial para host, clientes e NPCs via snapshot autoritativo.
+  resetDeconState();
   if(checkEnd())return;
   // Ao terminar qualquer reunião, todas as habilidades com cooldown entram em recarga completa.
   if(G.freePlay){
@@ -5468,7 +5548,7 @@ $('btnReport').addEventListener('pointerdown',e=>{e.preventDefault();playerRepor
 $('btnSkip').addEventListener('click',()=>playerVote('skip'));
 $('btnRole').addEventListener('click',startPlay);
 $('btnCfg').addEventListener('click',openCfg);  $('cfgClose').addEventListener('click',closeCfg);
-$('cfgReset').addEventListener('click',()=>{if((inGame()&&!G.freePlay)||(typeof NET!=='undefined'&&NET.inRoom&&(!NET.isHost||NET.room?.status!=='lobby')))return;Object.assign(CFG,CFG_DEF);CFG.cleanerMax=Math.min(CFG.cleanerMax,CFG.impostors);CFG.parasiteMax=Math.min(CFG.parasiteMax,CFG.impostors,3);CFG.spectralMax=Math.min(CFG.spectralMax,configuredPlayerCount(),15);CFG.paramedicMax=Math.min(CFG.paramedicMax,configuredPlayerCount());CFG.seerMax=Math.min(CFG.seerMax,configuredPlayerCount());CFG.noisyMax=Math.min(CFG.noisyMax,configuredPlayerCount());CFG.judgeMax=Math.min(CFG.judgeMax,configuredPlayerCount());CFG.lazyMax=Math.min(CFG.lazyMax,configuredPlayerCount(),15);saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
+$('cfgReset').addEventListener('click',()=>{if(cfgEditingLocked())return;Object.assign(CFG,CFG_DEF);CFG.cleanerMax=Math.min(CFG.cleanerMax,CFG.impostors);CFG.parasiteMax=Math.min(CFG.parasiteMax,CFG.impostors,3);CFG.spectralMax=Math.min(CFG.spectralMax,configuredPlayerCount(),15);CFG.paramedicMax=Math.min(CFG.paramedicMax,configuredPlayerCount());CFG.seerMax=Math.min(CFG.seerMax,configuredPlayerCount());CFG.noisyMax=Math.min(CFG.noisyMax,configuredPlayerCount());CFG.judgeMax=Math.min(CFG.judgeMax,configuredPlayerCount());CFG.lazyMax=Math.min(CFG.lazyMax,configuredPlayerCount(),15);saveCfg();if(typeof netNoteRoomSetting==='function')for(const k of NET_SETTING_KEYS)netNoteRoomSetting(k,CFG[k]);buildCfgUI();Snd.click()});
 $('cfgTabSettings').addEventListener('click',()=>{setCfgPage('settings');Snd.click()});$('cfgTabFunctions').addEventListener('click',()=>{setCfgPage('functions');Snd.click()});$('cfgTabPresets').addEventListener('click',()=>{setCfgPage('presets');Snd.click()});$('btnLocatorSection').addEventListener('click',()=>{G.cfgFunctionTab='locator';buildCfgUI();$('cfgNote').textContent='Configure os limites e os tempos da função especial Localizador.';Snd.click()});$('btnSheriffSection').addEventListener('click',()=>{G.cfgFunctionTab='sheriff';buildCfgUI();$('cfgNote').textContent='Configure o cooldown, a chance de atribuição e a quantidade de Xerifes.';Snd.click()});$('btnDelayedSection').addEventListener('click',()=>{G.cfgFunctionTab='delayed';buildCfgUI();$('cfgNote').textContent='Ative a função Atrasado e configure o tempo até a eliminação.';Snd.click()});$('btnObserverSection').addEventListener('click',()=>{G.cfgFunctionTab='observer';buildCfgUI();$('cfgNote').textContent='Configure a chance de existir Observador e a quantidade máxima de Observadores.';Snd.click()});$('btnInstructorSection').addEventListener('click',()=>{G.cfgFunctionTab='instructor';buildCfgUI();$('cfgNote').textContent='Configure a chance, quantidade, recarga, duração e distância máxima das trilhas do Instrutor após a morte.';Snd.click()});$('btnGuardianSection').addEventListener('click',()=>{G.cfgFunctionTab='guardian';buildCfgUI();$('cfgNote').textContent='Configure recarga, duração, chance, quantidade e visibilidade da proteção do Anjo Guardião.';Snd.click()});$('btnCleanerSection').addEventListener('click',()=>{G.cfgFunctionTab='cleaner';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade, recarga e usos do Faxineiro.';Snd.click()});$('btnParasiteSection').addEventListener('click',()=>{G.cfgFunctionTab='parasite';buildCfgUI();$('cfgNote').textContent='Configure chance e quantidade da função Parasita.';Snd.click()});$('btnSpectralSection').addEventListener('click',()=>{G.cfgFunctionTab='spectral';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade, recarga, duração e aumento de velocidade da invisibilidade do Espectral.';Snd.click()});$('btnParamedicSection').addEventListener('click',()=>{G.cfgFunctionTab='paramedic';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade, recarga, tarefas por uso e limite de usos do Paramédico.';Snd.click()});$('btnSeerSection').addEventListener('click',()=>{G.cfgFunctionTab='seer';buildCfgUI();$('cfgNote').textContent='Configure quantidade, chance, recarga, atraso e duração da reconstituição do Vidente.';Snd.click()});$('btnNoisySection').addEventListener('click',()=>{G.cfgFunctionTab='noisy';buildCfgUI();$('cfgNote').textContent='Configure duração, chance, quantidade e visibilidade do alerta do Barulhento.';Snd.click()});$('btnJudgeSection').addEventListener('click',()=>{G.cfgFunctionTab='judge';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade e exigência de tarefas do Juiz.';Snd.click()});$('btnLazySection').addEventListener('click',()=>{G.cfgFunctionTab='lazy';buildCfgUI();$('cfgNote').textContent='Configure chance, quantidade, tarefas e lentidão do Preguiçoso.';Snd.click()});$('btnEngineerSection').addEventListener('click',()=>{G.cfgFunctionTab='engineer';buildCfgUI();$('cfgNote').textContent='Configure o tempo nos dutos, chance, quantidade e cooldown do Engenheiro.';Snd.click()});$('btnMarionetteSection').addEventListener('click',()=>{G.cfgFunctionTab='marionette';buildCfgUI();$('cfgNote').textContent='Configure cooldown, duração e distribuição do Marionetista.';Snd.click()});
 $('btnSay').addEventListener('click',()=>{const i=$('sayIn');sendSay(i.value);i.value=''});
 $('sayIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const i=$('sayIn');sendSay(i.value);i.value=''}});
