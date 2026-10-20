@@ -68,7 +68,7 @@ Recebe uma quantidade menor de tarefas próprias. Ao completar todas, contribui 
 Tripulante capaz de usar os dutos por tempo limitado. Possui duração e recarga configuráveis e não pode utilizar a habilidade normalmente durante sabotagem de Comunicações.
 
 ### 🪽 Anjo Guardião
-Função especial obtida após a morte. O Anjo Guardião pode proteger um jogador vivo contra eliminações de Infiltrados, eliminações do Atrasado, infecção do Parasita e controle do Marionetista. A proteção possui duração configurável e **recarga para proteger de 35 a 60 segundos**. Também é possível configurar se os Infiltrados vivos podem enxergar a proteção.
+Função especial obtida após a morte. O Anjo Guardião pode proteger um jogador vivo contra eliminações de Infiltrados, eliminações do Temporizador, infecção do Parasita e controle do Marionetista. A proteção possui duração configurável e **recarga para proteger de 35 a 60 segundos**. Também é possível configurar se os Infiltrados vivos podem enxergar a proteção.
 
 ### 🔊 Barulhento
 Tripulante que, ao morrer, dispara um alerta visual e sonoro apontando para o local da morte. A duração do alerta, a chance e a quantidade da função são configuráveis, assim como a possibilidade de os Infiltrados enxergarem o alerta.
@@ -83,11 +83,11 @@ Tripulante que desbloqueia sua decisão ao atingir a porcentagem configurada de 
 ### Infiltrado
 Função básica. Pode eliminar Tripulantes, usar dutos, fingir tarefas e realizar sabotagens.
 
-### 🕓 Atrasado
-Não usa a eliminação comum. Em vez disso, marca um Tripulante; após o tempo configurado, a vítima é eliminada automaticamente caso a marca continue válida.
+### ⏱️ Temporizador
+Não usa a eliminação comum. Em vez disso, marca um Tripulante; após o tempo configurado, a vítima é eliminada automaticamente caso a marca continue válida. Enquanto existir uma marca pendente, não pode marcar outro jogador; a recarga de **Marcar** só começa quando a marca atual for resolvida, inclusive se o alvo for protegido.
 
 ### 🧹 Faxineiro
-Pode limpar corpos e remover evidências antes que sejam reportadas. Possui limite de usos e tempo de recarga configuráveis.
+Pode limpar corpos e remover evidências antes que sejam reportadas. A limpeza leva um tempo configurável de **1 a 5 segundos** antes de o corpo desaparecer, além de possuir limite de usos e tempo de recarga configuráveis.
 
 ### 🦠 Parasita
 Infecta um Tripulante. A infecção pode transformar a vítima em um novo Infiltrado após a reunião, seguindo as regras da função.

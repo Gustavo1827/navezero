@@ -94,7 +94,7 @@ test('descrições das funções e classes usam exatamente os textos solicitados
   assert.match(html, /Xerife — Elimine o Infiltrado\. Se você errar, será eliminado\./);
   assert.match(html, /Mate a tripulação e sabote a nave\./);
   assert.match(html, /Faça suas tarefas e encontre o Infiltrado\./);
-  assert.match(html, /Atrasado — Mate suas vítimas lentamente\./);
+  assert.match(html, /Temporizador — Mate suas vítimas lentamente\./);
   assert.match(html, /Observador - Veja a Tripulação no seu mapa a qualquer momento\./);
 });
 
@@ -119,18 +119,21 @@ test('culling desenha camadas visuais por sala sem desativar colisões', () => {
 });
 
 
-test('Atrasado tem aba vermelha, ativação, duração limitada e marcação autoritativa', () => {
-  assert.match(html, /id="btnDelayedSection"[^>]*>🕓 Atrasado/);
+test('Temporizador tem aba vermelha, ativação, duração limitada e marcação autoritativa', () => {
+  assert.match(html, /id="btnDelayedSection"[^>]*>⏱️ Temporizador/);
   assert.match(html, /id="btnDelayed"/);
   assert.match(html, /delayedEnabled:\[0,1\]/);
   assert.match(html, /delayedDuration:\[5,40\]/);
   assert.match(html, /Tempo para marcar/);
   assert.match(html, /Usa o mesmo cooldown configurado em/);
   assert.match(html, /if\(CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
-  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Atrasado'/);
+  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Temporizador'/);
   assert.doesNotMatch(html, /if\(CFG\.delayedEnabled&&CFG\.delayedChance>0/);
   assert.match(html, /function doDelayedMark\(shooter,target\)/);
   assert.match(html, /remaining:CFG\.delayedDuration/);
+  assert.match(html, /delayedPendingFor\(shooter\)/);
+  assert.match(html, /resolveDelayedMark\(id,mark\)/);
+  assert.match(html, /A recarga só começa quando esta marca for resolvida/);
   assert.match(html, /if\(G\.M\|\|G\.state==='meeting'/);
   assert.match(html, /command==='delayed_mark'[\s\S]*?dist\(ch,target\)<=actionDistancePx\('delayed'\)&&losClear/);
   assert.match(html, /delayedMarks:\{\.\.\.G\.delayedMarks\}/);
@@ -156,12 +159,12 @@ test('ajustes atuais: cooldowns maiores e uniformes, votos pulados identificados
   assert.match(html, /#roomBotsOk\{[^}]*font:800 20px/);
   assert.match(html, /wireRepeat\(minus,-1\);wireRepeat\(plus,1\)/);
   assert.match(html, /repeatTimer=setInterval\(\(\)=>\{if\(!canStep\(\)\)\{stop\(\);return\}change\(delta,true\)\},70\)/);
-  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Atrasado'/);
+  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Temporizador'/);
 });
 
-test('ícones das funções usam os emojis definidos e Atrasado não recebe eliminação direta', () => {
+test('ícones das funções usam os emojis definidos e Temporizador não recebe eliminação direta', () => {
   assert.match(html, /id="btnSheriff"[^>]*>🔫/);
-  assert.match(html, /id="btnDelayed"[^>]*>🕓/);
+  assert.match(html, /id="btnDelayed"[^>]*>⏱️/);
   assert.match(html, /id="btnLocator"[^>]*>🧭/);
   assert.match(html, /id="btnObserverSection"[^>]*>👀 Observador/);
   assert.match(html, /const p=G\.player, can=[^;]*directKill=imp&&p\.function!=='delayed'/);
@@ -229,12 +232,14 @@ test('Faxineiro tem configuração, atribuição, limpeza autoritativa e memóri
     assert.match(server, new RegExp(key+':\\['));
   }
   assert.match(html, /cleanerCooldown:\[10,60\]/);
+  assert.match(html, /cleanerDelay:\[1,5\]/);
   assert.match(html, /cleanerUses:\[1,15\]/);
   assert.match(html, /id="btnCleanerSection"[^>]*>🧹 Faxineiro/);
   assert.match(html, /id="btnCleaner"[^>]*>🧹/);
   assert.match(html, /Faxineiro - Limpe corpos e suma com as evidências\./);
   assert.match(html, /const cleanerEnabled|CFG\.cleanerChance>0&&CFG\.cleanerMax>0/);
-  assert.match(html, /function cleanBody\(cleaner,body\)[\s\S]*?G\.bodies=G\.bodies\.filter\(b=>b!==body\)/);
+  assert.match(html, /function cleanBody\(cleaner,body\)[\s\S]*?cleaner\.cleanPending=\{bodyId:body\.id,remaining:CFG\.cleanerDelay\}/);
+  assert.match(html, /function finishCleanBody\(cleaner,body\)[\s\S]*?G\.bodies=G\.bodies\.filter\(b=>b!==body\)/);
   assert.match(html, /cleaner\.cleanUses=Math\.max\(0,\(cleaner\.cleanUses\|\|0\)-1\)/);
   assert.match(html, /cleaner\.cleanCd=CFG\.cleanerCooldown/);
   assert.match(html, /command==='clean_body'[\s\S]*?cleanBody\(ch,body\)/);
@@ -449,7 +454,7 @@ test('distância para ações oferece Curta, Média e Longa e sincroniza no mult
 
 test('configurações de funções mostram descrição no topo de cada função', () => {
   assert.match(html, /const descriptions=\{locator:/);
-  for (const role of ['Localizador','Xerife','Atrasado','Observador','Instrutor','Faxineiro','Parasita','Engenheiro','Marionetista']) assert.match(html,new RegExp(role));
+  for (const role of ['Localizador','Xerife','Temporizador','Observador','Instrutor','Faxineiro','Parasita','Engenheiro','Marionetista']) assert.match(html,new RegExp(role));
   assert.match(html, /box\.appendChild\(info\)/);
 });
 

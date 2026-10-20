@@ -92,7 +92,7 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   const peer=await connect(url,'Segundo convidado','rosa');all.push(peer);send(peer,{type:'join_room',code});await onceMessage(peer,m=>m.type==='room_state');
   send(host,{type:'start_game'});await onceMessage(host,m=>m.type==='game_start');await onceMessage(guest,m=>m.type==='game_start');await onceMessage(peer,m=>m.type==='game_start');
   // A match cannot accept late joiners.
-  const late=await connect(url,'Atrasado','rosa');all.push(late);send(late,{type:'join_room',code});
+  const late=await connect(url,'Temporizador','rosa');all.push(late);send(late,{type:'join_room',code});
   const lateError=await onceMessage(late,m=>m.type==='room_error');assert.match(lateError.message,/começou|encerrada/i);
   const authoritative={seq:23,state:'playing',gt:12,chars:[
     {id:host.id,name:'Host',color:'azul',role:'imp',function:null,x:100,y:100,alive:true,netKillCd:5},
@@ -106,7 +106,7 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   assert.equal(guestSnapshot.snapshot.chars.find(c=>c.id===host.id).role,'crew','o snapshot público esconde o papel de outro jogador');
   assert.equal(peerSnapshot.snapshot.chars.find(c=>c.id===host.id).role,'imp','Infiltrados ainda veem o papel do colega de equipe');
   assert.deepEqual(guestSnapshot.snapshot.delayedMarks,{},'a vítima não recebe o cronômetro privado');
-  assert.equal(peerSnapshot.snapshot.delayedMarks[guest.id].remaining,12,'somente o Atrasado que marcou recebe o cronômetro');
+  assert.equal(peerSnapshot.snapshot.delayedMarks[guest.id].remaining,12,'somente o Temporizador que marcou recebe o cronômetro');
   send(host,{type:'leave_room'});
   const transferred=await onceMessage(guest,m=>m.type==='room_state'&&m.room.hostId===guest.id);
   assert.equal(transferred.room.status,'playing');
@@ -216,7 +216,7 @@ test('código alfanumérico maiúsculo, tamanho fixo e cancelamento da contagem 
 });
 
 
-test('configurações do Atrasado respeitam limites e valores padrão', () => {
+test('configurações do Temporizador respeitam limites e valores padrão', () => {
   const settings=cleanSettings({delayedEnabled:7,delayedChance:140,delayedMax:99,delayedDuration:99});
   assert.equal(settings.delayedEnabled,1);
   assert.equal(settings.delayedChance,100);
