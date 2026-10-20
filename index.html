@@ -415,6 +415,8 @@ body.touch #stick{display:block}
 #btnSaveRoomConfig{display:block;margin:4px auto}
 @media(max-width:480px){.roomCard{padding:15px}.roomFields{grid-template-columns:1fr 1fr}.roomCodeLine{font-size:16px}#roomCodeText{font-size:24px}}
 #gameSettingsOverlay{position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,5,18,.86)}#gameSettingsOverlay[hidden]{display:none!important}.gameSettingsCard{width:min(440px,100%)}.gameSettingRow{display:grid;gap:10px;margin:18px 0}.gameSettingRow label{display:flex;justify-content:space-between;gap:12px;font-weight:800}.gameSettingRow input[type=range]{width:100%}.gameSettingsLinks{display:grid;gap:10px;margin:10px 0 18px}.gameSettingsLinks .big{width:100%}
+.menuSocials{display:flex;justify-content:center;gap:10px;margin-top:12px}.socialIconBtn{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--edge);border-radius:12px;background:#12163f;box-shadow:0 4px 0 #0a0c26;color:var(--ink);text-decoration:none;transition:transform .08s,filter .08s}.socialIconBtn:hover{filter:brightness(1.13)}.socialIconBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #0a0c26}.socialIconBtn svg{width:22px;height:22px;display:block;fill:currentColor}
+#deadChatPanel{position:fixed;z-index:170;right:12px;top:calc(62px + var(--st));width:min(350px,calc(100vw - 24px));height:min(44vh,390px);min-height:190px;padding:9px;display:flex;flex-direction:column;gap:7px;overflow:hidden}#deadChatPanel[hidden]{display:none!important}#deadChatPanel header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none}#deadChatMessages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:2px}#deadChatForm{display:flex;gap:6px;flex:none}#deadChatInput{min-width:0;flex:1;background:#0d1033;border:1px solid #2b3270;border-radius:9px;padding:8px;color:#b8bcc8;font:inherit}.deadChatMsg{max-width:100%;overflow-wrap:anywhere;background:#0d1033;border:1px solid #2b3270;border-radius:9px;padding:5px 7px;text-align:left;color:#9ea4b2}.deadChatMsg strong{margin-right:5px;color:#a8aebb}.deadChatMsg span{color:#969ca9}@media(max-width:560px){#deadChatPanel{right:8px;top:auto;bottom:calc(155px + var(--sb));height:min(38vh,330px);width:min(330px,calc(100vw - 16px))}}
 
 </style>
 </head>
@@ -425,7 +427,7 @@ body.touch #stick{display:block}
   <div class="card">
     <h1 class="logo">Nave Zero</h1>
     <p class="tag">A nave está falhando. Conclua as tarefas antes que seja tarde.</p>
-    <p class="phase" style="margin:-4px 0 8px">Versão 0.3b-s75</p>
+    <p class="phase" style="margin:-4px 0 8px">Versão 0.3b-s76</p>
     <canvas id="pv" width="280" height="260"></canvas>
     <div class="field"><label for="nameIn">Seu nome</label><input id="nameIn" maxlength="12" value="Você" autocomplete="off"></div>
     <div class="row onlineMenu"><button class="big" id="btnCreateRoom">Criar sala</button><button class="big alt" id="btnJoinRoom">Entrar na sala</button></div>
@@ -448,6 +450,14 @@ body.touch #stick{display:block}
     </div>
     <p class="help"><b>Mover:</b> WASD ou setas (no celular, o direcional).<br><b>Usar:</b> chegue perto de um painel brilhante e aperte E, Espaço ou o botão Usar. Também dá para clicar no painel.</p>
     <p class="phase">Até 15 jogadores; Infiltrados definidos nas configurações (você pode ser um deles). <b>Q</b> mata, <b>X</b> sabota e <b>R</b> reporta um corpo.</p>
+    <div class="menuSocials" aria-label="Redes sociais do Nave Zero">
+      <a class="socialIconBtn" href="https://discord.gg/cQeVbpsetw" target="_blank" rel="noopener noreferrer" aria-label="Abrir Discord do Nave Zero" title="Discord">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.54 5.34A16.2 16.2 0 0 0 15.44 4l-.5 1.03a15.1 15.1 0 0 0-5.88 0L8.56 4a16.3 16.3 0 0 0-4.1 1.34C1.87 9.17 1.17 12.9 1.52 16.58a16.6 16.6 0 0 0 5.03 2.54l1.23-1.68a10.5 10.5 0 0 1-1.94-.92l.48-.37c3.74 1.72 7.8 1.72 11.5 0l.49.37c-.63.37-1.28.68-1.95.92l1.23 1.68a16.6 16.6 0 0 0 5.03-2.54c.42-4.28-.72-7.98-3.08-11.24ZM8.54 14.28c-1.12 0-2.04-1.03-2.04-2.3s.9-2.3 2.04-2.3 2.06 1.04 2.04 2.3c0 1.27-.9 2.3-2.04 2.3Zm6.92 0c-1.12 0-2.04-1.03-2.04-2.3s.9-2.3 2.04-2.3 2.06 1.04 2.04 2.3c0 1.27-.9 2.3-2.04 2.3Z"/></svg>
+      </a>
+      <a class="socialIconBtn" href="https://www.tiktok.com/@nave.zero.online?_r=1&amp;_t=ZS-9AiI8uaLyqK" target="_blank" rel="noopener noreferrer" aria-label="Abrir TikTok do Nave Zero" title="TikTok">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.55 3c.25 1.47 1.12 2.76 2.4 3.53A6.1 6.1 0 0 0 21 7.35v3.07a9.14 9.14 0 0 1-5.43-1.78v6.19a6.17 6.17 0 1 1-5.3-6.12v3.1a3.1 3.1 0 1 0 2.23 2.98V3h3.05Z"/></svg>
+      </a>
+    </div>
   </div>
 </div>
 
@@ -508,6 +518,13 @@ body.touch #stick{display:block}
   <header><strong>Chat da sala de espera</strong><button type="button" class="chip" id="btnRoomChatClose" aria-label="Fechar chat">✕</button></header>
   <div id="roomChatMessages" role="log" aria-live="polite" aria-relevant="additions"></div>
   <form id="roomChatForm"><input id="roomChatInput" maxlength="180" autocomplete="off" placeholder="Escreva uma mensagem…" aria-label="Mensagem do chat"><button type="submit" class="chip">Enviar</button></form>
+</section>
+
+<button class="chip" id="deadChatButton" type="button" hidden aria-expanded="false" aria-controls="deadChatPanel">Chat</button>
+<section id="deadChatPanel" class="panel" hidden aria-label="Chat dos mortos">
+  <header><strong>💀 Chat dos Mortos</strong><button type="button" class="chip" id="deadChatClose" aria-label="Fechar chat">✕</button></header>
+  <div id="deadChatMessages" role="log" aria-live="polite" aria-relevant="additions"></div>
+  <form id="deadChatForm"><input id="deadChatInput" maxlength="180" autocomplete="off" placeholder="Mensagem para os mortos…" aria-label="Mensagem do chat dos mortos"><button type="submit" class="chip">Enviar</button></form>
 </section>
 
 <div id="mpWaitOverlay" hidden aria-live="assertive" aria-atomic="true">
@@ -2802,7 +2819,7 @@ function toMenu(){
   resetMapDoors();
   G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
   joy.x=joy.y=0; keys.clear(); clearTimeout(toastT); $('toast').classList.remove('on');
-  G.state='menu'; updateSabUI();
+  G.state='menu'; closeDeadChat();$('deadChatMessages').innerHTML=''; updateSabUI();
 }
 let toastT=0;
 function toast(m,ms=2200){
@@ -4941,8 +4958,9 @@ function handlePlayerMsg(text,claimOverride){
 function sendSay(raw,claimOverride){
   const M=G.M; if(!M||!G.player.alive||M.phase!=='discuss')return false;
   const text=String(raw||'').trim().slice(0,90); if(!text)return false;
-  if(M.sayCd>0||M.said>=8){$('meetStatus').textContent='Aguarde um instante antes de falar de novo.';return false}
-  M.sayCd=2.5; M.said++; postMsg(G.player,text); handlePlayerMsg(text,claimOverride); return true;
+  M.chatLastById=M.chatLastById||{};const now=performance.now(),last=Number(M.chatLastById[G.player.id]||0);
+  if(now-last<3000||M.said>=8){$('meetStatus').textContent='Aguarde 3 segundos antes de falar de novo.';return false}
+  M.chatLastById[G.player.id]=now;M.sayCd=3; M.said++; postMsg(G.player,text); handlePlayerMsg(text,claimOverride); return true;
 }
 const PRESET_PHRASES=[
   {id:'suspicion',label:'Eu vi alguém suspeito.'},
@@ -5230,10 +5248,10 @@ function callMeeting(caller,reason,body,forceSync=false){
     if(rs)evid={text:'',claim:null,top,rs};
   }
   G.M={phase:'intro',t:0,clock:0,dur:1.9,caller,reason,body,votes:{},voteAt:{},log:[],msgs:[],mi:0,myVote:null,result:null,cards:{},chat:[],
-    gt0:G.gt,heat:{},claims:[],sel:null,replyQ:[],remarks:0,sayCd:0,said:0,used:new Set(),evid:null,judge:null};
+    gt0:G.gt,heat:{},claims:[],sel:null,replyQ:[],remarks:0,sayCd:0,said:0,chatLastById:{},used:new Set(),evid:null,judge:null};
   if(evid){evid.text=reasonText(caller,evid.top.id,evid.rs,true); evid.claim=reasonClaim(caller,evid.top.id,evid.rs); G.M.evid=evid}
   if(body)G.chars.forEach(o=>{if(o.alive&&!o.isPlayer&&!o.isRemoteHuman&&o.ai&&o.role==='crew')noteBodyEvidence(o,body)});
-  buildMeetUI(); Snd.err(); updateSabUI();
+  buildMeetUI(); Snd.err(); updateSabUI(); deadNpcMeetingLine();
   // Reunião online: publica imediatamente o primeiro snapshot autoritativo. O servidor
   // transforma a transição em meeting_start prioritário para todos os clientes.
   if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&!NET.applying)queueMicrotask(()=>netSyncHostAfterAuthorityChange());
@@ -5285,7 +5303,7 @@ function confirmMeetingVote(id){const M=G.M;if(!M||String(M.pendingVote)!==Strin
 function useJudgeVote(id){const M=G.M,target=charById(id);if(!M||String(M.pendingVote)!==String(id)||!target)return;if(NET.inRoom&&!NET.isHost){M.voteSending=true;netSend({type:'action',action:'judge_vote',targetId:id});$('meetStatus').textContent='Decisão do Juiz enviada...';renderMeetingVoteControls();return}if(registerJudgeDecision(G.player,target)){M.pendingVote=null;$('btnSkip').disabled=true;$('meetStatus').textContent='Voto registrado.';Snd.roleFx('judge','use');renderMeetingVoteControls()}else{toast('⚖️ Complete as tarefas necessárias para liberar o Juiz.',2200)}}
 function cancelMeetingVote(){const M=G.M;if(!M)return;M.pendingVote=null;$('meetStatus').textContent='Escolha seu voto.';Snd.click();renderMeetingVoteControls()}
 function setMeetPhase(ph){
-  const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive;const judgeOverlay=$('judgePronounce');if(judgeOverlay)judgeOverlay.hidden=!(M.judge&&['judge','result'].includes(ph)); $('meet').classList.toggle('vote-reveal',ph==='result');$('meet').classList.toggle('space-result',false);
+  const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive;$('meetChat').hidden=!al;if(!al){$('meetSay').hidden=true;$('sayChips').hidden=true}const judgeOverlay=$('judgePronounce');if(judgeOverlay)judgeOverlay.hidden=!(M.judge&&['judge','result'].includes(ph)); $('meet').classList.toggle('vote-reveal',ph==='result');$('meet').classList.toggle('space-result',false);
   $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';if(ph!=='result'){$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML=''}
   if(ph==='discuss'){
     $('meetTitle').textContent='Discussão'; $('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';
@@ -5381,7 +5399,7 @@ function postMsg(from,text){
   appendMeetingMsgVisual(from,msg,false);
 }
 function syncMeetingChatFromSnapshot(chat){
-  if(!G.M||!Array.isArray(chat))return;
+  if(!G.M||!Array.isArray(chat))return;if(G.player&&!G.player.alive){$('meetChat').innerHTML='';$('meetChat').hidden=true;return}
   const clean=chat.map(m=>({fromId:String(m.fromId||''),text:String(m.text||'').slice(0,180)}));
   const local=Array.isArray(G.M.chat)?G.M.chat:[];
   const same=local.length===clean.length&&local.every((m,i)=>String(m.fromId||'')===clean[i].fromId&&String(m.text||'')===clean[i].text);
@@ -5434,6 +5452,7 @@ const simActive=()=>(G.state==='playing'||G.state==='task'||G.state==='tool')&&!
 function updateButtons(){
   const p=G.player, can=G.state==='playing'&&(p.alive||ghostCanSab()), imp=G.role==='imp', directKill=imp&&p.function!=='delayed'&&!p.spectralInvisible;
   const chatBtn=$('btnRoomChat');if(chatBtn){chatBtn.hidden=true;chatBtn.setAttribute('aria-expanded','false')}
+  const deadBtn=$('deadChatButton');if(deadBtn){const showDead=!!p&&!p.alive&&!G.over&&G.state!=='menu'&&G.state!=='role';deadBtn.hidden=!showDead;if(!showDead)closeDeadChat()}
   const bk=$('btnKill'), bsh=$('btnSheriff'), bdel=$('btnDelayed'), bcl=$('btnCleaner'), bp=$('btnParasite'), bspec=$('btnSpectral'), bpa=$('btnParamedic'), bse=$('btnSeer'), bi=$('btnInstructor'), bg=$('btnGuardian'), bs=$('btnSab'), br=$('btnReport'), ub=$('btnUse'), bl=$('btnLocator'), be=$('btnEngineerVent'), bc=$('btnControl'), sheriff=G.role==='crew'&&p.function==='sheriff', delayed=G.role==='imp'&&p.function==='delayed', cleaner=G.role==='imp'&&p.function==='cleaner', parasite=G.role==='imp'&&p.function==='parasite', spectral=G.role==='imp'&&p.function==='spectral', paramedic=G.role==='crew'&&p.function==='paramedic', seer=G.role==='crew'&&p.function==='seer', engineer=G.role==='crew'&&p.function==='engineer', marionette=G.role==='imp'&&p.function==='marionette';
   // O conjunto extra de ações do Marionetista não pode ocupar a área física do joystick em telas estreitas.
   $('actions').classList.toggle('marionette-controls',marionette&&p.alive&&G.state==='playing');
@@ -5879,10 +5898,13 @@ function netHandleMessage(m){
   if(m.type==='snapshot'){if(!NET.isHost&&NET.inRoom){netApplySnapshot(m.snapshot);if(NET.revealPending&&G.player&&G.chars.length){NET.revealPending=false;showLocalRoleReveal(true);netHideWait()}}return}
   if(m.type==='host_snapshot'){if(NET.isHost&&NET.inRoom&&m.snapshot){netApplySnapshot(m.snapshot,true);NET.matchImpIds=new Set(G.chars.filter(c=>c.role==='imp').map(c=>c.id));const present=new Set((NET.room?.players||[]).map(p=>p.id));for(const c of G.chars)if(c.role==='imp'&&!present.has(c.id)&&!c.isBot)NET.departedImpIds.add(c.id);netBecomeHost();checkEnd()}return}
   if(m.type==='meeting_chat'){
-    if(NET.inRoom&&!NET.isHost&&!NET.applying&&G.M){
+    if(NET.inRoom&&!NET.isHost&&!NET.applying&&G.M&&G.player?.alive){
       const who=charById(m.playerId),text=String(m.text||'').slice(0,180),last=Array.isArray(G.M.chat)?G.M.chat[G.M.chat.length-1]:null;
-      if(who&&!(last&&String(last.fromId)===String(who.id)&&String(last.text)===text)){NET.applying=true;try{netOriginalPostMsg(who,text)}finally{NET.applying=false}}
+      if(who&&who.alive&&!(last&&String(last.fromId)===String(who.id)&&String(last.text)===text)){NET.applying=true;try{netOriginalPostMsg(who,text)}finally{NET.applying=false}}
     }return;
+  }
+  if(m.type==='dead_chat_message'){
+    if(NET.inRoom&&G.player&&!G.player.alive){const who=charById(m.playerId);if(who&&!who.alive)appendDeadChatMessage(who,String(m.text||'').slice(0,180))}return;
   }
   if(m.type==='game_end'){
     // O resultado e o snapshot final são enviados juntos para evitar corridas se o host sair logo após vencer.
@@ -6057,7 +6079,7 @@ function netApplySnapshot(s,force=false){
   }catch(e){console.error('Falha ao aplicar estado online',e)}finally{NET.applying=false}
 }
 function netPaintMeeting(sm){
-  const M=G.M;if(!M)return;const ph=sm.phase;const judgeOverlay=$('judgePronounce');if(judgeOverlay)judgeOverlay.hidden=!(M.judge&&['judge','result'].includes(ph));
+  const M=G.M;if(!M)return;$('meetChat').hidden=!G.player.alive;const ph=sm.phase;const judgeOverlay=$('judgePronounce');if(judgeOverlay)judgeOverlay.hidden=!(M.judge&&['judge','result'].includes(ph));
   syncMeetingChatFromSnapshot(sm.chat||[]);if(ph!=='vote'){M.pendingVote=null;M.voteSending=false}else if(M.votes[G.player.id]!==undefined){M.pendingVote=null;M.voteSending=false}
   $('meetTimer').textContent=Math.max(0,Math.ceil((sm.dur||0)-(sm.t||0)))+'s';
   $('meetingIntro').hidden=ph!=='intro';$('meet').hidden=ph==='intro';
@@ -6175,6 +6197,8 @@ function netHostCommand(m){
     const M=G.M;if(!M||M.phase!=='vote'||!ch.alive||M.votes[ch.id]!==undefined)return;if(m.targetId!=='skip'&&!G.chars.some(c=>c.id===m.targetId&&c.alive))return;castVote(ch.id,m.targetId);if(m.targetId!=='skip'&&M.cards[m.targetId])M.cards[m.targetId].classList.add('pick');
   }else if(command==='chat'){
     if(!G.M||G.M.phase!=='discuss'||!ch.alive)return;const raw=String(m.text||'').trim().slice(0,90);if(!raw)return;netWithRemotePlayer(ch,()=>netOriginalSendSay(raw,m.claim));
+  }else if(command==='dead_chat'){
+    if(ch.alive)return;relayDeadChat(ch,String(m.text||'').slice(0,180));
   }
 }
 function netWithRemotePlayer(ch,fn){
@@ -6280,6 +6304,15 @@ const netOriginalDoInteract=doInteract;doInteract=function(a){if(NET.inRoom&&!NE
 const netOriginalSendSay=sendSay;sendSay=function(raw,claimOverride){if(NET.inRoom&&!NET.isHost&&!NET.applying){const text=String(raw||'').trim().slice(0,90);if(!text)return false;netSend({type:'action',action:'chat',text,claim:claimOverride||null});return true}return netOriginalSendSay(raw,claimOverride)};
 const netOriginalPlayerVote=playerVote;playerVote=function(id){if(NET.inRoom&&!NET.isHost&&!NET.applying){const M=G.M;if(!M||M.phase!=='vote'||!G.player?.alive||M.votes[G.player.id]!==undefined||M.voteSending)return;if(id!=='skip'){const t=charById(id);if(!t||!t.alive)return}M.pendingVote=null;M.voteSending=true;netSend({type:'action',action:'vote',targetId:id});$('btnSkip').disabled=true;$('meetStatus').textContent='Voto enviado...';renderMeetingVoteControls();return}return netOriginalPlayerVote(id)};
 const netOriginalPostMsg=postMsg;postMsg=function(from,text){netOriginalPostMsg(from,text);if(NET.inRoom&&NET.isHost&&!NET.applying&&from&&from.id)netSend({type:'meeting_chat',playerId:from.id,text:String(text||'').slice(0,180)})};
+const DEAD_CHAT_LAST={};
+function closeDeadChat(){const panel=$('deadChatPanel'),btn=$('deadChatButton');if(panel)panel.hidden=true;if(btn)btn.setAttribute('aria-expanded','false')}
+function appendDeadChatMessage(from,text){if(!from||!G.player||G.player.alive)return;const box=$('deadChatMessages');if(!box)return;const row=el('div','deadChatMsg'),label=el('strong','',String(from.name||'Morto').slice(0,24)+':'),body=el('span','',String(text||'').slice(0,180));row.append(label,body);box.appendChild(row);while(box.children.length>80)box.removeChild(box.firstElementChild);box.scrollTop=box.scrollHeight}
+function deadHumanRecipientIds(){return (G.chars||[]).filter(c=>!c.alive&&c.isRemoteHuman).map(c=>String(c.id))}
+function relayDeadChat(from,text){if(!from||from.alive)return false;const msg=String(text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!msg)return false;const now=Date.now(),last=Number(DEAD_CHAT_LAST[from.id]||0);if(now-last<3000){if(from===G.player)toast('Aguarde 3 segundos para enviar outra mensagem.');return false}DEAD_CHAT_LAST[from.id]=now;if(G.player&&!G.player.alive)appendDeadChatMessage(from,msg);if(NET.inRoom&&NET.isHost&&!NET.applying){const recipients=deadHumanRecipientIds();if(recipients.length)netSend({type:'dead_chat_broadcast',playerId:from.id,text:msg,recipientIds:recipients})}return true}
+function sendDeadChat(raw){if(!G.player||G.player.alive)return false;const text=String(raw||'').trim().slice(0,180);if(!text)return false;if(NET.inRoom&&!NET.isHost&&!NET.applying){const now=Date.now(),last=Number(DEAD_CHAT_LAST[G.player.id]||0);if(now-last<3000){toast('Aguarde 3 segundos para enviar outra mensagem.');return false}DEAD_CHAT_LAST[G.player.id]=now;return netSend({type:'action',action:'dead_chat',text})}return relayDeadChat(G.player,text)}
+function toggleDeadChat(){if(!G.player||G.player.alive)return;const panel=$('deadChatPanel');panel.hidden=!panel.hidden;$('deadChatButton').setAttribute('aria-expanded',String(!panel.hidden));if(!panel.hidden){$('deadChatInput').focus();$('deadChatMessages').scrollTop=$('deadChatMessages').scrollHeight}}
+$('deadChatButton').addEventListener('click',toggleDeadChat);$('deadChatClose').addEventListener('click',closeDeadChat);$('deadChatForm').addEventListener('submit',e=>{e.preventDefault();const input=$('deadChatInput'),text=input.value;if(sendDeadChat(text))input.value=''})
+function deadNpcMeetingLine(){if(!G.M)return;const dead=(G.chars||[]).filter(c=>!c.alive&&!c.isPlayer&&!c.isRemoteHuman&&c.ai);if(!dead.length)return;const ch=pick(dead),lines=['Ainda estou acompanhando vocês.','Boa sorte, vivos.','Prestem atenção nas votações.','Estou morto, mas ainda estou de olho.'];setTimeout(()=>{if(G.M&&!ch.alive)relayDeadChat(ch,pick(lines))},900+Math.random()*1200)}
 function closeRoomChat(){const panel=$('roomChatPanel'),btn=$('btnRoomChat');if(panel)panel.hidden=true;if(btn)btn.setAttribute('aria-expanded','false')}
 function appendRoomChatMessage(m){
   if(!m||!NET.room||m.roomCode!==NET.room.code||!$('roomChatMessages'))return;

@@ -151,6 +151,8 @@ function personalizeSnapshot(snapshot, recipientId){
   const s=JSON.parse(JSON.stringify(snapshot));
   const ended=s.state==='over'||s.over;
   const recipient=s.chars?.find(c=>c.id===recipientId);
+  // O chat dos vivos nunca é enviado no snapshot de reunião para jogadores mortos.
+  if(!ended && recipient?.alive===false && s.meeting){s.meeting.chat=[];s.meeting.chatCount=0}
   if(!ended && recipient?.alive!==false){
     const recipientIsImp=recipient?.role==='imp';
     for(const c of (s.chars||[])){if(c.id!==recipientId){c.instructor=false;c.guardian=false}if(c.id!==recipientId && !(recipientIsImp&&c.role==='imp')){c.role='crew';c.function=null}}
@@ -388,7 +390,7 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='action'){
     if(isHost||room.status!=='playing')return;
-    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','decon_button']);if(!allowed.has(action))return;
+    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','dead_chat','decon_button']);if(!allowed.has(action))return;
     const host=clients.get(room.hostId);if(!host)return;
     const allowedData={command:action,playerId:c.id};
     for(const k of ['targetId','x','y','sabotage','ventId','stationId','taskId','stepId','fix','text','claim'])if(m[k]!==undefined)allowedData[k]=m[k];if(m.bodyId!==undefined)allowedData.bodyId=m.bodyId;
@@ -404,12 +406,19 @@ function handle(ws, raw, timings={}){
     if(room.status!=='lobby')return error(ws,'O chat escrito só fica disponível na sala de espera.');
     const player=room.players.find(p=>p.id===c.id);if(!player)return;
     const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;
-    const now=Date.now();if(now-(c.lastRoomChatAt||0)<350)return;c.lastRoomChatAt=now;
+    const now=Date.now();if(now-(c.lastRoomChatAt||0)<3000)return error(ws,'Aguarde 3 segundos antes de enviar outra mensagem.');c.lastRoomChatAt=now;
     broadcast(room,{type:'room_chat_message',roomCode:room.code,playerId:c.id,name:player.name,color:player.color,text,at:now});return;
   }
   if(m.type==='meeting_chat'){
     if(!isHost)return;
-    broadcast(room,{type:'meeting_chat',playerId:String(m.playerId||''),text:String(m.text||'').slice(0,180)},c.id);return;
+    const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;
+    const chars=Array.isArray(room.lastSnapshot?.chars)?room.lastSnapshot.chars:[];
+    for(const p of room.players){if(p.id===c.id)continue;const ch=chars.find(x=>String(x.id)===String(p.id));if(ch&&ch.alive===false)continue;const rc=clients.get(p.id);if(rc)send(rc.ws,{type:'meeting_chat',playerId:String(m.playerId||''),text})}
+    return;
+  }
+  if(m.type==='dead_chat_broadcast'){
+    if(!isHost)return;const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;
+    const allowed=new Set((Array.isArray(m.recipientIds)?m.recipientIds:[]).map(String));for(const p of room.players){if(!allowed.has(String(p.id)))continue;const rc=clients.get(p.id);if(rc)send(rc.ws,{type:'dead_chat_message',playerId:String(m.playerId||''),text})}return;
   }
   if(m.type==='ready'){
     const p=room.players.find(p=>p.id===c.id);if(p)p.ready=true;sendRoomState(room);return;
