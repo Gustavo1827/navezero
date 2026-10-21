@@ -39,8 +39,9 @@ test('Snapshot 75 integra votação automática, Anjo Guardião e Ascensão dos 
   assert.match(html,/guardianImpostorVisible:\[0,1\]/);
   assert.match(html,/consumeGuardianProtection\(v,'kill'\)/);
   assert.match(html,/consumeGuardianProtection\(victim,'delayed'\)/);
-  assert.match(html,/consumeGuardianProtection\(target,'parasite'\)/);
-  assert.match(html,/consumeGuardianProtection\(target,'control'\)/);
+  assert.match(html,/consumeGuardianProtection\(t,'parasite'\)/);
+  assert.match(html,/const GUARDIAN_BLOCK_KINDS=new Set\(\['kill','delayed','parasite'\]\)/);
+  assert.doesNotMatch(html,/consumeGuardianProtection\([^)]*,'control'\)/);
   assert.match(html,/name:'Ascensão dos Mortos'/);
   assert.match(html,/if\(id==='dead'\)[\s\S]*?const help=presetConfig\('help'\)[\s\S]*?cfg\[role\.chanceKey\]=100[\s\S]*?Math\.min\(5,configuredPlayerCount\(\),15\)/);
   assert.match(serverSrc,/canSeeGuardianProtection[\s\S]*?guardianImpostorVisible/);

@@ -101,12 +101,12 @@ test('descrições das funções e classes usam exatamente os textos solicitados
 test('cliente não marca tarefa concluída antes da confirmação autoritativa do host', () => {
   assert.match(html, /O host valida vida, posse, estação e distância antes de confirmar o passo/);
   assert.doesNotMatch(html, /if\(pending&&!q\.done\)z\.done=true/);
-  assert.match(html, /stationDist\(station,ch\)>95/);
+  assert.match(html, /stationDist\(station,ch\)>actionDistancePx\('object'\)/);
 });
 
 test('dutos de clientes são validados pelo host e a interface acompanha snapshots', () => {
   assert.match(html, /command==='vent_enter'/);
-  assert.match(html, /Math\.hypot\(ch\.x-v\.px,ch\.y\+4-v\.py\)<=75/);
+  assert.match(html, /Math\.hypot\(ch\.x-v\.px,ch\.y\+4-v\.py\)<=actionDistancePx\('vent'\)/);
   assert.match(html, /command==='vent_move'\)\{if\(activePlay&&ch\.vent\)ventMove\(ch,m\.ventId\)\}/);
   assert.match(html, /if\(G\.player\.vent&&s\.state==='playing'\)/);
 });
@@ -212,11 +212,16 @@ test('falas novas dos bots são condicionadas a corpo, tarefa ou evidência', ()
 });
 
 
-test('após a reunião, todos os cooldowns de habilidades voltam à recarga completa', () => {
-  assert.match(html, /G\.meetCd=CFG\.meet; G\.killCd=CFG\.kill; G\.sheriffCd=CFG\.sheriffCooldown; G\.delayedCd=CFG\.kill; G\.cleanerCd=CFG\.cleanerCooldown/);
-  assert.match(html, /G\.sab\.cd=CFG\.sab/);
-  assert.match(html, /c\.netKillCd=CFG\.kill;c\.netSheriffCd=CFG\.sheriffCooldown;c\.netDelayedCd=CFG\.kill;if\(c\.function==='cleaner'\)c\.cleanCd=CFG\.cleanerCooldown;c\.netTrackTarget=null;c\.netTrackTime=0;c\.netTrackCd=CFG\.locCooldown;c\.ventCd=VENT_CD/);
-  assert.match(html, /c\.engVentCd=CFG\.engCooldown/);
+test('após a reunião, ações e habilidades voltam à recarga completa sem reiniciar sabotagem', () => {
+  const endMeeting=html.slice(html.indexOf('function endMeeting(){'),html.indexOf('function appendMeetingMsgVisual'));
+  assert.match(endMeeting, /G\.meetCd=CFG\.meet;G\.killCd=CFG\.kill;G\.sheriffCd=CFG\.sheriffCooldown;G\.delayedCd=CFG\.kill;G\.cleanerCd=CFG\.cleanerCooldown;G\.paramedicCd=CFG\.paramedicCooldown/);
+  assert.match(endMeeting, /c\.netKillCd=CFG\.kill;c\.netSheriffCd=CFG\.sheriffCooldown;c\.netDelayedCd=CFG\.kill;c\.netTrackTarget=null;c\.netTrackTime=0;c\.netTrackCd=CFG\.locCooldown/);
+  assert.match(endMeeting, /c\.engVentTime=0;c\.engVentCd=CFG\.engCooldown/);
+  assert.match(endMeeting, /c\.function==='spectral'[\s\S]*?c\.spectralCd=CFG\.spectralCooldown/);
+  assert.match(endMeeting, /c\.function==='hunter'[\s\S]*?c\.hunterTargetCd=CFG\.hunterTargetCooldown/);
+  assert.match(endMeeting, /c\.guardian[\s\S]*?c\.guardianCd=CFG\.guardianCooldown/);
+  assert.match(endMeeting, /c\.instructor[\s\S]*?c\.instructorCd=CFG\.instructorCooldown/);
+  assert.doesNotMatch(endMeeting, /G\.sab\.cd=CFG\.sab|ai\.sabT=CFG\.sab/, 'reunião não deve alterar a recarga de sabotagem');
 });
 
 test('NPCs não usam a causa interna do corpo para descobrir funções', () => {
@@ -313,7 +318,7 @@ test('catálogo de cosméticos fica no menu inicial e preserva a regra de cores 
   assert.match(html, /\{id:'banana',name:'Banana',main:'#fff2a8',dark:'#d9be58'\}/, 'banana deve usar uma tonalidade mais clara');
 });
 
-test('pets somem em dutos, ficam tristes no corpo e persistem depois de reuniões', () => {
+test('pets somem em dutos, ficam tristes no corpo e estados visuais antigos são limpos após reuniões', () => {
   assert.match(html, /pet==='none'\|\|ch\.alive===false\|\|ch\.ghost\|\|ch\.vent\|\|\(ch\.ventAnim&&ch\.ventAnim\.kind==='in'\)/, 'seguidor deve ser suspenso ao morrer ou entrar no duto');
   assert.match(html, /worldPetVisible=ch\.alive!==false&&!ch\.ghost&&!ch\.vent/, 'pet não deve ser desenhado acompanhando morto ou jogador dentro do duto');
   assert.match(html, /function parkPetAtBody\(body,ch\)/);
@@ -322,7 +327,7 @@ test('pets somem em dutos, ficam tristes no corpo e persistem depois de reuniõe
   assert.match(html, /const deadPets=\(G\.deadPets\|\|\[\]\)\.map/, 'pets deixados no mapa precisam viajar no snapshot multiplayer');
   assert.match(html, /G\.deadPets=Array\.isArray\(s\.deadPets\)\?s\.deadPets\.map/, 'clientes precisam restaurar pets persistentes do snapshot');
   const endMeeting=html.slice(html.indexOf('function endMeeting(){'),html.indexOf('function appendMeetingMsgVisual'));
-  assert.doesNotMatch(endMeeting,/deadPets\s*=\s*\[\]/, 'fim da reunião não pode apagar os pets que ficaram no mapa');
+  assert.match(endMeeting,/G\.deadPets=\[\]/, 'retorno da reunião deve limpar pets/visuais antigos deixados na rodada anterior');
 });
 
 
@@ -346,7 +351,9 @@ test('Parasita é função de Infiltrado com infecção adiada até o fim da reu
   assert.match(html, /parasiteEligible=shuffle\(\[\.\.\.G\.imps\]\.filter\(ch=>ch\.role==='imp'&&!ch\.function\)\)/);
   assert.match(html, /function infectTarget\(parasite,target\)[\s\S]*?G\.parasiteWinnerId=parasite\.id[\s\S]*?G\.parasiteInfections\[target\.id\][\s\S]*?c\.parasiteReady=false/);
   assert.match(html, /function resolveParasiteInfections\(\)[\s\S]*?t&&t\.alive&&t\.role==='crew'[\s\S]*?consumeGuardianProtection\(t,'parasite'\)[\s\S]*?convertToImpostor\(t\)[\s\S]*?parasiteReady=false/);
-  assert.match(html, /if\(ej\)killChar\(ej\);\s*resolveParasiteInfections\(\);\s*G\.bodies=\[\]/);
+  const endMeeting=html.slice(html.indexOf('function endMeeting(){'),html.indexOf('function appendMeetingMsgVisual'));
+  assert.ok(endMeeting.indexOf('G.guardianBreakFx=[]')<endMeeting.indexOf('resolveParasiteInfections()'), 'efeitos antigos devem ser limpos antes de mostrar uma quebra nova do escudo do Parasita');
+  assert.match(endMeeting, /resolveParasiteInfections\(\);[\s\S]*?guardianProtections/, 'infecção pendente deve ser resolvida no fim da reunião antes de limpar proteções restantes');
   assert.match(html, /target\.role='imp';target\.function=null/);
   assert.match(html, /G\.tasks\.filter\(t=>t\.owner===target\.id\)\.forEach\(t=>t\.fake=true\)/);
   assert.match(html, /parasiteBotThink\(ch,dt\)/);
@@ -390,20 +397,20 @@ test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comuni
   assert.match(server, /recipient\?\.instructor\|\|recipient\?\.guardian[\s\S]*?c\.alive&&c\.role==='crew'\)c\.function=null/);
 });
 
-test('Instrutor só pode selecionar jogadores vivos próximos', () => {
-  assert.match(html, /const INSTRUCTOR_TARGET_RANGE=100/);
+test('Instrutor só pode selecionar jogadores vivos dentro da Distância para ações', () => {
   assert.match(html, /function instructorSelectableTargets\(owner,range=actionDistancePx\('instructor'\)\)[\s\S]*?c\.alive[\s\S]*?!c\.vent[\s\S]*?dist\(owner,c\)<=range[\s\S]*?losClear/);
   assert.match(html, /function openInstructorPicker\(\)[\s\S]*?const nearby=instructorSelectableTargets\(p\)[\s\S]*?Chegue perto de um jogador vivo/);
   assert.match(html, /action:'instructor_select'/);
-  assert.match(html, /command==='instructor_select'[\s\S]*?dist\(ch,target\)<=instructorRange[\s\S]*?ch\.instructorTargetId=target\.id/);
+  assert.match(html, /command==='instructor_select'[\s\S]*?const instructorRange=actionDistancePx\('instructor'\)[\s\S]*?dist\(ch,c\)<=instructorRange[\s\S]*?ch\.instructorTargetId=target\.id/);
   assert.match(html, /command==='instructor_mark'[\s\S]*?String\(ch\.instructorTargetId\)===String\(target\.id\)/);
   assert.match(server, /'instructor_select'/);
 });
 
-test('Instrutor online tolera pequena divergência de sincronização e aceita null autoritativo do alvo', () => {
-  assert.match(html, /const INSTRUCTOR_NET_RANGE_TOLERANCE=55, INSTRUCTOR_NET_POINT_TOLERANCE=120/);
+test('Instrutor online tolera previsão de posição sem ampliar o alcance global e aceita null autoritativo do alvo', () => {
+  assert.match(html, /const INSTRUCTOR_NET_POINT_TOLERANCE=120/);
+  assert.doesNotMatch(html, /INSTRUCTOR_NET_RANGE_TOLERANCE/);
   assert.match(html, /action:'instructor_select',targetId:ch\.id,x:p\.x,y:p\.y/);
-  assert.match(html, /hostNear=dist\(ch,target\)<=instructorRange\+INSTRUCTOR_NET_RANGE_TOLERANCE/);
+  assert.match(html, /clientDrift<=INSTRUCTOR_NET_POINT_TOLERANCE[\s\S]*?Math\.hypot\(sx-target\.x,sy-target\.y\)<=range/);
   assert.match(html, /drift<=INSTRUCTOR_NET_POINT_TOLERANCE\?rx:ch\.x/);
   assert.match(html, /hasOwnProperty\.call\(s,'selfInstructorTargetId'\)\?s\.selfInstructorTargetId/);
   assert.match(server, /\['targetId','x','y','sabotage'/);
@@ -445,7 +452,9 @@ test('distância para ações oferece Curta, Média e Longa e sincroniza no mult
   assert.match(html, /actionDistance:\[0,2\]/);
   assert.match(html, /const ACTION_DISTANCE_LABELS=\['Curta','Média','Longa'\]/);
   assert.match(html, /function actionDistancePx\(kind='default'\)/);
-  for (const kind of ['kill','sheriff','delayed','parasite','instructor','locator','cleaner','report','control']) assert.match(html, new RegExp(kind+":\\["));
+  assert.match(html, /const ACTION_DISTANCE_VALUES=\[100,130,160\]/);
+  assert.match(html, /return ACTION_DISTANCE_VALUES\[lv\]/);
+  assert.doesNotMatch(html, /const maps=\{kill:/, 'ações não devem manter tabelas de alcance separadas');
   assert.match(html, /\['actionDistance','Distância para ações'/);
   assert.match(html, /'actionDistance','commonTasks','mediumTasks','longTasks','renderDist'/);
   assert.match(server, /actionDistance:\[0,2\]/);
@@ -572,8 +581,8 @@ test('Inventário concentra a seleção de cor e substitui o nome Cosméticos no
 });
 
 test('Partida Livre não reposiciona bots na Cafeteria após reunião', () => {
-  assert.match(html, /if\(G\.freePlay\)[\s\S]*bots permanecem exatamente onde estavam antes da reunião/);
-  assert.match(html, /if\(alivePlayer\)[\s\S]*placeChar\(alivePlayer,pt\)/);
+  const endMeeting=html.slice(html.indexOf('function endMeeting(){'),html.indexOf('function appendMeetingMsgVisual'));
+  assert.match(endMeeting, /if\(G\.freePlay\)[\s\S]*const alivePlayer=G\.player&&G\.player\.alive\?G\.player:null[\s\S]*if\(alivePlayer\)[\s\S]*placeChar\(alivePlayer,pt\)/);
 });
 
 

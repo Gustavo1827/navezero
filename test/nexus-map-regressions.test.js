@@ -113,7 +113,7 @@ test('Nexus usa minigames próprios e exatamente a rede de dutos planejada',()=>
 });
 
 test('interação das tarefas da Nexus é recalculada e fantasmas veem somente a própria posição no mapa',()=>{
-  assert.match(html,/function stationUseRange\(s\)[\s\S]*ACTIVE_MAP_ID!=='nexus'[\s\S]*pendingAt\(s\?\.id\)\?82:68/);
+  assert.match(html,/function stationUseRange\(s\)\{return actionDistancePx\('object'\)\}/);
   assert.match(html,/btnUse'\)\.addEventListener\('pointerdown'[\s\S]*const p=G\.player,a=bestAction\(\);G\.action=a/);
   assert.doesNotMatch(html,/setLineDash\(\[8,5\]\)/,'tarefas não devem manter delineado constante; apenas o destaque de proximidade permanece');
   assert.match(html,/const showAll=observerAlive&&!commsDown/);
