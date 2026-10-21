@@ -11,7 +11,7 @@ test('Loucura dos Infiltrados é a quarta predefinição e garante Parasitas ini
   assert.match(html,/name:'Loucura dos Infiltrados'/);
   assert.match(html,/preset_loucura_infiltrados\.png/);
   assert.equal(fs.existsSync(path.join(root,'assets','presets','preset_loucura_infiltrados.png')),true);
-  assert.match(html,/if\(id==='infiltrados'\)\{cfg\.impostors=Math\.min\(3,maxImpostorsForPlayers\(configuredPlayerCount\(\)\)\);cfg\.delayedChance=25;cfg\.cleanerChance=25;cfg\.spectralChance=25;cfg\.marionChance=25;cfg\.parasiteChance=100;cfg\.parasiteMax=Math\.min\(3,cfg\.impostors\);\}/);
+  assert.match(html,/if\(id==='infiltrados'\)\{cfg\.impostors=Math\.min\(3,maxImpostorsForPlayers\(configuredPlayerCount\(\)\)\);cfg\.delayedChance=25;cfg\.cleanerChance=25;cfg\.spectralChance=25;cfg\.marionChance=25;cfg\.hunterChance=25;cfg\.parasiteChance=100;cfg\.parasiteMax=Math\.min\(3,cfg\.impostors\);\}/);
   assert.match(html,/const infiltradosPreset=currentCfgMatchesPreset\('infiltrados'\)/);
   assert.match(html,/if\(infiltradosPreset\)\{for\(const ch of G\.imps\)\{ch\.function='parasite'/);
 });

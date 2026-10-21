@@ -333,7 +333,7 @@ test('Faxineiro é exclusivamente Infiltrado, usa identidade vermelha e respeita
   assert.match(html, /if\(k==='impostors'&&CFG\.cleanerMax>CFG\.impostors\)\{CFG\.cleanerMax=CFG\.impostors/);
   assert.match(html, /cleanerEligible=shuffle\(\[\.\.\.G\.imps\]\.filter\(ch=>ch\.role==='imp'&&!ch\.function\)\)/);
   assert.match(html, /cleanerLimit=Math\.min\(clamp\(CFG\.cleanerMax,0,CFG\.impostors\),G\.imps\.length,cleanerEligible\.length\)/);
-  assert.match(html, /const crewFns=\['locator','sheriff','observer','engineer','lazy','seer','noisy','judge'\], impFns=\['delayed','cleaner','marionette'\]/);
+  assert.match(html, /const crewFns=\['locator','sheriff','observer','engineer','lazy','seer','noisy','judge'\], impFns=\['delayed','cleaner','marionette','hunter'\]/);
   assert.match(html, /cleaner=G\.role==='imp'&&p\.function==='cleaner'/);
   assert.match(server, /out\.cleanerMax=Math\.min\(out\.cleanerMax,out\.impostors\)/);
 });
