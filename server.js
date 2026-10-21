@@ -399,7 +399,7 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='action'){
     if(isHost||room.status!=='playing')return;
-    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','hunter_target','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','decon_button']);if(!allowed.has(action))return;
+    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','hunter_target','guardian_protect','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','decon_button']);if(!allowed.has(action))return;
     if(action==='chat'){const now=Date.now();if(now-(c.lastMeetingChatAt||0)<3000)return;c.lastMeetingChatAt=now}
     const host=clients.get(room.hostId);if(!host)return;
     const allowedData={command:action,playerId:c.id};
