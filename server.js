@@ -456,7 +456,7 @@ function createAccountService(opts={}){
   const attempts=new Map();
   if(!supabaseUrl||!supabaseSecretKey)console.warn('SUPABASE_URL/SUPABASE_SECRET_KEY não configurados: contas ficarão indisponíveis.');
   const tokenHash=token=>crypto.createHash('sha256').update(String(token||'')).digest('hex');
-  const dbHeaders=(extra={})=>({'apikey':supabaseSecretKey,'authorization':`Bearer ${supabaseSecretKey}`,'content-type':'application/json','accept':'application/json',...extra});
+  const dbHeaders=(extra={})=>({'apikey':supabaseSecretKey,'content-type':'application/json','accept':'application/json',...extra});
   async function dbRequest(table,{method='GET',query='',body,prefer='return=representation'}={}){
     if(!supabaseUrl||!supabaseSecretKey||typeof fetchImpl!=='function')throw Object.assign(new Error('Banco de contas não configurado.'),{status:503});
     const url=`${supabaseUrl}/rest/v1/${table}${query?`?${query}`:''}`;

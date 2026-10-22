@@ -36,7 +36,7 @@ function mockSupabase(){
   };
 }
 async function start(){
-  const app=createGameServer({port:0,host:'127.0.0.1',supabaseUrl:'https://example.supabase.co',supabaseSecretKey:'sb_secret_test',fetchImpl:mockSupabase()});
+  const app=createGameServer({port:0,host:'127.0.0.1',supabaseUrl:'http://127.0.0.1',supabaseSecretKey:'test-key',fetchImpl:mockSupabase()});
   await new Promise(resolve=>app.server.once('listening',resolve));
   return {app,base:`http://127.0.0.1:${app.server.address().port}`};
 }
