@@ -438,6 +438,7 @@ body.touch #stick{display:block}
 #btnSaveRoomConfig{display:block;margin:4px auto}
 @media(max-width:480px){.roomCard{padding:15px}.roomFields{grid-template-columns:1fr 1fr}.roomCodeLine{font-size:16px}#roomCodeText{font-size:24px}}
 #gameSettingsOverlay{position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,5,18,.86)}#gameSettingsOverlay[hidden]{display:none!important}.gameSettingsCard{width:min(440px,100%)}.gameSettingRow{display:grid;gap:10px;margin:18px 0}.gameSettingRow label{display:flex;justify-content:space-between;gap:12px;font-weight:800}.gameSettingRow input[type=range]{width:100%}.gameSettingsLinks{display:grid;gap:10px;margin:10px 0 18px}.gameSettingsLinks .big{width:100%}
+#accountOverlay{position:fixed;inset:0;z-index:195;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,5,18,.88);overflow:auto}#accountOverlay[hidden]{display:none!important}.accountCard{width:min(520px,100%);max-height:92vh;overflow:auto}.accountHead{display:flex;align-items:center;justify-content:space-between;gap:12px}.accountHead h2{margin:0;color:var(--amber)}.accountChoices,.accountFormActions,.accountActions{display:flex;gap:9px;flex-wrap:wrap}.accountChoices .big{flex:1 1 180px}.accountForm{display:grid;gap:12px;margin-top:14px}.accountForm[hidden],.accountView[hidden]{display:none!important}.accountForm label{display:grid;gap:6px;font-weight:800}.accountForm input{width:100%}.accountStatus{min-height:22px;margin:10px 0 0;color:var(--ink2);font-weight:700}.accountStatus.error{color:#ff9aa6}.accountStatus.ok{color:#7ff0bd}.accountIdBox{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;margin:14px 0;background:#111744;border:1px solid var(--line);border-radius:13px}.accountIdBox code{font:900 18px/1.2 "Baloo 2","Trebuchet MS",sans-serif;color:var(--sky);word-break:break-all}.accountMeta{display:grid;gap:5px;color:var(--ink2)}.accountPrivacy{font-size:13px;color:var(--ink2)}@media(max-width:560px){.accountIdBox{align-items:flex-start;flex-direction:column}.accountActions>*{flex:1 1 140px}}
 
 </style>
 </head>
@@ -448,11 +449,11 @@ body.touch #stick{display:block}
   <div class="card">
     <h1 class="logo">Nave Zero</h1>
     <p class="tag">A nave está falhando. Conclua as tarefas antes que seja tarde.</p>
-    <p class="phase" style="margin:-4px 0 8px">Versão 0.3b-s76</p>
+    <p class="phase" style="margin:-4px 0 8px">Versão 0.4b-s1</p>
     <canvas id="pv" width="280" height="260"></canvas>
     <div class="field"><label for="nameIn">Seu nome</label><input id="nameIn" maxlength="12" value="Você" autocomplete="off"></div>
     <div class="row onlineMenu"><button class="big" id="btnCreateRoom">Criar sala</button><button class="big alt" id="btnJoinRoom">Entrar na sala</button></div>
-    <div class="row" style="justify-content:center;margin-top:8px"><button class="chip" id="btnFreePlay" type="button">Partida Livre</button><button class="chip" id="btnCosmetics" type="button">Inventário</button><button class="chip" id="btnGameSettings" type="button">Configurações de jogo</button></div>
+    <div class="row" style="justify-content:center;margin-top:8px"><button class="chip" id="btnFreePlay" type="button">Partida Livre</button><button class="chip" id="btnCosmetics" type="button">Inventário</button><button class="chip" id="btnGameSettings" type="button">Configurações de jogo</button><button class="chip" id="btnAccount" type="button">Minha conta</button></div>
     <div id="createPanel" hidden>
       <h3 style="margin:0 0 10px;color:var(--amber)">Preparar sala</h3>
       <div class="createFields">
@@ -514,10 +515,29 @@ body.touch #stick{display:block}
 <div id="gameSettingsOverlay" hidden aria-live="polite">
   <div class="card gameSettingsCard" role="dialog" aria-modal="true" aria-labelledby="gameSettingsTitle">
     <h2 id="gameSettingsTitle">Configurações de jogo</h2>
-    <p class="phase">Preferências deste dispositivo. As alterações são salvas automaticamente.</p>
+    <p class="phase">Preferências pessoais. As alterações valem imediatamente e são salvas no perfil atual.</p>
     <div class="gameSettingRow"><label for="gameVolumeIn"><span>Volume do jogo</span><b id="gameVolumeValue">50%</b></label><input id="gameVolumeIn" type="range" min="0" max="100" step="1" value="50"></div>
-    <div class="gameSettingsLinks"><button class="big alt desktopOnly" id="btnGameKeys" type="button">Teclas ⌨️</button></div>
+    <div class="gameSettingsLinks"><button class="big alt desktopOnly" id="btnGameKeys" type="button">Teclas</button></div>
     <div class="row"><button class="big" id="btnGameSettingsClose" type="button">Fechar</button></div>
+  </div>
+</div>
+
+<div id="accountOverlay" hidden aria-live="polite">
+  <div class="card accountCard" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+    <div class="accountHead"><h2 id="accountTitle">Minha conta</h2><button class="chip" id="btnAccountClose" type="button" aria-label="Fechar Minha conta">✕</button></div>
+    <p class="phase">A conta é opcional. Sem login, seu perfil continua salvo somente neste navegador.</p>
+    <div id="accountLoggedOut" class="accountView">
+      <div class="accountChoices"><button class="big" id="btnAccountCreateShow" type="button">Criar conta</button><button class="big alt" id="btnAccountLoginShow" type="button">Entrar em uma conta</button></div>
+      <form id="accountCreateForm" class="accountForm" hidden><h3>Criar conta</h3><p class="phase">O ID será gerado automaticamente e não poderá ser alterado.</p><label>Senha<input id="accountCreatePassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label><label>Confirmar senha<input id="accountCreatePassword2" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label><div class="accountFormActions"><button class="big" type="submit">Criar e entrar</button><button class="chip" id="btnAccountCreateCancel" type="button">Cancelar</button></div></form>
+      <form id="accountLoginForm" class="accountForm" hidden><h3>Entrar em uma conta</h3><label>ID de usuário<input id="accountLoginId" type="text" maxlength="40" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="NavalGull#9173" required></label><label>Senha<input id="accountLoginPassword" type="password" maxlength="128" autocomplete="current-password" required></label><div class="accountFormActions"><button class="big" type="submit">Entrar</button><button class="chip" id="btnAccountLoginCancel" type="button">Cancelar</button></div></form>
+    </div>
+    <div id="accountLoggedIn" class="accountView" hidden>
+      <div class="accountMeta"><strong id="accountPlayerName">Jogador</strong><span>Conta conectada</span></div>
+      <div class="accountIdBox"><code id="accountIdText">••••••••••</code><button class="chip" id="btnAccountToggleId" type="button">Mostrar ID</button></div>
+      <p class="accountPrivacy">Seu ID pode ser copiado e compartilhado. Sua senha e sua sessão nunca são mostradas a outros jogadores.</p>
+      <div class="accountActions"><button class="chip" id="btnAccountCopyId" type="button">Copiar ID</button><button class="big alt" id="btnAccountLogout" type="button">Sair da conta</button></div>
+    </div>
+    <p id="accountStatus" class="accountStatus" role="status" aria-live="polite"></p>
   </div>
 </div>
 
@@ -529,7 +549,7 @@ body.touch #stick{display:block}
   </div>
 </div>
 
-<div id="keysOverlay" hidden aria-live="polite"><div class="keysCard" role="dialog" aria-modal="true" aria-labelledby="keysTitle"><div class="keysHead"><h2 id="keysTitle">Teclas ⌨️</h2><button class="chip" id="btnKeysClose" type="button">✕</button></div><p class="phase">Clique em uma tecla para substituir ou remover o atalho. As alterações ficam salvas neste navegador.</p><div id="keyRows" class="keyRows"></div><div id="keyCaptureBox" hidden class="keyCapture"></div><div id="keyConflict" class="keyConflict"></div><div class="row"><button class="chip" id="btnKeysDefaults" type="button">Restaurar teclas padrão</button></div></div></div>
+<div id="keysOverlay" hidden aria-live="polite"><div class="keysCard" role="dialog" aria-modal="true" aria-labelledby="keysTitle"><div class="keysHead"><h2 id="keysTitle">Teclas</h2><button class="chip" id="btnKeysClose" type="button">✕</button></div><p class="phase">Clique em uma tecla para substituir ou remover o atalho. As alterações ficam salvas no perfil atual.</p><div id="keyRows" class="keyRows"></div><div id="keyCaptureBox" hidden class="keyCapture"></div><div id="keyConflict" class="keyConflict"></div><div class="row"><button class="chip" id="btnKeysDefaults" type="button">Restaurar teclas padrão</button></div></div></div>
 
 <section id="roomChatPanel" class="panel" hidden aria-label="Chat escrito da sala de espera">
   <header><strong>Chat da sala de espera</strong><button type="button" class="chip" id="btnRoomChatClose" aria-label="Fechar chat">✕</button></header>
@@ -560,7 +580,7 @@ body.touch #stick{display:block}
     </div>
   </div>
   <div id="topRight">
-    <div class="chips"><button class="chip" id="btnMap" aria-pressed="false">Mapa</button><button class="chip" id="btnRoomChat" aria-expanded="false" aria-controls="ghostChatPanel" hidden>Chat</button><button class="chip" id="btnExit">Sair do jogo</button></div>
+    <div class="chips"><button class="chip" id="btnMap" aria-pressed="false">Mapa</button><button class="chip" id="btnGameSettingsHud" type="button">Configurações</button><button class="chip" id="btnRoomChat" aria-expanded="false" aria-controls="ghostChatPanel" hidden>Chat</button><button class="chip" id="btnExit">Sair do jogo</button></div>
     <div id="rolePanel" role="status" aria-live="polite" aria-label="Equipe e função"><span id="roleName"><span class="roleTeam crew">Tripulante</span></span></div>
   </div>
   <div id="toast" role="status"></div><div id="noisyAlert" hidden aria-hidden="true"></div>
@@ -850,7 +870,9 @@ const MAP_LIBRARY={
   }
 };
 function loadMapSelection(){try{const id=localStorage.getItem('navezero_map_v1');return MAP_LIBRARY[id]?id:'nave'}catch{return'nave'}}
-function saveMapSelection(id){try{localStorage.setItem('navezero_map_v1',MAP_LIBRARY[id]?id:'nave')}catch{}}
+function saveMapSelection(id){if(accountActive()){if(!ACCOUNT.applying&&(!(typeof NET!=='undefined'&&NET.inRoom)||(NET.isHost&&NET.room?.status==='lobby'))){if(ACCOUNT.roomProfile)ACCOUNT.roomProfile.mapId=MAP_LIBRARY[id]?id:'nave';accountScheduleSync()}return}try{localStorage.setItem('navezero_map_v1',MAP_LIBRARY[id]?id:'nave')}catch{}}
+const ACCOUNT={authenticated:false,id:null,profile:null,roomProfile:null,applying:false,syncTimer:null,syncInFlight:false,idVisible:false,restored:false};
+function accountActive(){return !!ACCOUNT.authenticated}
 let SELECTED_MAP_ID=loadMapSelection(),ACTIVE_MAP_ID=SELECTED_MAP_ID;
 let ROOM_DEFS=[],CORRIDORS=[],GLASS_RECTS=[],DOOR_DEFS=[],DECOR=[],STATION_DEFS=[],VENT_DEFS=[],ROOM_EDGES=[],VENT_LINKS=[],SPAWN={x:31,y:11},TABLE={x:29,y:6,w:6,h:3},FREEPLAY_COMPUTER={id:'freeplay_pc',room:'cafe',x:38,y:10,w:1,h:1,label:'Computador da Partida Livre'},CAMS=[],OUTSIDE_VOID=new Uint8Array(COLS*ROWS);
 let ROOM_BY_ID={},stationById={},ventById={},VENT_ADJ={},doors=[];
@@ -1055,16 +1077,18 @@ const COSMETIC_ALLOWED=Object.fromEntries(Object.entries(COSMETIC_CATALOG).map((
 function normalizeCosmetics(value){const src=value&&typeof value==='object'?value:{};const out={};for(const k of Object.keys(DEFAULT_COSMETICS)){const id=String(src[k]||COSMETIC_NONE);out[k]=COSMETIC_ALLOWED[k].has(id)?id:COSMETIC_NONE}return out}
 function cloneCosmetics(value){return {...normalizeCosmetics(value)}}
 function loadPlayerCosmetics(){try{return normalizeCosmetics(JSON.parse(localStorage.getItem('navezero_cosmetics_v1')||'{}'))}catch{return cloneCosmetics(DEFAULT_COSMETICS)}}
-let PLAYER_COSMETICS=loadPlayerCosmetics();function savePlayerCosmetics(){try{localStorage.setItem('navezero_cosmetics_v1',JSON.stringify(PLAYER_COSMETICS))}catch{}}
+let PLAYER_COSMETICS=loadPlayerCosmetics();function savePlayerCosmetics(){if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_cosmetics_v1',JSON.stringify(PLAYER_COSMETICS))}catch{}}
 const KEY_ACTIONS=[['killMark','Matar / Marcar'],['sabotage','Sabotar'],['use','Usar / Interagir'],['function','Botão da função'],['moveUp','Mover para cima'],['moveDown','Mover para baixo'],['moveLeft','Mover para esquerda'],['moveRight','Mover para direita'],['increase','Aumentar sliders/opções'],['decrease','Diminuir sliders/opções'],['map','Abrir mapa'],['report','Reportar corpo'],['quickChat','Abrir/fechar Chat Rápido'],['back','Fechar/voltar em menus'],['exit','Sair do jogo']];
 const DEFAULT_KEYS=Object.freeze({killMark:'KeyQ',sabotage:'KeyX',use:'KeyE',function:'KeyF',moveUp:'KeyW',moveDown:'KeyS',moveLeft:'KeyA',moveRight:'KeyD',increase:'ArrowRight',decrease:'ArrowLeft',map:'KeyM',report:'KeyR',quickChat:'KeyC',back:'Escape',exit:'Digit0'});
 function loadKeyBindings(){let raw={};try{raw=JSON.parse(localStorage.getItem('navezero_keys_v1')||'{}')||{}}catch{}const out={...DEFAULT_KEYS};for(const [k] of KEY_ACTIONS)if(raw[k]===null||typeof raw[k]==='string')out[k]=raw[k];return out}
 let KEY_BINDINGS=loadKeyBindings(),KEY_EDIT=null,KEY_CAPTURE=null,KEY_CAPTURE_TIMER=null;
-function saveKeyBindings(){try{localStorage.setItem('navezero_keys_v1',JSON.stringify(KEY_BINDINGS))}catch{}}
+function saveKeyBindings(){if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_keys_v1',JSON.stringify(KEY_BINDINGS))}catch{}}
 function keyLabel(code){if(!code)return 'Sem tecla';if(/^Key[A-Z]$/.test(code))return code.slice(3);if(/^Digit\d$/.test(code))return code.slice(5);return ({ArrowRight:'→',ArrowLeft:'←',ArrowUp:'↑',ArrowDown:'↓',Escape:'Esc',Space:'Espaço',Enter:'Enter',Backspace:'Backspace',Tab:'Tab'}[code]||code.replace(/^Numpad/,'Num '))}
 function actionForCode(code){return KEY_ACTIONS.find(([k])=>KEY_BINDINGS[k]===code)?.[0]||null}
-function savePlayerName(){try{localStorage.setItem('navezero_player_name_v1',String($('nameIn').value||'Você').trim().slice(0,12)||'Você')}catch{}}
+function savePlayerName(){G.cfg.name=String($('nameIn').value||'Você').trim().slice(0,12)||'Você';if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_player_name_v1',G.cfg.name)}catch{}}
 function loadPlayerName(){try{return localStorage.getItem('navezero_player_name_v1')||'Você'}catch{return 'Você'}}
+function savePlayerColor(){if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_player_color_v1',String(G.cfg.color||'azul'))}catch{}}
+function loadPlayerColor(){try{const c=String(localStorage.getItem('navezero_player_color_v1')||'azul');return COLOR_BY[c]?c:'azul'}catch{return 'azul'}}
 function isTextEntry(){const a=document.activeElement;if(!a)return false;if(a.isContentEditable||a.tagName==='TEXTAREA'||a.tagName==='SELECT')return true;if(a.tagName!=='INPUT')return false;return !['range','button','checkbox','radio'].includes(a.type)}
 function renderKeyMenu(){const box=$('keyRows');if(!box)return;box.innerHTML='';for(const [k,label] of KEY_ACTIONS){const row=el('div','keyRow'),name=el('strong','',label),b=el('button','chip keyBind',keyLabel(KEY_BINDINGS[k]));b.type='button';b.addEventListener('click',()=>{KEY_EDIT=k;renderKeyMenu()});row.append(name,b);if(KEY_EDIT===k){const ed=el('div','keyEdit');if(KEY_BINDINGS[k]){const rep=el('button','chip','Substituir'),rem=el('button','chip','Remover'),can=el('button','chip','Cancelar');rep.onclick=()=>beginKeyCapture(k);rem.onclick=()=>{KEY_BINDINGS[k]=null;saveKeyBindings();KEY_EDIT=null;renderKeyMenu()};can.onclick=()=>{KEY_EDIT=null;renderKeyMenu()};ed.append(rep,rem,can)}else{const add=el('button','chip','Adicionar'),can=el('button','chip','Cancelar');add.onclick=()=>beginKeyCapture(k);can.onclick=()=>{KEY_EDIT=null;renderKeyMenu()};ed.append(add,can)}row.append(ed)}box.append(row)}}
 function cancelKeyCapture(){if(KEY_CAPTURE_TIMER)clearInterval(KEY_CAPTURE_TIMER);KEY_CAPTURE_TIMER=null;KEY_CAPTURE=null;$('keyCaptureBox').hidden=true;$('keyCaptureBox').innerHTML='';$('keyConflict').textContent='';renderKeyMenu()}
@@ -1624,6 +1648,7 @@ const G={mapId:ACTIVE_MAP_ID,decon:{phase:'idle',until:0,exitSide:null,entrySide
   cam:{x:0,y:0},vision:820,visionTarget:820,cfg:{name:'Você',color:'azul'},over:false,lastRoom:null,action:null,
   role:'crew',imp:null,locator:false,observer:false,cleaner:false,parasite:false,paramedic:false,seer:false,noisy:false,judge:false,paramedicT:null,paramedicCd:0,seerT:null,seerReplay:null,parasiteWinnerId:null,parasiteInfections:{},noisyAlerts:[],noisySeq:0,noisyUi:null,guardianProtections:{},guardianBreakFx:[],guardianBreakSeq:0,instructorTrails:[],instructorTrailSeq:0,instructorCd:0,instructorTargetId:null,cleanerCd:0,cleanerUses:0,cleanerT:null,trackTarget:null,trackTime:0,trackCd:0,sheriffCd:0,sheriffT:null,delayedCd:0,delayedT:null,delayedMarks:{},controlTargetId:null,controlTime:0,controlCd:0,bodies:[],deadPets:[],killSplashes:[],spectralSmokes:[],spectralSmokeSeq:0,sab:{lights:0,reactor:0,comms:0,doors:0,cd:0},killCd:0,meetCd:0,spec:null,fx:0,walkVer:0,M:null,roleT:0,gt:0,fixT:0,killT:null,mapOpen:false,cfgOpen:false,confirmOpen:false,ghostMode:'tasks',followTarget:null,freePlay:false,dt:.016};
 // Mantém a visibilidade do painel de configurações sincronizada com cfgOpen desde a inicialização.
+G.cfg.color=loadPlayerColor();
 queueMicrotask(()=>{const panel=$('settings');if(panel&&!G.cfgOpen)panel.hidden=true});
 const NAME_BUB={};
 const keys=new Set(); const joy={x:0,y:0};
@@ -1634,7 +1659,7 @@ function loadGameVolume(){try{
   const old=Number(localStorage.getItem('navezero_game_volume_v1'));const migrated=Number.isFinite(old)?clamp(old,0,1):1;
   localStorage.setItem('navezero_game_volume_v2',String(migrated));return migrated;
 }catch{return 1}}
-function saveGameVolume(v){try{localStorage.setItem('navezero_game_volume_v2',String(clamp(v,0,2)))}catch{}}
+function saveGameVolume(v){if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_game_volume_v2',String(clamp(v,0,2)))}catch{}}
 const Snd={ctx:null,on:true,volume:loadGameVolume(),
   init(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}} if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume()},
   tone(f,d=.12,type='sine',vol=.08,slide=0,delay=0){
@@ -3774,7 +3799,7 @@ function actionDistancePx(kind='default'){const lv=clamp(Math.round(Number(CFG.a
   CFG.instructorMaxDistance=clamp(Math.round(CFG.instructorMaxDistance/100)*100,100,2000);CFG.judgeTaskPct=clamp(Math.round((CFG.judgeTaskPct||0)/25)*25,0,100);CFG.hunterTargetCooldown=clamp(Math.round((CFG.hunterTargetCooldown||10)/5)*5,5,25);
 }catch(e){}})();
 CFG.cleanerMax=Math.min(CFG.cleanerMax,CFG.impostors);CFG.hunterMax=Math.min(CFG.hunterMax,CFG.impostors,3);CFG.parasiteMax=Math.min(CFG.parasiteMax,CFG.impostors,3);CFG.lazyMax=Math.min(CFG.lazyMax,15);
-function saveCfg(force=false){if(!force&&typeof NET!=='undefined'&&NET.inRoom)return;try{const data={};for(const k of Object.keys(CFG_DEF))data[k]=CFG[k];data.spectralSpeedMode=3;localStorage.setItem('nz_cfg',JSON.stringify(data))}catch(e){}}
+function saveCfg(force=false){if(!force&&typeof NET!=='undefined'&&NET.inRoom)return;if(accountActive()){if(!ACCOUNT.applying){if(force||!(typeof NET!=='undefined'&&NET.inRoom))ACCOUNT.roomProfile=accountCaptureCurrentRoomSettings();accountScheduleSync()}return}try{const data={};for(const k of Object.keys(CFG_DEF))data[k]=CFG[k];data.spectralSpeedMode=3;localStorage.setItem('nz_cfg',JSON.stringify(data))}catch(e){}}
 function normalizeCfgCaps(cfg){cfg.cleanerMax=Math.min(cfg.cleanerMax,cfg.impostors);cfg.hunterMax=Math.min(cfg.hunterMax,cfg.impostors,3);cfg.parasiteMax=Math.min(cfg.parasiteMax,cfg.impostors,3);cfg.spectralMax=Math.min(cfg.spectralMax,configuredPlayerCount(),15);cfg.guardianMax=Math.min(cfg.guardianMax,configuredPlayerCount(),15);cfg.paramedicMax=Math.min(cfg.paramedicMax,configuredPlayerCount(),15);cfg.seerMax=Math.min(cfg.seerMax,configuredPlayerCount(),15);cfg.noisyMax=Math.min(cfg.noisyMax,configuredPlayerCount(),15);cfg.judgeMax=Math.min(cfg.judgeMax,configuredPlayerCount(),15);cfg.judgeTaskPct=clamp(Math.round((cfg.judgeTaskPct||0)/25)*25,0,100);cfg.hunterTargetCooldown=clamp(Math.round((cfg.hunterTargetCooldown||10)/5)*5,5,25);cfg.lazyMax=Math.min(cfg.lazyMax,configuredPlayerCount(),15);cfg.impostors=Math.min(cfg.impostors,maxImpostorsForPlayers(configuredPlayerCount()));return cfg}
 function presetBaseConfig(){const cfg={...CFG_DEF};cfg.locChance=0;cfg.locMax=0;cfg.sheriffChance=0;cfg.sheriffMax=0;cfg.obsChance=0;cfg.obsMax=0;cfg.instructorChance=0;cfg.instructorMax=0;cfg.guardianChance=0;cfg.guardianMax=0;cfg.cleanerChance=0;cfg.cleanerMax=0;cfg.hunterChance=0;cfg.hunterMax=0;cfg.parasiteChance=0;cfg.parasiteMax=0;cfg.spectralChance=0;cfg.spectralMax=0;cfg.paramedicChance=0;cfg.paramedicMax=0;cfg.seerChance=0;cfg.seerMax=0;cfg.noisyChance=0;cfg.noisyMax=0;cfg.judgeChance=0;cfg.judgeMax=0;cfg.lazyChance=0;cfg.lazyMax=0;cfg.delayedEnabled=0;cfg.delayedChance=0;cfg.delayedMax=0;cfg.engChance=0;cfg.engMax=0;cfg.marionChance=0;cfg.marionMax=0;return normalizeCfgCaps(cfg)}
 function presetConfig(id){const cfg=presetBaseConfig();if(id==='chaos'||id==='help'||id==='infiltrados'){cfg.locChance=100;cfg.locMax=1;cfg.sheriffChance=100;cfg.sheriffMax=1;cfg.obsChance=100;cfg.obsMax=1;cfg.instructorChance=100;cfg.instructorMax=1;cfg.guardianChance=100;cfg.guardianMax=1;cfg.paramedicChance=100;cfg.paramedicMax=1;cfg.noisyChance=100;cfg.noisyMax=1;cfg.judgeChance=100;cfg.judgeMax=1;cfg.lazyChance=100;cfg.lazyMax=1;cfg.engChance=100;cfg.engMax=1;cfg.delayedEnabled=1;cfg.delayedChance=50;cfg.delayedMax=1;cfg.cleanerChance=50;cfg.cleanerMax=1;cfg.parasiteChance=50;cfg.parasiteMax=1;cfg.spectralChance=50;cfg.spectralMax=1;cfg.marionChance=50;cfg.marionMax=1;cfg.hunterChance=50;cfg.hunterMax=1;}
@@ -3791,7 +3816,7 @@ function cfgEditingLocked(){
   if(typeof NET!=='undefined'&&NET.inRoom)return !NET.isHost||NET.room?.status!=='lobby';
   return inGame()&&!G.freePlay;
 }
-const uiBusy=()=>G.cfgOpen||G.confirmOpen;
+const uiBusy=()=>G.cfgOpen||G.confirmOpen||!$('gameSettingsOverlay').hidden||!$('keysOverlay').hidden||!$('accountOverlay').hidden;
 const PERS={
   desconfiado:{gain:1.3,thr:1.5,hear:1,direct:1,call:3.2},
   cauteloso:{gain:.8,thr:3.5,hear:.7,direct:1,call:4.5},
@@ -5697,6 +5722,8 @@ function toggleQuickChatKey(){if(G.state!=='meeting'||!G.player?.alive)return;co
 addEventListener('keydown',e=>{
   if(KEY_CAPTURE){e.preventDefault();e.stopPropagation();assignCapturedKey(e.code);return}
   if(!$('keysOverlay').hidden){if(e.code===KEY_BINDINGS.back||e.code==='Escape'){e.preventDefault();closeKeysMenu()}return}
+  if(!$('accountOverlay').hidden){if(e.code===KEY_BINDINGS.back||e.code==='Escape'){e.preventDefault();closeAccount()}return}
+  if(!$('gameSettingsOverlay').hidden){if(e.code===KEY_BINDINGS.back||e.code==='Escape'){e.preventDefault();closeGameSettings()}return}
   if(typing())return;
   const isBind=a=>KEY_BINDINGS[a]&&e.code===KEY_BINDINGS[a];
   if(isBind('exit')&&G.state!=='menu'){e.preventDefault();askExit();return}
@@ -5707,8 +5734,8 @@ addEventListener('keydown',e=>{
   if(isBind('back')&&G.mapOpen){e.preventDefault();closeMap();return}
   if(isBind('back')&&!$('cosmeticsOverlay').hidden){e.preventDefault();closeCosmetics();return}
   if(G.cfgOpen&&(isBind('increase')||isBind('decrease'))){e.preventDefault();adjustFocusedOption(isBind('increase')?1:-1);return}
-  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)&&G.state!=='menu'&&!G.cfgOpen&&!G.confirmOpen)e.preventDefault();
-  if(G.cfgOpen||G.confirmOpen)return;
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)&&G.state!=='menu'&&!uiBusy())e.preventDefault();
+  if(uiBusy())return;
   keys.add(e.code);
   const use=isBind('use');
   if(G.state==='playing'&&!e.repeat){
@@ -5749,8 +5776,8 @@ $('modal').addEventListener('pointerdown',e=>{if(e.target===$('modal'))closeModa
 $('tpHead').addEventListener('click',()=>$('tasksPanel').classList.toggle('fold'));
 $('btnExit').addEventListener('click',()=>{Snd.click();askExit()});
 function syncGameSettingsUI(){const inp=$('gameVolumeIn'),out=$('gameVolumeValue'),pct=Math.round(clamp(Snd.volume,0,2)*50);if(inp)inp.value=pct;if(out)out.textContent=pct+'%'}
-function openGameSettings(){syncGameSettingsUI();$('gameSettingsOverlay').hidden=false;Snd.init();Snd.open()}function closeGameSettings(){$('gameSettingsOverlay').hidden=true;Snd.click()}
-$('btnGameSettings').addEventListener('click',openGameSettings);$('btnGameSettingsClose').addEventListener('click',closeGameSettings);$('gameSettingsOverlay').addEventListener('pointerdown',e=>{if(e.target===$('gameSettingsOverlay'))closeGameSettings()});$('gameVolumeIn').addEventListener('input',()=>{Snd.volume=clamp(Number($('gameVolumeIn').value)/50,0,2);saveGameVolume(Snd.volume);syncGameSettingsUI()});$('gameVolumeIn').addEventListener('change',()=>{Snd.init();Snd.click()});
+function openGameSettings(){syncGameSettingsUI();joy.x=joy.y=0;keys.clear();resetStick();if(G.player)G.player.moving=false;$('gameSettingsOverlay').hidden=false;Snd.init();Snd.open()}function closeGameSettings(){$('gameSettingsOverlay').hidden=true;Snd.click()}
+$('btnGameSettings').addEventListener('click',openGameSettings);$('btnGameSettingsHud').addEventListener('click',openGameSettings);$('btnGameSettingsClose').addEventListener('click',closeGameSettings);$('gameSettingsOverlay').addEventListener('pointerdown',e=>{if(e.target===$('gameSettingsOverlay'))closeGameSettings()});$('gameVolumeIn').addEventListener('input',()=>{Snd.volume=clamp(Number($('gameVolumeIn').value)/50,0,2);saveGameVolume(Snd.volume);syncGameSettingsUI()});$('gameVolumeIn').addEventListener('change',()=>{Snd.init();Snd.click()});
 $('btnGameKeys').addEventListener('click',()=>{closeGameSettings();openKeysMenu()});$('btnKeysClose').addEventListener('click',closeKeysMenu);$('btnKeysDefaults').addEventListener('click',()=>{KEY_BINDINGS={...DEFAULT_KEYS};saveKeyBindings();KEY_EDIT=null;renderKeyMenu();Snd.click()});
 $('cfmStay').addEventListener('click',()=>{closeConfirm();Snd.click()});
 $('cfmLeave').addEventListener('click',()=>{Snd.click();toMenu()});
@@ -5815,12 +5842,33 @@ let COSMETIC_TAB='hat';
 function drawCosmeticPortrait(cv,char,scale=2.7){const c=cv.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);c.setTransform(scale,0,0,scale,cv.width/2,cv.height*.56);drawChar(c,{x:0,y:0,face:1,walk:(G.t||0)*.25,moving:true,color:char.color||G.cfg.color,cosmetics:cloneCosmetics(char.cosmetics),id:'cosmetic_preview'},false,{portrait:true})}
 function drawLobbyAvatar(cv,p){drawCosmeticPortrait(cv,{color:p.color,cosmetics:p.cosmetics},.95)}
 function syncMenuColorSelection(){if(!$('swatches'))return;document.querySelectorAll('#swatches .sw').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.playerColor===G.cfg.color)))}
-function renderLobbyColorSwatches(){const box=$('lobbyColorSwatches');if(!box)return;box.innerHTML='';const used=new Set((NET.room?.players||[]).filter(p=>p.id!==NET.id).map(p=>p.color));for(const color of COLORS){const b=el('button','sw');b.type='button';b.dataset.playerColor=color.id;b.style.background=color.main;b.setAttribute('aria-label',color.name);b.title=NET.inRoom&&used.has(color.id)?`${color.name} — em uso`:color.name;b.disabled=!!(NET.inRoom&&used.has(color.id));b.setAttribute('aria-pressed',String(color.id===G.cfg.color));b.addEventListener('click',()=>{if(NET.inRoom){if(NET.room?.status!=='lobby')return;if(used.has(color.id)){toast('Essa cor já está em uso.');return}if(color.id===G.cfg.color)return;netSend({type:'set_color',color:color.id});Snd.click();return}G.cfg.color=color.id;syncMenuColorSelection();renderCosmeticsCatalog();Snd.click()});box.appendChild(b)}}
+function renderLobbyColorSwatches(){const box=$('lobbyColorSwatches');if(!box)return;box.innerHTML='';const used=new Set((NET.room?.players||[]).filter(p=>p.id!==NET.id).map(p=>p.color));for(const color of COLORS){const b=el('button','sw');b.type='button';b.dataset.playerColor=color.id;b.style.background=color.main;b.setAttribute('aria-label',color.name);b.title=NET.inRoom&&used.has(color.id)?`${color.name} — em uso`:color.name;b.disabled=!!(NET.inRoom&&used.has(color.id));b.setAttribute('aria-pressed',String(color.id===G.cfg.color));b.addEventListener('click',()=>{if(NET.inRoom){if(NET.room?.status!=='lobby')return;if(used.has(color.id)){toast('Essa cor já está em uso.');return}if(color.id===G.cfg.color)return;netSend({type:'set_color',color:color.id});Snd.click();return}G.cfg.color=color.id;savePlayerColor();syncMenuColorSelection();renderCosmeticsCatalog();Snd.click()});box.appendChild(b)}}
 function renderCosmeticsCatalog(){const overlay=$('cosmeticsOverlay');if(!overlay||overlay.hidden)return;const tabs=$('cosmeticsTabs'),grid=$('cosmeticsGrid');tabs.innerHTML='';grid.innerHTML='';renderLobbyColorSwatches();for(const [key,label] of COSMETIC_CATEGORIES){const b=el('button','chip',label);b.type='button';b.setAttribute('aria-pressed',key===COSMETIC_TAB?'true':'false');b.addEventListener('click',()=>{COSMETIC_TAB=key;renderCosmeticsCatalog();Snd.click()});tabs.appendChild(b)}for(const item of COSMETIC_CATALOG[COSMETIC_TAB]){const b=el('button','cosmeticItem');b.type='button';b.setAttribute('aria-pressed',PLAYER_COSMETICS[COSMETIC_TAB]===item.id?'true':'false');if(item.id==='none'){b.appendChild(el('div','cosmeticNoneMark','∅'))}else{const cv=document.createElement('canvas');cv.width=208;cv.height=180;const only=cloneCosmetics(DEFAULT_COSMETICS);only[COSMETIC_TAB]=item.id;drawCosmeticPortrait(cv,{color:G.cfg.color,cosmetics:only},3.10);b.appendChild(cv)}b.appendChild(el('span','',item.name));b.addEventListener('click',()=>{PLAYER_COSMETICS[COSMETIC_TAB]=item.id;savePlayerCosmetics();renderCosmeticsCatalog();if(NET.inRoom&&NET.room?.status==='lobby')netSend({type:'set_cosmetics',cosmetics:cloneCosmetics(PLAYER_COSMETICS)});Snd.click()});grid.appendChild(b)}drawCosmeticPortrait($('cosmeticsPreviewCv'),{color:G.cfg.color,cosmetics:PLAYER_COSMETICS},5.30);$('cosmeticsEquipped').textContent=COSMETIC_CATEGORIES.map(([k,label])=>`${label}: ${cosmeticItemName(k,PLAYER_COSMETICS[k])}`).join(' · ')}
 function openCosmetics(){if(NET.inRoom){toast('O Inventário é usado na tela inicial, antes de entrar na sala.');return}COSMETIC_TAB='hat';$('cosmeticsOverlay').hidden=false;renderCosmeticsCatalog();Snd.open()}
 function closeCosmetics(){$('cosmeticsOverlay').hidden=true}
 function loadNetClientKey(){try{let k=localStorage.getItem('navezero_online_client_v1');if(!/^[A-Za-z0-9_-]{12,96}$/.test(String(k||''))){k=(globalThis.crypto?.randomUUID?.()||('nz_'+Math.random().toString(36).slice(2)+Date.now().toString(36))).replace(/[^A-Za-z0-9_-]/g,'');localStorage.setItem('navezero_online_client_v1',k)}return k}catch{return 'nz_'+Math.random().toString(36).slice(2)+Date.now().toString(36)}}
 const NET_CLIENT_KEY=loadNetClientKey();
+
+/* =====================================================================
+   CONTAS OPCIONAIS — perfil local separado do perfil autenticado
+   ===================================================================== */
+function accountSetStatus(text='',kind=''){const el=$('accountStatus');if(!el)return;el.textContent=text;el.className='accountStatus'+(kind?' '+kind:'')}
+function accountReadGuestCfg(){const out={...CFG_DEF};try{const raw=JSON.parse(localStorage.getItem('nz_cfg')||'{}')||{};for(const k of Object.keys(CFG_DEF)){const lim=CFG_LIM[k];const n=Number(raw[k]);if(!lim||!Number.isFinite(n))continue;let v=clamp(Math.round(n),lim[0],lim[1]);if(k==='spectralSpeed')v=clamp(Math.round(v/2)*2,0,10);if(k==='judgeTaskPct')v=clamp(Math.round(v/25)*25,0,100);if(k==='instructorMaxDistance')v=clamp(Math.round(v/100)*100,100,2000);if(k==='hunterTargetCooldown')v=clamp(Math.round(v/5)*5,5,25);out[k]=v}}catch{}return normalizeCfgCaps(out)}
+function accountReadGuestRoomDraft(){try{const raw=JSON.parse(localStorage.getItem('navezero_room_create_v1')||'{}')||{};const size=clamp(Math.round(Number(raw.size)||10),4,15),bots=clamp(Math.round(Number(raw.bots)||3),0,size-1);return {size,bots}}catch{return {size:10,bots:3}}}
+function accountGuestProfile(){let volume=1;try{const v=Number(localStorage.getItem('navezero_game_volume_v2'));if(Number.isFinite(v))volume=clamp(v,0,2)}catch{}let keys={...DEFAULT_KEYS};try{const raw=JSON.parse(localStorage.getItem('navezero_keys_v1')||'{}')||{};for(const [k] of KEY_ACTIONS)if(raw[k]===null||typeof raw[k]==='string')keys[k]=raw[k]}catch{}let cosmetics=cloneCosmetics(DEFAULT_COSMETICS);try{cosmetics=normalizeCosmetics(JSON.parse(localStorage.getItem('navezero_cosmetics_v1')||'{}'))}catch{}const draft=accountReadGuestRoomDraft();return {name:loadPlayerName(),color:loadPlayerColor(),cosmetics,personalSettings:{volume,keys},roomSettings:{mapId:loadMapSelection(),size:draft.size,bots:draft.bots,cfg:accountReadGuestCfg()}}}
+function accountCaptureCurrentRoomSettings(){const size=clamp(Math.round(Number($('createSizeIn')?.value)||10),4,15),bots=clamp(Math.round(Number($('createBotsIn')?.value)||3),0,size-1),cfg={};for(const k of Object.keys(CFG_DEF))cfg[k]=CFG[k];return {mapId:SELECTED_MAP_ID,size,bots,cfg}}
+function accountProfileSnapshot(){const room=accountActive()&&ACCOUNT.roomProfile?JSON.parse(JSON.stringify(ACCOUNT.roomProfile)):accountCaptureCurrentRoomSettings();const keys={};for(const [k] of KEY_ACTIONS)keys[k]=KEY_BINDINGS[k]??null;return {name:String($('nameIn')?.value||G.cfg.name||'Você').trim().slice(0,12)||'Você',color:G.cfg.color,cosmetics:cloneCosmetics(PLAYER_COSMETICS),personalSettings:{volume:clamp(Number(Snd.volume)||0,0,2),keys},roomSettings:room}}
+function accountPersistGuestSnapshot(){const profile=accountProfileSnapshot();try{localStorage.setItem('navezero_player_name_v1',profile.name);localStorage.setItem('navezero_player_color_v1',profile.color);localStorage.setItem('navezero_cosmetics_v1',JSON.stringify(profile.cosmetics));localStorage.setItem('navezero_keys_v1',JSON.stringify(profile.personalSettings.keys));localStorage.setItem('navezero_game_volume_v2',String(profile.personalSettings.volume));localStorage.setItem('navezero_map_v1',profile.roomSettings.mapId);localStorage.setItem('navezero_room_create_v1',JSON.stringify({size:profile.roomSettings.size,bots:profile.roomSettings.bots}));const cfg={...profile.roomSettings.cfg,spectralSpeedMode:3};localStorage.setItem('nz_cfg',JSON.stringify(cfg))}catch{}}
+function accountApplyProfile(profile){if(!profile||typeof profile!=='object')return;ACCOUNT.applying=true;try{const name=String(profile.name||'Você').trim().slice(0,12)||'Você';G.cfg.name=name;if($('nameIn'))$('nameIn').value=name;const color=String(profile.color||'azul');G.cfg.color=COLOR_BY[color]?color:'azul';PLAYER_COSMETICS=normalizeCosmetics(profile.cosmetics);const personal=profile.personalSettings||{};if(Number.isFinite(Number(personal.volume)))Snd.volume=clamp(Number(personal.volume),0,2);if(personal.keys&&typeof personal.keys==='object'){const next={...DEFAULT_KEYS};for(const [k] of KEY_ACTIONS)if(personal.keys[k]===null||typeof personal.keys[k]==='string')next[k]=personal.keys[k];KEY_BINDINGS=next}const room=profile.roomSettings||{};const size=clamp(Math.round(Number(room.size)||10),4,15),bots=clamp(Math.round(Number(room.bots)||3),0,size-1);ACCOUNT.roomProfile={mapId:MAP_LIBRARY[room.mapId]?room.mapId:'nave',size,bots,cfg:{...CFG_DEF}};if(room.cfg&&typeof room.cfg==='object'){for(const k of Object.keys(CFG_DEF)){const lim=CFG_LIM[k],n=Number(room.cfg[k]);if(!lim||!Number.isFinite(n))continue;let v=clamp(Math.round(n),lim[0],lim[1]);if(k==='spectralSpeed')v=clamp(Math.round(v/2)*2,0,10);if(k==='judgeTaskPct')v=clamp(Math.round(v/25)*25,0,100);if(k==='instructorMaxDistance')v=clamp(Math.round(v/100)*100,100,2000);if(k==='hunterTargetCooldown')v=clamp(Math.round(v/5)*5,5,25);ACCOUNT.roomProfile.cfg[k]=v}}normalizeCfgCaps(ACCOUNT.roomProfile.cfg);if(!(typeof NET!=='undefined'&&NET.inRoom)){Object.assign(CFG,ACCOUNT.roomProfile.cfg);SELECTED_MAP_ID=ACCOUNT.roomProfile.mapId;activateMapData(SELECTED_MAP_ID,true);G.mapId=SELECTED_MAP_ID}if($('createSizeIn')){$('createSizeIn').value=size;$('createBotsIn').max=Math.max(0,size-1)}if($('createBotsIn'))$('createBotsIn').value=bots;syncMenuColorSelection();syncGameSettingsUI();if(!$('cosmeticsOverlay')?.hidden)renderCosmeticsCatalog();if(!$('keysOverlay')?.hidden)renderKeyMenu();if(G.cfgOpen)buildCfgUI()}finally{ACCOUNT.applying=false}}
+async function accountApi(path,options={}){const res=await fetch(path,{credentials:'same-origin',headers:{'content-type':'application/json',...(options.headers||{})},...options});let data={};try{data=await res.json()}catch{}if(!res.ok){const err=new Error(data.message||'Não foi possível concluir a operação.');err.status=res.status;throw err}return data}
+async function accountSyncNow(){if(!ACCOUNT.authenticated||ACCOUNT.applying||ACCOUNT.syncInFlight)return;ACCOUNT.syncInFlight=true;try{const data=await accountApi('/api/account/profile',{method:'PATCH',body:JSON.stringify({profile:accountProfileSnapshot()})});ACCOUNT.profile=data.account?.profile||accountProfileSnapshot();if(data.account?.id)ACCOUNT.id=data.account.id}catch(err){if(err.status===401){ACCOUNT.authenticated=false;ACCOUNT.id=null;ACCOUNT.profile=null;ACCOUNT.roomProfile=null;accountRender();accountSetStatus('Sua sessão expirou. Entre novamente na conta.','error')}}finally{ACCOUNT.syncInFlight=false}}
+function accountScheduleSync(){if(!ACCOUNT.authenticated||ACCOUNT.applying)return;if(ACCOUNT.syncTimer)clearTimeout(ACCOUNT.syncTimer);ACCOUNT.syncTimer=setTimeout(()=>{ACCOUNT.syncTimer=null;accountSyncNow()},500)}
+function accountRememberRoomSettings(){if(accountActive()&&!ACCOUNT.applying){ACCOUNT.roomProfile=accountCaptureCurrentRoomSettings();accountScheduleSync();return}try{const size=clamp(Math.round(Number($('createSizeIn')?.value)||10),4,15),bots=clamp(Math.round(Number($('createBotsIn')?.value)||3),0,size-1);localStorage.setItem('navezero_room_create_v1',JSON.stringify({size,bots}))}catch{}}
+function accountRender(){const logged=!!ACCOUNT.authenticated;$('accountLoggedOut').hidden=logged;$('accountLoggedIn').hidden=!logged;if(logged){$('accountPlayerName').textContent=String($('nameIn')?.value||G.cfg.name||'Jogador');$('accountIdText').textContent=ACCOUNT.idVisible?(ACCOUNT.id||'—'):'••••••••••••';$('btnAccountToggleId').textContent=ACCOUNT.idVisible?'Ocultar ID':'Mostrar ID'}else{$('accountCreateForm').hidden=true;$('accountLoginForm').hidden=true}}
+function openAccount(){if(typeof NET!=='undefined'&&NET.inRoom){toast('Saia da sala para trocar ou criar uma conta.');return}accountSetStatus('');accountRender();$('accountOverlay').hidden=false;Snd.open()}
+function closeAccount(){$('accountOverlay').hidden=true;accountSetStatus('');Snd.click()}
+async function accountAcceptLogin(data){if(!data?.account)return;ACCOUNT.authenticated=true;ACCOUNT.id=data.account.id;ACCOUNT.profile=data.account.profile;ACCOUNT.roomProfile=data.account.profile?.roomSettings?JSON.parse(JSON.stringify(data.account.profile.roomSettings)):null;ACCOUNT.idVisible=false;accountApplyProfile(data.account.profile);accountRender();accountSetStatus('Conta conectada e perfil carregado.','ok')}
+async function accountRestoreSession(){if(ACCOUNT.restored)return;ACCOUNT.restored=true;try{const data=await accountApi('/api/account/me',{method:'GET'});await accountAcceptLogin(data)}catch(err){if(err.status!==401)console.warn('Conta:',err.message)}}
 
 /* =====================================================================
    MULTIPLAYER ONLINE — autoridade da sala no host + snapshots/requisições
@@ -6490,11 +6538,19 @@ const netOriginalToMenu=toMenu;toMenu=function(){if(typeof resetGhostChatLocal==
 // Override end/rematch controls without changing offline behavior.
 $('btnAgain').addEventListener('click',e=>{if(NET.inRoom||NET.rematchWaiting||NET.rematchReadyCode){e.stopImmediatePropagation();netRequestRematch();return}},true);
 $('btnMenu').addEventListener('click',e=>{if(NET.inRoom){e.stopImmediatePropagation();netLeaveRoom();netOriginalToMenu();return}},true);
+$('btnAccount').addEventListener('click',openAccount);$('btnAccountClose').addEventListener('click',closeAccount);$('accountOverlay').addEventListener('pointerdown',e=>{if(e.target===$('accountOverlay'))closeAccount()});
+$('btnAccountCreateShow').addEventListener('click',()=>{$('accountLoginForm').hidden=true;$('accountCreateForm').hidden=false;accountSetStatus('');$('accountCreatePassword').focus()});
+$('btnAccountLoginShow').addEventListener('click',()=>{$('accountCreateForm').hidden=true;$('accountLoginForm').hidden=false;accountSetStatus('');$('accountLoginId').focus()});
+$('btnAccountCreateCancel').addEventListener('click',()=>{$('accountCreateForm').hidden=true;accountSetStatus('')});$('btnAccountLoginCancel').addEventListener('click',()=>{$('accountLoginForm').hidden=true;accountSetStatus('')});
+$('accountCreateForm').addEventListener('submit',async e=>{e.preventDefault();const p1=$('accountCreatePassword').value,p2=$('accountCreatePassword2').value;if(p1!==p2){accountSetStatus('As senhas não coincidem.','error');return}if(p1.length<8){accountSetStatus('Use uma senha com pelo menos 8 caracteres.','error');return}accountPersistGuestSnapshot();accountSetStatus('Criando conta…');try{const data=await accountApi('/api/account/create',{method:'POST',body:JSON.stringify({password:p1,profile:accountProfileSnapshot()})});$('accountCreatePassword').value='';$('accountCreatePassword2').value='';await accountAcceptLogin(data)}catch(err){accountSetStatus(err.message,'error')}});
+$('accountLoginForm').addEventListener('submit',async e=>{e.preventDefault();const id=String($('accountLoginId').value||'').trim(),password=$('accountLoginPassword').value;if(!id||!password){accountSetStatus('Digite o ID e a senha.','error');return}accountPersistGuestSnapshot();accountSetStatus('Entrando…');try{const data=await accountApi('/api/account/login',{method:'POST',body:JSON.stringify({id,password})});$('accountLoginPassword').value='';await accountAcceptLogin(data)}catch(err){accountSetStatus(err.message,'error')}});
+$('btnAccountToggleId').addEventListener('click',()=>{ACCOUNT.idVisible=!ACCOUNT.idVisible;accountRender();Snd.click()});$('btnAccountCopyId').addEventListener('click',async()=>{if(!ACCOUNT.id)return;try{await navigator.clipboard.writeText(ACCOUNT.id);accountSetStatus('ID copiado.','ok')}catch{const ta=document.createElement('textarea');ta.value=ACCOUNT.id;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');accountSetStatus('ID copiado.','ok')}catch{accountSetStatus('Não foi possível copiar. ID: '+ACCOUNT.id,'error')}ta.remove()}});
+$('btnAccountLogout').addEventListener('click',async()=>{accountSetStatus('Saindo…');try{if(ACCOUNT.syncTimer){clearTimeout(ACCOUNT.syncTimer);ACCOUNT.syncTimer=null}await accountSyncNow();await accountApi('/api/account/logout',{method:'POST',body:'{}'})}catch(err){if(err.status!==401){accountSetStatus(err.message,'error');return}}ACCOUNT.authenticated=false;ACCOUNT.id=null;ACCOUNT.profile=null;ACCOUNT.roomProfile=null;ACCOUNT.idVisible=false;accountApplyProfile(accountGuestProfile());accountRender();accountSetStatus('Você saiu da conta. O perfil local deste navegador foi restaurado.','ok')});
 $('btnFreePlay').addEventListener('click',openFreePlayMapPicker);
 $('btnCreateRoom').addEventListener('click',()=>{$('joinPanel').hidden=true;$('createPanel').hidden=false;$('createSizeIn').focus()});
 $('btnCreateConfirm').addEventListener('click',netCreateRoom);$('btnCreateCancel').addEventListener('click',()=>$('createPanel').hidden=true);
-$('createSizeIn').addEventListener('input',()=>{const n=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createBotsIn').max=Math.max(0,n-1);if(+$('createBotsIn').value>n-1)$('createBotsIn').value=n-1});
-$('createBotsIn').addEventListener('input',()=>{const n=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createBotsIn').value=clamp(Math.round(+$('createBotsIn').value||0),0,n-1)});
+$('createSizeIn').addEventListener('input',()=>{const n=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createBotsIn').max=Math.max(0,n-1);if(+$('createBotsIn').value>n-1)$('createBotsIn').value=n-1;accountRememberRoomSettings()});
+$('createBotsIn').addEventListener('input',()=>{const n=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createBotsIn').value=clamp(Math.round(+$('createBotsIn').value||0),0,n-1);accountRememberRoomSettings()});
 $('btnJoinRoom').addEventListener('click',()=>{setJoinError('');$('joinPanel').hidden=false;$('roomCodeIn').focus();if(!$('serverUrlIn').value)$('serverUrlIn').value=netDefaultUrl()});
 $('btnJoinConfirm').addEventListener('click',()=>netJoinRoom());$('roomCodeIn').addEventListener('input',()=>{$('roomCodeIn').value=$('roomCodeIn').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)});$('roomCodeIn').addEventListener('keydown',e=>{if(e.key==='Enter')netJoinRoom()});$('btnJoinCancel').addEventListener('click',()=>{NET.joinPending=false;setJoinError('');$('joinPanel').hidden=true});
 $('btnSaveRoomConfig').addEventListener('click',netSaveRoomSettings);
@@ -6509,7 +6565,8 @@ function netSyncHostAfterAuthorityChange(){if(NET.inRoom&&NET.isHost){const snap
 $('btnCfg').addEventListener('click',e=>{if(!NET.inRoom)return;e.stopImmediatePropagation();if(NET.room?.settings&&!(NET.isHost&&NET.roomDraftDirty))netApplySettings(NET.room.settings);if(NET.isHost&&!NET.roomDraft)NET.roomDraft={...(NET.room?.settings||netSettings()),bots:NET.room?.bots};netSyncRoomControlsFromCFG();openCfg();if(!NET.isHost||NET.room?.status!=='lobby'){toast('Configurações da sala em modo de visualização. Só o host pode alterar antes da partida.')}},true);
 
 const netOriginalCloseCfg=closeCfg;closeCfg=function(){const shouldSave=NET.inRoom&&NET.isHost&&NET.room?.status==='lobby';if(shouldSave)netSaveRoomSettings();return netOriginalCloseCfg()};
-window.addEventListener('beforeunload',()=>{if(NET.inRoom&&NET.ws&&NET.ws.readyState===WebSocket.OPEN)netSend({type:'leave_room'})});
+window.addEventListener('beforeunload',()=>{if(ACCOUNT.authenticated&&!ACCOUNT.applying){try{fetch('/api/account/profile',{method:'PATCH',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({profile:accountProfileSnapshot()}),keepalive:true})}catch{}}if(NET.inRoom&&NET.ws&&NET.ws.readyState===WebSocket.OPEN)netSend({type:'leave_room'})});
+{const d=accountReadGuestRoomDraft();$('createSizeIn').value=d.size;$('createBotsIn').max=Math.max(0,d.size-1);$('createBotsIn').value=d.bots}accountRender();accountRestoreSession();
 netStartSnapshots();
 
 </script>

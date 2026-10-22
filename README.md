@@ -1,6 +1,6 @@
 # NAVE ZERO ONLINE — RESUMO DO JOGO
 
-**Versão de referência: 0.3-b**
+**Versão de referência: 0.4b-s1**
 
 Nave Zero Online é um jogo independente de dedução social, tarefas, sabotagens e funções especiais. O projeto é **sem fins lucrativos**, criado de forma experimental **com auxílio de Inteligência Artificial** e inspirado em jogos do gênero, especialmente **Among Us**.
 
@@ -207,7 +207,26 @@ Antes da partida, o host pode ajustar diversos parâmetros, como:
 
 As alterações são sincronizadas com os jogadores da sala.
 
-O menu **Configurações de jogo** da tela inicial também permite controlar o volume. Preferências locais, como volume e teclas personalizadas, permanecem salvas no navegador.
+O menu **Configurações de jogo** pode ser aberto também durante uma partida para alterar preferências pessoais, como volume e teclas, sem conceder acesso às configurações da sala. As configurações da sala continuam sob controle do host.
+
+Sem uma conta, nome, cor, cosméticos, preferências pessoais e configurações salvas continuam armazenados localmente no navegador. Com uma conta conectada, esses dados são carregados e sincronizados com o perfil da conta.
+
+---
+
+
+## CONTAS OPCIONAIS
+
+A versão 0.4b-s1 adiciona **Minha conta** ao menu inicial. O cadastro é opcional: jogadores sem conta continuam podendo jogar normalmente com um perfil local.
+
+- O ID é gerado pelo servidor no formato `PalavraPalavra#0000` e não pode ser alterado.
+- Senhas nunca são armazenadas em texto puro; o servidor usa **scrypt** com salt aleatório.
+- A sessão usa cookie **HttpOnly** e **SameSite=Strict**.
+- Rotas de perfil exigem uma sessão autenticada e nunca retornam hash ou senha ao cliente.
+- Os dados de conta ficam no **Supabase**, nas tabelas `nzo_accounts` e `nzo_sessions`; o servidor não depende mais de `accounts.json` nem de Persistent Disk.
+- Configure no backend as variáveis `SUPABASE_URL` e `SUPABASE_SECRET_KEY`. A chave secreta deve existir somente nas variáveis de ambiente do servidor e nunca no `index.html` ou no GitHub.
+- O navegador conversa apenas com as rotas `/api/account/*` do Nave Zero; somente o backend acessa diretamente o Supabase.
+
+O perfil local do navegador e o perfil autenticado são mantidos separados. Ao sair da conta, o jogo restaura o perfil local sem apagar os dados salvos no servidor.
 
 ---
 

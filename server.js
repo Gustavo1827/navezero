@@ -438,10 +438,75 @@ function handle(ws, raw, timings={}){
     const p=room.players.find(p=>p.id===c.id);if(p)p.ready=true;sendRoomState(room);return;
   }
 }
+const ACCOUNT_SESSION_COOKIE='nz_session';
+const ACCOUNT_SESSION_MAX_AGE=60*60*24*30;
+const ACCOUNT_WORD_A=['Naval','Brown','Red','Star','Solar','Lunar','Nova','Pixel','Cosmic','Silver','Golden','Swift','Silent','Bright','Iron','Blue','Green','Shadow','Crystal','Orbit','Rocket','Comet','Astro','Void','Sky','Neon','Storm','Frost','Ember','Echo','Cyber','Quantum'];
+const ACCOUNT_WORD_B=['Gull','Fox','Knight','Sus','Pilot','Scout','Raven','Wolf','Otter','Panda','Falcon','Tiger','Shark','Gecko','Lynx','Bear','Moth','Finch','Comet','Beacon','Rider','Runner','Spark','Drift','Wing','Core','Pulse','Byte','Nova','Star','Moon','Wave'];
+const ACCOUNT_KEY_ACTIONS=new Set(['killMark','sabotage','use','function','moveUp','moveDown','moveLeft','moveRight','increase','decrease','map','report','quickChat','back','exit']);
+function jsonResponse(res,status,data,extra={}){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer',...extra});res.end(JSON.stringify(data))}
+function parseCookies(req){const out={};for(const part of String(req.headers.cookie||'').split(';')){const i=part.indexOf('=');if(i<0)continue;const k=part.slice(0,i).trim(),v=part.slice(i+1).trim();if(k)out[k]=decodeURIComponent(v)}return out}
+function sessionCookie(req,token,maxAge=ACCOUNT_SESSION_MAX_AGE){const secure=String(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https'||!!req.socket?.encrypted;return `${ACCOUNT_SESSION_COOKIE}=${encodeURIComponent(token||'')}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${Math.max(0,Math.floor(maxAge))}${secure?'; Secure':''}`}
+function readJsonBody(req,maxBytes=64*1024){return new Promise((resolve,reject)=>{let total=0,parts=[];req.on('data',chunk=>{total+=chunk.length;if(total>maxBytes){reject(Object.assign(new Error('Corpo muito grande'),{status:413}));req.destroy();return}parts.push(chunk)});req.on('end',()=>{try{resolve(parts.length?JSON.parse(Buffer.concat(parts).toString('utf8')):{})}catch{reject(Object.assign(new Error('JSON inválido'),{status:400}))}});req.on('error',reject)})}
+function cleanAccountKeys(input){const out={};const src=input&&typeof input==='object'?input:{};for(const key of ACCOUNT_KEY_ACTIONS){const v=src[key];if(v===null)out[key]=null;else if(typeof v==='string'&&v.length<=40&&/^[A-Za-z0-9]+$/.test(v))out[key]=v}return out}
+function cleanAccountProfile(input={}){const src=input&&typeof input==='object'?input:{};const personal=src.personalSettings&&typeof src.personalSettings==='object'?src.personalSettings:{};const room=src.roomSettings&&typeof src.roomSettings==='object'?src.roomSettings:{};const size=Math.min(15,Math.max(4,Math.round(Number(room.size)||10)));const bots=Math.min(size-1,Math.max(0,Math.round(Number(room.bots)||0)));return {name:safeText(src.name,12,'Você'),color:COLORS.includes(normalizeColor(src.color))?normalizeColor(src.color):'azul',cosmetics:cleanCosmetics(src.cosmetics),personalSettings:{volume:Math.min(2,Math.max(0,Number.isFinite(Number(personal.volume))?Number(personal.volume):1)),keys:cleanAccountKeys(personal.keys)},roomSettings:{mapId:MAP_IDS.has(String(room.mapId||''))?String(room.mapId):'nave',size,bots,cfg:cleanSettings(room.cfg&&typeof room.cfg==='object'?room.cfg:{},size)}}}
+function createAccountService(opts={}){
+  const supabaseUrl=String(opts.supabaseUrl||process.env.SUPABASE_URL||'').replace(/\/+$/,'');
+  const supabaseSecretKey=String(opts.supabaseSecretKey||process.env.SUPABASE_SECRET_KEY||'').trim();
+  const fetchImpl=opts.fetchImpl||globalThis.fetch;
+  const attempts=new Map();
+  if(!supabaseUrl||!supabaseSecretKey)console.warn('SUPABASE_URL/SUPABASE_SECRET_KEY não configurados: contas ficarão indisponíveis.');
+  const tokenHash=token=>crypto.createHash('sha256').update(String(token||'')).digest('hex');
+  const dbHeaders=(extra={})=>({'apikey':supabaseSecretKey,'authorization':`Bearer ${supabaseSecretKey}`,'content-type':'application/json','accept':'application/json',...extra});
+  async function dbRequest(table,{method='GET',query='',body,prefer='return=representation'}={}){
+    if(!supabaseUrl||!supabaseSecretKey||typeof fetchImpl!=='function')throw Object.assign(new Error('Banco de contas não configurado.'),{status:503});
+    const url=`${supabaseUrl}/rest/v1/${table}${query?`?${query}`:''}`;
+    const headers=dbHeaders(prefer?{prefer}:{});
+    const res=await fetchImpl(url,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
+    const text=await res.text();let data=null;try{data=text?JSON.parse(text):null}catch{data=text}
+    if(!res.ok){const err=new Error(data?.message||data?.hint||`Erro do banco (${res.status}).`);err.status=res.status>=500?503:500;err.dbStatus=res.status;throw err}
+    return data;
+  }
+  async function pruneSessions(){const nowIso=new Date().toISOString();try{await dbRequest('nzo_sessions',{method:'DELETE',query:`expires_at=lt.${encodeURIComponent(nowIso)}`,prefer:'return=minimal'})}catch(err){console.warn('Falha ao limpar sessões expiradas:',err.message)}}
+  const accountFromRequest=async req=>{const token=parseCookies(req)[ACCOUNT_SESSION_COOKIE];if(!token)return null;const sessionHash=tokenHash(token);const sessions=await dbRequest('nzo_sessions',{query:`token_hash=eq.${encodeURIComponent(sessionHash)}&select=token_hash,account_id,expires_at&limit=1`});const sess=Array.isArray(sessions)?sessions[0]:null;if(!sess||new Date(sess.expires_at).getTime()<=Date.now())return null;const accounts=await dbRequest('nzo_accounts',{query:`id=eq.${encodeURIComponent(sess.account_id)}&select=id,password_hash,password_salt,profile,created_at,updated_at&limit=1`});const account=Array.isArray(accounts)?accounts[0]:null;return account?{account,sessionHash}:null};
+  const createSession=async(req,accountId)=>{const token=crypto.randomBytes(32).toString('base64url'),now=Date.now(),expiresAt=new Date(now+ACCOUNT_SESSION_MAX_AGE*1000).toISOString();await dbRequest('nzo_sessions',{method:'POST',body:{token_hash:tokenHash(token),account_id:accountId,created_at:new Date(now).toISOString(),expires_at:expiresAt}});return {token,cookie:sessionCookie(req,token)}};
+  const rateOk=req=>{const ip=String(req.headers['x-forwarded-for']||req.socket?.remoteAddress||'local').split(',')[0].trim();const now=Date.now(),cut=now-60_000,arr=(attempts.get(ip)||[]).filter(t=>t>cut);if(arr.length>=12){attempts.set(ip,arr);return false}arr.push(now);attempts.set(ip,arr);return true};
+  const hashPassword=(password,salt)=>crypto.scryptSync(password,salt,64,{N:16384,r:8,p:1,maxmem:64*1024*1024}).toString('base64');
+  const dummySalt=Buffer.alloc(16,7).toString('base64'),dummyHash=hashPassword('nave-zero-dummy-password',dummySalt);
+  const passwordRecord=password=>{const salt=crypto.randomBytes(16).toString('base64');return {salt,hash:hashPassword(password,salt)}};
+  const verifyPassword=(password,account)=>{const salt=account?.password_salt||dummySalt,expected=account?.password_hash||dummyHash;let actual;try{actual=hashPassword(password,salt)}catch{return false}const a=Buffer.from(actual,'base64'),b=Buffer.from(expected,'base64');return a.length===b.length&&crypto.timingSafeEqual(a,b)};
+  const makeId=async()=>{for(let i=0;i<5000;i++){const id=ACCOUNT_WORD_A[crypto.randomInt(ACCOUNT_WORD_A.length)]+ACCOUNT_WORD_B[crypto.randomInt(ACCOUNT_WORD_B.length)]+'#'+String(crypto.randomInt(10000)).padStart(4,'0');const existing=await dbRequest('nzo_accounts',{query:`id=eq.${encodeURIComponent(id)}&select=id&limit=1`});if(!Array.isArray(existing)||!existing.length)return id}throw new Error('Não foi possível gerar um ID único')};
+  const publicAccount=account=>({id:account.id,profile:cleanAccountProfile(account.profile),createdAt:new Date(account.created_at).getTime(),updatedAt:new Date(account.updated_at).getTime()});
+  async function handle(req,res,pathname){
+    if(req.method==='OPTIONS'){res.writeHead(204,{'allow':'GET, POST, PATCH, OPTIONS','cache-control':'no-store'});res.end();return true}
+    if(pathname==='/api/account/me'&&req.method==='GET'){const auth=await accountFromRequest(req);if(!auth){jsonResponse(res,401,{ok:false,message:'Nenhuma conta conectada.'});return true}jsonResponse(res,200,{ok:true,account:publicAccount(auth.account)});return true}
+    if(pathname==='/api/account/create'&&req.method==='POST'){
+      if(!rateOk(req)){jsonResponse(res,429,{ok:false,message:'Muitas tentativas. Aguarde um pouco e tente novamente.'});return true}
+      const body=await readJsonBody(req),password=String(body.password||'');if(password.length<8||password.length>128){jsonResponse(res,400,{ok:false,message:'A senha deve ter entre 8 e 128 caracteres.'});return true}
+      const id=await makeId(),pw=passwordRecord(password),now=new Date().toISOString(),profile=cleanAccountProfile(body.profile);let rows;
+      try{rows=await dbRequest('nzo_accounts',{method:'POST',body:{id,password_hash:pw.hash,password_salt:pw.salt,profile,created_at:now,updated_at:now}})}catch(err){if(err.dbStatus===409){jsonResponse(res,409,{ok:false,message:'Não foi possível criar a conta. Tente novamente.'});return true}throw err}
+      const account=Array.isArray(rows)&&rows[0]?rows[0]:{id,password_hash:pw.hash,password_salt:pw.salt,profile,created_at:now,updated_at:now};const sess=await createSession(req,id);jsonResponse(res,201,{ok:true,account:publicAccount(account)},{'set-cookie':sess.cookie});return true
+    }
+    if(pathname==='/api/account/login'&&req.method==='POST'){
+      if(!rateOk(req)){jsonResponse(res,429,{ok:false,message:'Muitas tentativas. Aguarde um pouco e tente novamente.'});return true}
+      const body=await readJsonBody(req),id=String(body.id||'').trim(),password=String(body.password||'').slice(0,128);const rows=await dbRequest('nzo_accounts',{query:`id=eq.${encodeURIComponent(id)}&select=id,password_hash,password_salt,profile,created_at,updated_at&limit=1`});const account=Array.isArray(rows)?rows[0]:null;const valid=verifyPassword(password,account);if(!account||!valid){jsonResponse(res,401,{ok:false,message:'ID ou senha incorretos.'});return true}const sess=await createSession(req,account.id);jsonResponse(res,200,{ok:true,account:publicAccount(account)},{'set-cookie':sess.cookie});return true
+    }
+    if(pathname==='/api/account/profile'&&req.method==='PATCH'){
+      const auth=await accountFromRequest(req);if(!auth){jsonResponse(res,401,{ok:false,message:'Sessão inválida ou expirada.'});return true}const body=await readJsonBody(req),profile=cleanAccountProfile(body.profile),updatedAt=new Date().toISOString();const rows=await dbRequest('nzo_accounts',{method:'PATCH',query:`id=eq.${encodeURIComponent(auth.account.id)}`,body:{profile,updated_at:updatedAt}});const account=Array.isArray(rows)&&rows[0]?rows[0]:{...auth.account,profile,updated_at:updatedAt};jsonResponse(res,200,{ok:true,account:publicAccount(account)});return true
+    }
+    if(pathname==='/api/account/logout'&&req.method==='POST'){
+      const token=parseCookies(req)[ACCOUNT_SESSION_COOKIE];if(token){try{await dbRequest('nzo_sessions',{method:'DELETE',query:`token_hash=eq.${encodeURIComponent(tokenHash(token))}`,prefer:'return=minimal'})}catch{}}jsonResponse(res,200,{ok:true},{'set-cookie':sessionCookie(req,'',0)});return true
+    }
+    jsonResponse(res,404,{ok:false,message:'Rota de conta não encontrada.'});return true
+  }
+  if(supabaseUrl&&supabaseSecretKey)pruneSessions();
+  return {handle,pruneSessions};
+}
+
 function createGameServer(opts={}){
-  const port=opts.port??PORT;const host=opts.host??HOST;
+  const port=opts.port??PORT;const host=opts.host??HOST;const accountService=createAccountService(opts);
   const server=http.createServer((req,res)=>{
     const pathname=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`).pathname;
+    if(pathname.startsWith('/api/account/')){accountService.handle(req,res,pathname).catch(err=>{if(res.headersSent)return;jsonResponse(res,err?.status||500,{ok:false,message:err?.status&&err.status<500?err.message:'Erro interno ao processar a conta.'})});return}
     if(pathname==='/health'){res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({ok:true,rooms:rooms.size,clients:clients.size}));return}
     if(pathname==='/'||pathname==='/index.html'){
       fs.readFile(HTML_FILE,(err,data)=>{if(err){res.writeHead(500);res.end('Não foi possível abrir index.html');return}res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-cache'});res.end(data)});return;
@@ -468,7 +533,7 @@ function createGameServer(opts={}){
   });
   server.listen(port,host);
   server.on('close',()=>{clearInterval(lobbySweep);for(const c of clients.values())try{c.ws.close()}catch{};rooms.clear();clients.clear()});
-  return {server,wss,rooms,clients};
+  return {server,wss,rooms,clients,accountService};
 }
 if(require.main===module){
   const app=createGameServer();
