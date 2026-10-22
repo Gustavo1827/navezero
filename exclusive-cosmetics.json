@@ -8,26 +8,16 @@
       "slot": "outfit",
       "enabled": true,
       "asset": "assets/exclusive/carrinho_orbital_roupa.png",
-      "render": {
-        "x": -4,
-        "y": 8,
-        "width": 78,
-        "height": 61
-      }
+      "render": { "x": -4, "y": 8, "width": 78, "height": 61 }
     },
     {
       "id": "mini_explorador_pet",
-      "name": "O explosivo",
+      "name": "O Explosivo",
       "type": "Pet",
       "slot": "pet",
       "enabled": true,
       "asset": "assets/exclusive/mini_explorador_pet.png",
-      "render": {
-        "x": 0,
-        "y": -4,
-        "width": 27,
-        "height": 31
-      }
+      "render": { "x": 0, "y": -3, "width": 25, "height": 34 }
     },
     {
       "id": "coroa_toxica_chapeu",
@@ -36,12 +26,7 @@
       "slot": "hat",
       "enabled": true,
       "asset": "assets/exclusive/coroa_toxica_chapeu.png",
-      "render": {
-        "x": 0,
-        "y": -40,
-        "width": 42,
-        "height": 34
-      }
+      "render": { "x": 0, "y": -40, "width": 42, "height": 34 }
     },
     {
       "id": "rubor_cosmico_rosto",
@@ -50,12 +35,7 @@
       "slot": "visor",
       "enabled": true,
       "asset": "assets/exclusive/rubor_cosmico_rosto.png",
-      "render": {
-        "x": 4,
-        "y": -11,
-        "width": 39,
-        "height": 23
-      }
+      "render": { "x": 4, "y": -11, "width": 39, "height": 23 }
     },
     {
       "id": "fios_rebeldes_chapeu",
@@ -64,12 +44,7 @@
       "slot": "hat",
       "enabled": true,
       "asset": "assets/exclusive/fios_rebeldes_chapeu.png",
-      "render": {
-        "x": 0,
-        "y": -39,
-        "width": 38,
-        "height": 26
-      }
+      "render": { "x": 0, "y": -39, "width": 38, "height": 26 }
     },
     {
       "id": "visor_67_rosto",
@@ -78,44 +53,15 @@
       "slot": "visor",
       "enabled": true,
       "asset": "assets/exclusive/visor_67_rosto.png",
-      "render": {
-        "x": 10,
-        "y": -13,
-        "width": 24,
-        "height": 17
-      }
+      "render": { "x": 10, "y": -13, "width": 25, "height": 15 }
     }
   ],
   "codes": [
-    {
-      "code": "A8b9Ak29Gd",
-      "cosmeticId": "carrinho_orbital_roupa",
-      "enabled": true
-    },
-    {
-      "code": "N7x2Pq8Lm4",
-      "cosmeticId": "mini_explorador_pet",
-      "enabled": true
-    },
-    {
-      "code": "Z3m8Vt1Qa6",
-      "cosmeticId": "coroa_toxica_chapeu",
-      "enabled": true
-    },
-    {
-      "code": "K9r2Nx7Bc5",
-      "cosmeticId": "rubor_cosmico_rosto",
-      "enabled": true
-    },
-    {
-      "code": "P4d8Hs2Wq9",
-      "cosmeticId": "fios_rebeldes_chapeu",
-      "enabled": true
-    },
-    {
-      "code": "T6y1Lf8Za3",
-      "cosmeticId": "visor_67_rosto",
-      "enabled": true
-    }
+    { "code": "A8b9Ak29Gd", "cosmeticId": "carrinho_orbital_roupa", "enabled": true },
+    { "code": "N7x2Pq8Lm4", "cosmeticId": "mini_explorador_pet", "enabled": true },
+    { "code": "Z3m8Vt1Qa6", "cosmeticId": "coroa_toxica_chapeu", "enabled": true },
+    { "code": "K9r2Nx7Bc5", "cosmeticId": "rubor_cosmico_rosto", "enabled": true },
+    { "code": "P4d8Hs2Wq9", "cosmeticId": "fios_rebeldes_chapeu", "enabled": true },
+    { "code": "T6y1Lf8Za3", "cosmeticId": "visor_67_rosto", "enabled": true }
   ]
 }

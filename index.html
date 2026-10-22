@@ -685,7 +685,6 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
    ===================================================================== */
 //#MAP_START
 const TILE=48, COLS=64, ROWS=46, WORLD_W=COLS*TILE, WORLD_H=ROWS*TILE;
-let ACCOUNT_STORAGE_READ_ALLOWED=false;
 const MAP_LIBRARY={
   nave:{
     id:'nave',name:'Nave de viagem',icon:'assets/map-nave.png',subtitle:'A nave clássica do Nave Zero',
@@ -876,9 +875,9 @@ const MAP_LIBRARY={
     decon:{doorW:'decon_w',doorE:'decon_e'}
   }
 };
-function loadMapSelection(){if(!ACCOUNT_STORAGE_READ_ALLOWED)return'nave';try{const id=localStorage.getItem('navezero_map_v1');return MAP_LIBRARY[id]?id:'nave'}catch{return'nave'}}
+function loadMapSelection(){if(!ACCOUNT.sessionResolved)return'nave';try{const id=localStorage.getItem('navezero_map_v1');return MAP_LIBRARY[id]?id:'nave'}catch{return'nave'}}
 function saveMapSelection(id){if(accountActive()){if(!ACCOUNT.applying&&(!(typeof NET!=='undefined'&&NET.inRoom)||(NET.isHost&&NET.room?.status==='lobby'))){if(ACCOUNT.roomProfile)ACCOUNT.roomProfile.mapId=MAP_LIBRARY[id]?id:'nave';accountScheduleSync()}return}try{localStorage.setItem('navezero_map_v1',MAP_LIBRARY[id]?id:'nave')}catch{}}
-const ACCOUNT={authenticated:false,id:null,profile:null,roomProfile:null,exclusiveCosmetics:new Set(),applying:false,syncTimer:null,syncInFlight:false,idVisible:false,restored:false,pendingCreateId:null,pendingCreateToken:null};
+const ACCOUNT={authenticated:false,id:null,profile:null,roomProfile:null,exclusiveCosmetics:new Set(),applying:false,syncTimer:null,syncInFlight:false,idVisible:false,restored:false,sessionResolved:false,pendingCreateId:null,pendingCreateToken:null};
 function accountActive(){return !!ACCOUNT.authenticated}
 let SELECTED_MAP_ID=loadMapSelection(),ACTIVE_MAP_ID=SELECTED_MAP_ID;
 let ROOM_DEFS=[],CORRIDORS=[],GLASS_RECTS=[],DOOR_DEFS=[],DECOR=[],STATION_DEFS=[],VENT_DEFS=[],ROOM_EDGES=[],VENT_LINKS=[],SPAWN={x:31,y:11},TABLE={x:29,y:6,w:6,h:3},FREEPLAY_COMPUTER={id:'freeplay_pc',room:'cafe',x:38,y:10,w:1,h:1,label:'Computador da Partida Livre'},CAMS=[],OUTSIDE_VOID=new Uint8Array(COLS*ROWS);
@@ -1087,19 +1086,19 @@ async function loadExclusiveCatalog(){if(EXCLUSIVE_CATALOG.loaded)return EXCLUSI
 function normalizeCosmetics(value){const src=value&&typeof value==='object'?value:{};const out={};for(const k of Object.keys(DEFAULT_COSMETICS)){const id=String(src[k]||COSMETIC_NONE);out[k]=COSMETIC_ALLOWED[k].has(id)?id:COSMETIC_NONE}return out}
 function normalizeOwnCosmetics(value){const out=normalizeCosmetics(value);for(const [slot,id] of Object.entries(out))if(EXCLUSIVE_CATALOG.byId.has(id)&&(!accountActive()||!ACCOUNT.exclusiveCosmetics.has(id)))out[slot]=COSMETIC_NONE;return out}
 function cloneCosmetics(value){return {...normalizeCosmetics(value)}}
-function loadPlayerCosmetics(){if(!ACCOUNT_STORAGE_READ_ALLOWED)return cloneCosmetics(DEFAULT_COSMETICS);try{return normalizeOwnCosmetics(JSON.parse(localStorage.getItem('navezero_cosmetics_v1')||'{}'))}catch{return cloneCosmetics(DEFAULT_COSMETICS)}}
+function loadPlayerCosmetics(){if(!ACCOUNT.sessionResolved)return cloneCosmetics(DEFAULT_COSMETICS);try{return normalizeOwnCosmetics(JSON.parse(localStorage.getItem('navezero_cosmetics_v1')||'{}'))}catch{return cloneCosmetics(DEFAULT_COSMETICS)}}
 let PLAYER_COSMETICS=loadPlayerCosmetics();function savePlayerCosmetics(){if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_cosmetics_v1',JSON.stringify(normalizeOwnCosmetics(PLAYER_COSMETICS)))}catch{}}
 const KEY_ACTIONS=[['killMark','Matar / Marcar'],['sabotage','Sabotar'],['use','Usar / Interagir'],['function','Botão da função'],['moveUp','Mover para cima'],['moveDown','Mover para baixo'],['moveLeft','Mover para esquerda'],['moveRight','Mover para direita'],['increase','Aumentar sliders/opções'],['decrease','Diminuir sliders/opções'],['map','Abrir mapa'],['report','Reportar corpo'],['quickChat','Abrir/fechar Chat Rápido'],['back','Fechar/voltar em menus'],['exit','Sair do jogo']];
 const DEFAULT_KEYS=Object.freeze({killMark:'KeyQ',sabotage:'KeyX',use:'KeyE',function:'KeyF',moveUp:'KeyW',moveDown:'KeyS',moveLeft:'KeyA',moveRight:'KeyD',increase:'ArrowRight',decrease:'ArrowLeft',map:'KeyM',report:'KeyR',quickChat:'KeyC',back:'Escape',exit:'Digit0'});
-function loadKeyBindings(){if(!ACCOUNT_STORAGE_READ_ALLOWED)return {...DEFAULT_KEYS};let raw={};try{raw=JSON.parse(localStorage.getItem('navezero_keys_v1')||'{}')||{}}catch{}const out={...DEFAULT_KEYS};for(const [k] of KEY_ACTIONS)if(raw[k]===null||typeof raw[k]==='string')out[k]=raw[k];return out}
+function loadKeyBindings(){if(!ACCOUNT.sessionResolved)return {...DEFAULT_KEYS};let raw={};try{raw=JSON.parse(localStorage.getItem('navezero_keys_v1')||'{}')||{}}catch{}const out={...DEFAULT_KEYS};for(const [k] of KEY_ACTIONS)if(raw[k]===null||typeof raw[k]==='string')out[k]=raw[k];return out}
 let KEY_BINDINGS=loadKeyBindings(),KEY_EDIT=null,KEY_CAPTURE=null,KEY_CAPTURE_TIMER=null;
 function saveKeyBindings(){if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_keys_v1',JSON.stringify(KEY_BINDINGS))}catch{}}
 function keyLabel(code){if(!code)return 'Sem tecla';if(/^Key[A-Z]$/.test(code))return code.slice(3);if(/^Digit\d$/.test(code))return code.slice(5);return ({ArrowRight:'→',ArrowLeft:'←',ArrowUp:'↑',ArrowDown:'↓',Escape:'Esc',Space:'Espaço',Enter:'Enter',Backspace:'Backspace',Tab:'Tab'}[code]||code.replace(/^Numpad/,'Num '))}
 function actionForCode(code){return KEY_ACTIONS.find(([k])=>KEY_BINDINGS[k]===code)?.[0]||null}
 function savePlayerName(){G.cfg.name=String($('nameIn').value||'Você').trim().slice(0,12)||'Você';if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_player_name_v1',G.cfg.name)}catch{}}
-function loadPlayerName(){if(!ACCOUNT_STORAGE_READ_ALLOWED)return'Você';try{return localStorage.getItem('navezero_player_name_v1')||'Você'}catch{return 'Você'}}
+function loadPlayerName(){if(!ACCOUNT.sessionResolved)return'Você';try{return localStorage.getItem('navezero_player_name_v1')||'Você'}catch{return 'Você'}}
 function savePlayerColor(){if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_player_color_v1',String(G.cfg.color||'azul'))}catch{}}
-function loadPlayerColor(){if(!ACCOUNT_STORAGE_READ_ALLOWED)return'azul';try{const c=String(localStorage.getItem('navezero_player_color_v1')||'azul');return COLOR_BY[c]?c:'azul'}catch{return 'azul'}}
+function loadPlayerColor(){if(!ACCOUNT.sessionResolved)return'azul';try{const c=String(localStorage.getItem('navezero_player_color_v1')||'azul');return COLOR_BY[c]?c:'azul'}catch{return 'azul'}}
 function isTextEntry(){const a=document.activeElement;if(!a)return false;if(a.isContentEditable||a.tagName==='TEXTAREA'||a.tagName==='SELECT')return true;if(a.tagName!=='INPUT')return false;return !['range','button','checkbox','radio'].includes(a.type)}
 function renderKeyMenu(){const box=$('keyRows');if(!box)return;box.innerHTML='';for(const [k,label] of KEY_ACTIONS){const row=el('div','keyRow'),name=el('strong','',label),b=el('button','chip keyBind',keyLabel(KEY_BINDINGS[k]));b.type='button';b.addEventListener('click',()=>{KEY_EDIT=k;renderKeyMenu()});row.append(name,b);if(KEY_EDIT===k){const ed=el('div','keyEdit');if(KEY_BINDINGS[k]){const rep=el('button','chip','Substituir'),rem=el('button','chip','Remover'),can=el('button','chip','Cancelar');rep.onclick=()=>beginKeyCapture(k);rem.onclick=()=>{KEY_BINDINGS[k]=null;saveKeyBindings();KEY_EDIT=null;renderKeyMenu()};can.onclick=()=>{KEY_EDIT=null;renderKeyMenu()};ed.append(rep,rem,can)}else{const add=el('button','chip','Adicionar'),can=el('button','chip','Cancelar');add.onclick=()=>beginKeyCapture(k);can.onclick=()=>{KEY_EDIT=null;renderKeyMenu()};ed.append(add,can)}row.append(ed)}box.append(row)}}
 function cancelKeyCapture(){if(KEY_CAPTURE_TIMER)clearInterval(KEY_CAPTURE_TIMER);KEY_CAPTURE_TIMER=null;KEY_CAPTURE=null;$('keyCaptureBox').hidden=true;$('keyCaptureBox').innerHTML='';$('keyConflict').textContent='';renderKeyMenu()}
@@ -1669,7 +1668,7 @@ const NAME_BUB={};
 const keys=new Set(); const joy={x:0,y:0};
 
 /* ---------- som ---------- */
-function loadGameVolume(){if(!ACCOUNT_STORAGE_READ_ALLOWED)return 1;try{
+function loadGameVolume(){if(!ACCOUNT.sessionResolved)return 1;try{
   const v2=Number(localStorage.getItem('navezero_game_volume_v2'));if(Number.isFinite(v2))return clamp(v2,0,2);
   const old=Number(localStorage.getItem('navezero_game_volume_v1'));const migrated=Number.isFinite(old)?clamp(old,0,1):1;
   localStorage.setItem('navezero_game_volume_v2',String(migrated));return migrated;
@@ -2012,7 +2011,7 @@ function doInteract(a){
 }
 function pressEmergency(){
   const p=G.player;if(!p||p.controlledBy)return;
-  if(emergencySabotageBlocked()){toast('Botão de emergência indisponível durante sabotagens ativas. Portas são a única exceção.');Snd.err();return}
+  if(emergencySabotageBlocked()){toast('Botão de emergência indisponível durante uma sabotagem ativa.');Snd.err();return}
   if(G.meetCd>0){toast('Botão em recarga: '+Math.ceil(G.meetCd)+'s');Snd.err();return}
   if(p.emUses<=0){toast('Você já usou seu botão de emergência.');Snd.err();return}
   callMeeting(p,'emergency');
@@ -3374,7 +3373,7 @@ const roomName=(x,y)=>{const r=roomAtPx(x,y);return r?r.name:'Corredor'};
 const infoOn=()=>!(G.sab.comms>0)||G.role==='imp'||!G.player.alive;
 const FIX_KEYS=['reactor','lights','comms'];
 const sabotageActive=()=>!!(G.sab&&(G.sab.lights>0||G.sab.reactor>0||G.sab.comms>0||G.sab.doors>0));
-const emergencySabotageBlocked=()=>!!(G.sab&&Object.entries(G.sab).some(([type,value])=>type!=='doors'&&type!=='cd'&&Number(value)>0));
+const emergencySabotageBlocked=()=>!!(G.sab&&Object.entries(G.sab).some(([key,value])=>key!=='doors'&&key!=='cd'&&Number(value)>0));
 const ghostActs=()=>!!G.player&&!G.player.alive;
 const ghostCanSab=()=>!!G.player&&!G.player.alive&&G.role==='imp';
 const specRoles=()=>!!G.player&&!G.player.alive&&G.ghostMode==='spec';
@@ -3807,7 +3806,7 @@ function cfgLimitFor(key){if(key==='impostors')return [1,maxImpostorsForPlayers(
 const ACTION_DISTANCE_LABELS=['Curta','Média','Longa'];
 const ACTION_DISTANCE_VALUES=[100,130,160];
 function actionDistancePx(kind='default'){const lv=clamp(Math.round(Number(CFG.actionDistance)||0),0,2);return ACTION_DISTANCE_VALUES[lv]}
-(function(){if(!ACCOUNT_STORAGE_READ_ALLOWED)return;try{
+(function(){if(!ACCOUNT.sessionResolved)return;try{
   const j=JSON.parse(localStorage.getItem('nz_cfg')||'{}');
   for(const k in CFG_LIM){if(k==='spectralSpeed')continue;const v=+j[k];if(Number.isFinite(v))CFG[k]=clamp(Math.round(v),CFG_LIM[k][0],CFG_LIM[k][1])}
   const raw=Number(j.spectralSpeed);if(Number.isFinite(raw)){const migrated=j.spectralSpeedMode===3?raw:(j.spectralSpeedMode===2?Math.min(raw,10):(raw>=10?raw-10:raw));CFG.spectralSpeed=clamp(Math.round(migrated/2)*2,0,10)}
@@ -5737,7 +5736,7 @@ function toggleQuickChatKey(){if(G.state!=='meeting'||!G.player?.alive)return;co
 addEventListener('keydown',e=>{
   if(KEY_CAPTURE){e.preventDefault();e.stopPropagation();assignCapturedKey(e.code);return}
   if(!$('keysOverlay').hidden){if(e.code===KEY_BINDINGS.back||e.code==='Escape'){e.preventDefault();closeKeysMenu()}return}
-  if(!$('accountOverlay').hidden){if(e.code===KEY_BINDINGS.back||e.code==='Escape'){e.preventDefault();closeAccount()}return}
+  if(!$('accountOverlay').hidden){if(e.code===KEY_BINDINGS.back||e.code==='Escape'){if(typing())return;e.preventDefault();closeAccount()}return}
   if(!$('gameSettingsOverlay').hidden){if(e.code===KEY_BINDINGS.back||e.code==='Escape'){e.preventDefault();closeGameSettings()}return}
   if(typing())return;
   const isBind=a=>KEY_BINDINGS[a]&&e.code===KEY_BINDINGS[a];
@@ -5868,9 +5867,9 @@ const NET_CLIENT_KEY=loadNetClientKey();
    CONTAS OPCIONAIS — perfil local separado do perfil autenticado
    ===================================================================== */
 function accountSetStatus(text='',kind=''){const el=$('accountStatus');if(!el)return;el.textContent=text;el.className='accountStatus'+(kind?' '+kind:'')}
-function accountReadGuestCfg(){const out={...CFG_DEF};try{const raw=JSON.parse(localStorage.getItem('nz_cfg')||'{}')||{};for(const k of Object.keys(CFG_DEF)){const lim=CFG_LIM[k];const n=Number(raw[k]);if(!lim||!Number.isFinite(n))continue;let v=clamp(Math.round(n),lim[0],lim[1]);if(k==='spectralSpeed')v=clamp(Math.round(v/2)*2,0,10);if(k==='judgeTaskPct')v=clamp(Math.round(v/25)*25,0,100);if(k==='instructorMaxDistance')v=clamp(Math.round(v/100)*100,100,2000);if(k==='hunterTargetCooldown')v=clamp(Math.round(v/5)*5,5,25);out[k]=v}}catch{}return normalizeCfgCaps(out)}
-function accountReadGuestRoomDraft(){try{const raw=JSON.parse(localStorage.getItem('navezero_room_create_v1')||'{}')||{};const size=clamp(Math.round(Number(raw.size)||10),4,15),bots=clamp(Math.round(Number(raw.bots)||3),0,size-1);return {size,bots}}catch{return {size:10,bots:3}}}
-function accountGuestProfile(){const previous=ACCOUNT_STORAGE_READ_ALLOWED;ACCOUNT_STORAGE_READ_ALLOWED=true;try{let volume=1;try{const v=Number(localStorage.getItem('navezero_game_volume_v2'));if(Number.isFinite(v))volume=clamp(v,0,2)}catch{}let keys={...DEFAULT_KEYS};try{const raw=JSON.parse(localStorage.getItem('navezero_keys_v1')||'{}')||{};for(const [k] of KEY_ACTIONS)if(raw[k]===null||typeof raw[k]==='string')keys[k]=raw[k]}catch{}let cosmetics=cloneCosmetics(DEFAULT_COSMETICS);try{cosmetics=normalizeOwnCosmetics(JSON.parse(localStorage.getItem('navezero_cosmetics_v1')||'{}'))}catch{}const draft=accountReadGuestRoomDraft();return {name:loadPlayerName(),color:loadPlayerColor(),cosmetics,personalSettings:{volume,keys},roomSettings:{mapId:loadMapSelection(),size:draft.size,bots:draft.bots,cfg:accountReadGuestCfg()}}}finally{ACCOUNT_STORAGE_READ_ALLOWED=previous}}
+function accountReadGuestCfg(){const out={...CFG_DEF};if(!ACCOUNT.sessionResolved)return normalizeCfgCaps(out);try{const raw=JSON.parse(localStorage.getItem('nz_cfg')||'{}')||{};for(const k of Object.keys(CFG_DEF)){const lim=CFG_LIM[k];const n=Number(raw[k]);if(!lim||!Number.isFinite(n))continue;let v=clamp(Math.round(n),lim[0],lim[1]);if(k==='spectralSpeed')v=clamp(Math.round(v/2)*2,0,10);if(k==='judgeTaskPct')v=clamp(Math.round(v/25)*25,0,100);if(k==='instructorMaxDistance')v=clamp(Math.round(v/100)*100,100,2000);if(k==='hunterTargetCooldown')v=clamp(Math.round(v/5)*5,5,25);out[k]=v}}catch{}return normalizeCfgCaps(out)}
+function accountReadGuestRoomDraft(){if(!ACCOUNT.sessionResolved)return {size:10,bots:3};try{const raw=JSON.parse(localStorage.getItem('navezero_room_create_v1')||'{}')||{};const size=clamp(Math.round(Number(raw.size)||10),4,15),bots=clamp(Math.round(Number(raw.bots)||3),0,size-1);return {size,bots}}catch{return {size:10,bots:3}}}
+function accountGuestProfile(){let volume=1;try{const v=Number(localStorage.getItem('navezero_game_volume_v2'));if(Number.isFinite(v))volume=clamp(v,0,2)}catch{}let keys={...DEFAULT_KEYS};try{const raw=JSON.parse(localStorage.getItem('navezero_keys_v1')||'{}')||{};for(const [k] of KEY_ACTIONS)if(raw[k]===null||typeof raw[k]==='string')keys[k]=raw[k]}catch{}let cosmetics=cloneCosmetics(DEFAULT_COSMETICS);try{cosmetics=normalizeOwnCosmetics(JSON.parse(localStorage.getItem('navezero_cosmetics_v1')||'{}'))}catch{}const draft=accountReadGuestRoomDraft();return {name:loadPlayerName(),color:loadPlayerColor(),cosmetics,personalSettings:{volume,keys},roomSettings:{mapId:loadMapSelection(),size:draft.size,bots:draft.bots,cfg:accountReadGuestCfg()}}}
 function accountCaptureCurrentRoomSettings(){const size=clamp(Math.round(Number($('createSizeIn')?.value)||10),4,15),bots=clamp(Math.round(Number($('createBotsIn')?.value)||3),0,size-1),cfg={};for(const k of Object.keys(CFG_DEF))cfg[k]=CFG[k];return {mapId:SELECTED_MAP_ID,size,bots,cfg}}
 function accountProfileSnapshot(){const room=accountActive()&&ACCOUNT.roomProfile?JSON.parse(JSON.stringify(ACCOUNT.roomProfile)):accountCaptureCurrentRoomSettings();const keys={};for(const [k] of KEY_ACTIONS)keys[k]=KEY_BINDINGS[k]??null;return {name:String($('nameIn')?.value||G.cfg.name||'Você').trim().slice(0,12)||'Você',color:G.cfg.color,cosmetics:cloneCosmetics(PLAYER_COSMETICS),personalSettings:{volume:clamp(Number(Snd.volume)||0,0,2),keys},roomSettings:room}}
 function accountPersistGuestSnapshot(){const profile=accountProfileSnapshot();try{localStorage.setItem('navezero_player_name_v1',profile.name);localStorage.setItem('navezero_player_color_v1',profile.color);localStorage.setItem('navezero_cosmetics_v1',JSON.stringify(profile.cosmetics));localStorage.setItem('navezero_keys_v1',JSON.stringify(profile.personalSettings.keys));localStorage.setItem('navezero_game_volume_v2',String(profile.personalSettings.volume));localStorage.setItem('navezero_map_v1',profile.roomSettings.mapId);localStorage.setItem('navezero_room_create_v1',JSON.stringify({size:profile.roomSettings.size,bots:profile.roomSettings.bots}));const cfg={...profile.roomSettings.cfg,spectralSpeedMode:3};localStorage.setItem('nz_cfg',JSON.stringify(cfg))}catch{}}
@@ -5885,8 +5884,27 @@ function accountSetPasswordVisible(kind,visible){const create=kind==='create',id
 function accountRender(){const logged=!!ACCOUNT.authenticated;$('accountLoggedOut').hidden=logged;$('accountLoggedIn').hidden=!logged;if($('accountCreateName'))$('accountCreateName').value=String($('nameIn')?.value||G.cfg.name||'Jogador');if(logged){$('accountPlayerName').textContent=String($('nameIn')?.value||G.cfg.name||'Jogador');$('accountIdText').textContent=ACCOUNT.idVisible?(ACCOUNT.id||'—'):'••••••••••••';$('btnAccountToggleId').textContent=ACCOUNT.idVisible?'Ocultar ID':'Mostrar ID'}else{$('accountCreateForm').hidden=true;$('accountLoginForm').hidden=true;if($('accountRedeemForm'))$('accountRedeemForm').hidden=true}}
 function openAccount(){if(typeof NET!=='undefined'&&NET.inRoom){toast('Saia da sala para trocar ou criar uma conta.');return}accountSetStatus('');accountRender();$('accountOverlay').hidden=false;Snd.open()}
 function closeAccount(){$('accountOverlay').hidden=true;accountSetStatus('');Snd.click()}
-async function accountAcceptLogin(data){if(!data?.account)return;await loadExclusiveCatalog();ACCOUNT.authenticated=true;ACCOUNT.id=data.account.id;ACCOUNT.profile=data.account.profile;ACCOUNT.roomProfile=data.account.profile?.roomSettings?JSON.parse(JSON.stringify(data.account.profile.roomSettings)):null;ACCOUNT.idVisible=false;accountApplyProfile(data.account.profile);accountRender();accountSetStatus('Conta conectada e perfil carregado.','ok')}
-async function accountRestoreSession(){if(ACCOUNT.restored)return;ACCOUNT.restored=true;try{const data=await accountApi('/api/account/me',{method:'GET'});await accountAcceptLogin(data);return true}catch(err){ACCOUNT.authenticated=false;ACCOUNT.id=null;ACCOUNT.profile=null;ACCOUNT.roomProfile=null;ACCOUNT.exclusiveCosmetics=new Set();accountApplyProfile(accountGuestProfile());accountRender();if(err.status!==401)console.warn('Conta:',err.message);return false}}
+async function accountAcceptLogin(data){if(!data?.account)return;ACCOUNT.sessionResolved=true;await loadExclusiveCatalog();ACCOUNT.authenticated=true;ACCOUNT.id=data.account.id;ACCOUNT.profile=data.account.profile;ACCOUNT.roomProfile=data.account.profile?.roomSettings?JSON.parse(JSON.stringify(data.account.profile.roomSettings)):null;ACCOUNT.idVisible=false;accountApplyProfile(data.account.profile);accountRender();accountSetStatus('Conta conectada e perfil carregado.','ok')}
+async function accountRestoreSession(){
+  if(ACCOUNT.restored)return;
+  ACCOUNT.restored=true;
+  try{
+    const data=await accountApi('/api/account/me',{method:'GET'});
+    ACCOUNT.sessionResolved=true;
+    await accountAcceptLogin(data);
+  }catch(err){
+    ACCOUNT.sessionResolved=true;
+    if(err.status===401){
+      accountApplyProfile(accountGuestProfile());
+      accountRender();
+      return;
+    }
+    ACCOUNT.sessionResolved=false;
+    console.warn('Conta:',err.message);
+    accountSetStatus('Não foi possível verificar sua sessão agora. Seus dados locais não foram carregados para evitar sobrescrever uma conta.','error');
+    accountRender();
+  }
+}
 
 function renderExclusiveUnlockPreview(cosmetic){const cv=$('exclusiveUnlockPreview');if(!cv||!cosmetic)return;const slot=String(cosmetic.slot||''),only=cloneCosmetics(DEFAULT_COSMETICS);if(Object.prototype.hasOwnProperty.call(only,slot))only[slot]=cosmetic.id;drawCosmeticPortrait(cv,{color:'cinza',cosmetics:only},4.65)}
 function showExclusiveUnlockPopup(cosmetic){if(!cosmetic)return;ACCOUNT.lastUnlockedCosmetic=cosmetic;$('exclusiveUnlockName').textContent=cosmetic.name||'Cosmético exclusivo';$('exclusiveUnlockType').textContent=cosmetic.type?`Tipo: ${cosmetic.type}`:'';$('exclusiveUnlockOverlay').hidden=false;renderExclusiveUnlockPreview(cosmetic);Snd.open()}
@@ -6604,7 +6622,7 @@ $('btnCfg').addEventListener('click',e=>{if(!NET.inRoom)return;e.stopImmediatePr
 
 const netOriginalCloseCfg=closeCfg;closeCfg=function(){const shouldSave=NET.inRoom&&NET.isHost&&NET.room?.status==='lobby';if(shouldSave)netSaveRoomSettings();return netOriginalCloseCfg()};
 window.addEventListener('beforeunload',()=>{if(ACCOUNT.authenticated&&!ACCOUNT.applying){try{fetch('/api/account/profile',{method:'PATCH',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({profile:accountProfileSnapshot()}),keepalive:true})}catch{}}if(NET.inRoom&&NET.ws&&NET.ws.readyState===WebSocket.OPEN)netSend({type:'leave_room'})});
-$('createSizeIn').value=10;$('createBotsIn').max=9;$('createBotsIn').value=3;accountRender();loadExclusiveCatalog();accountRestoreSession();
+{const d=accountReadGuestRoomDraft();$('createSizeIn').value=d.size;$('createBotsIn').max=Math.max(0,d.size-1);$('createBotsIn').value=d.bots}accountRender();loadExclusiveCatalog();accountRestoreSession();
 netStartSnapshots();
 
 </script>
