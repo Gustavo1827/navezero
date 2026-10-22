@@ -89,6 +89,7 @@ function roomFor(client){return client.roomCode?rooms.get(client.roomCode):null}
 function error(ws,message){send(ws,{type:'room_error',message})}
 function snapshotAlive(room,id){const ch=room.lastSnapshot?.chars?.find(c=>String(c.id)===String(id));return ch?ch.alive!==false:true}
 function ensureModeration(room){if(!(room.modVotes instanceof Map))room.modVotes=new Map();if(!(room.banned instanceof Set))room.banned=new Set();return room.modVotes}
+function moderationBanKey(client){const accountId=String(client?.accountId||'').trim();if(accountId)return `account:${accountId}`;const clientKey=String(client?.clientKey||'').trim();return clientKey?`client:${clientKey}`:''}
 function moderationRule(room,targetId){
   // Apenas jogadores humanos online e vivos podem votar; o alvo nunca entra no cálculo.
   // A expulsão exige maioria absoluta dos elegíveis: piso(n / 2) + 1.
@@ -113,7 +114,7 @@ function moderationPayload(room){
 function broadcastModeration(room,force=false){const state=moderationPayload(room),sig=JSON.stringify(state);if(!force&&room.modStateSig===sig)return;room.modStateSig=sig;broadcast(room,{type:'moderation_state',state})}
 function removePlayerByModeration(room,targetId,reason){
   const target=clients.get(targetId);if(!target||target.roomCode!==room.code)return false;
-  send(target.ws,{type:'moderation_removed',reason});
+  send(target.ws,{type:'moderation_removed',reason,code:room.code});
   detachFromRoom(target,reason==='ban'?'ban':'kicked');return true;
 }
 function evaluateModeration(room){
@@ -209,6 +210,19 @@ function startGame(room, rematch=false, timings={}){
   },countdownMs);
   return true;
 }
+function activeClientForAccount(client){
+  const accountId=String(client?.accountId||'');if(!accountId)return null;
+  for(const other of clients.values()){
+    if(!other||other.id===client.id||String(other.accountId||'')!==accountId||!other.roomCode)continue;
+    const room=rooms.get(other.roomCode);if(room&&room.players.some(p=>p.id===other.id))return other;
+  }
+  return null;
+}
+function rejectDuplicateAccountSlot(client){
+  if(!activeClientForAccount(client))return false;
+  error(client.ws,'Esta conta já está participando de uma sala em outro dispositivo ou sessão.');
+  return true;
+}
 function handle(ws, raw, timings={}){
   const c=ws.client;
   let m;try{m=JSON.parse(raw.toString())}catch{return error(ws,'Mensagem inválida.')}
@@ -222,6 +236,7 @@ function handle(ws, raw, timings={}){
   if(m.type==='ping'){send(ws,{type:'pong',echo:Number(m.echo)||0,t:Date.now()});return}
   if(!c.id)return error(ws,'Conecte-se primeiro ao servidor.');
   if(m.type==='create_room'){
+    if(rejectDuplicateAccountSlot(c))return;
     if(c.roomCode)detachFromRoom(c);
     const size=Math.min(15,Math.max(4,Math.round(Number(m.size)||10)));
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
@@ -233,11 +248,12 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='join_room'){
     if(c.roomCode)return error(ws,'Você já está em uma sala. Saia dela antes de entrar em outra.');
+    if(rejectDuplicateAccountSlot(c))return;
     const code=String(m.code||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
     if(!/^[A-Z0-9]{6}$/.test(code))return error(ws,'O código precisa ter 6 letras maiúsculas ou números.');
     const room=rooms.get(code);
     if(!room)return error(ws,'Sala inexistente. Confira o código de 6 caracteres.');
-    ensureModeration(room);if(room.banned.has(c.clientKey))return error(ws,'Você foi banido desta sala.');
+    ensureModeration(room);const banKey=moderationBanKey(c);if(banKey&&room.banned.has(banKey))return error(ws,`Você foi banido da sala ${room.code}. Você não pode mais voltar.`);
     if(!['lobby','countdown','loading'].includes(room.status))return error(ws,'Esta sala já começou ou foi encerrada.');
     if(room.players.length+room.bots>=room.size)return error(ws,'Sala lotada. O host precisa remover bots para liberar uma vaga.');
     const cancelled=invalidateCountdown(room);
@@ -252,6 +268,7 @@ function handle(ws, raw, timings={}){
   // já não possui roomCode, mas ainda tem uma vaga/perfil vinculados à mesma sala.
   // Aceitamos o pedido diretamente para não exigir um segundo clique.
   if(m.type==='rematch'&&!c.roomCode&&c.rematchCode){
+    if(rejectDuplicateAccountSlot(c))return;
     const code=String(c.rematchCode||''),rematchRoom=rooms.get(code);
     if(!rematchRoom||rematchRoom.status!=='lobby'||!rematchRoom.rematchLobby){c.rematchCode=null;c.rematchProfile=null;return error(ws,'A nova sala não está mais disponível.')}
     if(rematchRoom.players.some(p=>p.id===c.id)){c.roomCode=code;c.rematchCode=null;c.rematchProfile=null;sendRoomState(rematchRoom);return}
@@ -272,10 +289,10 @@ function handle(ws, raw, timings={}){
     if(!['kick','ban'].includes(action))return error(ws,'Ação de punição inválida.');
     if(!targetId||targetId===c.id||targetId===room.hostId)return error(ws,'Não é possível aplicar essa ação ao host atual.');
     const target=clients.get(targetId);if(!target||target.roomCode!==room.code)return error(ws,'Jogador não encontrado nesta sala.');
-    ensureModeration(room);if(action==='ban')room.banned.add(target.clientKey);
+    ensureModeration(room);if(action==='ban'){const key=moderationBanKey(target);if(key)room.banned.add(key)}
     const hostPlayer=room.players.find(p=>p.id===c.id),targetPlayer=room.players.find(p=>p.id===targetId);
-    broadcastSystemNotice(room,`${hostPlayer?.name||'Host'} ${action==='ban'?'baniu':'expulsou'} ${targetPlayer?.name||'jogador'}`);
-    removePlayerByModeration(room,targetId,action);return;
+    const notice=`${hostPlayer?.name||'Host'} ${action==='ban'?'baniu':'expulsou'} ${targetPlayer?.name||'jogador'}`;
+    if(removePlayerByModeration(room,targetId,action))broadcast(room,{type:'room_chat_system',roomCode:room.code,text:notice,at:Date.now()});return;
   }
   if(m.type==='moderation_vote'){
     if(room.status!=='playing'||room.lastSnapshot?.state!=='meeting')return error(ws,'A votação de expulsão só fica disponível durante reuniões.');
@@ -440,8 +457,12 @@ function handle(ws, raw, timings={}){
 }
 const ACCOUNT_SESSION_COOKIE='nz_session';
 const ACCOUNT_SESSION_MAX_AGE=60*60*24*30;
-const ACCOUNT_WORD_A=['Naval','Brown','Red','Star','Solar','Lunar','Nova','Pixel','Cosmic','Silver','Golden','Swift','Silent','Bright','Iron','Blue','Green','Shadow','Crystal','Orbit','Rocket','Comet','Astro','Void','Sky','Neon','Storm','Frost','Ember','Echo','Cyber','Quantum'];
-const ACCOUNT_WORD_B=['Gull','Fox','Knight','Sus','Pilot','Scout','Raven','Wolf','Otter','Panda','Falcon','Tiger','Shark','Gecko','Lynx','Bear','Moth','Finch','Comet','Beacon','Rider','Runner','Spark','Drift','Wing','Core','Pulse','Byte','Nova','Star','Moon','Wave'];
+const ACCOUNT_ID_STYLES=[
+  {a:['Cosmic','Mystic','Shadow','Neon','Silent','Golden','Solar','Lunar','Nova','Crystal','Swift','Bright','Silver','Storm','Frost','Ember','Iron','Star','Astral','Orbit'],b:['Panda','Gamer','Wolf','Tornado','Ninja','Phoenix','Falcon','Raven','Tiger','Comet','Pilot','Scout','Otter','Shark','Gecko','Lynx','Beacon','Rider','Wing','Moon']},
+  {a:['Dancing','Space','Radioactive','Flying','Socks','Turbo','Bouncy','Sneaky','Jumpy','Fuzzy','Wobbly','Rocket','Pixel','Banana','Bubble','Disco','Noodle','Happy','Crazy','Tiny'],b:['Cactus','Avocado','Cat','Potato','Tiger','Chicken','Penguin','Llama','Taco','Donut','Duck','Pigeon','Pickle','Muffin','Hamster','Pancake','Toaster','Cookie','Koala','Gull']},
+  {a:['Ghost','Cyber','Alpha','Dark','Eternal','Furious','Iron','Titan','Void','Omega','Storm','Blaze','Crimson','Savage','Prime','Rapid','Steel','Rogue','Ultra','Venom'],b:['Vortex','Titan','Impact','Phantom','Frost','Rex','Blade','Crusher','Strike','Hunter','Reaper','Core','Pulse','Fang','Nova','Knight','Storm','Force','Drake','Claw']},
+  {a:['Digital','Sonic','Ancient','Visual','Cold','Lunar','Quantum','Electric','Velvet','Static','Hidden','Parallel','Prism','Echo','Binary','Infinite','Solar','Midnight','Crystal','Neural'],b:['Origami','Breeze','Spark','Silence','Nebula','Echo','Mirage','Dream','Signal','Horizon','Canvas','Pulse','Orbit','Paradox','Glyph','Wave','Memory','Spectrum','Whisper','Fragment']}
+];
 const ACCOUNT_KEY_ACTIONS=new Set(['killMark','sabotage','use','function','moveUp','moveDown','moveLeft','moveRight','increase','decrease','map','report','quickChat','back','exit']);
 function jsonResponse(res,status,data,extra={}){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer',...extra});res.end(JSON.stringify(data))}
 function parseCookies(req){const out={};for(const part of String(req.headers.cookie||'').split(';')){const i=part.indexOf('=');if(i<0)continue;const k=part.slice(0,i).trim(),v=part.slice(i+1).trim();if(k)out[k]=decodeURIComponent(v)}return out}
@@ -453,7 +474,7 @@ function createAccountService(opts={}){
   const supabaseUrl=String(opts.supabaseUrl||process.env.SUPABASE_URL||'').replace(/\/+$/,'');
   const supabaseSecretKey=String(opts.supabaseSecretKey||process.env.SUPABASE_SECRET_KEY||'').trim();
   const fetchImpl=opts.fetchImpl||globalThis.fetch;
-  const attempts=new Map();
+  const attempts=new Map(),idPreviews=new Map();
   if(!supabaseUrl||!supabaseSecretKey)console.warn('SUPABASE_URL/SUPABASE_SECRET_KEY não configurados: contas ficarão indisponíveis.');
   const tokenHash=token=>crypto.createHash('sha256').update(String(token||'')).digest('hex');
   const dbHeaders=(extra={})=>({'apikey':supabaseSecretKey,'content-type':'application/json','accept':'application/json',...extra});
@@ -474,16 +495,25 @@ function createAccountService(opts={}){
   const dummySalt=Buffer.alloc(16,7).toString('base64'),dummyHash=hashPassword('nave-zero-dummy-password',dummySalt);
   const passwordRecord=password=>{const salt=crypto.randomBytes(16).toString('base64');return {salt,hash:hashPassword(password,salt)}};
   const verifyPassword=(password,account)=>{const salt=account?.password_salt||dummySalt,expected=account?.password_hash||dummyHash;let actual;try{actual=hashPassword(password,salt)}catch{return false}const a=Buffer.from(actual,'base64'),b=Buffer.from(expected,'base64');return a.length===b.length&&crypto.timingSafeEqual(a,b)};
-  const makeId=async()=>{for(let i=0;i<5000;i++){const id=ACCOUNT_WORD_A[crypto.randomInt(ACCOUNT_WORD_A.length)]+ACCOUNT_WORD_B[crypto.randomInt(ACCOUNT_WORD_B.length)]+'#'+String(crypto.randomInt(10000)).padStart(4,'0');const existing=await dbRequest('nzo_accounts',{query:`id=eq.${encodeURIComponent(id)}&select=id&limit=1`});if(!Array.isArray(existing)||!existing.length)return id}throw new Error('Não foi possível gerar um ID único')};
+  const idAvailable=async id=>{const existing=await dbRequest('nzo_accounts',{query:`id=eq.${encodeURIComponent(id)}&select=id&limit=1`});return !Array.isArray(existing)||!existing.length};
+  const randomAccountId=()=>{const style=ACCOUNT_ID_STYLES[crypto.randomInt(ACCOUNT_ID_STYLES.length)];return style.a[crypto.randomInt(style.a.length)]+style.b[crypto.randomInt(style.b.length)]+'#'+String(crypto.randomInt(10000)).padStart(4,'0')};
+  const makeId=async()=>{for(let i=0;i<5000;i++){const id=randomAccountId();if(await idAvailable(id))return id}throw new Error('Não foi possível gerar um ID único')};
+  const makeIdPreview=async()=>{const now=Date.now();for(const [token,item] of idPreviews)if(!item||item.expiresAt<=now)idPreviews.delete(token);const id=await makeId(),token=crypto.randomBytes(18).toString('base64url');idPreviews.set(token,{id,expiresAt:now+10*60_000});return {id,token}};
+  const consumeIdPreview=token=>{const key=String(token||'');const item=idPreviews.get(key);idPreviews.delete(key);return item&&item.expiresAt>Date.now()?item.id:null};
   const publicAccount=account=>({id:account.id,profile:cleanAccountProfile(account.profile),createdAt:new Date(account.created_at).getTime(),updatedAt:new Date(account.updated_at).getTime()});
   async function handle(req,res,pathname){
     if(req.method==='OPTIONS'){res.writeHead(204,{'allow':'GET, POST, PATCH, OPTIONS','cache-control':'no-store'});res.end();return true}
+    if(pathname==='/api/account/id-preview'&&req.method==='GET'){const preview=await makeIdPreview();jsonResponse(res,200,{ok:true,id:preview.id,token:preview.token});return true}
     if(pathname==='/api/account/me'&&req.method==='GET'){const auth=await accountFromRequest(req);if(!auth){jsonResponse(res,401,{ok:false,message:'Nenhuma conta conectada.'});return true}jsonResponse(res,200,{ok:true,account:publicAccount(auth.account)});return true}
     if(pathname==='/api/account/create'&&req.method==='POST'){
       if(!rateOk(req)){jsonResponse(res,429,{ok:false,message:'Muitas tentativas. Aguarde um pouco e tente novamente.'});return true}
       const body=await readJsonBody(req),password=String(body.password||'');if(password.length<8||password.length>128){jsonResponse(res,400,{ok:false,message:'A senha deve ter entre 8 e 128 caracteres.'});return true}
-      const id=await makeId(),pw=passwordRecord(password),now=new Date().toISOString(),profile=cleanAccountProfile(body.profile);let rows;
-      try{rows=await dbRequest('nzo_accounts',{method:'POST',body:{id,password_hash:pw.hash,password_salt:pw.salt,profile,created_at:now,updated_at:now}})}catch(err){if(err.dbStatus===409){jsonResponse(res,409,{ok:false,message:'Não foi possível criar a conta. Tente novamente.'});return true}throw err}
+      const pw=passwordRecord(password),now=new Date().toISOString(),profile=cleanAccountProfile(body.profile);let id=consumeIdPreview(body.idPreviewToken),rows=null;
+      for(let attempt=0;attempt<12;attempt++){
+        if(!id||!(await idAvailable(id)))id=await makeId();
+        try{rows=await dbRequest('nzo_accounts',{method:'POST',body:{id,password_hash:pw.hash,password_salt:pw.salt,profile,created_at:now,updated_at:now}});break}catch(err){if(err.dbStatus===409){id=null;continue}throw err}
+      }
+      if(!rows){jsonResponse(res,503,{ok:false,message:'Não foi possível gerar um ID único agora. Tente novamente.'});return true}
       const account=Array.isArray(rows)&&rows[0]?rows[0]:{id,password_hash:pw.hash,password_salt:pw.salt,profile,created_at:now,updated_at:now};const sess=await createSession(req,id);jsonResponse(res,201,{ok:true,account:publicAccount(account)},{'set-cookie':sess.cookie});return true
     }
     if(pathname==='/api/account/login'&&req.method==='POST'){
@@ -499,7 +529,7 @@ function createAccountService(opts={}){
     jsonResponse(res,404,{ok:false,message:'Rota de conta não encontrada.'});return true
   }
   if(supabaseUrl&&supabaseSecretKey)pruneSessions();
-  return {handle,pruneSessions};
+  return {handle,pruneSessions,accountFromRequest};
 }
 
 function createGameServer(opts={}){
@@ -525,9 +555,10 @@ function createGameServer(opts={}){
   });
   const wss=new WebSocketServer({server,maxPayload:2*1024*1024});
   const lobbySweep=setInterval(()=>{const now=Date.now();for(const [code,room] of rooms){if(!['lobby','countdown','loading'].includes(room.status)||!Number.isFinite(Number(room.lobbyExpiresAt))||Number(room.lobbyExpiresAt)>now)continue;if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);room.countdownTimer=null;room.loadingTimer=null;const message='A Sala de Espera expirou após 10 minutos sem iniciar uma partida.';for(const p of [...room.players]){const cl=clients.get(p.id);if(!cl)continue;send(cl.ws,{type:'room_expired',code,message});cl.roomCode=null;cl.rematchCode=null;cl.rematchProfile=null}rooms.delete(code)}},Math.max(100,Math.min(1000,Number(opts.lobbySweepMs)||500)));
-  wss.on('connection',ws=>{
-    ws.client={id:null,roomCode:null,name:'Tripulante',color:'azul',clientKey:null,ws};
-    ws.on('message',data=>handle(ws,data,{countdownMs:opts.countdownMs??5000,loadingMs:opts.loadingMs??1200,lobbyMaxMs:opts.lobbyMaxMs??600000}));
+  wss.on('connection',(ws,req)=>{
+    ws.client={id:null,roomCode:null,name:'Tripulante',color:'azul',clientKey:null,accountId:null,ws};
+    const accountReady=accountService.accountFromRequest(req).then(auth=>{ws.client.accountId=auth?.account?.id||null}).catch(err=>{ws.client.accountId=null;console.warn('Falha ao identificar conta no WebSocket:',err.message)});
+    ws.on('message',data=>{accountReady.then(()=>handle(ws,data,{countdownMs:opts.countdownMs??5000,loadingMs:opts.loadingMs??1200,lobbyMaxMs:opts.lobbyMaxMs??600000})).catch(()=>handle(ws,data,{countdownMs:opts.countdownMs??5000,loadingMs:opts.loadingMs??1200,lobbyMaxMs:opts.lobbyMaxMs??600000}))});
     ws.on('close',()=>{const c=ws.client;if(c.id){detachFromRoom(c,'disconnect');clients.delete(c.id)}});
     ws.on('error',()=>{});
   });
