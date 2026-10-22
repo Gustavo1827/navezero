@@ -8,6 +8,7 @@ const { WebSocketServer, WebSocket } = require('./websocket');
 const PORT = Number(process.env.PORT || 8080);
 const HOST = process.env.HOST || '0.0.0.0';
 const HTML_FILE = path.join(__dirname, 'index.html');
+const EXCLUSIVE_COSMETICS_FILE = path.join(__dirname, 'exclusive-cosmetics.json');
 const rooms = new Map();
 const clients = new Map();
 const COLORS = ['vermelho','azul','amarelo','verde','rosa','roxo','laranja','marrom','ciano','preto','branco','carmim','banana','caqui','coral','cinza','azul_claro','rosado','verde_forte','oliva','lavanda','mostarda','verde_claro'];
@@ -20,7 +21,34 @@ const COSMETIC_ALLOWED={
   visor:new Set(['none','hud_grid','prism_strip','data_monocle','star_sticker','scan_bar','visor_eclipse','visor_scope'])
 };
 const DEFAULT_COSMETICS={hat:'none',pet:'none',outfit:'none',visor:'none'};
+const EXCLUSIVE_SLOTS=new Set(Object.keys(DEFAULT_COSMETICS));
+function loadExclusiveCosmeticsConfig(){
+  try{
+    const raw=JSON.parse(fs.readFileSync(EXCLUSIVE_COSMETICS_FILE,'utf8'));
+    const cosmetics=Array.isArray(raw?.cosmetics)?raw.cosmetics:[],codes=Array.isArray(raw?.codes)?raw.codes:[];
+    const cleanCosmeticsList=[],ids=new Set();
+    for(const item of cosmetics){
+      const id=String(item?.id||'').trim(),name=String(item?.name||'').trim(),type=String(item?.type||'').trim(),slot=String(item?.slot||'').trim(),asset=String(item?.asset||'').trim();
+      if(!/^[a-z0-9_]{3,80}$/.test(id)||!name||!EXCLUSIVE_SLOTS.has(slot)||ids.has(id))continue;
+      ids.add(id);cleanCosmeticsList.push({id,name,type:type||slot,slot,asset,enabled:item?.enabled!==false,render:item?.render&&typeof item.render==='object'?item.render:{}});
+    }
+    const cleanCodes=[];
+    for(const item of codes){
+      const code=String(item?.code||'').trim(),cosmeticId=String(item?.cosmeticId||'').trim();
+      if(!/^[A-Za-z0-9]{10}$/.test(code)||!ids.has(cosmeticId)||cleanCodes.some(x=>x.code===code))continue;
+      cleanCodes.push({code,cosmeticId,enabled:item?.enabled!==false});
+    }
+    return {version:Number(raw?.version)||1,cosmetics:cleanCosmeticsList,codes:cleanCodes};
+  }catch(err){console.error('Falha ao carregar exclusive-cosmetics.json:',err.message);return {version:1,cosmetics:[],codes:[]}}
+}
+const EXCLUSIVE_CONFIG=loadExclusiveCosmeticsConfig();
+const EXCLUSIVE_COSMETIC_BY_ID=new Map(EXCLUSIVE_CONFIG.cosmetics.filter(x=>x.enabled).map(x=>[x.id,x]));
+const EXCLUSIVE_CODE_BY_VALUE=new Map(EXCLUSIVE_CONFIG.codes.filter(x=>x.enabled&&EXCLUSIVE_COSMETIC_BY_ID.has(x.cosmeticId)).map(x=>[x.code,x]));
+for(const item of EXCLUSIVE_COSMETIC_BY_ID.values())COSMETIC_ALLOWED[item.slot]?.add(item.id);
 function cleanCosmetics(input={}){const src=input&&typeof input==='object'?input:{};const out={};for(const key of Object.keys(DEFAULT_COSMETICS)){const id=String(src[key]||'none');out[key]=COSMETIC_ALLOWED[key].has(id)?id:'none'}return out}
+function cleanExclusiveCosmeticIds(value){const src=Array.isArray(value)?value:[],out=[];for(const id0 of src){const id=String(id0||'');if(EXCLUSIVE_COSMETIC_BY_ID.has(id)&&!out.includes(id))out.push(id)}return out}
+function cleanRedeemedExclusiveCodes(value){const src=Array.isArray(value)?value:[],out=[];for(const code0 of src){const code=String(code0||'');if(/^[A-Za-z0-9]{10}$/.test(code)&&!out.includes(code))out.push(code)}return out}
+function cleanCosmeticsForClient(input,client){const out=cleanCosmetics(input),owned=new Set(client?.exclusiveCosmetics instanceof Set?[...client.exclusiveCosmetics]:cleanExclusiveCosmeticIds(client?.exclusiveCosmetics));for(const [slot,id] of Object.entries(out))if(EXCLUSIVE_COSMETIC_BY_ID.has(id)&&(!client?.accountId||!owned.has(id)))out[slot]='none';return out}
 const LIMITS = {
   kill:[10,60], sab:[10,90], meet:[10,60], emergencyUses:[0,10], speed:[100,280], impVision:[260,900], crewVision:[260,900],
   discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], obsChance:[0,100], obsMax:[0,15], instructorChance:[0,100], instructorMax:[0,15], instructorCooldown:[20,60], instructorDuration:[5,15], instructorMaxDistance:[100,2000], guardianCooldown:[35,60], guardianDuration:[10,30], guardianChance:[0,100], guardianMax:[0,15], guardianImpostorVisible:[0,1], cleanerChance:[0,100], cleanerMax:[0,15], cleanerCooldown:[10,60], cleanerDelay:[1,5], cleanerUses:[1,15], parasiteChance:[0,100], parasiteMax:[0,3], spectralChance:[0,100], spectralMax:[0,15], spectralCooldown:[5,20], spectralDuration:[10,90], spectralSpeed:[0,10], paramedicChance:[0,100], paramedicMax:[0,15], paramedicCooldown:[5,25], paramedicTasksPerUse:[1,5], paramedicMaxUses:[1,3], seerChance:[0,100], seerMax:[0,15], seerCooldown:[10,45], seerDelay:[0,5], seerDuration:[5,10], noisyDuration:[5,15], noisyChance:[0,100], noisyMax:[0,15], noisyImpostorVisible:[0,1], judgeChance:[0,100], judgeMax:[0,15], judgeTaskPct:[0,100], lazyChance:[0,100], lazyMax:[0,15], lazySlowdown:[5,20], lazyTasks:[1,3], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], engVentDuration:[10,61], engChance:[0,100], engMax:[0,15], engCooldown:[5,25], marionCooldown:[15,60], marionDuration:[5,30], marionChance:[0,100], marionMax:[0,3], hunterChance:[0,100], hunterMax:[0,3], hunterTargetCooldown:[5,25], actionDistance:[0,2], commonTasks:[0,5], mediumTasks:[0,5], longTasks:[0,5], renderDist:[500,1500]
@@ -242,7 +270,7 @@ function handle(ws, raw, timings={}){
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
     const code=makeCode();
     const room={code,hostId:c.id,size,bots,status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,ghostChatHistory:[],createdAt:Date.now(),lobbyMaxMs:Math.max(1000,Number(timings.lobbyMaxMs)||600000),lobbyRemainingMs:0,lobbyExpiresAt:null,countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,rematchLobby:false,rematchWaiters:new Set(),botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};resetLobbyExpiry(room,room.lobbyMaxMs);
-    room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmetics(m.cosmetics)});
+    room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmeticsForClient(m.cosmetics,c)});
     c.name=room.players[0].name;c.color=room.players[0].color;c.roomCode=code;rooms.set(code,room);
     sendRoomState(room);return;
   }
@@ -257,7 +285,7 @@ function handle(ws, raw, timings={}){
     if(!['lobby','countdown','loading'].includes(room.status))return error(ws,'Esta sala já começou ou foi encerrada.');
     if(room.players.length+room.bots>=room.size)return error(ws,'Sala lotada. O host precisa remover bots para liberar uma vaga.');
     const cancelled=invalidateCountdown(room);
-    const player={id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmetics(m.cosmetics)};
+    const player={id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmeticsForClient(m.cosmetics,c)};
     room.players.push(player);c.name=player.name;c.color=player.color;c.roomCode=code;c.rematchCode=null;c.rematchProfile=null;
     sendRoomState(room);
     if(cancelled)broadcast(room,{type:'countdown_cancelled',reason:'Um jogador entrou. A contagem foi cancelada.'});
@@ -274,7 +302,7 @@ function handle(ws, raw, timings={}){
     if(rematchRoom.players.some(p=>p.id===c.id)){c.roomCode=code;c.rematchCode=null;c.rematchProfile=null;sendRoomState(rematchRoom);return}
     if(rematchRoom.players.length+rematchRoom.bots>=rematchRoom.size)return error(ws,'Sala lotada. O host precisa remover bots para liberar uma vaga.');
     const saved=c.rematchProfile&&typeof c.rematchProfile==='object'?c.rematchProfile:{};
-    const player={id:c.id,name:safeText(saved.name||c.name),color:pickColor(saved.color||c.color,rematchRoom),ready:false,cosmetics:cleanCosmetics(saved.cosmetics)};
+    const player={id:c.id,name:safeText(saved.name||c.name),color:pickColor(saved.color||c.color,rematchRoom),ready:false,cosmetics:cleanCosmeticsForClient(saved.cosmetics,c)};
     rematchRoom.players.push(player);c.name=player.name;c.color=player.color;c.roomCode=code;c.rematchCode=null;c.rematchProfile=null;
     sendRoomState(rematchRoom);return;
   }
@@ -321,7 +349,7 @@ function handle(ws, raw, timings={}){
   if(m.type==='set_cosmetics'){
     if(room.status!=='lobby')return error(ws,'Os cosméticos só podem ser alterados na sala de espera.');
     const player=room.players.find(p=>p.id===c.id);if(!player)return;
-    player.cosmetics=cleanCosmetics(m.cosmetics);sendRoomState(room);return;
+    player.cosmetics=cleanCosmeticsForClient(m.cosmetics,c);sendRoomState(room);return;
   }
   if(m.type==='start_game'){
     if(!isHost)return error(ws,'Somente o host pode iniciar a partida.');
@@ -469,12 +497,12 @@ function parseCookies(req){const out={};for(const part of String(req.headers.coo
 function sessionCookie(req,token,maxAge=ACCOUNT_SESSION_MAX_AGE){const secure=String(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https'||!!req.socket?.encrypted;return `${ACCOUNT_SESSION_COOKIE}=${encodeURIComponent(token||'')}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${Math.max(0,Math.floor(maxAge))}${secure?'; Secure':''}`}
 function readJsonBody(req,maxBytes=64*1024){return new Promise((resolve,reject)=>{let total=0,parts=[];req.on('data',chunk=>{total+=chunk.length;if(total>maxBytes){reject(Object.assign(new Error('Corpo muito grande'),{status:413}));req.destroy();return}parts.push(chunk)});req.on('end',()=>{try{resolve(parts.length?JSON.parse(Buffer.concat(parts).toString('utf8')):{})}catch{reject(Object.assign(new Error('JSON inválido'),{status:400}))}});req.on('error',reject)})}
 function cleanAccountKeys(input){const out={};const src=input&&typeof input==='object'?input:{};for(const key of ACCOUNT_KEY_ACTIONS){const v=src[key];if(v===null)out[key]=null;else if(typeof v==='string'&&v.length<=40&&/^[A-Za-z0-9]+$/.test(v))out[key]=v}return out}
-function cleanAccountProfile(input={}){const src=input&&typeof input==='object'?input:{};const personal=src.personalSettings&&typeof src.personalSettings==='object'?src.personalSettings:{};const room=src.roomSettings&&typeof src.roomSettings==='object'?src.roomSettings:{};const size=Math.min(15,Math.max(4,Math.round(Number(room.size)||10)));const bots=Math.min(size-1,Math.max(0,Math.round(Number(room.bots)||0)));return {name:safeText(src.name,12,'Você'),color:COLORS.includes(normalizeColor(src.color))?normalizeColor(src.color):'azul',cosmetics:cleanCosmetics(src.cosmetics),personalSettings:{volume:Math.min(2,Math.max(0,Number.isFinite(Number(personal.volume))?Number(personal.volume):1)),keys:cleanAccountKeys(personal.keys)},roomSettings:{mapId:MAP_IDS.has(String(room.mapId||''))?String(room.mapId):'nave',size,bots,cfg:cleanSettings(room.cfg&&typeof room.cfg==='object'?room.cfg:{},size)}}}
+function cleanAccountProfile(input={},protectedInput=null){const src=input&&typeof input==='object'?input:{};const protectedSrc=protectedInput&&typeof protectedInput==='object'?protectedInput:src;const personal=src.personalSettings&&typeof src.personalSettings==='object'?src.personalSettings:{};const room=src.roomSettings&&typeof src.roomSettings==='object'?src.roomSettings:{};const size=Math.min(15,Math.max(4,Math.round(Number(room.size)||10)));const bots=Math.min(size-1,Math.max(0,Math.round(Number(room.bots)||0)));const exclusiveCosmetics=cleanExclusiveCosmeticIds(protectedSrc.exclusiveCosmetics),owned=new Set(exclusiveCosmetics),cosmetics=cleanCosmetics(src.cosmetics);for(const [slot,id] of Object.entries(cosmetics))if(EXCLUSIVE_COSMETIC_BY_ID.has(id)&&!owned.has(id))cosmetics[slot]='none';return {name:safeText(src.name,12,'Você'),color:COLORS.includes(normalizeColor(src.color))?normalizeColor(src.color):'azul',cosmetics,exclusiveCosmetics,redeemedExclusiveCodes:cleanRedeemedExclusiveCodes(protectedSrc.redeemedExclusiveCodes),personalSettings:{volume:Math.min(2,Math.max(0,Number.isFinite(Number(personal.volume))?Number(personal.volume):1)),keys:cleanAccountKeys(personal.keys)},roomSettings:{mapId:MAP_IDS.has(String(room.mapId||''))?String(room.mapId):'nave',size,bots,cfg:cleanSettings(room.cfg&&typeof room.cfg==='object'?room.cfg:{},size)}}}
 function createAccountService(opts={}){
   const supabaseUrl=String(opts.supabaseUrl||process.env.SUPABASE_URL||'').replace(/\/+$/,'');
   const supabaseSecretKey=String(opts.supabaseSecretKey||process.env.SUPABASE_SECRET_KEY||'').trim();
   const fetchImpl=opts.fetchImpl||globalThis.fetch;
-  const attempts=new Map(),idPreviews=new Map();
+  const attempts=new Map(),idPreviews=new Map(),redeemLocks=new Map();
   if(!supabaseUrl||!supabaseSecretKey)console.warn('SUPABASE_URL/SUPABASE_SECRET_KEY não configurados: contas ficarão indisponíveis.');
   const tokenHash=token=>crypto.createHash('sha256').update(String(token||'')).digest('hex');
   const dbHeaders=(extra={})=>({'apikey':supabaseSecretKey,'content-type':'application/json','accept':'application/json',...extra});
@@ -500,15 +528,17 @@ function createAccountService(opts={}){
   const makeId=async()=>{for(let i=0;i<5000;i++){const id=randomAccountId();if(await idAvailable(id))return id}throw new Error('Não foi possível gerar um ID único')};
   const makeIdPreview=async()=>{const now=Date.now();for(const [token,item] of idPreviews)if(!item||item.expiresAt<=now)idPreviews.delete(token);const id=await makeId(),token=crypto.randomBytes(18).toString('base64url');idPreviews.set(token,{id,expiresAt:now+10*60_000});return {id,token}};
   const consumeIdPreview=token=>{const key=String(token||'');const item=idPreviews.get(key);idPreviews.delete(key);return item&&item.expiresAt>Date.now()?item.id:null};
-  const publicAccount=account=>({id:account.id,profile:cleanAccountProfile(account.profile),createdAt:new Date(account.created_at).getTime(),updatedAt:new Date(account.updated_at).getTime()});
+  async function withRedeemLock(accountId,fn){const key=String(accountId||''),previous=redeemLocks.get(key)||Promise.resolve();let release;const gate=new Promise(resolve=>{release=resolve}),next=previous.then(()=>gate);redeemLocks.set(key,next);await previous;try{return await fn()}finally{release();if(redeemLocks.get(key)===next)redeemLocks.delete(key)}}
+  const publicAccount=account=>{const profile=cleanAccountProfile(account.profile);delete profile.redeemedExclusiveCodes;return {id:account.id,profile,createdAt:new Date(account.created_at).getTime(),updatedAt:new Date(account.updated_at).getTime()}};
   async function handle(req,res,pathname){
     if(req.method==='OPTIONS'){res.writeHead(204,{'allow':'GET, POST, PATCH, OPTIONS','cache-control':'no-store'});res.end();return true}
     if(pathname==='/api/account/id-preview'&&req.method==='GET'){const preview=await makeIdPreview();jsonResponse(res,200,{ok:true,id:preview.id,token:preview.token});return true}
+    if(pathname==='/api/account/exclusive-catalog'&&req.method==='GET'){const cosmetics=EXCLUSIVE_CONFIG.cosmetics.filter(x=>x.enabled).map(x=>({id:x.id,name:x.name,type:x.type,slot:x.slot,asset:x.asset,render:x.render}));jsonResponse(res,200,{ok:true,version:EXCLUSIVE_CONFIG.version,cosmetics});return true}
     if(pathname==='/api/account/me'&&req.method==='GET'){const auth=await accountFromRequest(req);if(!auth){jsonResponse(res,401,{ok:false,message:'Nenhuma conta conectada.'});return true}jsonResponse(res,200,{ok:true,account:publicAccount(auth.account)});return true}
     if(pathname==='/api/account/create'&&req.method==='POST'){
       if(!rateOk(req)){jsonResponse(res,429,{ok:false,message:'Muitas tentativas. Aguarde um pouco e tente novamente.'});return true}
       const body=await readJsonBody(req),password=String(body.password||'');if(password.length<8||password.length>128){jsonResponse(res,400,{ok:false,message:'A senha deve ter entre 8 e 128 caracteres.'});return true}
-      const pw=passwordRecord(password),now=new Date().toISOString(),profile=cleanAccountProfile(body.profile);let id=consumeIdPreview(body.idPreviewToken),rows=null;
+      const pw=passwordRecord(password),now=new Date().toISOString(),profile=cleanAccountProfile(body.profile,{exclusiveCosmetics:[],redeemedExclusiveCodes:[]});let id=consumeIdPreview(body.idPreviewToken),rows=null;
       for(let attempt=0;attempt<12;attempt++){
         if(!id||!(await idAvailable(id)))id=await makeId();
         try{rows=await dbRequest('nzo_accounts',{method:'POST',body:{id,password_hash:pw.hash,password_salt:pw.salt,profile,created_at:now,updated_at:now}});break}catch(err){if(err.dbStatus===409){id=null;continue}throw err}
@@ -521,7 +551,17 @@ function createAccountService(opts={}){
       const body=await readJsonBody(req),id=String(body.id||'').trim(),password=String(body.password||'').slice(0,128);const rows=await dbRequest('nzo_accounts',{query:`id=eq.${encodeURIComponent(id)}&select=id,password_hash,password_salt,profile,created_at,updated_at&limit=1`});const account=Array.isArray(rows)?rows[0]:null;const valid=verifyPassword(password,account);if(!account||!valid){jsonResponse(res,401,{ok:false,message:'ID ou senha incorretos.'});return true}const sess=await createSession(req,account.id);jsonResponse(res,200,{ok:true,account:publicAccount(account)},{'set-cookie':sess.cookie});return true
     }
     if(pathname==='/api/account/profile'&&req.method==='PATCH'){
-      const auth=await accountFromRequest(req);if(!auth){jsonResponse(res,401,{ok:false,message:'Sessão inválida ou expirada.'});return true}const body=await readJsonBody(req),profile=cleanAccountProfile(body.profile),updatedAt=new Date().toISOString();const rows=await dbRequest('nzo_accounts',{method:'PATCH',query:`id=eq.${encodeURIComponent(auth.account.id)}`,body:{profile,updated_at:updatedAt}});const account=Array.isArray(rows)&&rows[0]?rows[0]:{...auth.account,profile,updated_at:updatedAt};jsonResponse(res,200,{ok:true,account:publicAccount(account)});return true
+      const auth=await accountFromRequest(req);if(!auth){jsonResponse(res,401,{ok:false,message:'Sessão inválida ou expirada.'});return true}const body=await readJsonBody(req),profile=cleanAccountProfile(body.profile,auth.account.profile),updatedAt=new Date().toISOString();const rows=await dbRequest('nzo_accounts',{method:'PATCH',query:`id=eq.${encodeURIComponent(auth.account.id)}`,body:{profile,updated_at:updatedAt}});const account=Array.isArray(rows)&&rows[0]?rows[0]:{...auth.account,profile,updated_at:updatedAt};jsonResponse(res,200,{ok:true,account:publicAccount(account)});return true
+    }
+    if(pathname==='/api/account/redeem'&&req.method==='POST'){
+      const auth=await accountFromRequest(req);if(!auth){jsonResponse(res,401,{ok:false,message:'Entre em uma conta para resgatar códigos.'});return true}
+      const body=await readJsonBody(req),code=String(body.code||'').trim();if(!/^[A-Za-z0-9]{10}$/.test(code)){jsonResponse(res,400,{ok:false,message:'Código inválido.'});return true}
+      const codeDef=EXCLUSIVE_CODE_BY_VALUE.get(code),cosmetic=codeDef&&EXCLUSIVE_COSMETIC_BY_ID.get(codeDef.cosmeticId);if(!codeDef||!cosmetic){jsonResponse(res,400,{ok:false,message:'Código inválido.'});return true}
+      return withRedeemLock(auth.account.id,async()=>{const fresh=await accountFromRequest(req);if(!fresh){jsonResponse(res,401,{ok:false,message:'Entre em uma conta para resgatar códigos.'});return true}const profile=cleanAccountProfile(fresh.account.profile),redeemed=new Set(profile.redeemedExclusiveCodes||[]);if(redeemed.has(code)){jsonResponse(res,409,{ok:false,message:'Você já resgatou este código.'});return true}
+        redeemed.add(code);profile.redeemedExclusiveCodes=[...redeemed];profile.exclusiveCosmetics=cleanExclusiveCosmeticIds([...(profile.exclusiveCosmetics||[]),cosmetic.id]);
+        const updatedAt=new Date().toISOString();const rows=await dbRequest('nzo_accounts',{method:'PATCH',query:`id=eq.${encodeURIComponent(fresh.account.id)}`,body:{profile,updated_at:updatedAt}});const account=Array.isArray(rows)&&rows[0]?rows[0]:{...fresh.account,profile,updated_at:updatedAt};
+        for(const client of clients.values()){if(String(client?.accountId||'')!==String(fresh.account.id))continue;client.exclusiveCosmetics=new Set(profile.exclusiveCosmetics);send(client.ws,{type:'account_exclusive_updated',exclusiveCosmetics:profile.exclusiveCosmetics})}
+        jsonResponse(res,200,{ok:true,message:'Cosmético desbloqueado!',cosmetic:{id:cosmetic.id,name:cosmetic.name,type:cosmetic.type,slot:cosmetic.slot,asset:cosmetic.asset,render:cosmetic.render},account:publicAccount(account)});return true})
     }
     if(pathname==='/api/account/logout'&&req.method==='POST'){
       const token=parseCookies(req)[ACCOUNT_SESSION_COOKIE];if(token){try{await dbRequest('nzo_sessions',{method:'DELETE',query:`token_hash=eq.${encodeURIComponent(tokenHash(token))}`,prefer:'return=minimal'})}catch{}}jsonResponse(res,200,{ok:true},{'set-cookie':sessionCookie(req,'',0)});return true
@@ -556,8 +596,8 @@ function createGameServer(opts={}){
   const wss=new WebSocketServer({server,maxPayload:2*1024*1024});
   const lobbySweep=setInterval(()=>{const now=Date.now();for(const [code,room] of rooms){if(!['lobby','countdown','loading'].includes(room.status)||!Number.isFinite(Number(room.lobbyExpiresAt))||Number(room.lobbyExpiresAt)>now)continue;if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);room.countdownTimer=null;room.loadingTimer=null;const message='A Sala de Espera expirou após 10 minutos sem iniciar uma partida.';for(const p of [...room.players]){const cl=clients.get(p.id);if(!cl)continue;send(cl.ws,{type:'room_expired',code,message});cl.roomCode=null;cl.rematchCode=null;cl.rematchProfile=null}rooms.delete(code)}},Math.max(100,Math.min(1000,Number(opts.lobbySweepMs)||500)));
   wss.on('connection',(ws,req)=>{
-    ws.client={id:null,roomCode:null,name:'Tripulante',color:'azul',clientKey:null,accountId:null,ws};
-    const accountReady=accountService.accountFromRequest(req).then(auth=>{ws.client.accountId=auth?.account?.id||null}).catch(err=>{ws.client.accountId=null;console.warn('Falha ao identificar conta no WebSocket:',err.message)});
+    ws.client={id:null,roomCode:null,name:'Tripulante',color:'azul',clientKey:null,accountId:null,exclusiveCosmetics:new Set(),ws};
+    const accountReady=accountService.accountFromRequest(req).then(auth=>{ws.client.accountId=auth?.account?.id||null;ws.client.exclusiveCosmetics=new Set(cleanExclusiveCosmeticIds(auth?.account?.profile?.exclusiveCosmetics))}).catch(err=>{ws.client.accountId=null;ws.client.exclusiveCosmetics=new Set();console.warn('Falha ao identificar conta no WebSocket:',err.message)});
     ws.on('message',data=>{accountReady.then(()=>handle(ws,data,{countdownMs:opts.countdownMs??5000,loadingMs:opts.loadingMs??1200,lobbyMaxMs:opts.lobbyMaxMs??600000})).catch(()=>handle(ws,data,{countdownMs:opts.countdownMs??5000,loadingMs:opts.loadingMs??1200,lobbyMaxMs:opts.lobbyMaxMs??600000}))});
     ws.on('close',()=>{const c=ws.client;if(c.id){detachFromRoom(c,'disconnect');clients.delete(c.id)}});
     ws.on('error',()=>{});
