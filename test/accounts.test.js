@@ -73,3 +73,22 @@ test('interface de conta mostra nome somente leitura, alterna senha e mantém re
   assert.match(html,/\.menuSocial\{position:static/);
   assert.doesNotMatch(html,/leaderboard|ranking|líderes/i);
 });
+
+
+test('inicialização prioriza sessão da conta antes do armazenamento local e modais de conta não fecham por toque de fundo',()=>{
+  const fs=require('node:fs');const path=require('node:path');
+  const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+  assert.match(html,/sessionResolved:false/);
+  assert.match(html,/function loadPlayerName\(\)\{if\(!ACCOUNT\.sessionResolved\)return'Você'/);
+  assert.match(html,/function loadPlayerColor\(\)\{if\(!ACCOUNT\.sessionResolved\)return'azul'/);
+  assert.match(html,/function loadPlayerCosmetics\(\)\{if\(!ACCOUNT\.sessionResolved\)return cloneCosmetics\(DEFAULT_COSMETICS\)/);
+  assert.match(html,/function loadKeyBindings\(\)\{if\(!ACCOUNT\.sessionResolved\)return \{\.\.\.DEFAULT_KEYS\}/);
+  assert.match(html,/function loadGameVolume\(\)\{if\(!ACCOUNT\.sessionResolved\)return 1/);
+  assert.match(html,/function accountReadGuestRoomDraft\(\)\{if\(!ACCOUNT\.sessionResolved\)return \{size:10,bots:3\}/);
+  const restore=html.match(/async function accountRestoreSession\(\)\{[\s\S]*?\n\}/)?.[0]||'';
+  assert.match(restore,/\/api\/account\/me/);
+  assert.match(restore,/if\(err\.status===401\)\{[\s\S]*accountApplyProfile\(accountGuestProfile\(\)\)/);
+  assert.ok(restore.indexOf("/api/account/me")<restore.indexOf("accountGuestProfile()"),'sessão precisa ser verificada antes do perfil local');
+  assert.doesNotMatch(html,/accountOverlay'\)\.addEventListener\('pointerdown'/);
+  assert.match(html,/if\(!\$\('accountOverlay'\)\.hidden\)\{if\(e\.code===KEY_BINDINGS\.back\|\|e\.code==='Escape'\)\{if\(typing\(\)\)return;/);
+});

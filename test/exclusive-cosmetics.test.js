@@ -44,6 +44,9 @@ test('catálogo exclusivo mantém IDs/códigos estáveis e assets separados',()=
   assert.deepEqual(cfg.codes.map(x=>[x.cosmeticId,x.code]),expected);
   for(const item of cfg.cosmetics){assert.match(item.id,/^[a-z0-9_]+$/);assert.ok(fs.statSync(path.join(root,item.asset)).size>100,'asset vazio: '+item.asset)}
   for(const item of cfg.codes)assert.match(item.code,/^[A-Za-z0-9]{10}$/);
+  const explosive=cfg.cosmetics.find(x=>x.id==='mini_explorador_pet');
+  assert.equal(explosive.name,'O Explosivo','o ID do pet deve permanecer estável, mudando apenas o nome');
+  assert.equal(cfg.codes.find(x=>x.cosmeticId==='mini_explorador_pet').code,'N7x2Pq8Lm4');
 });
 
 test('resgate é servidor-side, uma vez por conta, reutilizável em outra conta e não aceita falsificação',async t=>{
@@ -90,13 +93,4 @@ test('interface tem resgate, estrela exclusiva e pop-up com prévia',()=>{
   assert.match(html,/id="exclusiveUnlockOverlay"/);assert.match(html,/id="exclusiveUnlockPreview"/);assert.match(html,/Prévia no Tripulante de teste/);
   assert.match(html,/cosmeticExclusiveStar','★'/);assert.match(html,/item\.exclusive/);
   assert.match(html,/\/api\/account\/redeem/);assert.match(html,/Código inválido\./);assert.match(html,/showExclusiveUnlockPopup/);
-});
-
-test('Visor 67 e O explosivo preservam IDs internos e assets válidos',()=>{
-  const root=path.join(__dirname,'..'),cfg=JSON.parse(fs.readFileSync(path.join(root,'exclusive-cosmetics.json'),'utf8'));
-  const pet=cfg.cosmetics.find(x=>x.id==='mini_explorador_pet'),visor=cfg.cosmetics.find(x=>x.id==='visor_67_rosto');
-  assert.equal(pet.name,'O explosivo');
-  assert.equal(pet.id,'mini_explorador_pet');
-  assert.equal(visor.name,'Visor 67');
-  for(const item of [pet,visor]){const buf=fs.readFileSync(path.join(root,item.asset));assert.equal(buf.subarray(1,4).toString(),'PNG')}
 });

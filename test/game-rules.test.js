@@ -41,3 +41,22 @@ test('Tripulantes vencem quando todos os Infiltrados restantes estão mortos',()
   const r=runCheck([{id:'i1',role:'imp',alive:false},{id:'c1',role:'crew',alive:true}],['i1']);
   assert.equal(r.ended,true);assert.equal(r.G.winner,'crew');
 });
+
+
+test('botão de emergência bloqueia qualquer sabotagem ativa exceto portas',()=>{
+  const m=html.match(/const emergencySabotageBlocked=\(\)=>[^;]+;/);
+  assert.ok(m,'regra de bloqueio do botão de emergência deve existir');
+  const check=sab=>{
+    const context={G:{sab},Object,Number};
+    vm.runInNewContext(`${m[0]}\nglobalThis.result=emergencySabotageBlocked();`,context);
+    return context.result;
+  };
+  assert.equal(check({lights:20,reactor:0,comms:0,doors:0,cd:0}),true);
+  assert.equal(check({lights:0,reactor:25,comms:0,doors:0,cd:0}),true);
+  assert.equal(check({lights:0,reactor:0,comms:30,doors:0,cd:0}),true);
+  assert.equal(check({lights:0,reactor:0,comms:0,doors:15,cd:0}),false);
+  assert.equal(check({lights:0,reactor:0,comms:0,doors:0,cd:12}),false);
+  assert.equal(check({lights:0,reactor:0,comms:0,doors:20,cd:0,futureSabotage:9}),true,'sabotagens futuras também devem bloquear');
+  assert.match(html,/ai=ch\.ai;if\(ch\.role!=='crew'\|\|ch\.emUses<=0\|\|G\.meetCd>0\|\|emergencySabotageBlocked\(\)/,'NPCs devem usar a mesma regra');
+  assert.match(html,/ch\.emUses>0&&G\.meetCd<=0&&!emergencySabotageBlocked\(\)\)callMeeting\(ch,'emergency'\)/,'ações multiplayer devem validar a mesma regra');
+});
