@@ -15,16 +15,24 @@ test('Chat Rápido e interface incluem novas falas e controles de punição',()=
   assert.match(html,/id="btnLobbyModeration"[^>]*>⚠️/);
   assert.match(html,/id="btnMeetingModeration"[^>]*>🦶/);assert.match(html,/meetingModProgress/);
   assert.match(html,/moderate_lobby/);assert.match(html,/moderation_vote/);assert.match(html,/navezero_online_client_v1/);
+  assert.match(html,/id="roomExitOverlay"/);assert.match(html,/Você foi desconectado da sala\. Entre novamente\./);assert.match(html,/room_chat_system/);
 });
 
-test('host pode expulsar e banir no lobby, e banimento vale enquanto a sala existir',async t=>{
+test('host pode expulsar e banir no lobby, mensagens usam o código e banimento é validado no servidor',async t=>{
   const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:10,loadingMs:5});await new Promise(r=>app.server.once('listening',r));const url=`ws://127.0.0.1:${app.server.address().port}`,all=[];
   t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
   const host=await connect(url,'Host','host_key_123456');all.push(host);send(host,{type:'create_room',name:'Host',size:5,bots:0});const made=await onceMessage(host,m=>m.type==='room_state');const code=made.room.code;
-  const kicked=await connect(url,'Kick','kick_key_123456');all.push(kicked);send(kicked,{type:'join_room',code});await onceMessage(kicked,m=>m.type==='room_state');send(host,{type:'moderate_lobby',action:'kick',targetId:kicked.id});await onceMessage(kicked,m=>m.type==='moderation_removed'&&m.reason==='kick');
+
+  const kicked=await connect(url,'Kick','kick_key_123456');all.push(kicked);send(kicked,{type:'join_room',code});await onceMessage(kicked,m=>m.type==='room_state');send(host,{type:'moderate_lobby',action:'kick',targetId:kicked.id});
+  const kickedMsg=await onceMessage(kicked,m=>m.type==='moderation_removed'&&m.reason==='kick');assert.equal(kickedMsg.code,code);
+  const kickNotice=await onceMessage(host,m=>m.type==='room_chat_system'&&/expulsou/.test(m.text));assert.equal(kickNotice.roomCode,code);assert.equal(kickNotice.text,'Host expulsou Kick');
   send(kicked,{type:'join_room',code});await onceMessage(kicked,m=>m.type==='room_state'&&m.room.code===code);
-  const banned=await connect(url,'Ban','ban_key_1234567');all.push(banned);send(banned,{type:'join_room',code});await onceMessage(banned,m=>m.type==='room_state');send(host,{type:'moderate_lobby',action:'ban',targetId:banned.id});await onceMessage(banned,m=>m.type==='moderation_removed'&&m.reason==='ban');
-  const retry=await connect(url,'Ban de novo','ban_key_1234567');all.push(retry);send(retry,{type:'join_room',code});const err=await onceMessage(retry,m=>m.type==='room_error');assert.match(err.message,/banido/i);
+
+  const banned=await connect(url,'Ban','ban_key_1234567');all.push(banned);app.clients.get(banned.id).accountId='ContaTeste#0001';send(banned,{type:'join_room',code});await onceMessage(banned,m=>m.type==='room_state');send(host,{type:'moderate_lobby',action:'ban',targetId:banned.id});
+  const bannedMsg=await onceMessage(banned,m=>m.type==='moderation_removed'&&m.reason==='ban');assert.equal(bannedMsg.code,code);
+  const banNotice=await onceMessage(host,m=>m.type==='room_chat_system'&&/baniu/.test(m.text));assert.equal(banNotice.roomCode,code);assert.equal(banNotice.text,'Host baniu Ban');
+
+  const retry=await connect(url,'Outra sessão','outro_dispositivo_123456');all.push(retry);app.clients.get(retry.id).accountId='ContaTeste#0001';send(retry,{type:'join_room',code});const err=await onceMessage(retry,m=>m.type==='room_error');assert.match(err.message,/banido/i);assert.match(err.message,new RegExp(code));assert.match(err.message,/não pode mais voltar/i);
 });
 
 test('votação de punição usa maioria dos elegíveis, ignora duplicata e não exige o host',async t=>{

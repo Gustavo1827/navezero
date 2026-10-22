@@ -424,3 +424,27 @@ test('Preguiçoso no servidor respeita chance, limite de jogadores, lentidão e 
   assert.equal(low.lazySlowdown,5);
   assert.equal(low.lazyTasks,1);
 });
+
+test('uma conta autenticada não ocupa duas vagas multiplayer ao mesmo tempo', async t=>{
+  const app=createGameServer({port:0,host:'127.0.0.1'});
+  await new Promise(resolve=>app.server.once('listening',resolve));
+  const url=`ws://127.0.0.1:${app.server.address().port}`;const all=[];
+  t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+
+  const pc=await connect(url,'Mesmo usuário','azul');all.push(pc);
+  const celular=await connect(url,'Mesmo usuário','verde');all.push(celular);
+  app.clients.get(pc.id).accountId='ContaTeste#0001';
+  app.clients.get(celular.id).accountId='ContaTeste#0001';
+
+  send(pc,{type:'create_room',name:'Mesmo usuário',color:'azul',size:4,bots:0,settings:{}});
+  const created=await onceMessage(pc,m=>m.type==='room_state');
+  send(celular,{type:'join_room',code:created.room.code,name:'Mesmo usuário',color:'verde'});
+  const blocked=await onceMessage(celular,m=>m.type==='room_error');
+  assert.match(blocked.message,/conta já está participando/i);
+  assert.equal(rooms.get(created.room.code).players.length,1,'a mesma conta não pode ocupar uma segunda vaga');
+
+  const guest=await connect(url,'Convidado','amarelo');all.push(guest);
+  send(guest,{type:'join_room',code:created.room.code,name:'Convidado',color:'amarelo'});
+  const joined=await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.some(p=>p.id===guest.id));
+  assert.equal(joined.room.players.length,2,'jogadores sem conta continuam podendo entrar normalmente');
+});
