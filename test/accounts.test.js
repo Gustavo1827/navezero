@@ -46,8 +46,9 @@ async function close(app){await new Promise(resolve=>app.server.close(resolve));
 test('contas opcionais usam Supabase, hash scrypt, sessão HttpOnly e isolamento de perfil',async t=>{
   const {app,base}=await start();t.after(async()=>{try{await close(app)}catch{}});
   const password='SenhaSegura-123!';
-  const created=await fetch(base+'/api/account/create',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password,profile:{name:'Piloto',color:'verde',cosmetics:{hat:'antenna_lunar'},personalSettings:{volume:1.4,keys:{map:'KeyM'}},roomSettings:{mapId:'nexus',size:10,bots:3,cfg:{kill:40,speed:210}}}})});
-  assert.equal(created.status,201);const createdBody=await created.json();assert.match(createdBody.account.id,/^[A-Za-z]+#[0-9]{4}$/);assert.equal(createdBody.account.profile.name,'Piloto');
+  const preview=await fetch(base+'/api/account/id-preview');assert.equal(preview.status,200);const previewBody=await preview.json();assert.match(previewBody.id,/^[A-Za-z]+#[0-9]{4}$/);assert.ok(previewBody.token);
+  const created=await fetch(base+'/api/account/create',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password,idPreviewToken:previewBody.token,profile:{name:'Piloto',color:'verde',cosmetics:{hat:'antenna_lunar'},personalSettings:{volume:1.4,keys:{map:'KeyM'}},roomSettings:{mapId:'nexus',size:10,bots:3,cfg:{kill:40,speed:210}}}})});
+  assert.equal(created.status,201);const createdBody=await created.json();assert.equal(createdBody.account.id,previewBody.id);assert.match(createdBody.account.id,/^[A-Za-z]+#[0-9]{4}$/);assert.equal(createdBody.account.profile.name,'Piloto');
   const cookie=cookiePair(created);assert.match(cookie,/^nz_session=/);assert.match(String(created.headers.get('set-cookie')),/HttpOnly/);assert.match(String(created.headers.get('set-cookie')),/SameSite=Strict/);
   const me=await fetch(base+'/api/account/me',{headers:{cookie}});assert.equal(me.status,200);assert.equal((await me.json()).account.id,createdBody.account.id);
   const unauthorized=await fetch(base+'/api/account/profile',{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({profile:{name:'Intruso'}})});assert.equal(unauthorized.status,401);
@@ -57,4 +58,18 @@ test('contas opcionais usam Supabase, hash scrypt, sessão HttpOnly e isolamento
   const login=await fetch(base+'/api/account/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:createdBody.account.id,password})});assert.equal(login.status,200);const loginCookie=cookiePair(login);
   const logout=await fetch(base+'/api/account/logout',{method:'POST',headers:{'content-type':'application/json',cookie:loginCookie},body:'{}'});assert.equal(logout.status,200);
   const after=await fetch(base+'/api/account/me',{headers:{cookie:loginCookie}});assert.equal(after.status,401);
+});
+
+test('interface de conta mostra nome somente leitura, alterna senha e mantém redes sociais no fim da tela inicial',()=>{
+  const fs=require('node:fs');const path=require('node:path');
+  const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+  assert.match(html,/id="accountCreateName"[^>]*readonly/);
+  assert.match(html,/id="accountCreateIdPreview"[^>]*readonly/);
+  assert.match(html,/accountLoadIdPreview/);
+  assert.match(html,/idPreviewToken:ACCOUNT\.pendingCreateToken/);
+  assert.match(html,/id="btnAccountCreatePasswordToggle"/);
+  assert.match(html,/id="btnAccountLoginPasswordToggle"/);
+  assert.match(html,/function accountSetPasswordVisible\(/);
+  assert.match(html,/\.menuSocial\{position:static/);
+  assert.doesNotMatch(html,/leaderboard|ranking|líderes/i);
 });
