@@ -30,7 +30,9 @@ test('cliente carrega catálogo externo e traduz DOM dinâmico sem traduzir camp
   assert.match(html,/function translateRuntimeText\(/);
   assert.match(html,/I18N_TEMPLATE_MATCHERS/);
   assert.match(html,/function patchCanvasI18n\(/);
-  assert.match(html,/CanvasRenderingContext2D\.prototype/);
+  assert.doesNotMatch(html,/CanvasRenderingContext2D\.prototype\[['"]?(?:fillText|strokeText)/,'localização não deve monkey-patchar globalmente o canvas');
+  assert.match(html,/I18N_FALLBACK_PTBR/);
+  assert.match(html,/usando Português \(Brasil\)/);
   assert.doesNotMatch(html,/const I18N=\{/);
 });
 
