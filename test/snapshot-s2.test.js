@@ -15,6 +15,9 @@ test('0.4b-s2 inclui streamer mode, idiomas e prévia de sala com estrutura de l
   assert.match(html,/id="streamerModeIn"/);assert.match(html,/Modo para Streamers/);assert.match(html,/maskedRoomCode/);assert.match(html,/navigator\.clipboard\.writeText\(code\)/);
   for(const label of ['Português (Brasil)','Português (Portugal)','Español','English','Русский','日本語'])assert.ok(html.includes(label),`idioma ausente: ${label}`);
   assert.match(html,/const I18N=/);assert.match(html,/function t\(key,vars=\{\}\)/);assert.match(html,/navezero_user_preferences_v1/);
+  assert.match(html,/id="btnGameLanguage"[^>]*>Idioma do jogo<\/button>/);assert.doesNotMatch(html,/id="gameLanguageValue"/);
+  assert.match(html,/function applyGameLanguage\(\)/);assert.match(html,/function closeLanguageMenu\(\)/);assert.match(html,/queueMicrotask\(applyGameLanguage\)/);
+  assert.ok(html.includes("(selected?'✓ ':'')+label"));assert.match(html,/gameSettingRow \.userSettingToggle \.switch/);
   assert.match(html,/id="createRegionIn"/);assert.match(html,/id="createLanguageIn"/);assert.match(html,/id="roomInfoOverlay"/);assert.match(html,/type:'room_info'/);assert.match(html,/roomInfoConfirming/);
 });
 
