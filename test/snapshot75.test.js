@@ -30,7 +30,7 @@ async function connect(url,name='Host'){
 async function closeClient(client){try{client?.ws?.close()}catch{}await new Promise(r=>setTimeout(r,25))}
 
 test('Snapshot 75 integra votação automática, Anjo Guardião e Ascensão dos Mortos',()=>{
-  assert.match(html,/Versão 0\.4b-s1/);
+  assert.match(html,/Versão 0\.4b-s2/);
   assert.match(html,/const everyoneVoted=voters\.every\(c=>M\.votes\[c\.id\]!==undefined\)/);
   assert.match(html,/id="btnGuardian"[\s\S]*?🪽<small>Proteger<\/small>/);
   assert.match(html,/guardianDuration:\[10,30\]/);
