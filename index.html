@@ -541,7 +541,7 @@ body.touch #stick{display:block}
       <div class="accountIdBox"><code id="accountIdText">••••••••••</code><button class="chip" id="btnAccountToggleId" type="button">Mostrar ID</button></div>
       <p class="accountPrivacy">Seu ID pode ser copiado e compartilhado. Sua senha e sua sessão nunca são mostradas a outros jogadores.</p>
       <div class="accountActions"><button class="chip" id="btnAccountCopyId" type="button">Copiar ID</button><button class="chip" id="btnAccountRedeemShow" type="button">Resgatar código</button><button class="big alt" id="btnAccountLogout" type="button">Sair da conta</button></div>
-      <form id="accountRedeemForm" class="accountForm accountRedeemForm" hidden><h3>Resgatar código</h3><p class="phase">Use um código alfanumérico de 10 caracteres. Cada código pode ser usado uma vez por conta.</p><label>Código<input id="accountRedeemCode" type="text" maxlength="10" minlength="10" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="A8b9Ak29Gd" required></label><div class="accountFormActions"><button class="big" type="submit">Resgatar</button><button class="chip" id="btnAccountRedeemCancel" type="button">Cancelar</button></div></form>
+      <form id="accountRedeemForm" class="accountForm accountRedeemForm" hidden><h3>Resgatar código</h3><p class="phase">Use um código alfanumérico de 10 caracteres. Cada código pode ser usado uma vez por conta.</p><label>Código<input id="accountRedeemCode" type="text" maxlength="10" minlength="10" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ABC123XYZ0" required></label><div class="accountFormActions"><button class="big" type="submit">Resgatar</button><button class="chip" id="btnAccountRedeemCancel" type="button">Cancelar</button></div></form>
     </div>
     <p id="accountStatus" class="accountStatus" role="status" aria-live="polite"></p>
   </div>
@@ -4776,8 +4776,9 @@ function dispatchFixers(type){
 }
 function updateSab(dt){
   const S=G.sab; S.cd=Math.max(0,S.cd-dt);
-  if(S.lights>0){S.lights-=dt;if(S.lights<=0){S.lights=0;S.cd=CFG.sab;renderTasks();toast('Luzes restauradas.')}}
-  if(S.comms>0){S.comms-=dt;if(S.comms<=0){S.comms=0;S.cd=CFG.sab;renderTasks();toast('Comunicações restabelecidas.')}}
+  // Luzes e comunicações não expiram sozinhas: permanecem ativas até Jogador ou NPC concluir o reparo.
+  if(S.lights>0)S.lights=Math.max(1,S.lights);
+  if(S.comms>0)S.comms=Math.max(1,S.comms);
   if(S.doors>0){S.doors-=dt;if(S.doors<=0){S.doors=0;S.cd=CFG.sab;openSabotageDoors();renderTasks();toast('Portas destravadas.')}}
   if(S.reactor>0){S.reactor-=dt;if(S.reactor<=0){S.reactor=0;endGame('imp','O reator derreteu antes que a tripulação conseguisse estabilizá-lo.');return}}
   G.fixT-=dt;

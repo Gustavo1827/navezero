@@ -25,25 +25,27 @@ const EXCLUSIVE_SLOTS=new Set(Object.keys(DEFAULT_COSMETICS));
 function loadExclusiveCosmeticsConfig(){
   try{
     const raw=JSON.parse(fs.readFileSync(EXCLUSIVE_COSMETICS_FILE,'utf8'));
-    const cosmetics=Array.isArray(raw?.cosmetics)?raw.cosmetics:[],codes=Array.isArray(raw?.codes)?raw.codes:[];
+    const cosmetics=Array.isArray(raw?.cosmetics)?raw.cosmetics:[];
     const cleanCosmeticsList=[],ids=new Set();
     for(const item of cosmetics){
       const id=String(item?.id||'').trim(),name=String(item?.name||'').trim(),type=String(item?.type||'').trim(),slot=String(item?.slot||'').trim(),asset=String(item?.asset||'').trim();
       if(!/^[a-z0-9_]{3,80}$/.test(id)||!name||!EXCLUSIVE_SLOTS.has(slot)||ids.has(id))continue;
       ids.add(id);cleanCosmeticsList.push({id,name,type:type||slot,slot,asset,enabled:item?.enabled!==false,render:item?.render&&typeof item.render==='object'?item.render:{}});
     }
-    const cleanCodes=[];
-    for(const item of codes){
-      const code=String(item?.code||'').trim(),cosmeticId=String(item?.cosmeticId||'').trim();
-      if(!/^[A-Za-z0-9]{10}$/.test(code)||!ids.has(cosmeticId)||cleanCodes.some(x=>x.code===code))continue;
-      cleanCodes.push({code,cosmeticId,enabled:item?.enabled!==false});
-    }
-    return {version:Number(raw?.version)||1,cosmetics:cleanCosmeticsList,codes:cleanCodes};
-  }catch(err){console.error('Falha ao carregar exclusive-cosmetics.json:',err.message);return {version:1,cosmetics:[],codes:[]}}
+    return {version:Number(raw?.version)||1,cosmetics:cleanCosmeticsList};
+  }catch(err){console.error('Falha ao carregar exclusive-cosmetics.json:',err.message);return {version:1,cosmetics:[]}}
 }
 const EXCLUSIVE_CONFIG=loadExclusiveCosmeticsConfig();
 const EXCLUSIVE_COSMETIC_BY_ID=new Map(EXCLUSIVE_CONFIG.cosmetics.filter(x=>x.enabled).map(x=>[x.id,x]));
-const EXCLUSIVE_CODE_BY_VALUE=new Map(EXCLUSIVE_CONFIG.codes.filter(x=>x.enabled&&EXCLUSIVE_COSMETIC_BY_ID.has(x.cosmeticId)).map(x=>[x.code,x]));
+function loadExclusiveRedeemCodes(value){
+  const text=String(value||'').trim();if(!text)return {ready:false,codes:new Map(),error:'NAVE_ZERO_REDEEM_CODES não configurada.'};
+  try{
+    const raw=JSON.parse(text),items=Array.isArray(raw)?raw:Object.entries(raw&&typeof raw==='object'?raw:{}).map(([code,cosmeticId])=>({code,cosmeticId})),codes=new Map();
+    for(const item of items){const code=String(item?.code||'').trim(),cosmeticId=String(item?.cosmeticId||'').trim();if(!/^[A-Za-z0-9]{10}$/.test(code)||!EXCLUSIVE_COSMETIC_BY_ID.has(cosmeticId)||item?.enabled===false||codes.has(code))continue;codes.set(code,{code,cosmeticId})}
+    if(!codes.size)return {ready:false,codes,error:'NAVE_ZERO_REDEEM_CODES não contém nenhum código válido.'};
+    return {ready:true,codes,error:null};
+  }catch(err){return {ready:false,codes:new Map(),error:`NAVE_ZERO_REDEEM_CODES inválida: ${err.message}`}}
+}
 for(const item of EXCLUSIVE_COSMETIC_BY_ID.values())COSMETIC_ALLOWED[item.slot]?.add(item.id);
 function cleanCosmetics(input={}){const src=input&&typeof input==='object'?input:{};const out={};for(const key of Object.keys(DEFAULT_COSMETICS)){const id=String(src[key]||'none');out[key]=COSMETIC_ALLOWED[key].has(id)?id:'none'}return out}
 function cleanExclusiveCosmeticIds(value){const src=Array.isArray(value)?value:[],out=[];for(const id0 of src){const id=String(id0||'');if(EXCLUSIVE_COSMETIC_BY_ID.has(id)&&!out.includes(id))out.push(id)}return out}
@@ -503,7 +505,9 @@ function createAccountService(opts={}){
   const supabaseSecretKey=String(opts.supabaseSecretKey||process.env.SUPABASE_SECRET_KEY||'').trim();
   const fetchImpl=opts.fetchImpl||globalThis.fetch;
   const attempts=new Map(),idPreviews=new Map(),redeemLocks=new Map();
+  const redeemConfig=loadExclusiveRedeemCodes(opts.exclusiveRedeemCodes??process.env.NAVE_ZERO_REDEEM_CODES);
   if(!supabaseUrl||!supabaseSecretKey)console.warn('SUPABASE_URL/SUPABASE_SECRET_KEY não configurados: contas ficarão indisponíveis.');
+  if(!redeemConfig.ready)console.error(`Sistema de resgate NÃO iniciado: ${redeemConfig.error}`);
   const tokenHash=token=>crypto.createHash('sha256').update(String(token||'')).digest('hex');
   const dbHeaders=(extra={})=>({'apikey':supabaseSecretKey,'content-type':'application/json','accept':'application/json',...extra});
   async function dbRequest(table,{method='GET',query='',body,prefer='return=representation'}={}){
@@ -554,9 +558,10 @@ function createAccountService(opts={}){
       const auth=await accountFromRequest(req);if(!auth){jsonResponse(res,401,{ok:false,message:'Sessão inválida ou expirada.'});return true}const body=await readJsonBody(req),profile=cleanAccountProfile(body.profile,auth.account.profile),updatedAt=new Date().toISOString();const rows=await dbRequest('nzo_accounts',{method:'PATCH',query:`id=eq.${encodeURIComponent(auth.account.id)}`,body:{profile,updated_at:updatedAt}});const account=Array.isArray(rows)&&rows[0]?rows[0]:{...auth.account,profile,updated_at:updatedAt};jsonResponse(res,200,{ok:true,account:publicAccount(account)});return true
     }
     if(pathname==='/api/account/redeem'&&req.method==='POST'){
+      if(!redeemConfig.ready){jsonResponse(res,503,{ok:false,message:'Sistema de resgate indisponível.'});return true}
       const auth=await accountFromRequest(req);if(!auth){jsonResponse(res,401,{ok:false,message:'Entre em uma conta para resgatar códigos.'});return true}
       const body=await readJsonBody(req),code=String(body.code||'').trim();if(!/^[A-Za-z0-9]{10}$/.test(code)){jsonResponse(res,400,{ok:false,message:'Código inválido.'});return true}
-      const codeDef=EXCLUSIVE_CODE_BY_VALUE.get(code),cosmetic=codeDef&&EXCLUSIVE_COSMETIC_BY_ID.get(codeDef.cosmeticId);if(!codeDef||!cosmetic){jsonResponse(res,400,{ok:false,message:'Código inválido.'});return true}
+      const codeDef=redeemConfig.codes.get(code),cosmetic=codeDef&&EXCLUSIVE_COSMETIC_BY_ID.get(codeDef.cosmeticId);if(!codeDef||!cosmetic){jsonResponse(res,400,{ok:false,message:'Código inválido.'});return true}
       return withRedeemLock(auth.account.id,async()=>{const fresh=await accountFromRequest(req);if(!fresh){jsonResponse(res,401,{ok:false,message:'Entre em uma conta para resgatar códigos.'});return true}const profile=cleanAccountProfile(fresh.account.profile),redeemed=new Set(profile.redeemedExclusiveCodes||[]);if(redeemed.has(code)){jsonResponse(res,409,{ok:false,message:'Você já resgatou este código.'});return true}
         redeemed.add(code);profile.redeemedExclusiveCodes=[...redeemed];profile.exclusiveCosmetics=cleanExclusiveCosmeticIds([...(profile.exclusiveCosmetics||[]),cosmetic.id]);
         const updatedAt=new Date().toISOString();const rows=await dbRequest('nzo_accounts',{method:'PATCH',query:`id=eq.${encodeURIComponent(fresh.account.id)}`,body:{profile,updated_at:updatedAt}});const account=Array.isArray(rows)&&rows[0]?rows[0]:{...fresh.account,profile,updated_at:updatedAt};

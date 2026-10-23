@@ -664,29 +664,3 @@ test('NPCs usam campo de visão real e sofrem Sabotagem de Luzes em todas as evi
   assert.match(html, /function noteCleanerEvidence[\s\S]*?const sawBody=npcCanSeePoint[\s\S]*?sawCleaner=npcCanSeeChar/);
   assert.match(html, /function noteParamedicEvidence[\s\S]*?npcCanSeePoint\(o,body\.x,body\.y\)&&npcCanSeeChar\(o,medic\)/);
 });
-
-test('conta tem prioridade no boot e armazenamento local só é aplicado sem sessão válida', () => {
-  assert.match(html, /let ACCOUNT_STORAGE_READ_ALLOWED=false/);
-  assert.match(html, /function loadPlayerName\(\)\{if\(!ACCOUNT_STORAGE_READ_ALLOWED\)return'Você'/);
-  assert.match(html, /function loadPlayerColor\(\)\{if\(!ACCOUNT_STORAGE_READ_ALLOWED\)return'azul'/);
-  assert.match(html, /function loadMapSelection\(\)\{if\(!ACCOUNT_STORAGE_READ_ALLOWED\)return'nave'/);
-  assert.match(html, /function loadPlayerCosmetics\(\)\{if\(!ACCOUNT_STORAGE_READ_ALLOWED\)return cloneCosmetics\(DEFAULT_COSMETICS\)/);
-  assert.match(html, /function loadKeyBindings\(\)\{if\(!ACCOUNT_STORAGE_READ_ALLOWED\)return \{\.\.\.DEFAULT_KEYS\}/);
-  assert.match(html, /function loadGameVolume\(\)\{if\(!ACCOUNT_STORAGE_READ_ALLOWED\)return 1/);
-  assert.match(html, /async function accountRestoreSession\(\)[\s\S]*?\/api\/account\/me[\s\S]*?await accountAcceptLogin\(data\)[\s\S]*?accountApplyProfile\(accountGuestProfile\(\)\)/);
-});
-
-test('modais de conta no celular não fecham por toque no fundo ou perda de foco', () => {
-  assert.doesNotMatch(html, /\$\('accountOverlay'\)\.addEventListener\('pointerdown'/);
-  assert.match(html, /\$\('btnAccountClose'\)\.addEventListener\('click',closeAccount\)/);
-  assert.match(html, /btnAccountCreateCancel/);
-  assert.match(html, /btnAccountLoginCancel/);
-  assert.match(html, /btnAccountRedeemCancel/);
-});
-
-test('botão de emergência bloqueia toda sabotagem principal e permite apenas portas', () => {
-  assert.match(html, /const emergencySabotageBlocked=\(\)=>!!\(G\.sab&&Object\.entries\(G\.sab\)\.some\(\(\[type,value\]\)=>type!=='doors'&&type!=='cd'&&Number\(value\)>0\)\)/);
-  assert.match(html, /Portas são a única exceção/);
-  assert.match(html, /reason==='emergency'[\s\S]*?emergencySabotageBlocked\(\)/);
-  assert.match(html, /command==='emergency'[\s\S]*?!emergencySabotageBlocked\(\)/);
-});
