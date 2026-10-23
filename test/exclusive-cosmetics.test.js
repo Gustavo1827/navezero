@@ -42,6 +42,13 @@ test('catálogo exclusivo mantém IDs estáveis, sem códigos públicos, e asset
   assert.equal(Object.hasOwn(cfg,'codes'),false,'catálogo público não pode conter códigos de resgate');
   for(const item of cfg.cosmetics){assert.match(item.id,/^[a-z0-9_]+$/);assert.ok(fs.statSync(path.join(root,item.asset)).size>100,'asset vazio: '+item.asset)}
   const explosive=cfg.cosmetics.find(x=>x.id==='mini_explorador_pet');assert.equal(explosive.name,'O Explosivo','o ID do pet deve permanecer estável, mudando apenas o nome');
+  const byId=new Map(cfg.cosmetics.map(item=>[item.id,item]));
+  assert.deepEqual(byId.get('fios_rebeldes_chapeu').render,{x:0,y:-28,width:28,height:19},'Fios Rebeldes deve apoiar corretamente na cabeça');
+  assert.deepEqual(byId.get('coroa_toxica_chapeu').render,{x:0,y:-31,width:38,height:31});
+  assert.deepEqual(byId.get('rubor_cosmico_rosto').render,{x:0,y:-9,width:24,height:14});
+  assert.deepEqual(byId.get('visor_67_rosto').render,{x:10,y:-13,width:22,height:14});
+  assert.deepEqual(byId.get('carrinho_orbital_roupa').render,{x:-1,y:7,width:72,height:56});
+  assert.deepEqual(byId.get('mini_explorador_pet').render,{x:0,y:0,width:22,height:30});
 });
 
 test('resgate é servidor-side, uma vez por conta, reutilizável em outra conta e não aceita falsificação',async t=>{

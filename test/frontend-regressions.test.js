@@ -522,6 +522,8 @@ test('Paramédico libera usos por tarefas, revive uma única vez e sincroniza o 
   assert.match(html, /Paramédico - Reviva Tripulantes por meio de seus corpos\./);
   assert.match(html, /paramedicEligible=shuffle\(G\.chars\.filter\(c=>c\.role==='crew'&&!c\.function\)\)/);
   assert.match(html, /Math\.floor\(completedRealTasksFor\(ch\)\/Math\.max\(1,CFG\.paramedicTasksPerUse\)\)/);
+  assert.match(html, /function paramedicAvailableUses\(ch\)\{return Math\.max\(0,paramedicUnlockedUses\(ch\)-Math\.max\(0,ch\?\.paramedicSpent\|\|0\)\)\}/, 'usos liberados devem acumular até serem realmente gastos');
+  assert.match(html, /Reviver \(\$\{pav\}\)/, 'o botão deve refletir mais de um uso acumulado');
   assert.match(html, /victim&&victim!==medic&&!victim\.alive&&victim\.role==='crew'&&!victim\.revivedOnce/);
   assert.match(html, /clearRevivedFunctionState\(victim\);victim\.role='crew';victim\.alive=true;victim\.ghost=false;victim\.revivedOnce=true/);
   assert.match(html, /victim\.x=body\.x;victim\.y=body\.y/);
@@ -532,6 +534,14 @@ test('Paramédico libera usos por tarefas, revive uma única vez e sincroniza o 
   assert.match(server, /'revive_body'/);
   assert.match(server, /if\(m\.bodyId!==undefined\)allowedData\.bodyId=m\.bodyId/);
   assert.match(html, /paramedicBotThink\(ch,dt\)/);
+  assert.match(html, /function paramedicBlockedByComms\(\)\{return \(G\.sab\.comms\|\|0\)>0\}/);
+  assert.match(html, /validReviveBodyFor[\s\S]*?paramedicBlockedByComms\(\)/, 'Comunicações deve bloquear a validação autoritativa do revive');
+  assert.match(html, /paramedicBotThink[\s\S]*?paramedicBlockedByComms\(\)/, 'NPC Paramédico também deve respeitar Comunicações');
+  assert.match(html, /command==='revive_body'[\s\S]*?\(G\.sab\.comms\|\|0\)<=0[\s\S]*?reviveBody\(ch,body\)/, 'host deve recusar revive remoto durante Comunicações');
+  assert.match(html, /paramedicCommsDown\?'📡 Sem sinal'/, 'botão deve ficar indisponível enquanto não há sinal');
+  assert.match(html, /netOriginalPlayerRevive[\s\S]*?paramedicBlockedByComms\(\)[\s\S]*?return/, 'cliente não deve enviar revive durante Comunicações');
+  const sabotage=html.slice(html.indexOf('function startSabotage('),html.indexOf('function resolveSab('));
+  assert.doesNotMatch(sabotage,/paramedicSpent\s*=/,'Comunicações não pode apagar ou gastar os usos acumulados');
   assert.match(html, /\['paramedic','⛑️ Paramédico'\]/);
 });
 

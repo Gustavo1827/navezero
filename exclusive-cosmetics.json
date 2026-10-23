@@ -9,10 +9,10 @@
       "enabled": true,
       "asset": "assets/exclusive/carrinho_orbital_roupa.png",
       "render": {
-        "x": -4,
-        "y": 8,
-        "width": 78,
-        "height": 61
+        "x": -1,
+        "y": 7,
+        "width": 72,
+        "height": 56
       }
     },
     {
@@ -24,9 +24,9 @@
       "asset": "assets/exclusive/mini_explorador_pet.png",
       "render": {
         "x": 0,
-        "y": -3,
-        "width": 25,
-        "height": 34
+        "y": 0,
+        "width": 22,
+        "height": 30
       }
     },
     {
@@ -38,9 +38,9 @@
       "asset": "assets/exclusive/coroa_toxica_chapeu.png",
       "render": {
         "x": 0,
-        "y": -40,
-        "width": 42,
-        "height": 34
+        "y": -31,
+        "width": 38,
+        "height": 31
       }
     },
     {
@@ -51,10 +51,10 @@
       "enabled": true,
       "asset": "assets/exclusive/rubor_cosmico_rosto.png",
       "render": {
-        "x": 4,
-        "y": -11,
-        "width": 39,
-        "height": 23
+        "x": 0,
+        "y": -9,
+        "width": 24,
+        "height": 14
       }
     },
     {
@@ -66,9 +66,9 @@
       "asset": "assets/exclusive/fios_rebeldes_chapeu.png",
       "render": {
         "x": 0,
-        "y": -39,
-        "width": 38,
-        "height": 26
+        "y": -28,
+        "width": 28,
+        "height": 19
       }
     },
     {
@@ -81,8 +81,8 @@
       "render": {
         "x": 10,
         "y": -13,
-        "width": 25,
-        "height": 15
+        "width": 22,
+        "height": 14
       }
     }
   ]
