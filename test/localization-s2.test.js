@@ -11,13 +11,14 @@ test('0.4b-s2 centraliza localização em languages.json e mantém seis idiomas 
   const langs=['pt-BR','pt-PT','es','en','ru','ja'];
   assert.deepEqual(Object.keys(catalog.strings),langs);
   const baseKeys=Object.keys(catalog.strings['pt-BR']);
-  assert.ok(baseKeys.length>=220,'catálogo deve cobrir a interface ampla');
+  assert.ok(baseKeys.length>=380,'catálogo deve cobrir interface, ações, funções, presets e cosméticos');
   for(const lang of langs){
     assert.deepEqual(Object.keys(catalog.strings[lang]).sort(),baseKeys.slice().sort(),`chaves incompletas em ${lang}`);
     for(const key of baseKeys)assert.equal(typeof catalog.strings[lang][key],'string',`${lang}:${key}`);
   }
   assert.equal(catalog.strings.en['settings.language'],'Game language');
   assert.equal(catalog.strings.ja['message.noSignal'],'📡 圏外');
+  for(const key of ['role.desc.instructor','role.desc.guardian','action.engineerHelp','action.reviveHelp','preset.infiltratorMadness','cosmetics.previewCharacter','hat.traveler','pet.miniCrewmate','visor.scope'])assert.ok(catalog.strings.en[key]&&catalog.strings.ja[key],`tradução crítica ausente: ${key}`);
 });
 
 test('cliente carrega catálogo externo e traduz DOM dinâmico sem traduzir campos digitados',()=>{
@@ -27,6 +28,9 @@ test('cliente carrega catálogo externo e traduz DOM dinâmico sem traduzir camp
   assert.match(html,/MutationObserver/);
   assert.match(html,/input,textarea,\[contenteditable="true"\]/);
   assert.match(html,/function translateRuntimeText\(/);
+  assert.match(html,/I18N_TEMPLATE_MATCHERS/);
+  assert.match(html,/function patchCanvasI18n\(/);
+  assert.match(html,/CanvasRenderingContext2D\.prototype/);
   assert.doesNotMatch(html,/const I18N=\{/);
 });
 
