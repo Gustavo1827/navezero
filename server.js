@@ -9,6 +9,7 @@ const PORT = Number(process.env.PORT || 8080);
 const HOST = process.env.HOST || '0.0.0.0';
 const HTML_FILE = path.join(__dirname, 'index.html');
 const EXCLUSIVE_COSMETICS_FILE = path.join(__dirname, 'exclusive-cosmetics.json');
+const LANGUAGES_FILE = path.join(__dirname, 'languages.json');
 const rooms = new Map();
 const clients = new Map();
 const ROOM_REGIONS=new Set(['north-america','asia','europe']);
@@ -597,6 +598,9 @@ function createGameServer(opts={}){
     const pathname=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`).pathname;
     if(pathname.startsWith('/api/account/')){accountService.handle(req,res,pathname).catch(err=>{if(res.headersSent)return;jsonResponse(res,err?.status||500,{ok:false,message:err?.status&&err.status<500?err.message:'Erro interno ao processar a conta.'})});return}
     if(pathname==='/health'){res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({ok:true,rooms:rooms.size,clients:clients.size}));return}
+    if(pathname==='/languages.json'){
+      fs.readFile(LANGUAGES_FILE,(err,data)=>{if(err){res.writeHead(500);res.end('languages.json indisponível');return}res.writeHead(200,{'content-type':'application/json; charset=utf-8','cache-control':'no-cache'});res.end(data)});return;
+    }
     if(pathname==='/'||pathname==='/index.html'){
       fs.readFile(HTML_FILE,(err,data)=>{if(err){res.writeHead(500);res.end('Não foi possível abrir index.html');return}res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-cache'});res.end(data)});return;
     }
