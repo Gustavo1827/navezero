@@ -423,7 +423,11 @@ body.touch #stick{display:block}
 .roomFields #roomBotsOk:active{transform:translateY(3px);box-shadow:0 1px 0 var(--amber-d),0 2px 0 #10122a}
 .roomFields input{width:100%;min-width:0;background:#0d1033;border:2px solid var(--edge);border-radius:10px;padding:7px;color:var(--ink);font:700 16px var(--font)}
 .roomActions{justify-content:center;margin-top:14px}
-#roomSettingsView{position:fixed;z-index:155;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto;background:rgba(4,5,18,.88)}#roomSettingsView[hidden]{display:none!important}.roomSettingsViewCard{width:min(680px,100%);max-height:92dvh;overflow:auto;text-align:left}.roomSettingsViewCard h2{text-align:center;margin:2px 0 5px;color:var(--amber)}.roomSettingsViewCard>.phase{text-align:center}.roomSettingsReadonlySection{margin:14px 0 0}.roomSettingsReadonlySection h3{margin:0 0 7px;color:var(--amber)}.roomSettingsReadonlyList{display:grid;gap:7px}.roomSettingsReadonlyRow{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:9px 11px;background:#0d1033;border:1px solid #343d80;border-radius:10px}.roomSettingsReadonlyRow span{color:var(--ink2);font-weight:700}.roomSettingsReadonlyRow b{text-align:right;color:var(--ink);font-weight:900;white-space:nowrap}.roomSettingsReadonlyEmpty{padding:10px 12px;color:var(--ink2);text-align:center}.roomSettingsViewActions{justify-content:center;margin-top:16px}@media(max-width:480px){.roomSettingsReadonlyRow{gap:9px}.roomSettingsReadonlyRow b{white-space:normal}}
+#roomViewSettings{position:fixed;z-index:130;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(3,4,17,.9);backdrop-filter:blur(7px)}
+.roomViewSettingsCard{width:min(720px,100%);max-height:92dvh;overflow:auto;text-align:left}
+.roomViewSettingsCard h2{text-align:center;margin-top:2px}.roomViewSettingsCard h3{margin:14px 0 7px;color:var(--amber)}
+.roomViewSettingsList{display:flex;flex-direction:column;gap:7px}.roomViewSettingRow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:9px 11px;background:#0d1033;border:1px solid #343d80;border-radius:10px}.roomViewSettingRow span{color:var(--ink2)}.roomViewSettingRow b{text-align:right;color:var(--ink);white-space:nowrap}.roomViewSettingsNote{text-align:center;color:var(--ink2);font-size:13px;margin:4px 0 12px}
+
 #createPanel{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(12,17,44,.7)}
 .createFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;text-align:left}
 .createFields label{display:flex;flex-direction:column;gap:5px;color:var(--ink2);font-size:13px}
@@ -517,18 +521,17 @@ body.touch #stick{display:block}
         <button id="btnSaveRoomConfig" type="button">Salvar configurações</button>
       </div>
     </div>
-    <div class="row roomActions"><button class="big" id="btnStartRoom" type="button">Iniciar partida</button><button class="big alt" id="btnViewRoomConfig" type="button" hidden>Ver configurações</button><button class="big alt" id="btnLeaveRoom" type="button">Sair da sala</button></div>
+    <div class="row roomActions"><button class="big alt" id="btnViewRoomSettings" type="button" hidden>Ver configurações</button><button class="big" id="btnStartRoom" type="button">Iniciar partida</button><button class="big alt" id="btnLeaveRoom" type="button">Sair da sala</button></div>
     <p class="phase" id="roomLobbyHint">Somente o host pode iniciar e alterar configurações.</p>
   </div>
 </div>
 
-
-<div id="roomSettingsView" hidden aria-live="polite">
-  <div class="card roomSettingsViewCard" role="dialog" aria-modal="true" aria-labelledby="roomSettingsViewTitle">
-    <h2 id="roomSettingsViewTitle">Configurações da sala</h2>
-    <p class="phase" id="roomSettingsViewDesc">Somente leitura. Apenas o host pode alterar estas configurações.</p>
-    <div id="roomSettingsViewContent"></div>
-    <div class="row roomSettingsViewActions"><button class="big" id="btnRoomSettingsViewClose" type="button">Fechar</button></div>
+<div id="roomViewSettings" hidden aria-live="polite">
+  <div class="card roomViewSettingsCard" role="dialog" aria-modal="true" aria-labelledby="roomViewSettingsTitle">
+    <h2 id="roomViewSettingsTitle">Ver configurações</h2>
+    <p class="roomViewSettingsNote" id="roomViewSettingsNote">Somente leitura. Apenas o host pode alterar estas configurações.</p>
+    <div id="roomViewSettingsBody"></div>
+    <div class="row"><button class="big" id="btnCloseRoomViewSettings" type="button">Fechar</button></div>
   </div>
 </div>
 
@@ -902,16 +905,57 @@ const GAME_LANGUAGES={
 const ROOM_REGIONS={'north-america':'América do Norte',asia:'Ásia',europe:'Europa'};
 // Catálogo-base de localização. Novas traduções podem sobrescrever chaves sem alterar a lógica da interface.
 let I18N={'pt-BR':{}};
-let I18N_SOURCE_MAP={},I18N_REVERSE_MAP=new Map(),I18N_CATALOG_READY=false;
-function rebuildI18nReverse(){I18N_REVERSE_MAP=new Map();for(const [lang,table] of Object.entries(I18N||{}))for(const [key,value] of Object.entries(table||{})){if(typeof value!=='string'||value.includes('{'))continue;I18N_REVERSE_MAP.set(value.trim(),key)}for(const [source,key] of Object.entries(I18N_SOURCE_MAP||{}))I18N_REVERSE_MAP.set(String(source).trim(),key)}
+let I18N_SOURCE_MAP={},I18N_REVERSE_MAP=new Map(),I18N_TEMPLATE_MATCHERS=[],I18N_CATALOG_READY=false;
+const I18N_SCOPE_SELECTOR='#menu,#cosmeticsOverlay,#exclusiveUnlockOverlay,#accountOverlay,#roomLobby,#roomViewSettings,#roomInfoOverlay,#roomChatPanel,#gameSettingsOverlay,#languageOverlay,#keysOverlay,#settings';
+function escRx(v){return String(v).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+function rebuildI18nReverse(){
+  I18N_REVERSE_MAP=new Map();I18N_TEMPLATE_MATCHERS=[];
+  for(const [lang,table] of Object.entries(I18N||{}))for(const [key,value] of Object.entries(table||{})){
+    if(typeof value!=='string')continue;
+    const trimmed=value.trim();if(!trimmed)continue;
+    if(!value.includes('{'))I18N_REVERSE_MAP.set(trimmed,key);
+  }
+  for(const [source,key] of Object.entries(I18N_SOURCE_MAP||{}))I18N_REVERSE_MAP.set(String(source).trim(),key);
+  const base=I18N['pt-BR']||{};
+  for(const [key,value] of Object.entries(base))if(typeof value==='string'&&/\{\w+\}/.test(value)){
+    const names=[];let pattern='',last=0;
+    for(const m of value.matchAll(/\{(\w+)\}/g)){pattern+=escRx(value.slice(last,m.index))+'(.+?)';names.push(m[1]);last=m.index+m[0].length}
+    pattern+=escRx(value.slice(last));
+    try{I18N_TEMPLATE_MATCHERS.push({key,names,rx:new RegExp('^'+pattern+'$')})}catch{}
+  }
+}
 async function loadLanguageCatalog(){try{const res=await fetch('/languages.json',{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);const catalog=await res.json();if(catalog?.strings&&typeof catalog.strings==='object')I18N=catalog.strings;if(catalog?.sourceMap&&typeof catalog.sourceMap==='object')I18N_SOURCE_MAP=catalog.sourceMap;if(catalog?.languageNames)Object.assign(GAME_LANGUAGES,catalog.languageNames);if(catalog?.regions?.['pt-BR'])Object.assign(ROOM_REGIONS,catalog.regions['pt-BR']);window.NZ_LANGUAGE_CATALOG=catalog;I18N_CATALOG_READY=true;rebuildI18nReverse();return true}catch(err){console.error('Falha ao carregar languages.json:',err);rebuildI18nReverse();return false}}
 function regionLabel(region){const lang=validGameLanguage(USER_PREFS.language),catalog=window.NZ_LANGUAGE_CATALOG;return catalog?.regions?.[lang]?.[region]||catalog?.regions?.['pt-BR']?.[region]||ROOM_REGIONS[region]||'—'}
 function knownI18nKey(value){return I18N_REVERSE_MAP.get(String(value||'').trim())||null}
 function translateKnownText(value){const raw=String(value??''),lead=raw.match(/^\s*/)?.[0]||'',trail=raw.match(/\s*$/)?.[0]||'',core=raw.trim();if(!core)return raw;const key=knownI18nKey(core);return key?lead+t(key)+trail:raw}
-function i18nSkipNode(node){const el=node?.nodeType===1?node:node?.parentElement;if(!el)return true;return !!el.closest('script,style,input,textarea,[contenteditable="true"],[data-i18n-skip],#roomChatLog,#deadChatLog,#roomPlayers,#roomPlayerList,.chatMessages,.playerName')}
-function localizeDom(root=document.body){if(!root||!I18N_CATALOG_READY)return;const visitText=node=>{if(i18nSkipNode(node))return;const next=translateKnownText(node.nodeValue);if(next!==node.nodeValue)node.nodeValue=next};if(root.nodeType===Node.TEXT_NODE)visitText(root);else{const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while((n=walker.nextNode()))visitText(n);const els=root.querySelectorAll?root.querySelectorAll('[placeholder],[title],[aria-label]'):[];for(const el of els){if(i18nSkipNode(el))continue;for(const attr of ['placeholder','title','aria-label'])if(el.hasAttribute(attr)){const old=el.getAttribute(attr),next=translateKnownText(old);if(next!==old)el.setAttribute(attr,next)}}}}
-let I18N_OBSERVER=null;function ensureI18nObserver(){if(I18N_OBSERVER||!document.body)return;I18N_OBSERVER=new MutationObserver(records=>{for(const r of records){if(r.type==='characterData')localizeDom(r.target);for(const n of r.addedNodes)localizeDom(n)}});I18N_OBSERVER.observe(document.body,{subtree:true,childList:true,characterData:true})}
-function translateRuntimeText(value){let text=translateKnownText(value);const patterns=[[/^Duto em recarga: (\d+)s$/,'message.ventCooldown'],[/^Xerife recarregando: (\d+)s$/,'message.sheriffCooldown'],[/^Reviver recarregando: (\d+)s$/,'message.reviveCooldown'],[/^Limpar recarregando: (\d+)s$/,'message.cleanCooldown'],[/^Temporizador recarregando: (\d+)s$/,'message.timerCooldown'],[/^Proteger recarregando: (\d+)s$/,'message.protectCooldown'],[/^Trilha recarregando: (\d+)s$/,'message.trailCooldown']];for(const [rx,key] of patterns){const m=String(value||'').match(rx);if(m)return t(key,{seconds:m[1]})}return text}
+function translateRuntimeText(value){
+  const raw=String(value??''),lead=raw.match(/^\s*/)?.[0]||'',trail=raw.match(/\s*$/)?.[0]||'',core=raw.trim();if(!core)return raw;
+  const direct=knownI18nKey(core);if(direct)return lead+t(direct)+trail;
+  for(const item of I18N_TEMPLATE_MATCHERS){const m=core.match(item.rx);if(!m)continue;const vars={};item.names.forEach((name,i)=>vars[name]=m[i+1]);return lead+t(item.key,vars)+trail}
+  return raw;
+}
+function i18nScopeRoot(node){
+  const el=node?.nodeType===1?node:node?.parentElement;if(!el)return null;
+  const root=el.closest?.(I18N_SCOPE_SELECTOR);if(!root)return null;
+  if(root.id==='settings'){
+    if(el.closest?.('#cfgFunctionFooter'))return null;
+    if(el.closest?.('#cfgRows')&&typeof G!=='undefined'&&G.cfgPage==='functions')return null;
+  }
+  return root;
+}
+function i18nSkipNode(node){const el=node?.nodeType===1?node:node?.parentElement;if(!el||!i18nScopeRoot(el))return true;return !!el.closest('script,style,input,textarea,[contenteditable="true"],[data-i18n-skip],#roomChatLog,#roomChatMessages,#deadChatLog,#roomPlayers,#roomPlayerList,.chatMessages,.playerName')}
+function localizeDom(root){
+  if(!root||!I18N_CATALOG_READY)return;
+  const scope=root.nodeType===Node.ELEMENT_NODE&&root.matches?.(I18N_SCOPE_SELECTOR)?root:i18nScopeRoot(root);if(!scope)return;
+  const visitText=node=>{if(i18nSkipNode(node))return;const next=translateRuntimeText(node.nodeValue);if(next!==node.nodeValue)node.nodeValue=next};
+  if(root.nodeType===Node.TEXT_NODE)visitText(root);else{
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while((n=walker.nextNode()))visitText(n);
+    const own=root.nodeType===Node.ELEMENT_NODE&&root.matches?.('[placeholder],[title],[aria-label]')?[root]:[],els=[...own,...(root.querySelectorAll?[...root.querySelectorAll('[placeholder],[title],[aria-label]')]:[])];
+    for(const el of els){if(i18nSkipNode(el))continue;for(const attr of ['placeholder','title','aria-label'])if(el.hasAttribute(attr)){const old=el.getAttribute(attr),next=translateRuntimeText(old);if(next!==old)el.setAttribute(attr,next)}}
+  }
+}
+function localizeScopedUi(){for(const root of document.querySelectorAll(I18N_SCOPE_SELECTOR))localizeDom(root)}
+let I18N_OBSERVER=null;function ensureI18nObserver(){if(I18N_OBSERVER||!document.body)return;I18N_OBSERVER=new MutationObserver(records=>{for(const r of records){if(r.type==='characterData'||r.type==='attributes')localizeDom(r.target);for(const n of r.addedNodes)localizeDom(n)}});I18N_OBSERVER.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']})}
 
 let USER_PREFS={streamerMode:false,language:'pt-BR'};
 function validGameLanguage(v){return Object.hasOwn(GAME_LANGUAGES,String(v||''))?String(v):'pt-BR'}
@@ -925,7 +969,7 @@ function setText(id,key){const node=$(id);if(node)node.textContent=t(key)}
 function setLabelText(forId,key){const label=document.querySelector(`label[for="${forId}"]`);if(!label)return;for(const n of [...label.childNodes])if(n.nodeType===Node.TEXT_NODE)n.remove();label.insertBefore(document.createTextNode(t(key)),label.firstChild)}
 function applyGameLanguage(){
   const lang=validGameLanguage(USER_PREFS.language);document.documentElement.lang=lang;
-  const textMap={btnCreateRoom:'menu.create',btnJoinRoom:'menu.join',btnFreePlay:'menu.freeplay',btnCosmetics:'menu.inventory',btnGameSettings:'menu.settings',btnAccount:'menu.account',btnCreateConfirm:'create.confirm',btnCreateCancel:'common.cancel',btnJoinConfirm:'common.enter',btnJoinCancel:'common.cancel',gameSettingsTitle:'settings.title',btnGameLanguage:'settings.language',btnGameKeys:'settings.keys',btnGameSettingsClose:'common.close',languageTitle:'settings.language',btnLanguageClose:'common.close',roomInfoTitle:'room.found',btnRoomInfoEnter:'room.enter',btnRoomInfoCancel:'room.cancel',roomLobbyTitle:'lobby.title',btnCopyCode:'lobby.copy',btnCfg:'lobby.settings',btnViewRoomConfig:'lobby.viewSettings',btnStartRoom:'lobby.start',btnLeaveRoom:'lobby.leave',roomSettingsViewTitle:'lobby.viewSettingsTitle',roomSettingsViewDesc:'lobby.viewSettingsDesc',btnRoomSettingsViewClose:'common.close',btnMap:'hud.map',btnGameSettingsHud:'hud.settings',btnExit:'hud.exit',btnUse:'hud.use',btnReport:'hud.report',btnKill:'hud.kill'};
+  const textMap={btnCreateRoom:'menu.create',btnJoinRoom:'menu.join',btnFreePlay:'menu.freeplay',btnCosmetics:'menu.inventory',btnGameSettings:'menu.settings',btnAccount:'menu.account',btnCreateConfirm:'create.confirm',btnCreateCancel:'common.cancel',btnJoinConfirm:'common.enter',btnJoinCancel:'common.cancel',gameSettingsTitle:'settings.title',btnGameLanguage:'settings.language',btnGameKeys:'settings.keys',btnGameSettingsClose:'common.close',languageTitle:'settings.language',btnLanguageClose:'common.close',roomInfoTitle:'room.found',btnRoomInfoEnter:'room.enter',btnRoomInfoCancel:'room.cancel',roomLobbyTitle:'lobby.title',btnCopyCode:'lobby.copy',btnCfg:'lobby.settings',btnStartRoom:'lobby.start',btnLeaveRoom:'lobby.leave'};
   for(const [id,key] of Object.entries(textMap))setText(id,key);
   const tag=document.querySelector('#menu .tag');if(tag)tag.textContent=t('menu.tag');
   setLabelText('nameIn','menu.name');setLabelText('createSizeIn','create.size');setLabelText('createBotsIn','create.bots');setLabelText('createRegionIn','create.region');setLabelText('createLanguageIn','create.language');setLabelText('roomCodeIn','join.code');setLabelText('serverUrlIn','join.server');
@@ -939,8 +983,7 @@ function applyGameLanguage(){
   const codeLine=document.querySelector('.roomCodeLine');if(codeLine&&codeLine.firstChild)codeLine.firstChild.textContent=t('lobby.code')+' ';
   const participants=document.querySelector('#roomLobby > .card > h3');if(participants)participants.textContent=t('lobby.participants');
   const options=document.querySelector('#hostRoomConfig h3');if(options)options.textContent=t('lobby.options');
-  const taskHead=document.querySelector('#tpHead span:first-child');if(taskHead)taskHead.textContent=t('hud.tasks');
-  renderLanguageMenu();syncStreamerVisuals();localizeDom(document.body);
+  renderLanguageMenu();syncStreamerVisuals();localizeScopedUi();
   if(!$('roomInfoOverlay')?.hidden&&NET.lastRoomInfo)showRoomInfo(NET.lastRoomInfo);
   if(NET.room&&NET.inRoom)renderRoomLobby();
 }
@@ -948,7 +991,7 @@ function renderLanguageMenu(){const list=$('languageList');if(!list)return;list.
 function applyUserPrefs(prefs,save=false){USER_PREFS={streamerMode:prefs?.streamerMode===true,language:validGameLanguage(prefs?.language)};syncStreamerVisuals();renderLanguageMenu();applyGameLanguage();if(save)saveUserPrefs()}
 function setGameLanguage(code){USER_PREFS.language=validGameLanguage(code);saveUserPrefs();applyGameLanguage();Snd.click()}
 function closeLanguageMenu(){applyGameLanguage();$('languageOverlay').hidden=true;Snd.click()}
-USER_PREFS=loadGuestUserPrefs();loadLanguageCatalog().finally(()=>{applyGameLanguage();localizeDom(document.body);ensureI18nObserver()});
+USER_PREFS=loadGuestUserPrefs();loadLanguageCatalog().finally(()=>{applyGameLanguage();localizeScopedUi();ensureI18nObserver()});
 
 function accountActive(){return !!ACCOUNT.authenticated}
 let SELECTED_MAP_ID=loadMapSelection(),ACTIVE_MAP_ID=SELECTED_MAP_ID;
@@ -3902,7 +3945,7 @@ function cfgEditingLocked(){
   if(typeof NET!=='undefined'&&NET.inRoom)return !NET.isHost||NET.room?.status!=='lobby';
   return inGame()&&!G.freePlay;
 }
-const uiBusy=()=>G.cfgOpen||G.confirmOpen||!$('gameSettingsOverlay').hidden||!$('keysOverlay').hidden||!$('accountOverlay').hidden||!$('languageOverlay').hidden||!$('roomInfoOverlay').hidden;
+const uiBusy=()=>G.cfgOpen||G.confirmOpen||!$('gameSettingsOverlay').hidden||!$('keysOverlay').hidden||!$('accountOverlay').hidden||!$('languageOverlay').hidden||!$('roomInfoOverlay').hidden||!$('roomViewSettings').hidden;
 const PERS={
   desconfiado:{gain:1.3,thr:1.5,hear:1,direct:1,call:3.2},
   cauteloso:{gain:.8,thr:3.5,hear:.7,direct:1,call:4.5},
@@ -5937,9 +5980,9 @@ let COSMETIC_TAB='hat';
 function drawCosmeticPortrait(cv,char,scale=2.7){const c=cv.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);c.setTransform(scale,0,0,scale,cv.width/2,cv.height*.56);drawChar(c,{x:0,y:0,face:1,walk:(G.t||0)*.25,moving:true,color:char.color||G.cfg.color,cosmetics:cloneCosmetics(char.cosmetics),id:'cosmetic_preview'},false,{portrait:true})}
 function drawLobbyAvatar(cv,p){drawCosmeticPortrait(cv,{color:p.color,cosmetics:p.cosmetics},.95)}
 function syncMenuColorSelection(){if(!$('swatches'))return;document.querySelectorAll('#swatches .sw').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.playerColor===G.cfg.color)))}
-function renderLobbyColorSwatches(){const box=$('lobbyColorSwatches');if(!box)return;box.innerHTML='';const used=new Set((NET.room?.players||[]).filter(p=>p.id!==NET.id).map(p=>p.color));for(const color of COLORS){const b=el('button','sw');b.type='button';b.dataset.playerColor=color.id;b.style.background=color.main;b.setAttribute('aria-label',color.name);b.title=NET.inRoom&&used.has(color.id)?`${color.name} — em uso`:color.name;b.disabled=!!(NET.inRoom&&used.has(color.id));b.setAttribute('aria-pressed',String(color.id===G.cfg.color));b.addEventListener('click',()=>{if(NET.inRoom){if(NET.room?.status!=='lobby')return;if(used.has(color.id)){toast('Essa cor já está em uso.');return}if(color.id===G.cfg.color)return;netSend({type:'set_color',color:color.id});Snd.click();return}G.cfg.color=color.id;savePlayerColor();syncMenuColorSelection();renderCosmeticsCatalog();Snd.click()});box.appendChild(b)}}
+function renderLobbyColorSwatches(){const box=$('lobbyColorSwatches');if(!box)return;box.innerHTML='';const used=new Set((NET.room?.players||[]).filter(p=>p.id!==NET.id).map(p=>p.color));for(const color of COLORS){const b=el('button','sw');b.type='button';b.dataset.playerColor=color.id;b.style.background=color.main;b.setAttribute('aria-label',color.name);b.title=NET.inRoom&&used.has(color.id)?`${color.name} — em uso`:color.name;b.disabled=!!(NET.inRoom&&used.has(color.id));b.setAttribute('aria-pressed',String(color.id===G.cfg.color));b.addEventListener('click',()=>{if(NET.inRoom){if(NET.room?.status!=='lobby')return;if(used.has(color.id)){toast(t('cosmetics.colorInUse'));return}if(color.id===G.cfg.color)return;netSend({type:'set_color',color:color.id});Snd.click();return}G.cfg.color=color.id;savePlayerColor();syncMenuColorSelection();renderCosmeticsCatalog();Snd.click()});box.appendChild(b)}}
 function renderCosmeticsCatalog(){const overlay=$('cosmeticsOverlay');if(!overlay||overlay.hidden)return;const tabs=$('cosmeticsTabs'),grid=$('cosmeticsGrid');tabs.innerHTML='';grid.innerHTML='';renderLobbyColorSwatches();for(const [key,label] of COSMETIC_CATEGORIES){const b=el('button','chip',label);b.type='button';b.setAttribute('aria-pressed',key===COSMETIC_TAB?'true':'false');b.addEventListener('click',()=>{COSMETIC_TAB=key;renderCosmeticsCatalog();Snd.click()});tabs.appendChild(b)}const exclusive=(EXCLUSIVE_CATALOG.bySlot[COSMETIC_TAB]||[]).filter(item=>accountActive()&&ACCOUNT.exclusiveCosmetics.has(item.id)),items=[...COSMETIC_CATALOG[COSMETIC_TAB],...exclusive];for(const item of items){const b=el('button','cosmeticItem'+(item.exclusive?' exclusive':''));b.type='button';b.setAttribute('aria-pressed',PLAYER_COSMETICS[COSMETIC_TAB]===item.id?'true':'false');if(item.id==='none'){b.appendChild(el('div','cosmeticNoneMark','∅'))}else{const cv=document.createElement('canvas');cv.width=208;cv.height=180;const only=cloneCosmetics(DEFAULT_COSMETICS);only[COSMETIC_TAB]=item.id;drawCosmeticPortrait(cv,{color:G.cfg.color,cosmetics:only},3.10);b.appendChild(cv)}const label=el('span','',item.name);if(item.exclusive)label.appendChild(el('span','cosmeticExclusiveStar','★'));b.appendChild(label);b.addEventListener('click',()=>{if(item.exclusive&&(!accountActive()||!ACCOUNT.exclusiveCosmetics.has(item.id)))return;PLAYER_COSMETICS[COSMETIC_TAB]=item.id;savePlayerCosmetics();renderCosmeticsCatalog();if(NET.inRoom&&NET.room?.status==='lobby')netSend({type:'set_cosmetics',cosmetics:cloneCosmetics(PLAYER_COSMETICS)});Snd.click()});grid.appendChild(b)}drawCosmeticPortrait($('cosmeticsPreviewCv'),{color:G.cfg.color,cosmetics:PLAYER_COSMETICS},5.30);$('cosmeticsEquipped').textContent=COSMETIC_CATEGORIES.map(([k,label])=>`${label}: ${cosmeticItemName(k,PLAYER_COSMETICS[k])}`).join(' · ')}
-async function openCosmetics(){if(NET.inRoom){toast('O Inventário é usado na tela inicial, antes de entrar na sala.');return}COSMETIC_TAB='hat';$('cosmeticsOverlay').hidden=false;await loadExclusiveCatalog();renderCosmeticsCatalog();Snd.open()}
+async function openCosmetics(){if(NET.inRoom){toast(t('cosmetics.menuOnly'));return}COSMETIC_TAB='hat';$('cosmeticsOverlay').hidden=false;await loadExclusiveCatalog();renderCosmeticsCatalog();Snd.open()}
 function closeCosmetics(){$('cosmeticsOverlay').hidden=true}
 function loadNetClientKey(){try{let k=localStorage.getItem('navezero_online_client_v1');if(!/^[A-Za-z0-9_-]{12,96}$/.test(String(k||''))){k=(globalThis.crypto?.randomUUID?.()||('nz_'+Math.random().toString(36).slice(2)+Date.now().toString(36))).replace(/[^A-Za-z0-9_-]/g,'');localStorage.setItem('navezero_online_client_v1',k)}return k}catch{return 'nz_'+Math.random().toString(36).slice(2)+Date.now().toString(36)}}
 const NET_CLIENT_KEY=loadNetClientKey();
@@ -5963,7 +6006,7 @@ function accountRememberRoomSettings(){if(accountActive()&&!ACCOUNT.applying){AC
 async function accountLoadIdPreview(){ACCOUNT.pendingCreateId=null;ACCOUNT.pendingCreateToken=null;const input=$('accountCreateIdPreview');if(input)input.value='Gerando...';try{const data=await accountApi('/api/account/id-preview',{method:'GET'});ACCOUNT.pendingCreateId=String(data.id||'');ACCOUNT.pendingCreateToken=String(data.token||'');if(input)input.value=ACCOUNT.pendingCreateId||'Gerando automaticamente'}catch(err){if(input)input.value='Será gerado ao criar';console.warn('Prévia de ID:',err.message)}}
 function accountSetPasswordVisible(kind,visible){const create=kind==='create',ids=create?['accountCreatePassword','accountCreatePassword2']:['accountLoginPassword'],btn=$(create?'btnAccountCreatePasswordToggle':'btnAccountLoginPasswordToggle');for(const id of ids){const input=$(id);if(input)input.type=visible?'text':'password'}if(btn){btn.textContent=visible?'Ocultar senha':'Mostrar senha';btn.setAttribute('aria-pressed',visible?'true':'false')}}
 function accountRender(){const logged=!!ACCOUNT.authenticated;$('accountLoggedOut').hidden=logged;$('accountLoggedIn').hidden=!logged;if($('accountCreateName'))$('accountCreateName').value=String($('nameIn')?.value||G.cfg.name||'Jogador');if(logged){$('accountPlayerName').textContent=String($('nameIn')?.value||G.cfg.name||'Jogador');$('accountIdText').textContent=ACCOUNT.idVisible?(ACCOUNT.id||'—'):'••••••••••••';$('btnAccountToggleId').textContent=ACCOUNT.idVisible?'Ocultar ID':'Mostrar ID'}else{$('accountCreateForm').hidden=true;$('accountLoginForm').hidden=true;if($('accountRedeemForm'))$('accountRedeemForm').hidden=true}}
-function openAccount(){if(typeof NET!=='undefined'&&NET.inRoom){toast('Saia da sala para trocar ou criar uma conta.');return}accountSetStatus('');accountRender();$('accountOverlay').hidden=false;Snd.open()}
+function openAccount(){if(typeof NET!=='undefined'&&NET.inRoom){toast(t('account.menuOnly'));return}accountSetStatus('');accountRender();$('accountOverlay').hidden=false;Snd.open()}
 function closeAccount(){$('accountOverlay').hidden=true;accountSetStatus('');Snd.click()}
 async function accountAcceptLogin(data){if(!data?.account)return;ACCOUNT.sessionResolved=true;await loadExclusiveCatalog();ACCOUNT.authenticated=true;ACCOUNT.id=data.account.id;ACCOUNT.profile=data.account.profile;ACCOUNT.roomProfile=data.account.profile?.roomSettings?JSON.parse(JSON.stringify(data.account.profile.roomSettings)):null;ACCOUNT.idVisible=false;accountApplyProfile(data.account.profile);accountRender();accountSetStatus('Conta conectada e perfil carregado.','ok')}
 async function accountRestoreSession(){
@@ -6042,13 +6085,13 @@ function netConnect(action){
   }catch(e){NET.connecting=false;if(NET.joinPending){NET.joinPending=false;setJoinError('Não foi possível conectar à sala. Tente novamente.')}else toast('Falha ao abrir a conexão multiplayer.');}
 }
 function netRoomPayload(){const size=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createSizeIn').value=size;const bots=clamp(Math.round(+$('createBotsIn').value||0),0,size-1);$('createBotsIn').value=bots;const region=String($('createRegionIn')?.value||''),language=String($('createLanguageIn')?.value||'');return {size,bots,region,language,settings:netSettings(),cosmetics:cloneCosmetics(PLAYER_COSMETICS)}}
-function netCreateRoom(){const payload=netRoomPayload();if(!ROOM_REGIONS[payload.region]){toast('Escolha a região da sala.');$('createRegionIn')?.focus();return}if(!GAME_LANGUAGES[payload.language]){toast('Escolha o idioma da sala.');$('createLanguageIn')?.focus();return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';$('createPanel').hidden=true;netConnect(()=>netSend({type:'create_room',name:G.cfg.name,color:G.cfg.color,...payload}))}
+function netCreateRoom(){const payload=netRoomPayload();if(!ROOM_REGIONS[payload.region]){toast(t('message.chooseRegion'));$('createRegionIn')?.focus();return}if(!GAME_LANGUAGES[payload.language]){toast(t('message.chooseRoomLanguage'));$('createLanguageIn')?.focus();return}Snd.init();G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';$('createPanel').hidden=true;netConnect(()=>netSend({type:'create_room',name:G.cfg.name,color:G.cfg.color,...payload}))}
 function netJoinRoom(){const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);setJoinError('');if(!/^[A-Z0-9]{6}$/.test(code)){setJoinError('Código inválido. Tente novamente');Snd.err();return}Snd.init();NET.pendingJoinCode=code;NET.roomInfoPending=true;NET.roomInfoConfirming=false;netConnect(()=>netSend({type:'room_info',code}))}
 function showRoomInfo(info){NET.lastRoomInfo=info?{...info}:null;NET.pendingJoinCode=String(info?.code||NET.pendingJoinCode||'');$('roomInfoPlayers').textContent=t('room.players',{current:Number(info?.current)||0,size:Number(info?.size)||0});$('roomInfoHost').textContent=t('room.host',{host:String(info?.hostName||'—')});$('roomInfoRegion').textContent=t('room.region',{region:regionLabel(info?.region)});$('roomInfoLanguage').textContent=t('room.language',{language:GAME_LANGUAGES[info?.language]||'—'});const full=info?.full===true;$('roomInfoStatus').textContent=full?t('room.full'):'';$('btnRoomInfoEnter').disabled=full;$('roomInfoOverlay').hidden=false}
 function confirmRoomJoin(){if(!NET.pendingJoinCode)return;NET.roomInfoPending=true;NET.roomInfoConfirming=true;$('btnRoomInfoEnter').disabled=true;$('roomInfoStatus').textContent='Atualizando informações da sala…';netSend({type:'room_info',code:NET.pendingJoinCode})}
 function performFreshRoomJoin(info){if(!info||info.full){showRoomInfo(info);NET.roomInfoConfirming=false;return}G.cfg.name=String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante';NET.joinPending=true;NET.roomInfoPending=false;NET.roomInfoConfirming=false;$('roomInfoOverlay').hidden=true;netSend({type:'join_room',code:info.code,name:G.cfg.name,color:G.cfg.color,cosmetics:cloneCosmetics(PLAYER_COSMETICS)})}
 
-function netLeaveRoom(){closeCosmetics();closeRoomSettingsView();if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomExpiryLocalUntil=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.rematchWaiting=false;NET.rematchReadyCode=null;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;netHideWait();$('roomLobby').hidden=true}
+function netLeaveRoom(){closeCosmetics();if(NET.inRoom)netSend({type:'leave_room'});NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomExpiryLocalUntil=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.pendingTasks.clear();NET.remoteInputs.clear();NET.lastState=null;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.rematchWaiting=false;NET.rematchReadyCode=null;NET.lastSnapshotAt=0;NET.lastMotionAt=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.snapshotBlendDuration=.15;NET.inputSeq=0;NET.inputAck=0;NET.reconcileX=0;NET.reconcileY=0;NET.modLobbyOpen=false;NET.modMeetingOpen=false;NET.moderationState=null;netHideWait();$('roomLobby').hidden=true}
 function netTotal(room=NET.room){return room?(room.players.length+(room.bots||0)):0}
 function showRoomExitNotice(reason,code=''){const overlay=$('roomExitOverlay'),title=$('roomExitTitle'),message=$('roomExitMessage');if(!overlay||!title||!message)return;const roomCode=maskedRoomCode(String(code||'').trim().toUpperCase());if(reason==='ban'){title.textContent='Banido';message.textContent=`Você foi banido da sala ${roomCode||'------'}. Você não pode mais voltar.`}else if(reason==='kick'||reason==='vote_kick'){title.textContent='Expulso';message.textContent=`Você foi expulso da sala ${roomCode||'------'}.`}else{title.textContent='Desconectado';message.textContent='Você foi desconectado da sala. Entre novamente.'}overlay.hidden=false}
 function hideRoomExitNotice(){const overlay=$('roomExitOverlay');if(overlay)overlay.hidden=true}
@@ -6097,22 +6140,26 @@ function netRequestRematch(){
 }
 function updateRoomExpiryDisplay(){const r=NET.room,elx=$('roomExpiryText');if(!elx)return;const waiting=!!r&&['lobby','countdown','loading'].includes(r.status),until=Number(NET.roomExpiryLocalUntil);if(!waiting||!Number.isFinite(until)){elx.hidden=true;return}const left=Math.max(0,Math.ceil((until-Date.now())/1000));if(left<=60){elx.hidden=false;elx.textContent=`⏱️ Sala expira em ${left}s se a partida não começar.`}else elx.hidden=true}
 setInterval(updateRoomExpiryDisplay,250);
-const ROOM_ROLE_CONFIG_KEYS=new Set(['locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorDuration','instructorMaxDistance','guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible','cleanerChance','cleanerMax','cleanerCooldown','cleanerDelay','cleanerUses','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','spectralSpeed','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','seerChance','seerMax','seerCooldown','seerDelay','seerDuration','noisyDuration','noisyChance','noisyMax','noisyImpostorVisible','judgeChance','judgeMax','judgeTaskPct','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedEnabled','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','hunterChance','hunterMax','hunterTargetCooldown']);
-function roomSettingsReadonlyRow(label,value){const row=el('div','roomSettingsReadonlyRow');row.append(el('span','',label),el('b','',String(value)));return row}
-function roomSettingsReadonlySection(title,rows){const section=el('section','roomSettingsReadonlySection');section.appendChild(el('h3','',title));const list=el('div','roomSettingsReadonlyList');for(const row of rows)list.appendChild(row);section.appendChild(list);return section}
-function renderRoomSettingsView(){
-  const box=$('roomSettingsViewContent'),r=NET.room;if(!box||!r)return;box.innerHTML='';const st=r.settings||{};
-  const map=MAP_LIBRARY[st.mapId]||MAP_LIBRARY.nave;
-  box.appendChild(roomSettingsReadonlySection(t('lobby.viewSettingsGeneral'),[roomSettingsReadonlyRow(t('lobby.viewSettingsMap'),map?.name||'—'),roomSettingsReadonlyRow(t('lobby.viewSettingsSize'),r.size??'—'),roomSettingsReadonlyRow(t('lobby.viewSettingsBots'),r.bots??0)]));
-  const general=[],roles=[];
-  for(const [key,label] of CFG_ROWS.map(([k,l])=>[k,l])){if(st[key]===undefined)continue;const row=roomSettingsReadonlyRow(label,roomCfgDisplayValue(key,st[key]));(ROOM_ROLE_CONFIG_KEYS.has(key)?roles:general).push(row)}
-  if(st.delayedEnabled!==undefined)roles.unshift(roomSettingsReadonlyRow(t('lobby.viewSettingsTimerEnabled'),roomCfgDisplayValue('delayedEnabled',st.delayedEnabled)));
-  if(general.length)box.appendChild(roomSettingsReadonlySection(t('lobby.viewSettingsGame'),general));
-  if(roles.length)box.appendChild(roomSettingsReadonlySection(t('lobby.viewSettingsRoles'),roles));
-  localizeDom(box);
+function roomViewSettingValue(key,value,unit=''){
+  if(key==='actionDistance')return translateRuntimeText(ACTION_DISTANCE_LABELS[clamp(Number(value)||0,0,2)]||String(value));
+  if(key==='noisyImpostorVisible'||key==='guardianImpostorVisible')return translateRuntimeText(Number(value)?'Sim':'Não');
+  if(key==='lazySlowdown'||key==='spectralSpeed')return (Number(value)/10).toFixed(1)+'x';
+  return String(value)+(unit?' '+unit:'');
 }
-function openRoomSettingsView(){if(!NET.inRoom||NET.isHost||NET.room?.status!=='lobby')return;renderRoomSettingsView();$('roomSettingsView').hidden=false;Snd.open()}
-function closeRoomSettingsView(){const panel=$('roomSettingsView');if(panel&&!panel.hidden){panel.hidden=true;Snd.click()}}
+function renderRoomViewSettings(){
+  const body=$('roomViewSettingsBody'),r=NET.room;if(!body||!r)return;
+  const settings=r.settings||{};body.innerHTML='';
+  const section=(title,rows,translate=true)=>{const tx=v=>translate?translateRuntimeText(v):String(v);const h=el('h3','',tx(title)),list=el('div','roomViewSettingsList');if(!translate){h.setAttribute('data-i18n-skip','');list.setAttribute('data-i18n-skip','')}for(const [label,value] of rows){const row=el('div','roomViewSettingRow');row.append(el('span','',tx(label)),el('b','',tx(String(value))));list.appendChild(row)}body.append(h,list)};
+  const map=MAP_LIBRARY[settings.mapId]||MAP_LIBRARY.nave;
+  section('Sala',[['Mapa',map?.name||settings.mapId||'—'],['Tamanho fixo da sala',r.size],['Bots',r.bots??0],['Região',regionLabel(r.region)],['Idioma da sala',GAME_LANGUAGES[r.language]||r.language||'—']]);
+  const fnKeys=new Set(['locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorDuration','instructorMaxDistance','guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible','cleanerChance','cleanerMax','cleanerCooldown','cleanerDelay','cleanerUses','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','spectralSpeed','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','seerMax','seerChance','seerCooldown','seerDelay','seerDuration','noisyDuration','noisyChance','noisyMax','noisyImpostorVisible','judgeChance','judgeMax','judgeTaskPct','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','hunterChance','hunterMax','hunterTargetCooldown']);
+  const general=[],functions=[];
+  for(const [key,label,_desc,unit] of CFG_ROWS){const raw=settings[key]??CFG[key];const item=[label,roomViewSettingValue(key,raw,unit)];(fnKeys.has(key)?functions:general).push(item)}
+  section('Configurações',general);section('Funções',functions,false);
+  localizeDom(body);
+}
+function openRoomViewSettings(){if(!NET.inRoom||NET.isHost||!NET.room)return;renderRoomViewSettings();$('roomViewSettings').hidden=false;Snd.init();Snd.open()}
+function closeRoomViewSettings(){const panel=$('roomViewSettings');if(panel)panel.hidden=true;Snd.click()}
 function netRenderRoom(){
   const r=NET.room;if(!r)return;
   $('roomCodeText').textContent=maskedRoomCode(r.code||'------');if($('roomRegionText'))$('roomRegionText').textContent='🌍 '+regionLabel(r.region);if($('roomLanguageText'))$('roomLanguageText').textContent='🗣️ '+(GAME_LANGUAGES[r.language]||'—');updateRoomExpiryDisplay();$('roomStatusText').textContent=r.status==='lobby'?t('lobby.waiting'):r.status==='countdown'?'Contagem regressiva':r.status==='loading'?'Carregando partida':r.status==='playing'?'Partida em andamento':r.status==='ended'?'Partida encerrada':'Conectando';
@@ -6120,7 +6167,7 @@ function netRenderRoom(){
   const list=$('roomPlayers');list.innerHTML='';
   (r.players||[]).forEach(p=>{const item=el('div','roomPlayer');const av=document.createElement('canvas');av.width=44;av.height=44;av.className='roomAvatar';drawLobbyAvatar(av,p);const name=el('strong','',p.name+(p.id===r.hostId?' ★ Host':''));const role=el('span','roomState',p.id===NET.id?'Você':(p.ready?'Pronto':'Conectado'));item.append(av,name,role);if(NET.modLobbyOpen&&NET.isHost&&p.id!==NET.id){const actions=el('div','roomModeration'),kick=el('button','roomKick','Expulsar'),ban=el('button','roomBan','Banir');kick.type=ban.type='button';kick.addEventListener('click',e=>{e.stopPropagation();lobbyModerate(p.id,'kick')});ban.addEventListener('click',e=>{e.stopPropagation();lobbyModerate(p.id,'ban')});actions.append(kick,ban);item.append(actions)}list.append(item)});
   if(r.bots){for(let i=0;i<r.bots;i++){const item=el('div','roomPlayer');const dot=el('i','roomDot');dot.style.background='#9298ad';const bot=r.botRoster?.[i];item.append(dot,el('strong','',bot?.name||('Bot '+(i+1))),el('span','','IA'));list.append(item)}}
-  $('hostRoomConfig').hidden=!NET.isHost||r.status!=='lobby';$('btnCfg').disabled=!NET.isHost||r.status!=='lobby';$('btnViewRoomConfig').hidden=NET.isHost||r.status!=='lobby';$('btnViewRoomConfig').disabled=NET.isHost||r.status!=='lobby';if(NET.isHost||r.status!=='lobby')closeRoomSettingsView();else if(!$('roomSettingsView').hidden)renderRoomSettingsView();
+  $('hostRoomConfig').hidden=!NET.isHost||r.status!=='lobby';$('btnCfg').disabled=!NET.isHost||r.status!=='lobby';$('btnViewRoomSettings').hidden=NET.isHost||r.status!=='lobby';if(!$('roomViewSettings').hidden)renderRoomViewSettings();
   $('roomLobbyHint').textContent=NET.isHost?'Você é o host. Ajuste a sala e inicie quando houver pelo menos 4 participantes contando os bots.':'Aguardando o host iniciar. Só o host pode alterar configurações ou reiniciar a partida.';
   $('btnStartRoom').hidden=!NET.isHost||r.status!=='lobby';$('btnStartRoom').disabled=!NET.isHost||r.status!=='lobby'||netTotal(r)<4||netTotal(r)>r.size;if(r.status!=='lobby')closeCosmetics();
   $('btnStartRoom').textContent=r.status==='countdown'?'Contagem em andamento…':'Iniciar partida ('+netTotal(r)+'/'+r.size+')';
@@ -6235,7 +6282,7 @@ function netHandleMessage(m){
 const ROOM_CFG_LABELS=Object.fromEntries(CFG_ROWS.map(([k,l,,u])=>[k,{label:l,unit:u}]));
 const ROOM_CFG_ICONS={locMax:'🧭',locChance:'🧭',locCooldown:'🧭',locDuration:'🧭',sheriffCooldown:'🔫',sheriffChance:'🔫',sheriffMax:'🔫',delayedChance:'⏱️',delayedMax:'⏱️',delayedDuration:'⏱️',obsChance:'👀',obsMax:'👀',instructorChance:'↔️',instructorMax:'↔️',instructorCooldown:'↔️',instructorDuration:'↔️',instructorMaxDistance:'↔️',guardianCooldown:'🪽',guardianDuration:'🪽',guardianChance:'🪽',guardianMax:'🪽',guardianImpostorVisible:'🪽',cleanerChance:'🧹',cleanerMax:'🧹',cleanerCooldown:'🧹',cleanerDelay:'🧹',cleanerUses:'🧹',parasiteChance:'🦠',parasiteMax:'🦠',spectralChance:'👻',spectralMax:'👻',spectralCooldown:'👻',spectralDuration:'👻',spectralSpeed:'👻',paramedicChance:'⛑️',paramedicMax:'⛑️',paramedicCooldown:'⛑️',paramedicTasksPerUse:'⛑️',paramedicMaxUses:'⛑️',seerChance:'🔮',seerMax:'🔮',seerCooldown:'🔮',seerDelay:'🔮',seerDuration:'🔮',noisyDuration:'🔊',noisyChance:'🔊',noisyMax:'🔊',noisyImpostorVisible:'🔊',judgeChance:'⚖️',judgeMax:'⚖️',judgeTaskPct:'⚖️',lazyChance:'🍕',lazyMax:'🍕',lazySlowdown:'🍕',lazyTasks:'🍕',engVentDuration:'🔧',engChance:'🔧',engMax:'🔧',engCooldown:'🔧',marionCooldown:'✋',marionDuration:'✋',marionChance:'✋',marionMax:'✋',hunterChance:'🎯',hunterMax:'🎯',hunterTargetCooldown:'🎯'};
 const ROOM_CFG_NOTICE_TIMERS=new Map();
-function roomCfgDisplayValue(key,value){if(key==='speed')return (Number(value)/120).toFixed(1)+'x';if(key==='spectralSpeed'||key==='lazySlowdown')return (Number(value)/10).toFixed(1)+'x';if(key==='noisyImpostorVisible'||key==='guardianImpostorVisible'||key==='delayedEnabled')return Number(value)?'Sim':'Não';if(key==='actionDistance')return ACTION_DISTANCE_LABELS[clamp(Number(value)||0,0,2)];const meta=ROOM_CFG_LABELS[key];return String(value)+(meta?.unit?meta.unit:'')}
+function roomCfgDisplayValue(key,value){if(key==='speed')return (Number(value)/120).toFixed(1)+'x';if(key==='spectralSpeed'||key==='lazySlowdown')return (Number(value)/10).toFixed(1)+'x';if(key==='noisyImpostorVisible')return Number(value)?'Sim':'Não';if(key==='actionDistance')return ACTION_DISTANCE_LABELS[clamp(Number(value)||0,0,2)];const meta=ROOM_CFG_LABELS[key];return String(value)+(meta?.unit?meta.unit:'')}
 function netAnnounceConfigChange(key,value){if(!NET.inRoom||!NET.isHost||NET.room?.status!=='lobby')return;const meta=ROOM_CFG_LABELS[key]||{label:key};const icon=ROOM_CFG_ICONS[key]||'⚙️';const text=`${icon} ${meta.label} → ${roomCfgDisplayValue(key,value)}`;clearTimeout(ROOM_CFG_NOTICE_TIMERS.get(key));ROOM_CFG_NOTICE_TIMERS.set(key,setTimeout(()=>{ROOM_CFG_NOTICE_TIMERS.delete(key);netSend({type:'room_config_notice',text})},120));}
 function netAnnounceBots(value){if(!NET.inRoom||!NET.isHost||NET.room?.status!=='lobby')return;netSend({type:'room_config_notice',text:`⚙ Bots → ${value}`})}
 function netEnsureRoomDraft(){if(!NET.room)return null;if(!NET.roomDraft)NET.roomDraft={...(NET.room.settings||netSettings()),bots:NET.room.bots};return NET.roomDraft}
@@ -6673,7 +6720,7 @@ function toggleContextChat(){if(NET.inRoom&&NET.room?.status==='lobby')toggleRoo
 $('btnRoomChat').addEventListener('click',toggleContextChat);$('btnRoomChatLobby').addEventListener('click',toggleRoomChat);
 $('btnRoomExitClose').addEventListener('click',()=>{hideRoomExitNotice();Snd.click()});
 $('btnRoomChatClose').addEventListener('click',closeRoomChat);$('btnGhostChatClose').addEventListener('click',closeGhostChat);
-$('roomChatForm').addEventListener('submit',e=>{e.preventDefault();if(!NET.inRoom||NET.room?.status!=='lobby'||!NET.ws||NET.ws.readyState!==WebSocket.OPEN){toast('O chat escrito só funciona na sala de espera.');return}const input=$('roomChatInput'),text=sanitizeChatText(input.value);if(!text)return;const now=Date.now();if(now-(NET.lastRoomChatAt||0)<CHAT_COOLDOWN_MS){toast('Aguarde 3 segundos antes de enviar outra mensagem.',1800);return}if(netSend({type:'room_chat',text})){NET.lastRoomChatAt=now;input.value=''}});
+$('roomChatForm').addEventListener('submit',e=>{e.preventDefault();if(!NET.inRoom||NET.room?.status!=='lobby'||!NET.ws||NET.ws.readyState!==WebSocket.OPEN){toast(t('lobby.chatOnly'));return}const input=$('roomChatInput'),text=sanitizeChatText(input.value);if(!text)return;const now=Date.now();if(now-(NET.lastRoomChatAt||0)<CHAT_COOLDOWN_MS){toast(t('lobby.chatCooldown'),1800);return}if(netSend({type:'room_chat',text})){NET.lastRoomChatAt=now;input.value=''}});
 $('ghostChatForm').addEventListener('submit',e=>{e.preventDefault();if(!canUseGhostChat()){closeGhostChat();return}const input=$('ghostChatInput'),text=sanitizeChatText(input.value);if(!text)return;const now=Date.now();if(now-(NET.lastGhostChatAt||0)<CHAT_COOLDOWN_MS){toast('Aguarde 3 segundos antes de falar de novo.',1800);return}if(NET.inRoom){if(!NET.ws||NET.ws.readyState!==WebSocket.OPEN)return;if(netSend({type:'ghost_chat',text})){NET.lastGhostChatAt=now;input.value=''}}else{NET.lastGhostChatAt=now;appendGhostChatMessage({playerId:G.player.id,name:G.player.name,text,at:now},true);input.value=''}});
 const netOriginalHandleRoomChat=netHandleMessage;netHandleMessage=function(m){
   if(m.type==='room_chat_message'){if(NET.inRoom&&NET.room?.status==='lobby'&&m.roomCode===NET.room.code)appendRoomChatMessage(m);return}
@@ -6715,12 +6762,13 @@ $('btnSaveRoomConfig').addEventListener('click',netSaveRoomSettings);
 for(const [id,key] of [['roomSpeedIn','speed'],['roomKillIn','kill'],['roomSabIn','sab'],['roomMeetIn','meet'],['roomDiscussionIn','discussion'],['roomVotingIn','voting'],['roomCrewVisionIn','crewVision']])$(id).addEventListener('input',()=>netNoteRoomControl(key,$(id).value));
 $('roomBotsIn').addEventListener('input',()=>netNoteRoomBots($('roomBotsIn').value));
 $('roomBotsOk').addEventListener('click',()=>{if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;const max=Math.max(0,NET.room.size-NET.room.players.length);$('roomBotsIn').value=clamp(Math.round(Number($('roomBotsIn').value)||0),0,max);netNoteRoomBots($('roomBotsIn').value);netSaveRoomSettings();toast('Quantidade de bots aplicada.')});
-$('btnLobbyModeration').addEventListener('click',toggleLobbyModeration);$('btnMeetingModeration').addEventListener('click',toggleMeetingModeration);$('btnViewRoomConfig').addEventListener('click',openRoomSettingsView);$('btnRoomSettingsViewClose').addEventListener('click',closeRoomSettingsView);$('roomSettingsView').addEventListener('pointerdown',e=>{if(e.target===$('roomSettingsView'))closeRoomSettingsView()});$('btnStartRoom').addEventListener('click',netStartGame);$('btnCosmetics').addEventListener('click',openCosmetics);$('btnCosmeticsClose').addEventListener('click',closeCosmetics);$('cosmeticsOverlay').addEventListener('pointerdown',e=>{if(e.target===$('cosmeticsOverlay'))closeCosmetics()});$('btnLeaveRoom').addEventListener('click',()=>{netLeaveRoom();netOriginalToMenu()});
+$('btnViewRoomSettings').addEventListener('click',openRoomViewSettings);$('btnCloseRoomViewSettings').addEventListener('click',closeRoomViewSettings);$('roomViewSettings').addEventListener('pointerdown',e=>{if(e.target===$('roomViewSettings'))closeRoomViewSettings()});
+$('btnLobbyModeration').addEventListener('click',toggleLobbyModeration);$('btnMeetingModeration').addEventListener('click',toggleMeetingModeration);$('btnStartRoom').addEventListener('click',netStartGame);$('btnCosmetics').addEventListener('click',openCosmetics);$('btnCosmeticsClose').addEventListener('click',closeCosmetics);$('cosmeticsOverlay').addEventListener('pointerdown',e=>{if(e.target===$('cosmeticsOverlay'))closeCosmetics()});$('btnLeaveRoom').addEventListener('click',()=>{netLeaveRoom();netOriginalToMenu()});
 $('btnCopyCode').addEventListener('click',()=>{const code=NET.room?.code;if(!code)return;try{navigator.clipboard.writeText(code);toast(USER_PREFS.streamerMode?'Código copiado.':'Código copiado: '+code)}catch(e){toast(USER_PREFS.streamerMode?'Não foi possível copiar o código.':'Código da sala: '+code)}});
 // Meeting chat / votes / action requests are sent to the host; the host answers with authoritative snapshots.
 function netSyncHostAfterAuthorityChange(){if(NET.inRoom&&NET.isHost){const snap=netCaptureSnapshot();netSend({type:'state_snapshot',snapshot:snap})}}
 // As telas de configuração só podem ser alteradas pelo host e salvam por sala no servidor.
-$('btnCfg').addEventListener('click',e=>{if(!NET.inRoom)return;e.stopImmediatePropagation();if(NET.room?.settings&&!(NET.isHost&&NET.roomDraftDirty))netApplySettings(NET.room.settings);if(NET.isHost&&!NET.roomDraft)NET.roomDraft={...(NET.room?.settings||netSettings()),bots:NET.room?.bots};netSyncRoomControlsFromCFG();openCfg();if(!NET.isHost||NET.room?.status!=='lobby'){toast('Configurações da sala em modo de visualização. Só o host pode alterar antes da partida.')}},true);
+$('btnCfg').addEventListener('click',e=>{if(!NET.inRoom)return;e.stopImmediatePropagation();if(NET.room?.settings&&!(NET.isHost&&NET.roomDraftDirty))netApplySettings(NET.room.settings);if(NET.isHost&&!NET.roomDraft)NET.roomDraft={...(NET.room?.settings||netSettings()),bots:NET.room?.bots};netSyncRoomControlsFromCFG();openCfg();if(!NET.isHost||NET.room?.status!=='lobby'){toast(t('lobby.readOnlySettings'))}},true);
 
 const netOriginalCloseCfg=closeCfg;closeCfg=function(){const shouldSave=NET.inRoom&&NET.isHost&&NET.room?.status==='lobby';if(shouldSave)netSaveRoomSettings();return netOriginalCloseCfg()};
 window.addEventListener('beforeunload',()=>{if(ACCOUNT.authenticated&&!ACCOUNT.applying){try{fetch('/api/account/profile',{method:'PATCH',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({profile:accountProfileSnapshot()}),keepalive:true})}catch{}}if(NET.inRoom&&NET.ws&&NET.ws.readyState===WebSocket.OPEN)netSend({type:'leave_room'})});
