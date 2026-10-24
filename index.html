@@ -2894,14 +2894,31 @@ function openFreePlayComputer(){
   $('mbody').appendChild(grid);
 }
 
+function resetMatchVisualState(){
+  G.fx=0;G.fixT=0;G.vision=G.visionTarget=CFG.crewVision;
+  if(!G.sab||typeof G.sab!=='object')G.sab={lights:0,reactor:0,comms:0,doors:0,cd:0};
+  G.sab.lights=0;G.sab.reactor=0;G.sab.comms=0;G.sab.doors=0;
+  fogC.globalAlpha=1;fogC.globalCompositeOperation='source-over';fogC.setTransform(1,0,0,1,0,0);fogC.clearRect(0,0,fogCv.width,fogCv.height);
+  ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.filter='none';
+}
+function sanitizeCharacterVisualState(ch){
+  if(!ch)return;
+  if(ch.alive&&ch.ghost)ch.ghost=false;
+  if(ch.vent&&!ventById[ch.vent]){ch.vent=null;ch.ventAnim=null;ch.ventMv=0}
+  if(ch.controlTargetId){const target=G.chars?.find(c=>String(c.id)===String(ch.controlTargetId));if(!target||target===ch||!target.alive)ch.controlTargetId=null}
+  if(ch.controlledBy){const owner=G.chars?.find(c=>String(c.id)===String(ch.controlledBy));if(!owner||owner===ch||!owner.alive)ch.controlledBy=null}
+  if(!Number.isFinite(+ch.x)||!Number.isFinite(+ch.y)){const sp=startSpawnPoints(1)[0]||{x:SPAWN.x,y:SPAWN.y};placeChar(ch,sp)}
+  if(!Number.isFinite(+ch.netVisualX)||!Number.isFinite(+ch.netVisualY)){ch.netVisualX=undefined;ch.netVisualY=undefined}
+}
 function newGame(prepareOnline=false){
   closeModalSilent(); $('end').hidden=true; $('menu').hidden=true; $('meet').hidden=true; $('hud').hidden=false;
   activateMapData(SELECTED_MAP_ID,true);G.mapId=ACTIVE_MAP_ID;G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
-  TID=0; resetMapDoors();
+  TID=0; resetMapDoors(); resetMatchVisualState();
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); G.killT=null; $('ventPanel').hidden=true; VENT_DEFS.forEach(v=>v.flash=0);
   G.over=false; G.followTarget=null; G.tasks=[]; G.pin=null; G.bodies=[]; G.deadPets=[]; G.killSplashes=[]; G.spectralSmokes=[];G.spectralSmokeSeq=0; G.instructorTrails=[];G.instructorTrailSeq=0;G.instructorCd=0;G.instructorTargetId=null;INSTRUCTOR_SEEN_TRAILS.clear();SPECTRAL_SEEN_SMOKES.clear(); G.M=null; G.spec=null; G.fx=0; G.fixT=0; G.gt=0;
   G.sab={lights:0,reactor:0,comms:0,doors:0,cd:CFG.sab}; G.parasiteInfections={};G.parasiteWinnerId=null;G.seerReplay=null;G.noisyAlerts=[];G.noisySeq=0;G.noisyUi=null;NOISY_SEEN_ALERTS.clear();if(typeof resetGhostChatLocal==='function')resetGhostChatLocal();G.guardianProtections={};G.guardianBreakFx=[];G.guardianBreakSeq=0;GUARDIAN_SEEN_BREAKS.clear(); G.killCd=Math.min(CFG.kill,15); G.sheriffCd=0;G.sheriffT=null;G.delayedCd=0;G.delayedT=null;G.delayedMarks={}; G.meetCd=CFG.meet; G.cfgOpen=false; $('settings').hidden=true; G.vision=G.visionTarget=CFG.crewVision;
   const online=!!(typeof NET!=='undefined'&&NET.inRoom&&NET.room&&(NET.room.status==='playing'||prepareOnline));
+  if(online)G.freePlay=false;
   const p=newChar(G.cfg.name,G.cfg.color,0,0,true); p.emUses=CFG.emergencyUses; if(online)p.id=NET.id;const ownRoom=online?NET.room.players.find(q=>q.id===NET.id):null;p.cosmetics=cloneCosmetics(ownRoom?.cosmetics||PLAYER_COSMETICS); G.player=p;
   const cols=shuffle(COLORS.filter(c=>c.id!==G.cfg.color));
   const usedBotNames=new Set([String(G.cfg.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,''),...(online?NET.room.players.map(q=>String(q.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')):[])]);
@@ -2975,6 +2992,7 @@ function newGame(prepareOnline=false){
     if(c.role==='imp')ts.forEach(t=>t.fake=true);
     G.tasks.push(...ts);
   });
+  G.chars.forEach(sanitizeCharacterVisualState);
   G.cam.x=p.x-VW/2; G.cam.y=p.y-VH/2; G.lastRoom=null; G.action=null;
   renderTasks(); updateSabUI();updateNoisyAlertUI();
   if(online&&prepareOnline){
@@ -3001,7 +3019,7 @@ function toMenu(){
   // descarta tudo da partida anterior (as configurações do menu e o nome/cor permanecem)
   G.M=null; G.chars=[]; G.bodies=[]; G.deadPets=[]; G.killSplashes=[]; G.spectralSmokes=[];G.spectralSmokeSeq=0; G.instructorTrails=[];G.instructorTrailSeq=0;G.instructorCd=0;G.instructorTargetId=null;G.guardianProtections={};G.guardianBreakFx=[]; G.tasks=[]; G.pin=null; G.spec=null; G.imp=null; G.player=null; G.action=null; G.killT=null;
   G.fx=0; G.fixT=0; G.gt=0; G.killCd=0; G.meetCd=0; G.role='crew'; G.ghostMode='tasks'; G.freePlay=false; G.over=false; G.camCtx=null; G.adminCtx=null;
-  G.sab={lights:0,reactor:0,comms:0,doors:0,cd:0}; TID=0;
+  G.sab={lights:0,reactor:0,comms:0,doors:0,cd:0}; TID=0; resetMatchVisualState();
   resetMapDoors();
   G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
   joy.x=joy.y=0; keys.clear(); clearTimeout(toastT); $('toast').classList.remove('on');
@@ -3211,7 +3229,8 @@ function drawArrow(c,p,tx,ty,col){
 function render(){
   const p=G.player; if(!p)return; const f=focus(), ghost=!p.alive, gAct=ghostActs();
   const c=ctx; c.setTransform(DPR*ZOOM,0,0,DPR*ZOOM,-G.cam.x*DPR*ZOOM,-G.cam.y*DPR*ZOOM);
-  const dark=G.sab.lights>0&&G.role==='crew', range=dark?G.vision+60:Math.max(G.vision+60,1250);
+  const lightsActive=!!(G.sab&&Number(G.sab.lights)>0&&G.role==='crew'&&p.alive&&['playing','task','tool'].includes(G.state));
+  const dark=lightsActive, range=dark?Math.max(G.vision+60,260):Math.max(G.vision+60,1250);
   drawWorld(c,G.cam.x,G.cam.y,VW,VH,{names:true,markers:!ghost||gAct,viewer:ghost?null:p,cullViewer:p,range,reveal:specRoles(),ghostSelf:gAct});
   if((!ghost||gAct)&&G.state==='playing'){
     if(G.pin&&infoOn()){const t=G.tasks.find(t=>t.id===G.pin&&!t.done); if(t){const sp=stationPos(nextStep(t).st); drawArrow(c,p,sp.x,sp.y,'#ffc233')}}
@@ -3221,16 +3240,17 @@ function render(){
   if(!p.ghost){
   // escuridão ao redor de quem se observa
   const sx=(f.x-G.cam.x)*ZOOM/FOG_DIV, sy=(f.y-G.cam.y)*ZOOM/FOG_DIV;
-  const R=(G.vision*(G.sab.lights>0&&G.role==='crew'?0.34:1))*ZOOM/FOG_DIV;
+  const visualVision=Math.max(110,Number(G.vision)||Number(G.visionTarget)||CFG.crewVision);
+  const R=visualVision*ZOOM/FOG_DIV;
   // Máscara de baixa resolução. Só células fora do piso (paredes reais do mapa)
   // bloqueiam a luz: decoração, caixas, mesas e estações não geram sombras.
-  fogC.globalCompositeOperation='source-over';const lightsDown=(G.sab.lights>0&&G.role==='crew');
+  fogC.globalCompositeOperation='source-over';const lightsDown=lightsActive;
   // Nave e Nexus compartilham exatamente a mesma névoa, sombras e bloqueio por paredes.
   // A única adaptação da Nexus acontece depois, somente no vazio externo conectado ao céu.
   fogC.fillStyle='rgba(2,3,14,.94)'; fogC.fillRect(0,0,fogCv.width,fogCv.height);
   // A Nexus usa interseção exata com a malha de paredes para a visão. O antigo
   // avanço em passos podia pular quinas/divisórias e deixar pequenas frestas de luz.
-  const rays=240, maxR=G.vision*(G.sab.lights>0&&G.role==='crew'?0.34:1);
+  const rays=240, maxR=visualVision;
   const traceWallLimitedLight=(wx,wy,radius,rayCount,screenX,screenY)=>{
     fogC.beginPath(); fogC.moveTo(screenX,screenY);
     for(let i=0;i<=rayCount;i++){
@@ -5780,7 +5800,8 @@ function update(dt){
   if(!p.alive&&(!G.spec||!G.spec.alive))G.spec=G.chars.find(c=>c.alive)||null;
   const f=focus();
   const baseVision=G.role==='imp'?CFG.impVision:CFG.crewVision;
-  G.visionTarget=!p.alive?Math.max(CFG.impVision,CFG.crewVision):(G.sab.lights>0&&G.role==='crew'?Math.max(110,baseVision*.34):baseVision);
+  const lightsVisionActive=!!(G.sab&&Number(G.sab.lights)>0&&G.role==='crew'&&p.alive&&['playing','task','tool'].includes(G.state));
+  G.visionTarget=!p.alive?Math.max(CFG.impVision,CFG.crewVision):(lightsVisionActive?Math.max(110,baseVision*.34):baseVision);
   G.vision+=(G.visionTarget-G.vision)*Math.min(1,dt*4);
   const useNetVisual=NET.inRoom&&!NET.isHost&&f.id!==NET.id&&Number.isFinite(f.netVisualX)&&Number.isFinite(f.netVisualY);
   const fx=useNetVisual?f.netVisualX:f.x;
@@ -6409,6 +6430,7 @@ function netApplySnapshot(s,force=false){
       }
       return c;
     });
+    G.chars.forEach(sanitizeCharacterVisualState);
     G.player=G.chars.find(c=>c.id===NET.id)||G.player;if(!G.player)return;G.player.isPlayer=true;G.role=G.player.role;G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.imps=G.chars.filter(c=>c.role==='imp');G.imp=G.imps[0]||null;
     const oldTasks=new Map((G.tasks||[]).map(t=>[String(t.id),t]));
     G.tasks=s.tasks.map(r=>{let t=oldTasks.get(String(r.id));if(!t)t={id:r.id,steps:[]};t.id=r.id;t.key=r.key;t.name=r.name;t.owner=r.owner;t.fake=!!r.fake;t.fakeOnly=!!r.fakeOnly;t.lazy=!!r.lazy;t.fix=r.fix||null;const oldSteps=new Map((t.steps||[]).map((q,i)=>[String(q.st)+'/'+i,q]));t.steps=r.steps.map((q,i)=>{let z=oldSteps.get(String(q.st)+'/'+i);if(!z)z={};const key=String(t.id)+':'+String(q.st);Object.assign(z,q);if(q.done)NET.pendingTasks.delete(key);return z});t.done=!!r.done||t.steps.every(q=>q.done);for(const q of t.steps){const key=String(t.id)+':'+String(q.st);if(q.done||t.done)NET.pendingTasks.delete(key)}return t});
