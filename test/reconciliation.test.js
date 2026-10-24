@@ -29,16 +29,12 @@ test('reconciliação evita puxões contra paredes e corrige apenas deriva útil
 });
 
 
-test('movimento online usa canal leve em ~40 Hz e snapshots autoritativos mais frequentes', () => {
+test('movimento online usa canal leve em ~30 Hz sem aumentar a frequência do snapshot completo', () => {
   assert.match(html, /function netCaptureMotion\(\)/);
   assert.match(html, /if\(m\.type==='motion'\)\{if\(!NET\.isHost&&NET\.inRoom\)netApplyMotion\(m\.motion\);return\}/);
   assert.match(html, /NET\.motionTimer=setInterval\(\(\)=>\{/);
   assert.match(html, /type:'motion_state',motion:netCaptureMotion\(\)/);
-  assert.match(html, /\},25\);\s*\/\/ Inputs também chegam ao host em ~40 Hz/);
-  assert.match(html, /NET\.snapshotTimer=setInterval[\s\S]*?\},100\);/);
-  assert.match(html, /c\.netBlendDuration=clamp\(interval\*1\.18,\.032,\.075\)/);
-  assert.match(html, /const recentMotion=clientSnapshot/);
-  assert.match(html, /netScheduleAuthoritySync\(\)/);
+  assert.match(html, /\},33\);\s*\/\/ Inputs também chegam ao host em ~30 Hz/);
   assert.match(server, /if\(m\.type==='motion_state'\)/);
   assert.match(server, /send\(target\.ws,\{type:'motion',motion:m\.motion\}\)/);
 });

@@ -9,12 +9,13 @@ const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 test('Comunicações bloqueia e padroniza botões das funções solicitadas',()=>{
   assert.match(html,/function roleAbilityBlockedByComms\(\)\{return \(G\.sab\.comms\|\|0\)>0\}/);
   for(const id of ['btnSheriff','btnSeer','btnLocator','btnInstructor','btnGuardian','btnEngineerVent'])assert.match(html,new RegExp(`id="${id}"`));
-  assert.match(html,/noSignalLabel=t\('message\.noSignal'\)/,'o texto padronizado deve vir do catálogo de idiomas');
-  assert.match(html,/const sht=commsAbilityDown\?noSignalLabel/);
-  assert.match(html,/const selab=commsAbilityDown\?noSignalLabel/);
-  assert.match(html,/const lt=commsAbilityDown\?noSignalLabel/);
-  assert.match(html,/lab=commsAbilityDown\?noSignalLabel/);
-  assert.match(html,/const ventLabel=commsAbilityDown\?noSignalLabel/);
+  const occurrences=(html.match(/📡 Sem sinal/g)||[]).length;
+  assert.ok(occurrences>=8,'o texto padronizado deve ser reutilizado nas habilidades bloqueadas');
+  assert.match(html,/const sht=commsAbilityDown\?'📡 Sem sinal'/);
+  assert.match(html,/const selab=commsAbilityDown\?'📡 Sem sinal'/);
+  assert.match(html,/const lt=commsAbilityDown\?'📡 Sem sinal'/);
+  assert.match(html,/lab=commsAbilityDown\?'📡 Sem sinal'/);
+  assert.match(html,/const ventLabel=commsAbilityDown\?'📡 Sem sinal'/);
 });
 
 test('Comunicações impede ativação por UI, IA e validação multiplayer sem gastar estado',()=>{
