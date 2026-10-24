@@ -284,7 +284,7 @@ test('NPCs usam falas contextuais e jogadores mortos veem funções sem revelar 
     assert.ok(html.includes(phrase), 'fala contextual ausente: '+phrase);
   }
   assert.match(html, /\(\(!G\.player\?\.alive\|\|G\.role==='imp'\)&&ch\.role==='imp'\?'#ff6b7e'/);
-  assert.match(html, /if\(!G\.player\.alive\)\{const fl=\{sheriff:'Xerife'.*const roleLine=el\('small','pfunction',fl\);/s);
+  assert.match(html, /if\(!G\.player\.alive\)\{const hiddenCrew=[\s\S]*?roleId=[\s\S]*?ROLE_ID_BY_FUNCTION\[ch\.function\][\s\S]*?roleI18nName\(roleId\)/, 'função exibida aos mortos deve usar o catálogo de idioma');
   assert.match(html, /if\(!G\.player\.alive&&ch\.role==='imp'\)pn\.style\.color='#ff6b7e'/);
   assert.match(html, /if\(ai\.ventSaw&&G\.gt-ai\.ventSaw\.gt<45/);
   assert.match(html, /\.pc\.dead\{filter:none;border-color/);
@@ -372,8 +372,8 @@ test('Vidente inspeciona corpos com reconstituição privada e pistas factuais p
   assert.match(html, /function drawSeerReplay\(c\)[\s\S]*?fillStyle='#050509'/);
   assert.match(html, /const fadeIn=clamp\(elapsed\/.45,0,1\),fadeOut=clamp\(\(duration-elapsed\)\/.55,0,1\)/);
   assert.doesNotMatch(html, /function drawSeerReplay\(c\)[\s\S]*?strokeStyle='rgba\(6,7,13,\.72\)'/);
-  assert.match(html, /\['marionette','✋ Marionetista'\]/);
-  assert.match(html, /\['engineer','🔧 Engenheiro'\]/);
+  assert.match(html, /const fns=ch\.role==='imp'\?\['delayed','cleaner','parasite','spectral','marionette','hunter'\]/);
+  assert.match(html, /roleI18nLabel\(ROLE_TAB_IDS\[id\]\|\|id\)/);
   assert.match(html, /Vi a silhueta de quem matou \$\{q\.victimName\}, entrou em um duto!/);
   assert.match(html, /Vi a silhueta de quem matou \$\{q\.victimName\}, foi para \$\{q\.room\}/);
   assert.match(server, /s\.selfSeerReplay=recipient\?\.alive!==false&&recipient\?\.role==='crew'&&recipient\?\.function==='seer'\?\(s\.seerReplays\?\.\[recipientId\]\|\|null\):null;delete s\.seerReplays;for\(const b of \(s\.bodies\|\|\[\]\)\)delete b\.killerTrace/);
@@ -399,7 +399,7 @@ test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comuni
 
 test('Instrutor só pode selecionar jogadores vivos dentro da Distância para ações', () => {
   assert.match(html, /function instructorSelectableTargets\(owner,range=actionDistancePx\('instructor'\)\)[\s\S]*?c\.alive[\s\S]*?!c\.vent[\s\S]*?dist\(owner,c\)<=range[\s\S]*?losClear/);
-  assert.match(html, /function openInstructorPicker\(\)[\s\S]*?const nearby=instructorSelectableTargets\(p\)[\s\S]*?Chegue perto de um jogador vivo/);
+  assert.match(html, /function openInstructorPicker\(\)[\s\S]*?const nearby=instructorSelectableTargets\(p\)[\s\S]*?t\('message\.instructorGetCloser'\)/, 'aviso do Instrutor deve usar localização');
   assert.match(html, /action:'instructor_select'/);
   assert.match(html, /command==='instructor_select'[\s\S]*?const instructorRange=actionDistancePx\('instructor'\)[\s\S]*?dist\(ch,c\)<=instructorRange[\s\S]*?ch\.instructorTargetId=target\.id/);
   assert.match(html, /command==='instructor_mark'[\s\S]*?String\(ch\.instructorTargetId\)===String\(target\.id\)/);
@@ -427,7 +427,7 @@ test('habilidades especiais possuem efeitos sonoros e visuais leves personalizad
 });
 
 test('Instrutor pode ser aplicado e removido pelo computador da Partida Livre', () => {
-  assert.match(html, /\['instructor','↔️ Instrutor'\]/, 'Instrutor deve aparecer no seletor de funções de Tripulante');
+  assert.match(html, /\['locator','sheriff','observer','paramedic','seer','noisy','judge','lazy','engineer','instructor','guardian'\]/, 'Instrutor deve aparecer no seletor de funções de Tripulante');
   assert.match(html, /if\(fn==='instructor'\)[\s\S]*?ch\.instructor=true[\s\S]*?if\(ch\.alive\)killChar\(ch\)/, 'adicionar Instrutor deve matar o personagem imediatamente');
   assert.match(html, /if\(ch\.instructor\)[\s\S]*?ch\.instructor=false[\s\S]*?ch\.alive=true;ch\.ghost=false/, 'remover Instrutor deve reviver o personagem');
   assert.match(html, /return ch\.instructor\?`\$\{base\} \+ Instrutor ↔️`:/, 'o computador deve indicar Instrutor sem apagar a função-base do Tripulante');
@@ -462,8 +462,9 @@ test('distância para ações oferece Curta, Média e Longa e sincroniza no mult
 });
 
 test('configurações de funções mostram descrição no topo de cada função', () => {
-  assert.match(html, /const descriptions=\{locator:/);
-  for (const role of ['Localizador','Xerife','Temporizador','Observador','Instrutor','Faxineiro','Parasita','Engenheiro','Marionetista']) assert.match(html,new RegExp(role));
+  assert.match(html, /const roleId=ROLE_TAB_IDS\[G\.cfgFunctionTab\]\|\|'locator'/);
+  assert.match(html, /roleI18nLabel\(roleId\)/);
+  assert.match(html, /role\.menuDesc\.\$\{roleId\}/);
   assert.match(html, /box\.appendChild\(info\)/);
 });
 
@@ -523,7 +524,7 @@ test('Paramédico libera usos por tarefas, revive uma única vez e sincroniza o 
   assert.match(html, /paramedicEligible=shuffle\(G\.chars\.filter\(c=>c\.role==='crew'&&!c\.function\)\)/);
   assert.match(html, /Math\.floor\(completedRealTasksFor\(ch\)\/Math\.max\(1,CFG\.paramedicTasksPerUse\)\)/);
   assert.match(html, /function paramedicAvailableUses\(ch\)\{return Math\.max\(0,paramedicUnlockedUses\(ch\)-Math\.max\(0,ch\?\.paramedicSpent\|\|0\)\)\}/, 'usos liberados devem acumular até serem realmente gastos');
-  assert.match(html, /Reviver \(\$\{pav\}\)/, 'o botão deve refletir mais de um uso acumulado');
+  assert.match(html, /t\('hud\.reviveWithUses',\{uses:pav\}\)/, 'o botão deve refletir mais de um uso acumulado e respeitar o idioma');
   assert.match(html, /victim&&victim!==medic&&!victim\.alive&&victim\.role==='crew'&&!victim\.revivedOnce/);
   assert.match(html, /clearRevivedFunctionState\(victim\);victim\.role='crew';victim\.alive=true;victim\.ghost=false;victim\.revivedOnce=true/);
   assert.match(html, /victim\.x=body\.x;victim\.y=body\.y/);
@@ -538,11 +539,11 @@ test('Paramédico libera usos por tarefas, revive uma única vez e sincroniza o 
   assert.match(html, /validReviveBodyFor[\s\S]*?paramedicBlockedByComms\(\)/, 'Comunicações deve bloquear a validação autoritativa do revive');
   assert.match(html, /paramedicBotThink[\s\S]*?paramedicBlockedByComms\(\)/, 'NPC Paramédico também deve respeitar Comunicações');
   assert.match(html, /command==='revive_body'[\s\S]*?\(G\.sab\.comms\|\|0\)<=0[\s\S]*?reviveBody\(ch,body\)/, 'host deve recusar revive remoto durante Comunicações');
-  assert.match(html, /paramedicCommsDown\?'📡 Sem sinal'/, 'botão deve ficar indisponível enquanto não há sinal');
+  assert.match(html, /paramedicCommsDown\?noSignalLabel/, 'botão deve ficar indisponível enquanto não há sinal e usar o texto localizado');
   assert.match(html, /netOriginalPlayerRevive[\s\S]*?paramedicBlockedByComms\(\)[\s\S]*?return/, 'cliente não deve enviar revive durante Comunicações');
   const sabotage=html.slice(html.indexOf('function startSabotage('),html.indexOf('function resolveSab('));
   assert.doesNotMatch(sabotage,/paramedicSpent\s*=/,'Comunicações não pode apagar ou gastar os usos acumulados');
-  assert.match(html, /\['paramedic','⛑️ Paramédico'\]/);
+  assert.match(html, /\['locator','sheriff','observer','paramedic','seer'/);
 });
 
 test('conversão do Parasita apaga toda função anterior e vira Infiltrado comum', () => {

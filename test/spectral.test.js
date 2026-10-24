@@ -43,7 +43,8 @@ test('velocidade do Espectral usa passos de 0,2x e contagem autoritativa monotô
   assert.match(html,/spectralEndsAt=G\.gt\+duration/);
   assert.match(html,/function spectralRemaining\(ch\)/);
   assert.match(html,/proposed<ch\._spectralUiDeadline/);
-  assert.match(html,/Voltar · \$\{Math\.max\(0,Math\.ceil\(time\)\)\}s/);
+  assert.match(html,/t\('hud\.return'\)/);
+  assert.match(html,/\$\{t\('hud\.return'\)\} · \$\{Math\.max\(0,Math\.ceil\(time\)\)\}s/);
   assert.match(server,/spectralSpeed:\[0,10\]/);
   assert.doesNotMatch(server,/spectralIntangible/);
   assert.match(server,/Math\.round\(out\.spectralSpeed\/2\)\*2/);
