@@ -1,17 +1,16 @@
-'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 
-test('não-host pode abrir configurações da sala em modo somente leitura',()=>{
-  const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-  assert.match(html,/id=\"btnViewRoomConfig\"[^>]*>Ver configurações<\/button>/);
-  assert.match(html,/id=\"roomSettingsView\"/);
-  assert.match(html,/function openRoomSettingsView\(\)\{if\(!NET\.inRoom\|\|NET\.isHost\|\|NET\.room\?\.status!==\'lobby\'\)return/);
-  assert.match(html,/const st=r\.settings\|\|\{\}/);
-  assert.match(html,/ROOM_ROLE_CONFIG_KEYS/);
-  assert.doesNotMatch(html,/id=\"roomSettingsViewContent\"[\s\S]{0,300}<input/);
-  assert.match(html,/btnViewRoomConfig'\)\.hidden=NET\.isHost\|\|r\.status!==\'lobby\'/);
-  assert.match(html,/else if\(!\$\('roomSettingsView'\)\.hidden\)renderRoomSettingsView\(\)/);
+test('não-host pode consultar configurações reais da sala em painel somente leitura',()=>{
+  assert.match(html,/id="btnViewRoomSettings"[^>]*>Ver configurações<\/button>/);
+  assert.match(html,/function renderRoomViewSettings\(\)/);
+  assert.match(html,/const settings=r\.settings\|\|\{\}/);
+  assert.match(html,/btnViewRoomSettings'\)\.hidden=NET\.isHost\|\|r\.status!=='lobby'/);
+  assert.match(html,/id="roomViewSettingsBody"/);
+  const overlay=html.match(/<div id="roomViewSettings"[\s\S]*?<\/div>\s*<\/div>\s*<div id="gameSettingsOverlay"/i)?.[0]||'';
+  assert.ok(overlay,'painel de visualização deve existir');
+  assert.doesNotMatch(overlay,/type="range"|fnstepper|cfgChoice|id="cfgReset"/);
 });

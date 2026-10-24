@@ -177,7 +177,7 @@ test('chat escrito de sala tem UI, sanitização, limitação e filtragem por c�
   assert.match(html, /id="roomChatPanel"/);
   assert.match(html, /id="btnRoomChatLobby"/);
   assert.match(html, /r\.status!=='lobby'\)closeRoomChat\(\)/);
-  assert.match(html, /NET\.room\?\.status!=='lobby'.*O chat escrito só funciona na sala de espera/s);
+  assert.match(html, /NET\.room\?\.status!=='lobby'.*(?:t\('lobby\.chatOnly'\)|O chat escrito só funciona na sala de espera)/s);
   assert.match(html, /id="roomChatInput" maxlength="180"/);
   assert.match(html, /type:'room_chat',text/);
   assert.match(html, /m\.roomCode===NET\.room\.code/);
@@ -311,7 +311,7 @@ test('cosméticos têm catálogo, categorias, renderização centralizada e sinc
 test('catálogo de cosméticos fica no menu inicial e preserva a regra de cores únicas online', () => {
   assert.match(html, /id="btnFreePlay"[^>]*>Partida Livre<\/button><button class="chip" id="btnCosmetics"[^>]*>Inventário<\/button>/, 'Inventário deve usar o mesmo estilo compacto de Partida Livre no menu');
   assert.doesNotMatch(html, /roomActions[^\n]*id="btnCosmetics"/, 'o botão não deve permanecer na janela do lobby');
-  assert.match(html, /function openCosmetics\(\)\{if\(NET\.inRoom\)\{toast\('O Inventário é usado na tela inicial/, 'Inventário deve ser aberto antes de entrar na sala');
+  assert.match(html, /function openCosmetics\(\)\{if\(NET\.inRoom\)\{toast\((?:t\('cosmetics\.menuOnly'\)|'O Inventário é usado na tela inicial)/, 'Inventário deve ser aberto antes de entrar na sala');
   assert.match(html, /id="lobbyColorSwatches"/, 'catálogo deve manter o seletor de cor');
   assert.match(html, /netSend\(\{type:'set_color',color:color\.id\}\)/, 'a proteção de cor única continua disponível para estado de lobby sincronizado');
   assert.match(html, /filter\(p=>p\.id!==NET\.id\)\.map\(p=>p\.color\)/, 'cores usadas por outros jogadores continuam detectadas');
