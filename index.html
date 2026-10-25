@@ -908,6 +908,23 @@ function localizedBotNamesFor(language){const lang=validGameLanguage(language),c
 function localizedBotFallback(index){return localizedBotFallbackFor(index,USER_PREFS.language)}
 function localizedBotFallbackFor(index,language){const pool=localizedBotNamesFor(language),base=pool[index%pool.length],cycle=Math.floor(index/pool.length);return cycle?`${base} ${cycle+1}`:base}
 function localizedBotDisplayName(name){const raw=String(name||''),catalog=window.NZ_LANGUAGE_CATALOG?.botNames||{};for(const pool of Object.values(catalog)){for(let i=0;i<pool.length;i++){if(raw===pool[i]||raw.startsWith(pool[i]+' ')&&/^\d+$/.test(raw.slice(pool[i].length+1)))return localizedBotNames()[i]+raw.slice(pool[i].length)}}return raw}
+const BOT_COLOR_NAMES=new WeakSet(),BOT_NAME_REFERENCES=new Map();
+function bindBotColorName(ch,owner=ch){
+  if(!ch||BOT_COLOR_NAMES.has(ch))return ch;
+  Object.defineProperty(ch,'name',{enumerable:true,configurable:true,get(){
+    const color=COLOR_BY[owner.color],key='color.'+owner.color;
+    for(const table of Object.values(I18N))if(table[key])BOT_NAME_REFERENCES.set(table[key],owner.id);
+    return colorDisplayName(color)||owner.color;
+  },set(value){}});BOT_COLOR_NAMES.add(ch);return ch;
+}
+function botReferenceName(value){const raw=String(value||'');if(G.chars.some(ch=>(ch.isPlayer||ch.isRemoteHuman)&&ch.name===raw))return raw;const bot=charById(BOT_NAME_REFERENCES.get(raw));return bot&&!bot.isPlayer&&!bot.isRemoteHuman?bot.name:raw}
+let BOT_NAME_UI_SIGNATURE='';
+function refreshBotNameUi(){
+  const signature=USER_PREFS.language+'|'+G.chars.filter(ch=>BOT_COLOR_NAMES.has(ch)).map(ch=>ch.id+':'+ch.color).join('|');
+  if(signature===BOT_NAME_UI_SIGNATURE)return;BOT_NAME_UI_SIGNATURE=signature;
+  for(const node of document.querySelectorAll('[data-bot-name-id]')){const bot=charById(node.dataset.botNameId);if(bot){const suffix=node.dataset.botNameSuffix||'';node.textContent=bot.name+(suffix.startsWith('\n')?'\n'+(bot.alive?t('freeplay.alive'):t('freeplay.dead'))+' · '+freePlayFunctionDisplayLabel(bot):suffix)}}
+  localizeScopedUi();
+}
 // Catálogo-base de localização. Novas traduções podem sobrescrever chaves sem alterar a lógica da interface.
 let I18N={'pt-BR':{}};
 let I18N_SOURCE_MAP={},I18N_REVERSE_MAP=new Map(),I18N_TEMPLATE_MATCHERS=[],I18N_CATALOG_READY=false;
@@ -939,7 +956,7 @@ function translateRuntimeText(value){
   const raw=String(value??''),lead=raw.match(/^\s*/)?.[0]||'',trail=raw.match(/\s*$/)?.[0]||'',core=raw.trim();if(!core)return raw;
   const direct=knownI18nKey(core);if(direct)return lead+t(direct)+trail;
   const icon=core.match(/^([^\p{L}\p{N}]+)([\p{L}].*)$/u);if(icon){const text=translateRuntimeText(icon[2]);if(text!==icon[2])return lead+icon[1]+text+trail}
-  for(const item of I18N_TEMPLATE_MATCHERS){const m=core.match(item.rx);if(!m)continue;const vars={};item.names.forEach((name,i)=>{let value=m[i+1];if(/^message$/i.test(name))value=translateRuntimeText(value.charAt(0).toUpperCase()+value.slice(1));else if(/^location$/i.test(name))value=localizedRoomPhrase(value);else if(/^role$/i.test(name))value=translateKnownText(value.replace(/^o /,''));else if(/^(room|region|role|function|team|color|saboteur|sabotage|label|stage|ability|task|map|preset)$/i.test(name))value=translateKnownText(value);vars[name]=value});return lead+t(item.key,vars)+trail}
+  for(const item of I18N_TEMPLATE_MATCHERS){const m=core.match(item.rx);if(!m)continue;const vars={};item.names.forEach((name,i)=>{let value=m[i+1];if(typeof botReferenceName==='function'&&/^(name|target|victim|killer|medic|player)$/i.test(name))value=botReferenceName(value);else if(/^message$/i.test(name))value=translateRuntimeText(value.charAt(0).toUpperCase()+value.slice(1));else if(/^location$/i.test(name))value=localizedRoomPhrase(value);else if(/^role$/i.test(name))value=translateKnownText(value.replace(/^o /,''));else if(/^(room|region|role|function|team|color|saboteur|sabotage|label|stage|ability|task|map|preset)$/i.test(name))value=translateKnownText(value);vars[name]=value});return lead+t(item.key,vars)+trail}
   return raw;
 }
 function i18nScopeRoot(node){
@@ -997,8 +1014,8 @@ function applyGameLanguage(){
   const participants=document.querySelector('#roomLobby > .card > h3');if(participants)participants.textContent=t('lobby.participants');
   const options=document.querySelector('#hostRoomConfig h3');if(options)options.textContent=t('lobby.options');
   renderLanguageMenu();syncStreamerVisuals();localizeScopedUi();
-  if(G.player){for(const ch of G.chars)if(!ch.isPlayer&&!ch.isRemoteHuman&&(ch.ai||ch.isBot))ch.name=localizedBotDisplayName(ch.name);renderTasks();updateRolePanel(G.player);updateSabUI();updateButtons()}
-  syncAccountVisibilityLabels();
+  if(G.player){for(const ch of G.chars)if(!ch.isPlayer&&!ch.isRemoteHuman&&(ch.ai||ch.isBot))bindBotColorName(ch);renderTasks();updateRolePanel(G.player);updateSabUI();updateButtons()}
+  syncAccountVisibilityLabels();refreshBotNameUi();
   if(!$('cosmeticsOverlay')?.hidden)renderCosmeticsCatalog();
   if(!$('roomInfoOverlay')?.hidden&&NET.lastRoomInfo)showRoomInfo(NET.lastRoomInfo);
   if(NET.room&&NET.inRoom)netRenderRoom();
@@ -2151,7 +2168,7 @@ function pressEmergency(){
 /* =====================================================================
    MODAL E MINIJOGOS
    ===================================================================== */
-const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
+const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null){e.textContent=txt;const raw=String(txt),bot=G.chars.find(ch=>BOT_COLOR_NAMES.has(ch)&&(raw===ch.name||raw.startsWith(ch.name+': ')||raw.startsWith(ch.name+'\n')));if(bot){e.dataset.botNameId=bot.id;e.dataset.botNameSuffix=raw.slice(bot.name.length)}}return e};
 function showModal(title,desc){
   $('mtitle').textContent=translateRuntimeText(title); $('mdesc').textContent=translateRuntimeText(desc); $('mbody').innerHTML='';
   $('mfx').className=''; $('mfx').innerHTML=''; $('modal').hidden=false; Snd.open();
@@ -2934,6 +2951,7 @@ function openFreePlayComputer(){
 }
 
 function newGame(prepareOnline=false){
+  BOT_NAME_REFERENCES.clear();BOT_NAME_UI_SIGNATURE='';
   closeModalSilent(); $('end').hidden=true; $('menu').hidden=true; $('meet').hidden=true; $('hud').hidden=false;
   activateMapData(SELECTED_MAP_ID,true);G.mapId=ACTIVE_MAP_ID;G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
   TID=0; resetMapDoors();
@@ -3983,7 +4001,7 @@ function activeFakeStations(){
 }
 
 function makeNPC(name,color){
-  const c=newChar(localizedBotDisplayName(name),color,0,0,false);
+  const c=bindBotColorName(newChar(name,color,0,0,false));
   c.emUses=CFG.emergencyUses;c.netKillCd=Math.max(0,Number(G.killCd)||0);c.netDelayedCd=0;c.netSheriffCd=0;c.cleanCd=0;c.cleanUses=0;c.guardianCd=0;c.parasiteReady=true;c.parasiteTargetId=null;c.paramedicCd=0;c.paramedicSpent=0;c.revivedOnce=false;c.spectralInvisible=false;c.spectralTime=0;c.spectralEndsAt=0;c.spectralSeq=0;c.spectralCd=0;
   c.ai={state:'idle',path:[],goal:null,isGoal:null,pathVer:0,wait:rand(0,25)/10,work:0,workMax:1,stuck:0,pt:Math.random()*.3,
     reactT:0,bodySeen:null,ignore:new Set(),seen:{},trail:[],speed:CFG.speed*(0.88+Math.random()*.18),wanderP:.15+Math.random()*.25,skipW:.5+Math.random()*1.3,
@@ -4440,7 +4458,7 @@ function seedBodyKillerTrace(body){
   if(!body?.killerId)return body;const killer=charById(body.killerId);if(!killer)return body;
   body.killerTrace=[{t:0,x:body.x,y:body.y,room:body.room||roomName(body.x,body.y),vent:killer.vent||null}];body.traceUntil=G.gt+10;body.traceNext=G.gt+.16;return body;
 }
-function addBodyWithPet(body,ch){seedBodyKillerTrace(body);G.bodies.push(body);parkPetAtBody(body,ch);return body}
+function addBodyWithPet(body,ch){if(BOT_COLOR_NAMES.has(ch))bindBotColorName(body,ch);seedBodyKillerTrace(body);G.bodies.push(body);parkPetAtBody(body,ch);return body}
 function updateBodyKillerTraces(){
   for(const b of G.bodies||[]){if(!b?.killerId||!b.traceUntil||G.gt>b.traceUntil||G.gt<(b.traceNext||0))continue;const k=charById(b.killerId);if(!k)continue;b.traceNext=G.gt+.16;
     const frame={t:Math.max(0,G.gt-(b.tKill||G.gt)),x:k.x,y:k.y,room:roomName(k.x,k.y),vent:k.vent||null};const arr=b.killerTrace||(b.killerTrace=[]),last=arr[arr.length-1];
@@ -5811,6 +5829,7 @@ function updateButtons(){
   if(p.controlledBy){[bk,bsh,bdel,bcl,bp,bspec,bpa,bse,bh,bi,bg,bs,br,bl,be,bc,ub,fb].forEach(e=>{if(e)hv(e,true)});$('ventPanel').hidden=true}
 }
 function update(dt){
+  refreshBotNameUi();
   const p=G.player;
   if(G.mapOpen&&G.state!=='playing')closeMap();
   if(G.state==='task'&&G.mini&&G.mini.task.fix&&!G.mini.finished&&!(G.sab[G.mini.task.fix]>0))closeModal();
@@ -6202,7 +6221,7 @@ function netRenderRoom(){
   $('btnRoomChatLobby').hidden=r.status!=='lobby';if(r.status!=='lobby')closeRoomChat();const modBtn=$('btnLobbyModeration');modBtn.hidden=!(NET.isHost&&r.status==='lobby');if(modBtn.hidden)NET.modLobbyOpen=false;modBtn.setAttribute('aria-pressed',String(!!NET.modLobbyOpen));
   const list=$('roomPlayers');list.innerHTML='';
   (r.players||[]).forEach(p=>{const item=el('div','roomPlayer');const av=document.createElement('canvas');av.width=44;av.height=44;av.className='roomAvatar';drawLobbyAvatar(av,p);const name=el('strong','',p.name+(p.id===r.hostId?' ★ Host':''));const role=el('span','roomState',p.id===NET.id?'Você':(p.ready?'Pronto':'Conectado'));item.append(av,name,role);if(NET.modLobbyOpen&&NET.isHost&&p.id!==NET.id){const actions=el('div','roomModeration'),kick=el('button','roomKick','Expulsar'),ban=el('button','roomBan','Banir');kick.type=ban.type='button';kick.addEventListener('click',e=>{e.stopPropagation();lobbyModerate(p.id,'kick')});ban.addEventListener('click',e=>{e.stopPropagation();lobbyModerate(p.id,'ban')});actions.append(kick,ban);item.append(actions)}list.append(item)});
-  if(r.bots){for(let i=0;i<r.bots;i++){const item=el('div','roomPlayer');const dot=el('i','roomDot');dot.style.background='#9298ad';const bot=r.botRoster?.[i];item.append(dot,el('strong','',localizedBotDisplayName(bot?.name||localizedBotFallback(i))),el('span','','IA'));list.append(item)}}
+  if(r.bots){for(let i=0;i<r.bots;i++){const item=el('div','roomPlayer');const dot=el('i','roomDot');dot.style.background='#9298ad';const bot=r.botRoster?.[i];item.append(dot,el('strong','',(G.chars.find(ch=>ch.id===bot?.id)?.name||localizedBotDisplayName(bot?.name||localizedBotFallback(i)))),el('span','','IA'));list.append(item)}}
   $('hostRoomConfig').hidden=!NET.isHost||r.status!=='lobby';$('btnCfg').disabled=!NET.isHost||r.status!=='lobby';$('btnViewRoomSettings').hidden=NET.isHost||r.status!=='lobby';if(!$('roomViewSettings').hidden)renderRoomViewSettings();
   $('roomLobbyHint').textContent=NET.isHost?'Você é o host. Ajuste a sala e inicie quando houver pelo menos 4 participantes contando os bots.':'Aguardando o host iniciar. Só o host pode alterar configurações ou reiniciar a partida.';
   $('btnStartRoom').hidden=!NET.isHost||r.status!=='lobby';$('btnStartRoom').disabled=!NET.isHost||r.status!=='lobby'||netTotal(r)<4||netTotal(r)>r.size;if(r.status!=='lobby')closeCosmetics();
@@ -6425,7 +6444,7 @@ function netApplySnapshot(s,force=false){
       const oldVisualWalk=Number.isFinite(+c.netVisualWalk)?+c.netVisualWalk:oldWalk,oldVisualMoving=typeof c.netVisualMoving==='boolean'?c.netVisualMoving:oldMoving;
       const ownPredicted=clientSnapshot&&r.id===NET.id&&hadOld;
       const predictedX=oldX,predictedY=oldY,predictedWalk=oldWalk,predictedMoving=oldMoving,predictedFace=c.face;
-      const ai=c.ai;Object.assign(c,r);c.cosmetics=cloneCosmetics(r.cosmetics);if(ai)c.ai=ai;else if(!r.isBot&&!r.isRemoteHuman&&!c.isPlayer)c.ai=null;c.isPlayer=c.id===NET.id;c.isRemoteHuman=c.id!==NET.id&&(!!NET.room?.players.some(p=>p.id===c.id)||!!r.isRemoteHuman);c.isBot=!!r.isBot;if(c.isBot)c.name=localizedBotDisplayName(c.name);
+      const ai=c.ai;Object.assign(c,r);c.cosmetics=cloneCosmetics(r.cosmetics);if(ai)c.ai=ai;else if(!r.isBot&&!r.isRemoteHuman&&!c.isPlayer)c.ai=null;c.isPlayer=c.id===NET.id;c.isRemoteHuman=c.id!==NET.id&&(!!NET.room?.players.some(p=>p.id===c.id)||!!r.isRemoteHuman);c.isBot=!!r.isBot;if(c.isBot)bindBotColorName(c);
       const targetX=Number.isFinite(+r.x)?+r.x:c.x,targetY=Number.isFinite(+r.y)?+r.y:c.y;
       // Para o próprio cliente, o snapshot é confirmação autoritativa, não um frame de animação.
       // Mantemos a posição prevista localmente e acumulamos apenas a diferença que realmente precisa ser reconciliada.
@@ -6457,7 +6476,7 @@ function netApplySnapshot(s,force=false){
     G.player=G.chars.find(c=>c.id===NET.id)||G.player;if(!G.player)return;G.player.isPlayer=true;G.role=G.player.role;G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.imps=G.chars.filter(c=>c.role==='imp');G.imp=G.imps[0]||null;
     const oldTasks=new Map((G.tasks||[]).map(t=>[String(t.id),t]));
     G.tasks=s.tasks.map(r=>{let t=oldTasks.get(String(r.id));if(!t)t={id:r.id,steps:[]};t.id=r.id;t.key=r.key;t.name=r.name;t.owner=r.owner;t.fake=!!r.fake;t.fakeOnly=!!r.fakeOnly;t.lazy=!!r.lazy;t.fix=r.fix||null;const oldSteps=new Map((t.steps||[]).map((q,i)=>[String(q.st)+'/'+i,q]));t.steps=r.steps.map((q,i)=>{let z=oldSteps.get(String(q.st)+'/'+i);if(!z)z={};const key=String(t.id)+':'+String(q.st);Object.assign(z,q);if(q.done)NET.pendingTasks.delete(key);return z});t.done=!!r.done||t.steps.every(q=>q.done);for(const q of t.steps){const key=String(t.id)+':'+String(q.st);if(q.done||t.done)NET.pendingTasks.delete(key)}return t});
-    const oldBodies=new Map((G.bodies||[]).map(b=>[String(b.id),b]));G.bodies=s.bodies.map(r=>{const b=oldBodies.get(String(r.id))||{};Object.assign(b,r);return b});G.deadPets=Array.isArray(s.deadPets)?s.deadPets.map(p=>({...p,sad:true})):[];
+    const oldBodies=new Map((G.bodies||[]).map(b=>[String(b.id),b]));G.bodies=s.bodies.map(r=>{const b=oldBodies.get(String(r.id))||{};Object.assign(b,r);const owner=charById(b.victimId||b.id);if(BOT_COLOR_NAMES.has(owner))bindBotColorName(b,owner);return b});G.deadPets=Array.isArray(s.deadPets)?s.deadPets.map(p=>({...p,sad:true})):[];
     const oldSplashes=new Map((G.killSplashes||[]).map(q=>[String(q.id),q]));G.killSplashes=Array.isArray(s.killSplashes)?s.killSplashes.map(q=>{const old=oldSplashes.get(String(q.id));return old?{...q,t:Math.min(Number(q.t)||0,Number(old.t)||0)}:{...q}}):[];const incomingSmoke=Array.isArray(s.spectralSmokes)?s.spectralSmokes:[];G.spectralSmokes=incomingSmoke.map(f=>({...f}));for(const f of G.spectralSmokes){if(!SPECTRAL_SEEN_SMOKES.has(f.id)){SPECTRAL_SEEN_SMOKES.add(f.id);spectralSoundNearby(f.x,f.y,f.phase==='show'?'done':'use')}}
     G.noisyAlerts=Array.isArray(s.noisyAlerts)?s.noisyAlerts.map(a=>({...a})):[];for(const a of G.noisyAlerts){if(noisyAudienceAllowed()&&!NOISY_SEEN_ALERTS.has(a.id)){NOISY_SEEN_ALERTS.add(a.id);Snd.noisyAlarm()}};G.guardianProtections=s.guardianProtections&&typeof s.guardianProtections==='object'?{...s.guardianProtections}:{};G.guardianBreakFx=Array.isArray(s.guardianBreakFx)?s.guardianBreakFx.map(f=>({...f})):[];for(const f of G.guardianBreakFx){if(!GUARDIAN_SEEN_BREAKS.has(f.id)){GUARDIAN_SEEN_BREAKS.add(f.id);Snd.roleFx('guardian','done')}};G.instructorTrails=Array.isArray(s.instructorTrails)?s.instructorTrails.map(t=>({...t,points:(t.points||[]).map(p=>({...p}))})):[];for(const tr of G.instructorTrails){if(!INSTRUCTOR_SEEN_TRAILS.has(tr.id)){INSTRUCTOR_SEEN_TRAILS.add(tr.id);const end=tr.points?.[tr.points.length-1];if(end){Snd.roleFx('instructor','done');if(String(tr.targetId)===String(G.player.id))toast('↔️ Um Instrutor marcou um caminho para você.',2400);else if(String(tr.ownerId)===String(G.player.id)){const tgt=charById(tr.targetId);toast('Trilha marcada'+(tgt?' para '+tgt.name:'')+'.',2200)}}}}
     G.delayedMarks=s.delayedMarks&&typeof s.delayedMarks==='object'?{...s.delayedMarks}:{};G.parasiteInfections=s.parasiteInfections&&typeof s.parasiteInfections==='object'?{...s.parasiteInfections}:{};G.parasiteWinnerId=s.parasiteWinnerId||G.parasiteWinnerId||null;

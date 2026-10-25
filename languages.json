@@ -1741,7 +1741,8 @@
       "remaining.final.23": "as portas travaram",
       "account.hidePassword": "Ocultar senha",
       "account.hideId": "Ocultar ID",
-      "hud.following": "Seguindo"
+      "hud.following": "Seguindo",
+      "color.marrom": "Marrom"
     },
     "pt-PT": {
       "menu.tag": "A nave está a falhar. Conclui as tarefas antes que seja tarde.",
@@ -3442,7 +3443,8 @@
       "remaining.final.23": "as portas bloquearam",
       "account.hidePassword": "Ocultar palavra-passe",
       "account.hideId": "Ocultar ID",
-      "hud.following": "A seguir"
+      "hud.following": "A seguir",
+      "color.marrom": "Castanho"
     },
     "es": {
       "menu.tag": "La nave está fallando. Completa las tareas antes de que sea tarde.",
@@ -5143,7 +5145,8 @@
       "remaining.final.23": "se bloquearon las puertas",
       "account.hidePassword": "Ocultar contraseña",
       "account.hideId": "Ocultar ID",
-      "hud.following": "Siguiendo"
+      "hud.following": "Siguiendo",
+      "color.marrom": "Marrón"
     },
     "en": {
       "menu.tag": "The ship is failing. Complete your tasks before it is too late.",
@@ -6844,7 +6847,8 @@
       "remaining.final.23": "the doors locked",
       "account.hidePassword": "Hide password",
       "account.hideId": "Hide ID",
-      "hud.following": "Following"
+      "hud.following": "Following",
+      "color.marrom": "Brown"
     },
     "ru": {
       "menu.tag": "Корабль выходит из строя. Выполните задания, пока не стало слишком поздно.",
@@ -8545,7 +8549,8 @@
       "remaining.final.23": "заблокировались двери",
       "account.hidePassword": "Скрыть пароль",
       "account.hideId": "Скрыть ID",
-      "hud.following": "Слежение за"
+      "hud.following": "Слежение за",
+      "color.marrom": "Коричневый"
     },
     "ja": {
       "menu.tag": "宇宙船に異常が発生しています。手遅れになる前にタスクを完了しましょう。",
@@ -10246,7 +10251,8 @@
       "remaining.final.23": "ドアが封鎖された",
       "account.hidePassword": "パスワードを隠す",
       "account.hideId": "IDを隠す",
-      "hud.following": "追跡中"
+      "hud.following": "追跡中",
+      "color.marrom": "茶色"
     }
   },
   "sourceMap": {
@@ -11798,7 +11804,8 @@
     "as portas travaram": "remaining.final.23",
     "Ocultar senha": "account.hidePassword",
     "Ocultar ID": "account.hideId",
-    "Seguindo": "hud.following"
+    "Seguindo": "hud.following",
+    "Marrom": "color.marrom"
   },
   "botNames": {
     "pt-BR": [
