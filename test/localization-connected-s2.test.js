@@ -23,9 +23,9 @@ test('cosméticos, tarefas, bots e etapas de tarefa têm tradução conectada',(
   assert.match(html,/function taskDisplayName\(/);
   assert.match(html,/function taskDisplayStep\(/);
   assert.match(html,/localizedBotNamesFor\(/);
-  assert.deepEqual(catalog.botNames.en.slice(0,3),['Crewmate 1','Crewmate 2','Crewmate 3']);
-  assert.deepEqual(catalog.botNames['pt-BR'].slice(0,3),['Tripulante 1','Tripulante 2','Tripulante 3']);
-  assert.deepEqual(catalog.botNames.ru.slice(0,3),['Член экипажа 1','Член экипажа 2','Член экипажа 3']);
+  assert.deepEqual(catalog.botNames.en.slice(0,3),['Blue','Yellow','Red']);
+  assert.deepEqual(catalog.botNames['pt-BR'].slice(0,3),['Azul','Amarelo','Vermelho']);
+  assert.deepEqual(catalog.botNames.ru.slice(0,3),['Синий','Жёлтый','Красный']);
   assert.notEqual(catalog.strings.en['task.stepLabel.abastecer_o_reator'],catalog.strings['pt-BR']['task.stepLabel.abastecer_o_reator']);
 });
 

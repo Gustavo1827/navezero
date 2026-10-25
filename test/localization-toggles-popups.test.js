@@ -1,0 +1,11 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const root=path.join(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),catalog=JSON.parse(fs.readFileSync(path.join(root,'languages.json'),'utf8'));
+function context(lang){const node={textContent:'',classList:{add(){node.visible=true},remove(){node.visible=false}}};const ctx={I18N:catalog.strings,I18N_SOURCE_MAP:catalog.sourceMap,I18N_REVERSE_MAP:new Map(),I18N_TEMPLATE_MATCHERS:[],USER_PREFS:{language:lang},toastT:null,$:()=>node,clearTimeout(){},setTimeout(){},window:{NZ_LANGUAGE_CATALOG:catalog}};ctx.validGameLanguage=l=>l;ctx.t=(k,v={})=>catalog.strings[ctx.USER_PREFS.language][k].replace(/\{(\w+)\}/g,(_,n)=>v[n]??'');vm.createContext(ctx);vm.runInContext(html.slice(html.indexOf('function escRx('),html.indexOf('function i18nScopeRoot('))+'\nrebuildI18nReverse();',ctx);const a=html.indexOf('function toast('),b=html.indexOf('\n}',a)+2;vm.runInContext(html.slice(a,b),ctx);ctx.node=node;return ctx}
+test('important translated notices retain the Portuguese visibility rule and all parameters',()=>{
+ const filter=/(sabot|reator|eliminad|morte|vit[oó]ria|derrota|conex[aã]o perdida|sala fechada|cooldown|recarga|vota[cç][aã]o|ejetad|erro|banid|expuls|inv[aá]lid|emerg[eê]ncia|marcad|restaurad|estabilizad|reabert|destrav|aplicad)/i;
+ for(const lang of Object.keys(catalog.strings)){const ctx=context(lang);for(const [key,base] of Object.entries(catalog.strings['pt-BR'])){if(!filter.test(base))continue;const vars={};for(const m of base.matchAll(/\{(\w+)\}/g))vars[m[1]]='12';const message=ctx.t(key,vars);ctx.node.visible=false;ctx.toast(message);assert.equal(ctx.node.visible,true,lang+' '+key);assert.equal(ctx.node.textContent,ctx.translateRuntimeText(message))}ctx.node.visible=false;ctx.toast('Hello');assert.equal(ctx.node.visible,false)}
+});
+test('bot color pools are localized and retain Unicode uniqueness',()=>{
+ for(const [lang,names] of Object.entries(catalog.botNames)){assert.equal(names.length,15);assert.equal(new Set(names.map(n=>n.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,''))).size,15);assert.equal(names[0],catalog.strings[lang]['color.azul']);assert.equal(names[1],catalog.strings[lang]['color.amarelo'])}
+});
