@@ -477,7 +477,7 @@ function handle(ws, raw, timings={}){
     const text=String(m.text||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,180);if(!text)return;
     const now=Date.now();if(now-(c.lastGhostChatAt||0)<3000)return;c.lastGhostChatAt=now;
     if(!Array.isArray(room.ghostChatHistory))room.ghostChatHistory=[];
-    const entry={roomCode:room.code,playerId:c.id,name:player.name,color:player.color,text,at:now};room.ghostChatHistory.push(entry);if(room.ghostChatHistory.length>80)room.ghostChatHistory.splice(0,room.ghostChatHistory.length-80);
+    const entry={roomCode:room.code,playerId:c.id,name:player.name,color:player.color,text,quick:m.quick===true,at:now};room.ghostChatHistory.push(entry);if(room.ghostChatHistory.length>80)room.ghostChatHistory.splice(0,room.ghostChatHistory.length-80);
     // Privacidade real do canal: o servidor envia a mensagem apenas para humanos mortos.
     for(const p of room.players){if(snapshotAlive(room,p.id))continue;const target=clients.get(p.id);if(target)send(target.ws,{type:'ghost_chat_message',...entry})}
     return;
