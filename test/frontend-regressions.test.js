@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const server = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+const languages = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'languages.json'), 'utf8'));
 
 test('configurações completas incluem infiltrados e distância de renderização na sala', () => {
   assert.match(html, /NET_SETTING_KEYS=\[[^\]]*'impostors'[^\]]*'renderDist'/);
@@ -14,8 +15,8 @@ test('configurações completas incluem infiltrados e distância de renderizaç�
 });
 
 test('a reunião revela os votos por 5 segundos e mantém a tela de ejeção por 10 segundos', () => {
-  assert.match(html, /M\.replyQ=\[\]; M\.dur=5; \$\('meetTitle'\)\.textContent='Votação'/);
-  assert.match(html, /M\.dur=10; \$\('meetTitle'\)\.textContent='Ejeção'/);
+  assert.match(html, /M\.replyQ=\[\]; M\.dur=5; \$\('meetTitle'\)\.textContent=t\('meeting\.voting'\)/);
+  assert.match(html, /M\.dur=10; \$\('meetTitle'\)\.textContent=t\('meeting\.ejection'\)/);
   assert.match(html, /M\.phase==='result'\)\{if\(M\.t>=M\.dur\)setMeetPhase\('eject'\)\}/);
   assert.match(html, /M\.phase==='eject'\)\{if\(M\.t>=M\.dur\)endMeeting\(\)\}/);
   assert.match(html, /\$\('meet'\)\.classList\.toggle\('vote-reveal',ph==='result'\)/);
@@ -90,12 +91,13 @@ test('frases prontas permitem alegar ou suspeitar das funções de tripulante', 
 });
 
 test('descrições das funções e classes usam exatamente os textos solicitados', () => {
-  assert.match(html, /Localizador — Rastreie um Tripulante com seu mapa\./);
-  assert.match(html, /Xerife — Elimine o Infiltrado\. Se você errar, será eliminado\./);
-  assert.match(html, /Mate a tripulação e sabote a nave\./);
-  assert.match(html, /Faça suas tarefas e encontre o Infiltrado\./);
-  assert.match(html, /Temporizador — Mate suas vítimas lentamente\./);
-  assert.match(html, /Observador - Veja a Tripulação no seu mapa a qualquer momento\./);
+  assert.equal(languages.strings['pt-BR']['role.desc.locator'],'Localizador — Rastreie um Tripulante com seu mapa.');
+  assert.equal(languages.strings['pt-BR']['role.desc.sheriff'],'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.');
+  assert.equal(languages.strings['pt-BR']['role.defaultImpDesc'],'Mate a tripulação e sabote a nave.');
+  assert.equal(languages.strings['pt-BR']['role.defaultCrewDesc'],'Faça suas tarefas e encontre o Infiltrado.');
+  assert.equal(languages.strings['pt-BR']['role.desc.timer'],'Temporizador — Mate suas vítimas lentamente.');
+  assert.equal(languages.strings['pt-BR']['role.desc.observer'],'Observador - Veja a Tripulação no seu mapa a qualquer momento.');
+  assert.match(html, /roleMessageForPlayer[\s\S]*?t\('role\.desc\.'/);
 });
 
 test('cliente não marca tarefa concluída antes da confirmação autoritativa do host', () => {
@@ -154,7 +156,7 @@ test('Temporizador tem aba vermelha, ativação, duração limitada e marcação
 test('ajustes atuais: cooldowns maiores e uniformes, votos pulados identificados, OK menor e stepper contínuo', () => {
   assert.match(html, /\.act2\.cooldown-label\{font-size:22px!important/);
   assert.match(html, /\.act2\.cooldown-label small,\.act2\.cooldown-label \.sheriffButtonLabel\{font-size:22px!important/);
-  assert.match(html, /el\('span','skip-vote-label','Votos Pulados:'\)/);
+  assert.match(html, /el\('span','skip-vote-label',t\('meeting\.skippedVotes'\)\)/);
   assert.match(html, /dot\.style\.background=COLOR_BY\[voter\.color\]\?\.main\|\|chatCol\(voter\)/);
   assert.match(html, /#roomBotsOk\{[^}]*font:800 20px/);
   assert.match(html, /wireRepeat\(minus,-1\);wireRepeat\(plus,1\)/);
@@ -241,7 +243,7 @@ test('Faxineiro tem configuração, atribuição, limpeza autoritativa e memóri
   assert.match(html, /cleanerUses:\[1,15\]/);
   assert.match(html, /id="btnCleanerSection"[^>]*>🧹 Faxineiro/);
   assert.match(html, /id="btnCleaner"[^>]*>🧹/);
-  assert.match(html, /Faxineiro - Limpe corpos e suma com as evidências\./);
+  assert.equal(languages.strings['pt-BR']['role.desc.cleaner'],'Faxineiro - Limpe corpos e suma com as evidências.');
   assert.match(html, /const cleanerEnabled|CFG\.cleanerChance>0&&CFG\.cleanerMax>0/);
   assert.match(html, /function cleanBody\(cleaner,body\)[\s\S]*?cleaner\.cleanPending=\{bodyId:body\.id,remaining:CFG\.cleanerDelay\}/);
   assert.match(html, /function finishCleanBody\(cleaner,body\)[\s\S]*?G\.bodies=G\.bodies\.filter\(b=>b!==body\)/);
@@ -268,7 +270,7 @@ test('Engenheiro tem configuração, atribuição e sincronização multiplayer'
   assert.match(html, /engVentDuration:\[10,61\]/);
   assert.match(html, /engCooldown:\[5,25\]/);
   assert.match(html, /id="btnEngineerSection"[^>]*>🔧 Engenheiro/);
-  assert.match(html, /Engenheiro - Pode usar os dutos/);
+  assert.equal(languages.strings['pt-BR']['role.desc.engineer'],'Engenheiro - Pode usar os dutos');
   assert.match(html, /function noteEngineerVentSeen\(ch,v,act\)[\s\S]*?addSusp\(o,ch\.id,-1\.2,'clear'/);
   assert.match(html, /ai\.engineerSaw&&G\.gt-ai\.engineerSaw\.gt<45/);
   assert.match(html, /\(ai\.vents\|\|\[\]\)\.some\(v=>v\.id===t\.id&&!v\.engineer\)/);
@@ -519,7 +521,7 @@ test('Paramédico libera usos por tarefas, revive uma única vez e sincroniza o 
     assert.match(html, new RegExp(key+':\\['));
     assert.match(server, new RegExp(key+':\\['));
   }
-  assert.match(html, /Paramédico - Reviva Tripulantes por meio de seus corpos\./);
+  assert.equal(languages.strings['pt-BR']['role.desc.paramedic'],'Paramédico - Reviva Tripulantes por meio de seus corpos.');
   assert.match(html, /paramedicEligible=shuffle\(G\.chars\.filter\(c=>c\.role==='crew'&&!c\.function\)\)/);
   assert.match(html, /Math\.floor\(completedRealTasksFor\(ch\)\/Math\.max\(1,CFG\.paramedicTasksPerUse\)\)/);
   assert.match(html, /function paramedicAvailableUses\(ch\)\{return Math\.max\(0,paramedicUnlockedUses\(ch\)-Math\.max\(0,ch\?\.paramedicSpent\|\|0\)\)\}/, 'usos liberados devem acumular até serem realmente gastos');
@@ -620,7 +622,7 @@ test('Chat Rápido contém as novas frases e reutiliza seletores de salas e joga
 
 test('Preguiçoso é Tripulante vivo com tarefas reduzidas e peso normal na barra', () => {
   assert.match(html, /id="btnLazySection"[^>]*>🍕 Preguiçoso/);
-  assert.match(html, /Preguiçoso - Suas tarefas são fáceis, complete elas e ajude a Tripulação\./);
+  assert.equal(languages.strings['pt-BR']['role.desc.lazy'],'Preguiçoso - Suas tarefas são fáceis, complete elas e ajude a Tripulação.');
   for (const key of ['lazyChance','lazyMax','lazySlowdown','lazyTasks']) {
     assert.match(html,new RegExp(key+':\\['));
     assert.match(server,new RegExp(key+':\\['));
