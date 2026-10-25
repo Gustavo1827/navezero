@@ -17,12 +17,13 @@ test('reuniões e títulos internos têm as mesmas chaves nos seis idiomas',()=>
   assert.match(html,/t\('meeting\.votingDesc'\)/);
 });
 
-test('bots usam nomes naturais por idioma e exemplos pedidos em inglês',()=>{
-  for(const lang of langs){assert.ok(Array.isArray(catalog.botNames[lang]));assert.equal(catalog.botNames[lang].length,12)}
-  const pt=catalog.botNames['pt-BR'], en=catalog.botNames.en;
-  assert.equal(en[pt.indexOf('Duda')],'Lily');
-  assert.equal(en[pt.indexOf('João')],'John');
-  assert.equal(en[pt.indexOf('Marcos')],'Marc');
+test('bots usam padrão numerado traduzido por idioma',()=>{
+  for(const lang of langs){assert.ok(Array.isArray(catalog.botNames[lang]));assert.equal(catalog.botNames[lang].length,15)}
+  assert.deepEqual(catalog.botNames['pt-BR'].slice(0,3),['Tripulante 1','Tripulante 2','Tripulante 3']);
+  assert.deepEqual(catalog.botNames.en.slice(0,3),['Crewmate 1','Crewmate 2','Crewmate 3']);
+  assert.deepEqual(catalog.botNames.es.slice(0,3),['Tripulante 1','Tripulante 2','Tripulante 3']);
+  assert.deepEqual(catalog.botNames.ru.slice(0,3),['Член экипажа 1','Член экипажа 2','Член экипажа 3']);
+  assert.deepEqual(catalog.botNames.ja.slice(0,3),['クルー 1','クルー 2','クルー 3']);
   assert.match(html,/function localizedBotNames\(\)/);
   assert.match(server,/function botNamesForRoom\(room\)/);
   assert.match(server,/cleanRoomLanguage\(room\?\.language\)/);

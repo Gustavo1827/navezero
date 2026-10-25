@@ -126,8 +126,9 @@ test('Temporizador tem aba vermelha, ativação, duração limitada e marcação
   assert.match(html, /id="btnDelayed"/);
   assert.match(html, /delayedEnabled:\[0,1\]/);
   assert.match(html, /delayedDuration:\[5,40\]/);
-  assert.match(html, /Tempo para marcar/);
-  assert.match(html, /Usa o mesmo cooldown configurado em/);
+  assert.match(html, /settings\.timer\.markCooldownLabel/);
+  assert.match(html, /settings\.timer\.markCooldownDesc/);
+  assert.equal(languages.strings['pt-BR']['settings.timer.markCooldownLabel'],'⏱️ Tempo para marcar');
   assert.match(html, /if\(CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
   assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Temporizador'/);
   assert.doesNotMatch(html, /if\(CFG\.delayedEnabled&&CFG\.delayedChance>0/);
@@ -463,9 +464,10 @@ test('distância para ações oferece Curta, Média e Longa e sincroniza no mult
   assert.match(server, /actionDistance:1/);
 });
 
-test('configurações de funções mostram descrição no topo de cada função', () => {
-  assert.match(html, /const descriptions=\{locator:/);
-  for (const role of ['Localizador','Xerife','Temporizador','Observador','Instrutor','Faxineiro','Parasita','Engenheiro','Marionetista']) assert.match(html,new RegExp(role));
+test('configurações de funções mostram descrição localizada no topo de cada função', () => {
+  assert.match(html, /const roleKey=G\.cfgFunctionTab==='delayed'\?'timer'/);
+  assert.match(html, /const descKey=`role\.desc\.\$\{roleKey\}`/);
+  for (const key of ['role.desc.locator','role.desc.sheriff','role.desc.timer','role.desc.observer','role.desc.instructor','role.desc.cleaner','role.desc.parasite','role.desc.engineer','role.desc.marionette']) assert.equal(typeof languages.strings.en[key],'string');
   assert.match(html, /box\.appendChild\(info\)/);
 });
 

@@ -62,7 +62,7 @@ const LIMITS = {
 };
 const MAP_IDS=new Set(['nave','nexus']);
 const DEFAULT_SETTINGS = {mapId:'nave',kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorDuration:8,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,cleanerDelay:2,cleanerUses:2,parasiteChance:0,parasiteMax:1,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,spectralSpeed:4,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,seerDuration:7,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
-const BOT_NAMES_FALLBACK = ['Aurora','Bruno','Caio','Duda','Eli','Fabi','Gael','Hugo','Iris','João','Lia','Marcos'];
+const BOT_NAMES_FALLBACK = Array.from({length:15},(_,i)=>`Tripulante ${i+1}`);
 let BOT_NAMES_BY_LANGUAGE={};
 try{const catalog=JSON.parse(fs.readFileSync(LANGUAGES_FILE,'utf8'));if(catalog?.botNames&&typeof catalog.botNames==='object')BOT_NAMES_BY_LANGUAGE=catalog.botNames}catch(err){console.error('Falha ao carregar nomes localizados dos bots:',err.message)}
 function botNamesForRoom(room){const lang=cleanRoomLanguage(room?.language),list=BOT_NAMES_BY_LANGUAGE?.[lang];return Array.isArray(list)&&list.length?list:BOT_NAMES_FALLBACK}
@@ -71,7 +71,7 @@ function ensureBotRoster(room){
   if(!room.botRoster)room.botRoster=[];if(!Number.isFinite(room.botNameSeq))room.botNameSeq=0;
   const used=new Set((room.players||[]).map(p=>nameKey(p.name)));
   const makeName=()=>{
-    const pool=botNamesForRoom(room);for(let tries=0;tries<500;tries++){const n=room.botNameSeq++,base=pool[n%pool.length],cycle=Math.floor(n/pool.length);let candidate=cycle?`${base} ${cycle+1}`:base;if(candidate.length>12)candidate=`Bot ${n+1}`;if(!used.has(nameKey(candidate))){used.add(nameKey(candidate));return candidate}}
+    const pool=botNamesForRoom(room);for(let tries=0;tries<500;tries++){const n=room.botNameSeq++,base=pool[n%pool.length],cycle=Math.floor(n/pool.length);const candidate=cycle?`${base} ${cycle+1}`:base;if(!used.has(nameKey(candidate))){used.add(nameKey(candidate));return candidate}}
     let n=1,candidate;do{candidate=`Bot ${n++}`}while(used.has(nameKey(candidate)));used.add(nameKey(candidate));return candidate;
   };
   for(let i=0;i<room.bots;i++){

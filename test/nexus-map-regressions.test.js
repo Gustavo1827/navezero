@@ -109,7 +109,7 @@ test('Nexus usa minigames próprios e exatamente a rede de dutos planejada',()=>
   assert.match(html,/key:'nx_vision_lenses'.*game:'nx_lenses'/s);
   assert.match(html,/key:'nx_lab_anomaly'.*game:'nx_anomaly'/s);
   assert.match(html,/Atual: \$\{r\.value\}/,'controles de quantidade devem mostrar o valor atual ao jogador');
-  assert.match(html,/if\(best\?\.type!=='decon'.*Entrar no duto/s,'controles da Descontaminação devem ter prioridade sobre dutos próximos');
+  assert.match(html,/if\(best\?\.type!=='decon'.*label:t\('action\.enterVent'\)/s,'controles da Descontaminação devem ter prioridade sobre dutos próximos');
 });
 
 test('interação das tarefas da Nexus é recalculada e fantasmas veem somente a própria posição no mapa',()=>{
