@@ -66,7 +66,7 @@ const BOT_NAMES_FALLBACK = Array.from({length:15},(_,i)=>`Tripulante ${i+1}`);
 let BOT_NAMES_BY_LANGUAGE={};
 try{const catalog=JSON.parse(fs.readFileSync(LANGUAGES_FILE,'utf8'));if(catalog?.botNames&&typeof catalog.botNames==='object')BOT_NAMES_BY_LANGUAGE=catalog.botNames}catch(err){console.error('Falha ao carregar nomes localizados dos bots:',err.message)}
 function botNamesForRoom(room){const lang=cleanRoomLanguage(room?.language),list=BOT_NAMES_BY_LANGUAGE?.[lang];return Array.isArray(list)&&list.length?list:BOT_NAMES_FALLBACK}
-const nameKey = value => String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]/g,'');
+const nameKey = value => String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^\p{L}\p{N}]/gu,'');
 function ensureBotRoster(room){
   if(!room.botRoster)room.botRoster=[];if(!Number.isFinite(room.botNameSeq))room.botNameSeq=0;
   const used=new Set((room.players||[]).map(p=>nameKey(p.name)));
