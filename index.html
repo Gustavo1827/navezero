@@ -2057,8 +2057,8 @@ function actionFor(s){
       }
     }
   }
-  const t=pendingAt(s.id);
-  if(t){const st=nextStep(t); return {type:'task',task:t,step:st,station:s,label:taskDisplayStep(t,st)}}
+  const pendingTask=pendingAt(s.id);
+  if(pendingTask){const st=nextStep(pendingTask); return {type:'task',task:pendingTask,step:st,station:s,label:taskDisplayStep(pendingTask,st)}}
   if(G.role==='imp'&&G.player.alive&&FAKE_GAME[s.id]&&!TOOLS[s.id]){   // impostor só finge: nunca existe tarefa real para ele
     const f=FAKE_GAME[s.id], step={st:s.id,game:f.game,mode:f.mode,dest:f.dest,label:t('task.fakeAction'),done:false};
     return {type:'task',task:{name:t('task.faking'),steps:[step],fake:true,fakeOnly:true,done:false,owner:G.player.id},step,station:s,label:t('task.fakeAction')};
@@ -4231,7 +4231,7 @@ function enterVent(ch,v){if(ch?.function==='engineer'&&ch===G.player){emitRoleFx
 function ventMove(ch,toId){
   if(!ch.vent||ch.ventAnim||ch.ventMv>0)return false;
   const from=ventById[ch.vent], to=ventById[toId];
-  if(!to||!VENT_ADJ[ch.vent].includes(toId))return false;   // só destinos realmente conectados
+  if(!from||!to||!VENT_ADJ[ch.vent]?.includes(toId))return false;   // só destinos realmente conectados
   // A rede de dutos já define as conexões permitidas. Não use a distância dos corredores
   // para recusá-las: Nave↔Reator e Enfermaria↔Varanda são ligações diretas do duto.
   ch.vent=toId; ch.x=to.px; ch.y=to.py-OFF_Y; ch.ventMv=.8;const puppet=ch.controlTargetId&&charById(ch.controlTargetId);if(puppet){puppet.vent=toId;puppet.x=ch.x;puppet.y=ch.y;puppet.ventMv=.8} Snd.tone(220,.15,'triangle',.05);
@@ -4310,7 +4310,8 @@ function tickVents(dt){
 }
 function openVentPanel(){$('ventPanel').hidden=false;refreshVentPanel()}
 function refreshVentPanel(){
-  const p=G.player; if(!p||!p.vent)return;
+  const p=G.player; if(!p||!p.vent){$('ventPanel').hidden=true;return}
+  if(!ventById[p.vent]||!VENT_ADJ[p.vent]){p.ventAnim=null;exitVent(p);return}
   const box=$('ventList'); box.innerHTML=''; $('ventHere').textContent='Você está no duto: '+ROOM_BY_ID[ventById[p.vent].room].name;
   VENT_ADJ[p.vent].forEach(id=>{const b=el('button','chip',ROOM_BY_ID[ventById[id].room].name); b.addEventListener('click',()=>{if(ventMove(G.player,id))Snd.click(); else Snd.err()}); box.appendChild(b)});
 }
@@ -4938,18 +4939,18 @@ function updateSabUI(){
   if(S.lights>0)L.push(t('sabotage.bar.lights'));
   if(S.comms>0)L.push(t('sabotage.bar.comms'));
   if(S.doors>0)L.push(t('sabotage.bar.doors',{seconds:Math.ceil(S.doors)}));
-  const t=L.join('|'); const bar=$('sabBar');
-  if(bar._t!==t){bar._t=t; bar.innerHTML=L.map(x=>'<div>'+x+'</div>').join('')}
+  const statusText=L.join('|'); const bar=$('sabBar');
+  if(bar._t!==statusText){bar._t=statusText; bar.innerHTML=L.map(x=>'<div>'+x+'</div>').join('')}
   bar.hidden=!L.length;
 }
 function openSabPanel(){
   showModal(t('sabotage.title'),t('sabotage.choose'));
   const S=G.sab, busy=S.lights>0||S.reactor>0||S.comms>0, cd=S.cd>0;
   const grid=el('div'); grid.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%';
-  [['lights','sabotage.lightsAction'],['reactor','sabotage.reactorAction'],['comms','sabotage.commsAction'],['doors','sabotage.doorsAction']].forEach(([t,l])=>{
+  [['lights','sabotage.lightsAction'],['reactor','sabotage.reactorAction'],['comms','sabotage.commsAction'],['doors','sabotage.doorsAction']].forEach(([type,l])=>{
     const b=el('button','mg',t(l)); b.style.cssText='height:84px;font-size:19px;padding:6px';
-    const off=cd||(t==='doors'?S.doors>0:busy); b.disabled=off; if(off)b.style.opacity=.45;
-    b.addEventListener('click',()=>{if(startSabotage(t,G.player))closeModal(); else Snd.err()});
+    const off=cd||(type==='doors'?S.doors>0:busy); b.disabled=off; if(off)b.style.opacity=.45;
+    b.addEventListener('click',()=>{if(startSabotage(type,G.player))closeModal(); else Snd.err()});
     grid.appendChild(b);
   });
   $('mbody').appendChild(grid);
@@ -6104,10 +6105,10 @@ function netConnect(action){
   if(NET.connecting)return;
   try{
     NET.connecting=true;const ws=new WebSocket(url);NET.ws=ws;
-    ws.onopen=()=>{NET.connecting=false;NET.lastServerMsgAt=performance.now();ws.send(JSON.stringify({type:'hello',name:String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante',color:G.cfg.color,clientKey:NET_CLIENT_KEY}))};
-    ws.onmessage=e=>{netMarkAlive();let m;try{m=JSON.parse(e.data)}catch{return}netHandleMessage(m)};
-    ws.onerror=()=>{NET.connecting=false;if(NET.joinPending)setJoinError('Não foi possível conectar ao servidor multiplayer.');else toast('Não foi possível conectar ao servidor multiplayer. Confira o endereço e se o servidor está ligado.',4200)};
-    ws.onclose=()=>{NET.connecting=false;netStopSilentProbe();const wasRoom=NET.inRoom,wasJoining=!!NET.joinPending,wasInfo=!!NET.roomInfoPending||!!NET.roomInfoConfirming;NET.joinPending=false;NET.roomInfoPending=false;NET.roomInfoConfirming=false;if((wasJoining||wasInfo)&&!wasRoom){if(!$('roomInfoOverlay').hidden){$('roomInfoStatus').textContent='Não foi possível atualizar as informações da sala.';$('btnRoomInfoEnter').disabled=true}else setJoinError('Não foi possível conectar à sala. Tente novamente.')}NET.ws=null;NET.id=null;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.remoteInputs.clear();NET.pendingTasks.clear();NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastMotionAt=0;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.rematchWaiting=false;NET.rematchReadyCode=null;NET.matchImpIds.clear();NET.departedImpIds.clear();netHideWait();if(wasRoom){$('roomLobby').hidden=true;toMenu();showRoomExitNotice('disconnect')}};
+    ws.onopen=()=>{if(NET.ws!==ws)return;NET.connecting=false;NET.lastServerMsgAt=performance.now();ws.send(JSON.stringify({type:'hello',name:String($('nameIn').value||'Tripulante').trim().slice(0,12)||'Tripulante',color:G.cfg.color,clientKey:NET_CLIENT_KEY}))};
+    ws.onmessage=e=>{if(NET.ws!==ws)return;netMarkAlive();let m;try{m=JSON.parse(e.data)}catch{return}netHandleMessage(m)};
+    ws.onerror=()=>{if(NET.ws!==ws)return;NET.connecting=false;if(NET.joinPending)setJoinError('Não foi possível conectar ao servidor multiplayer.');else toast('Não foi possível conectar ao servidor multiplayer. Confira o endereço e se o servidor está ligado.',4200)};
+    ws.onclose=()=>{if(NET.ws!==ws)return;NET.connecting=false;netStopSilentProbe();const wasRoom=NET.inRoom,wasJoining=!!NET.joinPending,wasInfo=!!NET.roomInfoPending||!!NET.roomInfoConfirming;NET.joinPending=false;NET.roomInfoPending=false;NET.roomInfoConfirming=false;if((wasJoining||wasInfo)&&!wasRoom){if(!$('roomInfoOverlay').hidden){$('roomInfoStatus').textContent='Não foi possível atualizar as informações da sala.';$('btnRoomInfoEnter').disabled=true}else setJoinError('Não foi possível conectar à sala. Tente novamente.')}NET.ws=null;NET.id=null;NET.inRoom=false;NET.isHost=false;NET.room=null;NET.roomDraft=null;NET.roomDraftDirty=false;NET.remoteInputs.clear();NET.pendingTasks.clear();NET.recvSeq=0;NET.seq=0;NET.motionSeq=0;NET.recvMotionSeq=0;NET.lastMotionAt=0;NET.preparedRound=0;NET.revealPending=false;NET.startRequested=false;NET.rematchWaiting=false;NET.rematchReadyCode=null;NET.matchImpIds.clear();NET.departedImpIds.clear();netHideWait();if(wasRoom){$('roomLobby').hidden=true;toMenu();showRoomExitNotice('disconnect')}};
   }catch(e){NET.connecting=false;if(NET.joinPending){NET.joinPending=false;setJoinError('Não foi possível conectar à sala. Tente novamente.')}else toast('Falha ao abrir a conexão multiplayer.');}
 }
 function netRoomPayload(){const size=clamp(Math.round(+$('createSizeIn').value||10),4,15);$('createSizeIn').value=size;const bots=clamp(Math.round(+$('createBotsIn').value||0),0,size-1);$('createBotsIn').value=bots;const region=String($('createRegionIn')?.value||''),language=String($('createLanguageIn')?.value||'');return {size,bots,region,language,settings:netSettings(),cosmetics:cloneCosmetics(PLAYER_COSMETICS)}}
