@@ -903,6 +903,8 @@ const GAME_LANGUAGES={
   'pt-BR':'Português (Brasil)','pt-PT':'Português (Portugal)',es:'Español',en:'English',ru:'Русский',ja:'日本語'
 };
 const ROOM_REGIONS={'north-america':'América do Norte',asia:'Ásia',europe:'Europa'};
+function localizedBotNames(){const lang=validGameLanguage(USER_PREFS.language),catalog=window.NZ_LANGUAGE_CATALOG;return catalog?.botNames?.[lang]||catalog?.botNames?.['pt-BR']||NAMES}
+function localizedBotFallback(index){return t('hud.crewGeneric',{number:index+1})}
 // Catálogo-base de localização. Novas traduções podem sobrescrever chaves sem alterar a lógica da interface.
 let I18N={'pt-BR':{}};
 let I18N_SOURCE_MAP={},I18N_REVERSE_MAP=new Map(),I18N_TEMPLATE_MATCHERS=[],I18N_CATALOG_READY=false;
@@ -2681,43 +2683,44 @@ function drawImpostors(participants,count){
 function offlineBotNames(owner){
   const key=String(owner||'Tripulante').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
   if(OFFLINE_BOT_ROSTER.owner!==key||!OFFLINE_BOT_ROSTER.names.length){
-    const used=new Set([key]);const pool=shuffle([...NAMES,...Array.from({length:100},(_,i)=>'Tripulante '+(i+1))]);
+    const used=new Set([key]);const pool=shuffle([...localizedBotNames(),...Array.from({length:100},(_,i)=>localizedBotFallback(i))]);
     const names=[];for(const raw of pool){const name=String(raw||'').trim();const k=name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();if(!k||used.has(k))continue;used.add(k);names.push(name)}
     OFFLINE_BOT_ROSTER={owner:key,names};
   }
   return OFFLINE_BOT_ROSTER.names;
 }
-const HUD_FUNCTION_NAMES=Object.freeze({hunter:'Caçador',parasite:'Parasita',spectral:'Espectral',cleaner:'Faxineiro',marionette:'Marionetista',delayed:'Temporizador',engineer:'Engenheiro',observer:'Observador',sheriff:'Xerife',locator:'Localizador',paramedic:'Paramédico',seer:'Vidente',noisy:'Barulhento',judge:'Juiz',lazy:'Preguiçoso'});
+const ROLE_I18N_KEYS=Object.freeze({hunter:'hunter',parasite:'parasite',spectral:'spectral',cleaner:'cleaner',marionette:'puppeteer',delayed:'timer',engineer:'engineer',observer:'observer',sheriff:'sheriff',locator:'locator',paramedic:'paramedic',seer:'seer',noisy:'noisy',judge:'judge',lazy:'lazy',instructor:'instructor',guardian:'guardian'});
+function roleLabelByFunction(code){const key=ROLE_I18N_KEYS[code];return key?t('role.'+key).replace(/^[^\p{L}\p{N}]+/u,''):''}
 function currentHudFunctionName(p){
   if(!p)return '';
-  if(!p.alive){if(p.role==='crew'&&p.instructor)return 'Instrutor';if(p.role==='crew'&&p.guardian)return 'Anjo Guardião';return ''}
-  return HUD_FUNCTION_NAMES[p.function]||'';
+  if(!p.alive){if(p.role==='crew'&&p.instructor)return roleLabelByFunction('instructor');if(p.role==='crew'&&p.guardian)return roleLabelByFunction('guardian');return ''}
+  return roleLabelByFunction(p.function);
 }
 function updateRolePanel(p){
   const box=$('rolePanel'),host=$('roleName');if(!box||!host||!p)return;
-  const team=p.role==='imp'?'Infiltrado':'Tripulante',fn=currentHudFunctionName(p),key=team+'|'+fn;if(host._rolePanelKey===key)return;host._rolePanelKey=key;
+  const team=p.role==='imp'?t('role.teamImp'):t('role.teamCrew'),fn=currentHudFunctionName(p),key=USER_PREFS.language+'|'+team+'|'+fn;if(host._rolePanelKey===key)return;host._rolePanelKey=key;
   const teamEl=el('span','roleTeam '+(p.role==='imp'?'imp':'crew'),team);host.replaceChildren(teamEl);
   if(fn){host.appendChild(el('span','roleSep',' • '));host.appendChild(el('span','roleFunction',fn))}
-  box.setAttribute('aria-label',fn?`${team}, função ${fn}`:team);
+  box.setAttribute('aria-label',fn?t('hud.functionAria',{team,function:fn}):team);
 }
 function roleNameForPlayer(p){
   if(!p)return '-';
-  const names={hunter:'Infiltrado · Caçador',parasite:'Infiltrado · Parasita',spectral:'Infiltrado · Espectral',cleaner:'Infiltrado · Faxineiro',marionette:'Infiltrado · Marionetista',delayed:'Infiltrado · Temporizador',engineer:'Tripulante · Engenheiro',observer:'Tripulante · Observador',sheriff:'Tripulante · Xerife',locator:'Tripulante · Localizador',paramedic:'Tripulante · Paramédico',seer:'Tripulante · Vidente',noisy:'Tripulante · Barulhento',judge:'Tripulante · Juiz',lazy:'Tripulante · Preguiçoso'};
-  return names[p.function]||(p.role==='imp'?'Infiltrado':'Tripulante');
+  const team=p.role==='imp'?t('role.teamImp'):t('role.teamCrew'),fn=currentHudFunctionName(p);
+  return fn?`${team} · ${fn}`:team;
 }
 function roleMessageForPlayer(p){
   if(!p)return '';
-  const messages={hunter:'Caçador - Marque um Tripulante vivo e redefina sua recarga de matar ao acertar o alvo.',parasite:'Parasita - Contamine a tripulação e transforme Inocentes em Infiltrados.',spectral:'Espectral - Fique invisível e engane a tripulação.',cleaner:'Faxineiro - Limpe corpos e suma com as evidências.',engineer:'Engenheiro - Pode usar os dutos',marionette:'Marionetista - Controle Tripulantes e cause confusão na nave.',observer:'Observador - Veja a Tripulação no seu mapa a qualquer momento.',sheriff:'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.',locator:'Localizador — Rastreie um Tripulante com seu mapa.',delayed:'Temporizador — Mate suas vítimas lentamente.',paramedic:'Paramédico - Reviva Tripulantes por meio de seus corpos.',seer:'Vidente 🔮 — Veja quem e como os corpos foram mortos',noisy:'Barulhento - Envie um alerta a todos quando morrer.',judge:'Juiz - Defina uma reunião ao fazer tarefas.',lazy:'Preguiçoso - Suas tarefas são fáceis, complete elas e ajude a Tripulação.'};
-  return messages[p.function]||(p.role==='imp'?'Mate a tripulação e sabote a nave.':'Faça suas tarefas e encontre o Infiltrado.');
+  const key=ROLE_I18N_KEYS[p.function];
+  return key?t('role.desc.'+key):(p.role==='imp'?t('role.defaultImpDesc'):t('role.defaultCrewDesc'));
 }
 function showLocalRoleReveal(resetTimer=false){
   const p=G.player;if(!p)return false;
   G.role=p.role||'crew';G.locator=p.function==='locator';G.observer=p.function==='observer';G.cleaner=p.function==='cleaner';G.parasite=p.function==='parasite';G.paramedic=p.function==='paramedic';G.seer=p.function==='seer';G.noisy=p.function==='noisy';G.judge=p.function==='judge';G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
   p.nameCol=G.role==='imp'?'#ff8a98':'#fff';
-  $('tpHead').firstElementChild.textContent=G.role==='imp'?'Tarefas (falsas)':'Tarefas';
+  $('tpHead').firstElementChild.textContent=G.role==='imp'?t('hud.tasksFake'):t('hud.tasks');
   updateRolePanel(p);
   $('role').className=G.role==='imp'?'imp':'crew';
-  $('roleTitle').textContent=G.role==='imp'?'Você é um Infiltrado':'Você é um Tripulante';
+  $('roleTitle').textContent=G.role==='imp'?t('role.revealImp'):t('role.revealCrew');
   $('roleMsg').textContent=roleMessageForPlayer(p);$('roleMsg').hidden=false;$('role').hidden=false;
   if(resetTimer)G.roleT=9;G.state='role';
   return true;
@@ -2923,7 +2926,7 @@ function newGame(prepareOnline=false){
   const p=newChar(G.cfg.name,G.cfg.color,0,0,true); p.emUses=CFG.emergencyUses; if(online)p.id=NET.id;const ownRoom=online?NET.room.players.find(q=>q.id===NET.id):null;p.cosmetics=cloneCosmetics(ownRoom?.cosmetics||PLAYER_COSMETICS); G.player=p;
   const cols=shuffle(COLORS.filter(c=>c.id!==G.cfg.color));
   const usedBotNames=new Set([String(G.cfg.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,''),...(online?NET.room.players.map(q=>String(q.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')):[])]);
-  const fallbackNames=shuffle([...NAMES,...Array.from({length:100},(_,i)=>'Tripulante '+(i+1))]).filter(n=>{const k=String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');if(usedBotNames.has(k))return false;usedBotNames.add(k);return true});
+  const fallbackNames=shuffle([...localizedBotNames(),...Array.from({length:100},(_,i)=>localizedBotFallback(i))]).filter(n=>{const k=String(n).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');if(usedBotNames.has(k))return false;usedBotNames.add(k);return true});
   const names=online?fallbackNames:offlineBotNames(G.cfg.name);
   G.chars=[p];
   if(online){
@@ -3472,7 +3475,7 @@ function renderTool(){
 /* =====================================================================
    FASE 2 — IA DOS NPCs, CORPOS, SABOTAGENS E REUNIÕES
    ===================================================================== */
-const NAMES=['Aurora','Bruno','Caio','Duda','Eli','Fabi','Gael','Hugo','Iris','Jota','Lia','Mateus'];
+const NAMES=['Aurora','Bruno','Caio','Duda','Eli','Fabi','Gael','Hugo','Iris','João','Lia','Marcos'];
 const D4=[[1,0],[-1,0],[0,1],[0,-1]];
 const FIX={
   lights:{st:'circuits',game:'nx_circuit',name:'Luzes apagadas'},
@@ -5480,15 +5483,15 @@ function renderMeetingIntro(){
   const c=cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); c.save();
   if(M.reason==='body'){
     const b=M.body; // usa diretamente a cor guardada no registro do corpo eliminado
-    title.textContent='CORPO REPORTADO';
-    desc.textContent=b?`Corpo de ${b.name} encontrado ${inRoom(b.room)}.`:'Um corpo foi reportado.';
+    title.textContent=t('meeting.bodyReported');
+    desc.textContent=b?t('meeting.bodyFound',{name:b.name,room:inRoom(b.room)}):t('meeting.bodyGeneric');
     const color=COLOR_BY[b&&b.color]; wrap.style.setProperty('--intro-color',color?color.main:'var(--amber)');
     c.setTransform(3.2,0,0,3.2,cv.width/2,cv.height/2);
     if(b)drawBody(c,{x:0,y:0,color:b.color,cosmetics:b.cosmetics});
   }else{
     const caller=M.caller; // a cor vem diretamente do tripulante que apertou o botão
-    title.textContent='REUNIÃO DE EMERGÊNCIA';
-    desc.textContent=`${caller.name} acionou o botão de emergência.`;
+    title.textContent=t('meeting.emergencyTitle');
+    desc.textContent=t('meeting.emergencyCalled',{name:caller.name});
     const color=COLOR_BY[caller.color]; wrap.style.setProperty('--intro-color',color?color.main:'var(--amber)');
     c.setTransform(1.8,0,0,1.8,cv.width/2,cv.height/2);
     drawChar(c,{x:-35,y:0,color:caller.color,face:1,walk:0,moving:false,cosmetics:caller.cosmetics},false,{portrait:true});
@@ -5527,9 +5530,9 @@ function callMeeting(caller,reason,body,forceSync=false){
   if(typeof NET!=='undefined'&&NET.inRoom&&NET.isHost&&!NET.applying)queueMicrotask(()=>netSyncHostAfterAuthorityChange());
 }
 function buildMeetUI(){
-  const M=G.M; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject'); $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';$('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML='');$('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick')); $('meetTitle').textContent='Reunião convocada';
-  const why=M.reason==='body'?`Corpo de ${M.body.name} encontrado ${inRoom(M.body.room)}.`:'Reunião de emergência.'; $('meetTitle').style.color=M.reason==='body'?(COLOR_BY[M.body.color]?.main||'var(--ink)'):(COLOR_BY[M.caller.color]?.main||'var(--ink)');
-  $('meetDesc').textContent=`${M.caller.name} convocou a reunião. ${why}`;
+  const M=G.M; $('meet').hidden=true; $('meet').classList.remove('space-result','space-eject'); $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';$('meetGrid').querySelectorAll('.dots').forEach(n=>n.innerHTML='');$('meetGrid').querySelectorAll('.pc.pick').forEach(n=>n.classList.remove('pick')); $('meetTitle').textContent=t('meeting.title');
+  const why=M.reason==='body'?t('meeting.bodyFound',{name:M.body.name,room:inRoom(M.body.room)}):t('meeting.emergencyShort'); $('meetTitle').style.color=M.reason==='body'?(COLOR_BY[M.body.color]?.main||'var(--ink)'):(COLOR_BY[M.caller.color]?.main||'var(--ink)');
+  $('meetDesc').textContent=t('meeting.called',{name:M.caller.name})+' '+why;
   $('meetStatus').textContent=''; $('meetChat').innerHTML=''; $('btnSkip').hidden=true; $('btnSkip').disabled=false; $('meetTimer').textContent='3s';
   $('meetSay').hidden=true; $('sayChips').hidden=true; $('sayChips').innerHTML=''; $('sayIn').value='';
   if(typeof updateDeadChatAccess==='function')updateDeadChatAccess();
@@ -5540,18 +5543,18 @@ function buildMeetUI(){
     const b=el('button','pc'+(ch.isPlayer?' me':'')+(ch.alive?'':' dead')); b.type='button';
     const cv=document.createElement('canvas'); cv.width=100; cv.height=88; const c=cv.getContext('2d');
     c.setTransform(1.65,0,0,1.65,50,47); drawChar(c,{x:0,y:0,color:ch.color,face:1,walk:0,moving:false,cosmetics:ch.cosmetics,id:ch.id},false,{portrait:true});
-    const pv=el('span','pv',ch.alive?'':'Eliminado'), dots=el('span','dots'), pn=el('span','pn',ch.name);
+    const pv=el('span','pv',ch.alive?'':t('meeting.eliminated')), dots=el('span','dots'), pn=el('span','pn',ch.name);
     if(!G.player.alive&&ch.role==='imp')pn.style.color='#ff6b7e';
     if(!G.player.alive){const fl={sheriff:'Xerife',locator:'Localizador',delayed:'Temporizador',hunter:'Caçador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',seer:'Vidente',noisy:'Barulhento',judge:'Juiz',lazy:'Preguiçoso',__hidden:'Tripulante'}[(G.player.instructor||G.player.guardian)&&ch.alive&&ch.role==='crew'?'__hidden':ch.function]|| (ch.role==='imp'?'Infiltrado':'Tripulante');const roleLine=el('small','pfunction',fl);b.append(cv,roleLine,pn,pv,dots)}else b.append(cv,pn,pv,dots); b.pvEl=pv; b.dotsEl=dots;
     b.addEventListener('click',()=>cardClick(ch.id));M.cards[ch.id]=b;
     const cardSlot=el('div','meetingCardSlot');cardSlot.appendChild(b);
     const confirm=el('div','meetingVoteConfirm');confirm.dataset.targetId=ch.id;confirm.hidden=true;
-    const yes=el('button','voteConfirmYes','✔️'),no=el('button','voteConfirmNo','❌'),judge=el('button','judgeVoteBtn','🔨');yes.type=no.type=judge.type='button';yes.title='Confirmar voto';no.title='Cancelar voto';judge.title='Juiz — definir esta reunião';yes.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();confirmMeetingVote(ch.id)});no.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();cancelMeetingVote()});judge.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();useJudgeVote(ch.id)});confirm.append(yes,no,judge);cardSlot.appendChild(confirm);wrap.appendChild(cardSlot);
+    const yes=el('button','voteConfirmYes','✔️'),no=el('button','voteConfirmNo','❌'),judge=el('button','judgeVoteBtn','🔨');yes.type=no.type=judge.type='button';yes.title=t('meeting.confirmVote');no.title=t('meeting.cancelVote');judge.title=t('meeting.judgeVote');yes.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();confirmMeetingVote(ch.id)});no.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();cancelMeetingVote()});judge.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();useJudgeVote(ch.id)});confirm.append(yes,no,judge);cardSlot.appendChild(confirm);wrap.appendChild(cardSlot);
     const onlineHuman=!!(NET.inRoom&&NET.room?.players?.some(p=>String(p.id)===String(ch.id)));
     if(onlineHuman&&String(ch.id)!==String(NET.id)){
       const mw=el('div','meetingModWrap');mw.dataset.targetId=ch.id;mw.hidden=true;
-      const mb=el('button','meetingModVote','🦶');mb.type='button';mb.dataset.targetId=ch.id;mb.title='Votar para expulsar da sala';mb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();meetingModerationVote(ch.id)});
-      const prog=el('div','meetingModProgress'),fill=el('i'),txt=el('span','', '0/0 votos');prog.append(fill,txt);mw.append(mb,prog);wrap.appendChild(mw);
+      const mb=el('button','meetingModVote','🦶');mb.type='button';mb.dataset.targetId=ch.id;mb.title=t('meeting.kickVote');mb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();meetingModerationVote(ch.id)});
+      const prog=el('div','meetingModProgress'),fill=el('i'),txt=el('span','',t('meeting.voteCount',{count:0,required:0}));prog.append(fill,txt);mw.append(mb,prog);wrap.appendChild(mw);
     }
     grid.appendChild(wrap);
   });
@@ -5568,32 +5571,32 @@ function renderMeetingVoteControls(){
 function selectMeetingVote(id){
   const M=G.M;if(!M||M.phase!=='vote'||!G.player?.alive||M.votes[G.player.id]!==undefined||M.voteSending)return;
   const target=charById(id);if(!target||!target.alive)return;
-  M.pendingVote=id;Snd.click();$('meetStatus').textContent=`Selecionado: ${target.name}. Confirme em ✔️ ou cancele em ❌.`;renderMeetingVoteControls();
+  M.pendingVote=id;Snd.click();$('meetStatus').textContent=t('meeting.selected',{name:target.name});renderMeetingVoteControls();
 }
 function confirmMeetingVote(id){const M=G.M;if(!M||String(M.pendingVote)!==String(id))return;playerVote(id)}
-function useJudgeVote(id){const M=G.M,target=charById(id);if(!M||String(M.pendingVote)!==String(id)||!target)return;if(NET.inRoom&&!NET.isHost){M.voteSending=true;netSend({type:'action',action:'judge_vote',targetId:id});$('meetStatus').textContent='Decisão do Juiz enviada...';renderMeetingVoteControls();return}if(registerJudgeDecision(G.player,target)){M.pendingVote=null;$('btnSkip').disabled=true;$('meetStatus').textContent='Voto registrado.';Snd.roleFx('judge','use');renderMeetingVoteControls()}else{toast('⚖️ Complete as tarefas necessárias para liberar o Juiz.',2200)}}
-function cancelMeetingVote(){const M=G.M;if(!M)return;M.pendingVote=null;$('meetStatus').textContent='Escolha seu voto.';Snd.click();renderMeetingVoteControls()}
+function useJudgeVote(id){const M=G.M,target=charById(id);if(!M||String(M.pendingVote)!==String(id)||!target)return;if(NET.inRoom&&!NET.isHost){M.voteSending=true;netSend({type:'action',action:'judge_vote',targetId:id});$('meetStatus').textContent=t('meeting.judgeSent');renderMeetingVoteControls();return}if(registerJudgeDecision(G.player,target)){M.pendingVote=null;$('btnSkip').disabled=true;$('meetStatus').textContent=t('meeting.voteRegistered');Snd.roleFx('judge','use');renderMeetingVoteControls()}else{toast(t('message.judgeLocked'),2200)}}
+function cancelMeetingVote(){const M=G.M;if(!M)return;M.pendingVote=null;$('meetStatus').textContent=t('meeting.chooseVote');Snd.click();renderMeetingVoteControls()}
 function setMeetPhase(ph){
   const M=G.M; M.phase=ph; M.t=0; const al=G.player.alive;const judgeOverlay=$('judgePronounce');if(judgeOverlay)judgeOverlay.hidden=!(M.judge&&['judge','result'].includes(ph)); $('meet').classList.toggle('vote-reveal',ph==='result');$('meet').classList.toggle('space-result',false);
   $('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';if(ph!=='result'){$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML=''}
   if(ph==='discuss'){
-    $('meetTitle').textContent='Discussão'; $('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';
+    $('meetTitle').textContent=t('meeting.discussion'); $('meetDesc').textContent=t('meeting.discussionDesc');
     genChat(); M.dur=CFG.discussion; M.endIn=undefined;
     renderQuickPhrases();
   }else if(ph==='vote'){
     M.replyQ=[];
-    $('meetTitle').textContent='Votação'; $('meetDesc').textContent='Escolha quem ejetar ou pule o voto.'; M.dur=CFG.voting;
+    $('meetTitle').textContent=t('meeting.voting'); $('meetDesc').textContent=t('meeting.votingDesc'); M.dur=CFG.voting;
     meetingNPCs().forEach(c=>{M.voteAt[c.id]=Math.random()*Math.max(.25,M.dur-.25)});
-    $('btnSkip').hidden=!al; $('meetStatus').textContent=al?'Escolha seu voto.':'Você foi eliminado e não pode votar.';
+    $('btnSkip').hidden=!al; $('meetStatus').textContent=al?t('meeting.chooseVote'):t('meeting.cannotVote');
   }else if(ph==='judge'){
-    M.replyQ=[];M.dur=2.4;$('meetTitle').textContent='O Juiz se pronunciou! 🔨';$('meetDesc').textContent='A decisão do Juiz substituirá o resultado da votação.';$('meetStatus').textContent='';$('btnSkip').hidden=true;Snd.roleFx('judge','done');
+    M.replyQ=[];M.dur=2.4;$('meetTitle').textContent=t('meeting.judge');$('meetDesc').textContent=t('meeting.judgeDesc');$('meetStatus').textContent='';$('btnSkip').hidden=true;Snd.roleFx('judge','done');
   }else if(ph==='result'){
-    M.replyQ=[]; M.dur=5; $('meetTitle').textContent='Votação'; $('meetDesc').textContent='';$('meetStatus').textContent=''; $('btnSkip').hidden=true; showResult();
+    M.replyQ=[]; M.dur=5; $('meetTitle').textContent=t('meeting.voting'); $('meetDesc').textContent='';$('meetStatus').textContent=''; $('btnSkip').hidden=true; showResult();
   }else if(ph==='eject'){
-    M.dur=10; $('meetTitle').textContent='Ejeção'; $('meetStatus').textContent=''; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent='';$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML='';$('meet').classList.remove('vote-reveal','space-result');
+    M.dur=10; $('meetTitle').textContent=t('meeting.ejection'); $('meetStatus').textContent=''; $('voteBreakdown').hidden=true; $('voteBreakdown').textContent='';$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML='';$('meet').classList.remove('vote-reveal','space-result');
     $('meet').classList.add('space-eject');
     for(const c of G.chars){const card=M.cards[c.id];if(card){card.dotsEl.innerHTML='';card.classList.remove('pick')}}
-    $('meetDesc').textContent=M.result?.headline||'Ninguém foi ejetado.'; $('btnSkip').hidden=true;
+    $('meetDesc').textContent=M.result?.headline||t('meeting.noneEjected'); $('btnSkip').hidden=true;
   }
   $('meetSay').hidden=!(al&&ph==='discuss'); $('sayChips').hidden=!(al&&ph==='discuss');renderMeetingModerationControls();
   if(ph!=='discuss')$('sayChips').innerHTML='';
@@ -5704,13 +5707,13 @@ function playerVote(id){
   const M=G.M; if(!M||M.phase!=='vote'||!G.player.alive||M.votes[G.player.id]!==undefined)return;
   if(id!=='skip'){const t=charById(id); if(!t||!t.alive)return}
   M.pendingVote=null;M.voteSending=false;castVote(G.player.id,id); Snd.click(); if(id!=='skip')M.cards[id].classList.add('pick');
-  $('btnSkip').disabled=true; $('meetStatus').textContent=id==='skip'?'Você pulou o voto.':'Voto registrado em '+charById(id).name+'.';renderMeetingVoteControls();
+  $('btnSkip').disabled=true; $('meetStatus').textContent=id==='skip'?t('meeting.voteSkipped'):t('meeting.votedFor',{name:charById(id).name});renderMeetingVoteControls();
 }
 function renderSkipVoteDots(log){
   const box=$('skipVoteDots');box.innerHTML='';
   const skipped=(log||[]).filter(v=>v.target==='skip');
-  if(skipped.length){box.appendChild(el('span','skip-vote-label','Votos Pulados:'));}
-  skipped.forEach(v=>{const voter=charById(v.voter);if(!voter)return;const dot=el('i');dot.style.background=COLOR_BY[voter.color]?.main||chatCol(voter);dot.title=`${voter.name} pulou a votação`;dot.setAttribute('aria-label',dot.title);box.appendChild(dot)});
+  if(skipped.length){box.appendChild(el('span','skip-vote-label',t('meeting.skippedVotes')));}
+  skipped.forEach(v=>{const voter=charById(v.voter);if(!voter)return;const dot=el('i');dot.style.background=COLOR_BY[voter.color]?.main||chatCol(voter);dot.title=t('meeting.playerSkipped',{name:voter.name});dot.setAttribute('aria-label',dot.title);box.appendChild(dot)});
   box.hidden=skipped.length===0;
 }
 function showResult(){
@@ -5724,11 +5727,11 @@ function showResult(){
   G.chars.forEach(c=>{const card=M.cards[c.id];if(card)card.pvEl.textContent=''});
   const aliveImps=G.chars.filter(c=>c.alive&&c.role==='imp').length-(eject&&eject.role==='imp'?1:0);
   let headline='';
-  if(eject)headline=`${eject.name} foi ejetado.\n${eject.name} ${eject.role==='imp'?'era':'não era'} um Infiltrado.\nHá ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
-  else if(skipN>0&&skipN>=(top?top[1]:0))headline='Ninguém foi ejetado (pulado).\n'+`Há ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
-  else headline='Ninguém foi ejetado (empate).\n'+`Há ${aliveImps} Infiltrado${aliveImps===1?'':'s'} restante${aliveImps===1?'':'s'}.`;
+  if(eject)headline=[t('meeting.ejected',{name:eject.name}),t(eject.role==='imp'?'meeting.wasImp':'meeting.wasNotImp',{name:eject.name}),t('meeting.impsRemaining',{count:aliveImps})].join('\n');
+  else if(skipN>0&&skipN>=(top?top[1]:0))headline=[t('meeting.noneSkipped'),t('meeting.impsRemaining',{count:aliveImps})].join('\n');
+  else headline=[t('meeting.noneTie'),t('meeting.impsRemaining',{count:aliveImps})].join('\n');
   M.result.headline=headline;M.resultHeadline='';renderSkipVoteDots(M.log);
-  $('meetTitle').textContent='Votação';$('meetDesc').textContent='';$('meetStatus').textContent='';$('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';
+  $('meetTitle').textContent=t('meeting.voting');$('meetDesc').textContent='';$('meetStatus').textContent='';$('voteBreakdown').hidden=true;$('voteBreakdown').textContent='';
   $('meet').classList.add('vote-reveal');$('meet').classList.remove('space-result','space-eject');
   if(eject)Snd.err();
 }
@@ -6100,7 +6103,7 @@ function toggleLobbyModeration(){if(!NET.inRoom||!NET.isHost||NET.room?.status!=
 function toggleMeetingModeration(){if(!NET.inRoom||G.state!=='meeting')return;NET.modMeetingOpen=!NET.modMeetingOpen;$('btnMeetingModeration').setAttribute('aria-pressed',String(NET.modMeetingOpen));renderMeetingModerationControls();renderMeetingVoteLabels();Snd.click()}
 function lobbyModerate(targetId,action){if(!NET.isHost||!['kick','ban'].includes(action))return;netSend({type:'moderate_lobby',targetId,action})}
 function meetingModerationVote(targetId){if(!NET.inRoom||G.state!=='meeting'||String(targetId)===String(NET.id))return;netSend({type:'moderation_vote',targetId})}
-function renderMeetingVoteLabels(){const M=G.M;if(!M)return;for(const c of G.chars){const card=M.cards?.[c.id];if(!card?.pvEl)continue;if(NET.modMeetingOpen){const st=moderationTargetState(c.id),eligible=!!st&&st.possible!==false&&c.alive&&String(c.id)!==String(NET.id);card.pvEl.textContent=eligible?'Votar para expulsar':''}else card.pvEl.textContent=M.phase==='vote'&&M.votes[c.id]!==undefined?'Votou':''}}
+function renderMeetingVoteLabels(){const M=G.M;if(!M)return;for(const c of G.chars){const card=M.cards?.[c.id];if(!card?.pvEl)continue;if(NET.modMeetingOpen){const st=moderationTargetState(c.id),eligible=!!st&&st.possible!==false&&c.alive&&String(c.id)!==String(NET.id);card.pvEl.textContent=eligible?t('meeting.kickLabel'):''}else card.pvEl.textContent=M.phase==='vote'&&M.votes[c.id]!==undefined?t('meeting.voted'):''}}
 function renderMeetingModerationControls(){
   const top=$('btnMeetingModeration');if(top){top.hidden=!(NET.inRoom&&G.state==='meeting');top.setAttribute('aria-pressed',String(!!NET.modMeetingOpen))}
   document.querySelectorAll('.meetingModWrap').forEach(wrap=>{
@@ -6108,8 +6111,8 @@ function renderMeetingModerationControls(){
     const eligible=!!st&&st.possible!==false&&String(id)!==String(NET.id),canLocalVote=!!G.player?.alive;wrap.hidden=!(NET.modMeetingOpen&&eligible&&canLocalVote);
     if(!st)return;
     const required=Math.max(1,Number(st.required)||1),count=Math.max(0,Number(st.count)||0),pct=Math.max(0,Math.min(100,count/required*100));
-    if(fill)fill.style.width=pct+'%';if(txt)txt.textContent=`${count}/${required} votos`;
-    if(btn){btn.textContent='🦶';btn.classList.toggle('voted',own);btn.title=own?'Seu voto para expulsar já foi registrado.':'Votar para expulsar este jogador da sala';btn.disabled=own||!G.player?.alive||!eligible;}
+    if(fill)fill.style.width=pct+'%';if(txt)txt.textContent=t('meeting.voteCount',{count,required});
+    if(btn){btn.textContent='🦶';btn.classList.toggle('voted',own);btn.title=own?t('meeting.kickVoted'):t('meeting.kickThis');btn.disabled=own||!G.player?.alive||!eligible;}
   });
 }
 function netEnterRematchLobby(){
@@ -6453,24 +6456,24 @@ function netPaintMeeting(sm){
   // Os resultados visuais usam exclusivamente bolinhas; não há lista nem explicação textual.
   $('voteBreakdown').textContent='';$('voteBreakdown').hidden=true;if(ph==='result')renderSkipVoteDots(sm.log||M.log);else{$('skipVoteDots').hidden=true;$('skipVoteDots').innerHTML=''}
   if(ph==='intro'){
-    $('meetingIntroTitle').textContent=sm.reason==='body'?'CORPO REPORTADO':'REUNIÃO DE EMERGÊNCIA';
-    $('meetingIntroDesc').textContent=sm.reason==='body'&&M.body?`Corpo de ${M.body.name} encontrado ${inRoom(M.body.room)}.`:`${M.caller.name} convocou a reunião.`;
+    $('meetingIntroTitle').textContent=sm.reason==='body'?t('meeting.bodyReported'):t('meeting.emergencyTitle');
+    $('meetingIntroDesc').textContent=sm.reason==='body'&&M.body?t('meeting.bodyFound',{name:M.body.name,room:inRoom(M.body.room)}):t('meeting.called',{name:M.caller.name});
   }else if(ph==='discuss'){
-    $('meetTitle').textContent='Discussão';$('meetDesc').textContent='Converse, compartilhe pistas e use as frases prontas. A votação só libera quando o tempo acabar.';
+    $('meetTitle').textContent=t('meeting.discussion');$('meetDesc').textContent=t('meeting.discussionDesc');
     $('meetStatus').textContent='';$('meetSay').hidden=!G.player.alive;$('sayChips').hidden=!G.player.alive;
     if(!$('sayChips').children.length)renderQuickPhrases();$('btnSkip').hidden=true;
   }else if(ph==='vote'){
-    $('meetTitle').textContent='Votação';$('meetDesc').textContent='Escolha quem ejetar ou pule o voto.';
+    $('meetTitle').textContent=t('meeting.voting');$('meetDesc').textContent=t('meeting.votingDesc');
     $('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=!G.player.alive;
     $('btnSkip').disabled=M.votes[G.player.id]!==undefined;
-    $('meetStatus').textContent=M.votes[G.player.id]!==undefined?'Voto registrado.':'Escolha seu voto.';
+    $('meetStatus').textContent=M.votes[G.player.id]!==undefined?t('meeting.voteRegistered'):t('meeting.chooseVote');
   }else if(ph==='judge'){
-    $('meetTitle').textContent='O Juiz se pronunciou! 🔨';$('meetDesc').textContent='A decisão do Juiz substituirá o resultado da votação.';$('meetStatus').textContent='';$('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=true;
+    $('meetTitle').textContent=t('meeting.judge');$('meetDesc').textContent=t('meeting.judgeDesc');$('meetStatus').textContent='';$('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=true;
   }else if(ph==='result'){
-    $('meetTitle').textContent='Votação';$('meetDesc').textContent='';$('meetStatus').textContent='';
+    $('meetTitle').textContent=t('meeting.voting');$('meetDesc').textContent='';$('meetStatus').textContent='';
     $('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=true;
   }else if(ph==='eject'){
-    $('meetTitle').textContent='Ejeção';$('meetDesc').textContent=sm.ejectHeadline||sm.headline||'Ninguém foi ejetado.';
+    $('meetTitle').textContent=t('meeting.ejection');$('meetDesc').textContent=sm.ejectHeadline||sm.headline||'Ninguém foi ejetado.';
     $('meetStatus').textContent='';$('meetSay').hidden=true;$('sayChips').hidden=true;$('btnSkip').hidden=true;
   }
   for(const c of G.chars){
