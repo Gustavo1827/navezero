@@ -1,6 +1,6 @@
 # NAVE ZERO ONLINE — RESUMO DO JOGO
 
-**Versão de referência: 0.4b-s3**
+**Versão de referência: 0.4b-s2**
 
 Nave Zero Online é um jogo independente de dedução social, tarefas, sabotagens e funções especiais. O projeto é **sem fins lucrativos**, criado de forma experimental **com auxílio de Inteligência Artificial** e inspirado em jogos do gênero, especialmente **Among Us**.
 
