@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "cosmetics": [
+    {
+      "id": "carrinho_orbital_roupa",
+      "name": "Carrinho Orbital",
+      "type": "Roupa",
+      "slot": "outfit",
+      "enabled": true,
+      "asset": "assets/exclusive/carrinho_orbital_roupa.png",
+      "render": {
+        "x": -1,
+        "y": 7,
+        "width": 72,
+        "height": 56
+      }
+    },
+    {
+      "id": "mini_explorador_pet",
+      "name": "O Explosivo",
+      "type": "Pet",
+      "slot": "pet",
+      "enabled": true,
+      "asset": "assets/exclusive/mini_explorador_pet.png",
+      "render": {
+        "x": 0,
+        "y": 0,
+        "width": 22,
+        "height": 30
+      }
+    },
+    {
+      "id": "coroa_toxica_chapeu",
+      "name": "Coroa Tóxica",
+      "type": "Chapéu",
+      "slot": "hat",
+      "enabled": true,
+      "asset": "assets/exclusive/coroa_toxica_chapeu.png",
+      "render": {
+        "x": 0,
+        "y": -31,
+        "width": 38,
+        "height": 31
+      }
+    },
+    {
+      "id": "rubor_cosmico_rosto",
+      "name": "Rubor Cósmico",
+      "type": "Rosto",
+      "slot": "visor",
+      "enabled": true,
+      "asset": "assets/exclusive/rubor_cosmico_rosto.png",
+      "render": {
+        "x": 0,
+        "y": -9,
+        "width": 24,
+        "height": 14
+      }
+    },
+    {
+      "id": "fios_rebeldes_chapeu",
+      "name": "Fios Rebeldes",
+      "type": "Chapéu",
+      "slot": "hat",
+      "enabled": true,
+      "asset": "assets/exclusive/fios_rebeldes_chapeu.png",
+      "render": {
+        "x": 0,
+        "y": -28,
+        "width": 28,
+        "height": 19
+      }
+    },
+    {
+      "id": "visor_67_rosto",
+      "name": "Visor 67",
+      "type": "Rosto",
+      "slot": "visor",
+      "enabled": true,
+      "asset": "assets/exclusive/visor_67_rosto.png",
+      "render": {
+        "x": 10,
+        "y": -13,
+        "width": 22,
+        "height": 14
+      }
+    }
+  ]
+}
