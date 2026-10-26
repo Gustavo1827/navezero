@@ -30,7 +30,7 @@ async function connect(url,name='Host'){
 async function closeClient(client){try{client?.ws?.close()}catch{}await new Promise(r=>setTimeout(r,25))}
 
 test('Snapshot 75 integra votação automática, Anjo Guardião e Ascensão dos Mortos',()=>{
-  assert.match(html,/Versão 0\.4b-s2/);
+  assert.match(html,/Versão 0\.4b-s3/);
   assert.match(html,/const everyoneVoted=voters\.every\(c=>M\.votes\[c\.id\]!==undefined\)/);
   assert.match(html,/id="btnGuardian"[\s\S]*?🪽<small>Proteger<\/small>/);
   assert.match(html,/guardianDuration:\[10,30\]/);
@@ -43,7 +43,7 @@ test('Snapshot 75 integra votação automática, Anjo Guardião e Ascensão dos 
   assert.match(html,/const GUARDIAN_BLOCK_KINDS=new Set\(\['kill','delayed','parasite'\]\)/);
   assert.doesNotMatch(html,/consumeGuardianProtection\([^)]*,'control'\)/);
   assert.match(html,/name:'Ascensão dos Mortos'/);
-  assert.match(html,/if\(id==='dead'\)[\s\S]*?const help=presetConfig\('help'\)[\s\S]*?cfg\[role\.chanceKey\]=100[\s\S]*?Math\.min\(5,configuredPlayerCount\(\),15\)/);
+  assert.match(html,/if\(id==='dead'\)[\s\S]*?const help=preservedPresetConfig\('help'\)[\s\S]*?cfg\[role\.chanceKey\]=100[\s\S]*?Math\.min\(5,configuredPlayerCount\(\),15\)/);
   assert.match(serverSrc,/canSeeGuardianProtection[\s\S]*?guardianImpostorVisible/);
   const s=cleanSettings({guardianDuration:99,guardianChance:120,guardianMax:99,guardianImpostorVisible:0},8);
   assert.equal(s.guardianDuration,30);assert.equal(s.guardianChance,100);assert.equal(s.guardianMax,8);assert.equal(s.guardianImpostorVisible,0);

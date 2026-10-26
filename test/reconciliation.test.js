@@ -8,7 +8,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
 
 test('cliente não-host usa previsão local em vez de bloquear updatePlayer', () => {
-  assert.match(html, /const clientPredicted=NET\.inRoom&&!NET\.isHost;\s*netOriginalUpdatePlayer\(dt\)/);
+  assert.match(html, /const clientPredicted=NET\.inRoom&&!NET\.isHost;[\s\S]*?withControlledBody\(G\.player,\(\)=>netOriginalUpdatePlayer\(dt\)\)/);
   assert.doesNotMatch(html, /updatePlayer=function\(dt\)\{if\(NET\.inRoom&&!NET\.isHost\)return;/);
 });
 
@@ -24,7 +24,7 @@ test('reconciliação evita puxões contra paredes e corrige apenas deriva útil
   assert.match(html, /if\(err<58\)\{NET\.reconcileX\*=\.55;NET\.reconcileY\*=\.55;return\}/);
   assert.match(html, /if\(perp>1\)\{const cap=Math\.min\(perp,28\),k=cap\/perp;NET\.reconcileX=px\*k;NET\.reconcileY=py\*k/);
   assert.match(html, /const k=Math\.min\(1,dt\*8\),cx=NET\.reconcileX\*k,cy=NET\.reconcileY\*k/);
-  assert.match(html, /const ax=p\.x-ox,ay=p\.y-oy;NET\.reconcileX-=ax;NET\.reconcileY-=ay/);
+  assert.match(html, /const ax=body\.x-ox,ay=body\.y-oy;NET\.reconcileX-=ax;NET\.reconcileY-=ay/);
   assert.match(html, /if\(Math\.abs\(cx\)>\.05&&Math\.abs\(ax\)<\.001\)NET\.reconcileX=0/);
 });
 

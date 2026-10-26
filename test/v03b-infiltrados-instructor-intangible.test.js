@@ -7,13 +7,13 @@ const root=path.join(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const server=fs.readFileSync(path.join(root,'server.js'),'utf8');
 
-test('Loucura dos Infiltrados é a quarta predefinição e garante Parasitas iniciais',()=>{
+test('Loucura dos Infiltrados habilita todas as funções e distribui as vagas disponíveis',()=>{
   assert.match(html,/name:'Loucura dos Infiltrados'/);
   assert.match(html,/preset_loucura_infiltrados\.png/);
   assert.equal(fs.existsSync(path.join(root,'assets','presets','preset_loucura_infiltrados.png')),true);
-  assert.match(html,/if\(id==='infiltrados'\)\{cfg\.impostors=Math\.min\(3,maxImpostorsForPlayers\(configuredPlayerCount\(\)\)\);cfg\.delayedChance=25;cfg\.cleanerChance=25;cfg\.spectralChance=25;cfg\.marionChance=25;cfg\.hunterChance=25;cfg\.parasiteChance=100;cfg\.parasiteMax=Math\.min\(3,cfg\.impostors\);\}/);
+  assert.match(html,/else if\(id==='infiltrados'\)\{for\(const role of PRESET_IMP_ROLES\)cfg\[role\.key\+'Chance'\]=100\}/);
   assert.match(html,/const infiltradosPreset=currentCfgMatchesPreset\('infiltrados'\)/);
-  assert.match(html,/if\(infiltradosPreset\)\{for\(const ch of G\.imps\)\{ch\.function='parasite'/);
+  assert.match(html,/if\(infiltradosPreset\)\{[\s\S]*?for\(const ch of shuffle\(G\.imps\.slice\(\)\)\)[\s\S]*?ch\.function=role\.id/);
 });
 
 test('Instrutor cria percurso caminhável a partir do jogador e limita distância em passos de 100 px',()=>{

@@ -74,11 +74,11 @@ test('Observador usa o mapa dos vivos, some em Comunicações e bloqueia movimen
 test('disparo do Xerife é validado pelo host e respeita alcance, linha de visão e cooldown', () => {
   assert.match(html, /command==='sheriff_shoot'[\s\S]*?activePlay&&!G\.M&&ch\.alive&&ch\.role==='crew'&&ch\.function==='sheriff'[\s\S]*?dist\(ch,target\)<=actionDistancePx\('sheriff'\)&&losClear/);
   assert.match(server, /'sheriff_shoot'/);
-  assert.match(html, /function doSheriffShot\(shooter,target\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(target\);parkPetAtBody/);
-  assert.doesNotMatch(html.slice(html.indexOf('function doSheriffShot(shooter,target)'),html.indexOf('function playerSheriffShot()')), /addSheriffBody\(/, 'disparos do Xerife não criam corpo físico');
+  assert.match(html, /function doSheriffShot\(shooter,target\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(target\);addSheriffBody/);
+  assert.match(html.slice(html.indexOf('function doSheriffShot(shooter,target)'),html.indexOf('function playerSheriffShot()')), /addSheriffBody\(/, 'vítimas dos disparos ficam no registro normal de corpos');
   const shotBody=html.slice(html.indexOf('function doSheriffShot(shooter,target)'),html.indexOf('function playerSheriffShot()'));
   assert.doesNotMatch(shotBody.slice(shotBody.indexOf("if(target.role==='imp')"),shotBody.indexOf('}else{')), /killChar\(shooter\)/, 'o Xerife sobrevive ao acertar um Infiltrado');
-  assert.match(shotBody, /killChar\(shooter\);parkPetAtBody/, 'ao errar, somente o Xerife morre e não deixa corpo físico');
+  assert.match(shotBody, /killChar\(shooter\);addSheriffBody/, 'ao errar, somente o Xerife morre e deixa um corpo normal');
   assert.match(html, /if\(shooter===G\.player\)G\.sheriffCd=CFG\.sheriffCooldown;else shooter\.netSheriffCd=CFG\.sheriffCooldown/);
 });
 
@@ -110,7 +110,8 @@ test('dutos de clientes são validados pelo host e a interface acompanha snapsho
   assert.match(html, /command==='vent_enter'/);
   assert.match(html, /Math\.hypot\(ch\.x-v\.px,ch\.y\+4-v\.py\)<=actionDistancePx\('vent'\)/);
   assert.match(html, /command==='vent_move'\)\{if\(activePlay&&ch\.vent\)ventMove\(ch,m\.ventId\)\}/);
-  assert.match(html, /if\(G\.player\.vent&&s\.state==='playing'\)/);
+  assert.match(html, /if\(NET\.inRoom&&!NET\.isHost\)syncControlledVentPanel\(\)/);
+  assert.match(html, /const body=controlledBodyFor\(p\),panel=\$\('ventPanel'\)/);
 });
 
 test('culling desenha camadas visuais por sala sem desativar colisões', () => {
