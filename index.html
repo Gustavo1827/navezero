@@ -451,6 +451,10 @@ body.touch #stick{display:block}
 
 .userSettingToggle{display:grid;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#0d1230}.userSettingToggleMain{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}.userSettingToggleMain strong{display:block;min-width:0;flex:1}.userSettingToggle small{display:block;color:var(--ink2);margin:0}.userToggleSwitch{position:relative;display:inline-flex;align-items:center;width:52px;height:29px;min-width:52px;flex:0 0 52px;margin:0;padding:0;box-sizing:border-box;cursor:pointer;vertical-align:middle}.userToggleSwitch input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}.userToggleTrack{position:absolute;inset:0;box-sizing:border-box;border-radius:999px;background:#555b6f;border:2px solid #777f96;transition:background .18s,border-color .18s}.userToggleTrack:after{content:'';position:absolute;box-sizing:border-box;width:19px;height:19px;left:3px;top:3px;border-radius:50%;background:#d9dde8;transition:transform .18s,background .18s;transform:translateX(0)}.userToggleSwitch input:checked+.userToggleTrack{background:#ae8b14;border-color:#ffd84e}.userToggleSwitch input:checked+.userToggleTrack:after{transform:translateX(23px);background:#fff6b8}.languageOverlay,.roomInfoOverlay{position:fixed;inset:0;z-index:210;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,5,18,.86)}.languageOverlay[hidden],.roomInfoOverlay[hidden]{display:none!important}.languageCard,.roomInfoCard{width:min(430px,94vw);max-height:90vh;overflow:auto}.languageList{display:grid;gap:9px;margin:14px 0}.languageChoice{text-align:left;background:#545968;color:#e5e7ef;border:2px solid #707789;border-radius:12px;padding:11px 14px;font:800 16px var(--font)}.languageChoice.selected{background:#b58f16;color:#fff7c4;border-color:#ffd84e;box-shadow:0 0 0 2px rgba(255,216,78,.12)}.roomMetaLine{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:-2px 0 10px;color:var(--ink2);font-weight:800}.roomInfoDetails{display:grid;gap:10px;margin:16px 0;text-align:left}.roomInfoDetails div{padding:10px 12px;border-radius:12px;background:#111744;border:1px solid var(--line);font-weight:800}.createFields select{width:100%;font:700 15px var(--font);color:var(--ink);background:#0d1033;border:2px solid var(--edge);border-radius:12px;padding:8px 10px;outline:none}
 
+#actions .no-signal{font-size:14px!important;line-height:1.1!important;padding:5px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-sizing:border-box;overflow:hidden}
+#actions .no-signal .signalIcon{font-size:22px;line-height:1}
+#actions .no-signal small{display:block;font-size:clamp(10px,2.7vw,14px)!important;line-height:1.1;max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:center;margin:0}
+.infectionMark{font-size:20px}.pc .infectionMark{position:absolute;top:58px;left:50%;transform:translateX(-50%);pointer-events:none}.livingMeetingMsg{border-left:2px solid #7de1ff;padding-left:6px}
 </style>
 </head>
 <body>
@@ -460,7 +464,7 @@ body.touch #stick{display:block}
   <div class="card">
     <h1 class="logo">Nave Zero</h1>
     <p class="tag">A nave está falhando. Conclua as tarefas antes que seja tarde.</p>
-    <p class="phase" style="margin:-4px 0 8px">Versão 0.4b-s2</p>
+    <p class="phase" style="margin:-4px 0 8px">Versão 0.4b-s3</p>
     <canvas id="pv" width="280" height="260"></canvas>
     <div class="field"><label for="nameIn">Seu nome</label><input id="nameIn" maxlength="12" value="Você" autocomplete="off"></div>
     <div class="row onlineMenu"><button class="big" id="btnCreateRoom">Criar sala</button><button class="big alt" id="btnJoinRoom">Entrar na sala</button></div>
@@ -1017,6 +1021,7 @@ function applyGameLanguage(){
   if(G.player){for(const ch of G.chars)if(!ch.isPlayer&&!ch.isRemoteHuman&&(ch.ai||ch.isBot))bindBotColorName(ch);renderTasks();updateRolePanel(G.player);updateSabUI();updateButtons()}
   syncAccountVisibilityLabels();refreshBotNameUi();
   if(!$('cosmeticsOverlay')?.hidden)renderCosmeticsCatalog();
+  if(G.cfgOpen)buildCfgUI();
   if(!$('roomInfoOverlay')?.hidden&&NET.lastRoomInfo)showRoomInfo(NET.lastRoomInfo);
   if(NET.room&&NET.inRoom)netRenderRoom();
 }
@@ -1595,6 +1600,7 @@ function drawChar(c,ch,showName=true,opts={}){
   const worldPetVisible=ch.alive!==false&&!ch.ghost&&!ch.vent,showPet=opts.portrait||worldPetVisible;
   if(showPet){const petX=Number.isFinite(ch.petX)&&!opts.portrait?ch.petX:vx-(ch.face||1)*27,petY=Number.isFinite(ch.petY)&&!opts.portrait?ch.petY:vy+17;c._nzCosmeticColor=ch.color;drawPetShape(c,cosmetics.pet,petX,petY,String(ch.id||ch.name||'').length*.7)}
   if(showName&&ch.name){const sp=nameSprite(ch.name,ch.nameCol||'#fff');c.drawImage(sp.cv,vx-sp.w/2,vy-35-sp.asc,sp.w,sp.h)}
+  if(showName&&G.player?.role==='imp'&&G.parasiteInfections?.[ch.id]){c.save();c.font='21px sans-serif';c.textAlign='center';c.fillText('🦠',vx,vy-60);c.restore()}
   if(showName&&hunterViewerCanSeeTargets()&&hunterOwnerForTarget(ch)){c.save();c.font='700 21px "Baloo 2","Trebuchet MS",sans-serif';c.textAlign='center';c.textBaseline='middle';c.lineWidth=3;c.strokeStyle='rgba(8,9,28,.9)';c.strokeText('🎯',vx,vy-74);c.fillText('🎯',vx,vy-74);c.restore()}
 }
 
@@ -2073,7 +2079,7 @@ for(const tpl of TASK_TEMPLATES)for(const step of (tpl.steps||[])){
 }
 function actionFor(s){
   if(s.kind==='decon'&&G.player.alive)return {type:'decon',station:s,label:stationDisplayLabel(s)};
-  if(G.role==='crew'&&G.player.alive){
+  if(G.player.alive){
     for(const t of FIX_KEYS){
       if(G.sab[t]>0&&FIX[t].st===s.id){
         const f=FIX[t], step={st:s.id,game:f.game,label:'Resolver: '+f.name,done:false,mode:'fix'};
@@ -3435,7 +3441,7 @@ function buildCfgUI(){
   if(G.cfgPage==='functions'){
     const roleKey=G.cfgFunctionTab==='delayed'?'timer':G.cfgFunctionTab==='marionette'?'marionette':G.cfgFunctionTab;
     const roleIcons={locator:'🧭',sheriff:'🔫',timer:'⏱️',observer:'👀',instructor:'↔️',guardian:'🪽',cleaner:'🧹',parasite:'🦠',spectral:'👻',paramedic:'⛑️',seer:'🔮',noisy:'🔊',judge:'⚖️',lazy:'🍕',engineer:'🔧',marionette:'✋',hunter:'🎯'};
-    const descKey=`role.desc.${roleKey}`,raw=hasI18nKey(descKey)?t(descKey):'';if(raw){const info=el('div','fnDescription'),parts=raw.split(/\s+[—-]\s+/),title=parts.shift()||raw,desc=parts.join(' — ');info.append(el('b','',(roleIcons[roleKey]||'')+' '+title),document.createTextNode(desc?' — '+desc:''));box.appendChild(info)}
+    const descKey=`settings.roleDetails.${G.cfgFunctionTab}`,raw=hasI18nKey(descKey)?t(descKey).replace(/^[^\p{L}\p{N}]+/u,''):'';if(raw){const info=el('div','fnDescription'),parts=raw.split(/\s+[—-]\s+/),title=parts.shift()||raw,desc=parts.join(' — ');info.append(el('b','',(roleIcons[roleKey]||'')+' '+title),document.createTextNode(desc?' — '+desc:''));box.appendChild(info)}
   }
   if(G.cfgPage==='functions'&&G.cfgFunctionTab==='delayed'){
     const cooldownRow=el('div','cfgrow fncompact'),top=el('div','cfgtop');
@@ -4659,7 +4665,8 @@ function convertToImpostor(target){
 }
 function resolveParasiteInfections(){
   const pending=G.parasiteInfections||{};for(const rec of Object.values(pending)){const t=charById(rec.targetId);if(t&&t.alive&&t.role==='crew'){if(consumeGuardianProtection(t,'parasite'))continue;convertToImpostor(t)}}G.parasiteInfections={};
-  for(const c of G.chars){if(c.function==='parasite'&&c.role==='imp'){c.parasiteReady=false;c.parasiteTargetId=null}}
+  for(const c of G.chars){if(c.function==='parasite'&&c.role==='imp'){c.parasiteReady=true;c.parasiteTargetId=null}}
+  G.parasiteWinnerId=null;
 }
 function playerInfect(){
   const p=G.player;if(!p||p.controlledBy||p.vent||G.state!=='playing'||G.M||uiBusy()||!p.alive||p.role!=='imp'||p.function!=='parasite'||p.parasiteReady===false)return;
@@ -5593,8 +5600,9 @@ function buildMeetUI(){
     const cv=document.createElement('canvas'); cv.width=100; cv.height=88; const c=cv.getContext('2d');
     c.setTransform(1.65,0,0,1.65,50,47); drawChar(c,{x:0,y:0,color:ch.color,face:1,walk:0,moving:false,cosmetics:ch.cosmetics,id:ch.id},false,{portrait:true});
     const pv=el('span','pv',ch.alive?'':t('meeting.eliminated')), dots=el('span','dots'), pn=el('span','pn',ch.name);
-    if(!G.player.alive&&ch.role==='imp')pn.style.color='#ff6b7e';
-    if(!G.player.alive){const fl={sheriff:'Xerife',locator:'Localizador',delayed:'Temporizador',hunter:'Caçador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',seer:'Vidente',noisy:'Barulhento',judge:'Juiz',lazy:'Preguiçoso',__hidden:'Tripulante'}[(G.player.instructor||G.player.guardian)&&ch.alive&&ch.role==='crew'?'__hidden':ch.function]|| (ch.role==='imp'?'Infiltrado':'Tripulante');const roleLine=el('small','pfunction',fl);b.append(cv,roleLine,pn,pv,dots)}else b.append(cv,pn,pv,dots); b.pvEl=pv; b.dotsEl=dots;
+    if(G.player.role==='imp'&&ch.role==='imp')pn.style.color='#ff6b7e';
+    const infectionBadge=G.player.role==='imp'&&G.parasiteInfections?.[ch.id]?el('span','infectionMark','🦠'):null;
+    if(!G.player.alive){const fl={sheriff:'Xerife',locator:'Localizador',delayed:'Temporizador',hunter:'Caçador',observer:'Observador',cleaner:'Faxineiro',parasite:'Parasita',spectral:'Espectral',engineer:'Engenheiro',marionette:'Marionetista',paramedic:'Paramédico',seer:'Vidente',noisy:'Barulhento',judge:'Juiz',lazy:'Preguiçoso',__hidden:'Tripulante'}[(G.player.instructor||G.player.guardian)&&ch.alive&&ch.role==='crew'?'__hidden':ch.function]|| (ch.role==='imp'?'Infiltrado':'Tripulante');const roleLine=el('small','pfunction',fl);b.append(cv,roleLine,pn,pv,dots)}else b.append(cv,pn,pv,dots); if(infectionBadge)b.append(infectionBadge); b.pvEl=pv; b.dotsEl=dots;
     b.addEventListener('click',()=>cardClick(ch.id));M.cards[ch.id]=b;
     const cardSlot=el('div','meetingCardSlot');cardSlot.appendChild(b);
     const confirm=el('div','meetingVoteConfirm');confirm.dataset.targetId=ch.id;confirm.hidden=true;
@@ -5729,9 +5737,17 @@ function endMeeting(){
   toast(G.player.alive?(G.freePlay?'Reunião encerrada. Bots permaneceram em suas posições. Habilidades em recarga.':'Todos voltaram à cantina. Habilidades em recarga.'):'Você virou morto. Use o botão de modo para tarefas ou espectador.');
 }
 function meetingDisplayText(from,text){const raw=String(text||''),translated=translateRuntimeText(raw),lang=validGameLanguage(USER_PREFS.language),isBot=!!(from?.ai||(!from?.isPlayer&&!from?.isRemoteHuman));return translated===raw&&isBot&&!['pt-BR','pt-PT'].includes(lang)?t('meeting.bot.botFallback'):translated}
+function appendLivingMeetingForGhost(from,text){
+  if(!G.M||!from||from.alive===false||G.player?.alive!==false)return;
+  const index=(G.M.chat||[]).findLastIndex(m=>m.fromId===from.id&&m.text===text),key=String(G.M.gt0)+'|'+index+'|'+from.id+'|'+text;
+  if(GHOST_LIVING_SEEN.has(key))return;GHOST_LIVING_SEEN.add(key);
+  const row=el('div','ghostChatMsg livingMeetingMsg');row.append(el('strong','',from.name+':'),el('span','',meetingDisplayText(from,text)));
+  const box=$('ghostChatMessages');box.append(row);while(box.children.length>80)box.firstElementChild.remove();box.scrollTop=box.scrollHeight;
+}
+const GHOST_LIVING_SEEN=new Set();
 function appendMeetingMsgVisual(from,text,silent=false){
-  // Mortos usam um canal separado e não recebem o feed dos vivos na reunião.
-  if(!from||G.player?.alive===false)return;const p=el('p'); const b=el('b','',from.name+': '); b.style.color=chatCol(from);
+  if(!from)return;
+  if(G.player?.alive===false){appendLivingMeetingForGhost(from,text);return}const p=el('p'); const b=el('b','',from.name+': '); b.style.color=chatCol(from);
   p.append(b,document.createTextNode(meetingDisplayText(from,text))); const box=$('meetChat'); box.appendChild(p); box.scrollTop=box.scrollHeight;
   if(!silent)Snd.tone(440+rand(0,120),.05,'square',.03);
 }
@@ -5826,6 +5842,7 @@ function updateButtons(){
   const bodyNear=!!(can&&nearBody());br.disabled=!bodyNear;setCls(br,'ready',bodyNear);const locatorNear=!commsAbilityDown&&G.chars.some(c=>c.alive&&c!==p&&!c.vent&&dist(p,c)<=actionDistancePx('locator')&&losClear(p.x,p.y,c.x,c.y));bl.disabled=commsAbilityDown||(G.trackTime<=0&&(G.trackCd>0||!locatorNear));setCls(bl,'active',G.trackTime>0&&!commsAbilityDown); const lt=commsAbilityDown?'📡 Sem sinal':(G.trackTime>0?String(Math.ceil(G.trackTime)):(G.trackCd>0?String(Math.ceil(G.trackCd)):'Rastrear'));setCls(bl,'cooldown-label',commsAbilityDown||G.trackTime>0||G.trackCd>0);if(bl._l!==lt){bl._l=lt;if(lt==='📡 Sem sinal')bl.textContent=lt;else bl.innerHTML=lt==='Rastrear'?'🧭<small>Rastrear</small>':`🧭<small>${lt}</small>`}
   if(!bi.hidden){const it=charById(p.instructorTargetId||G.instructorTargetId),cd=p.instructorCd||G.instructorCd||0,nearby=!it&&!commsAbilityDown&&instructorSelectableTargets(p).length>0,lab=commsAbilityDown?'📡 Sem sinal':(cd>0?String(Math.ceil(cd)):(it&&it.alive?'Marcar ponto':'Trilhar'));bi.disabled=commsAbilityDown||cd>0||(!it&&!nearby);setCls(bi,'ready',!bi.disabled);if(bi._l!==lab){bi._l=lab;bi.innerHTML=lab==='Trilhar'?'↔️<small>Trilhar</small>':lab==='Marcar ponto'?'↔️<small>Marcar ponto</small>':lab}}
   if(!bg.hidden){const own=Object.values(G.guardianProtections||{}).find(pr=>String(pr.ownerId)===String(p.id)&&G.gt<Number(pr.until||0)),target=own&&charById(own.targetId),near=!commsAbilityDown&&guardianSelectableTargets(p).length>0,cd=p.guardianCd||0,lab=commsAbilityDown?'📡 Sem sinal':(own?String(Math.ceil(Math.max(0,Number(own.until)-G.gt)))+'s':(cd>0?String(Math.ceil(cd)):'Proteger'));bg.disabled=commsAbilityDown||!!own||cd>0||!near;setCls(bg,'ready',!bg.disabled);setCls(bg,'cooldown-label',commsAbilityDown||(!own&&cd>0));if(bg._l!==lab){bg._l=lab;if(lab==='📡 Sem sinal')bg.textContent=lab;else bg.innerHTML=lab==='Proteger'?'🪽<small>Proteger</small>':`🪽<small>${lab}</small>`}}
+  for(const button of [bsh,bpa,bse,bl,be,bi,bg]){const blocked=(button===bpa?paramedicCommsDown:commsAbilityDown);button.classList.toggle('no-signal',blocked);if(blocked){const label=translateRuntimeText('📡 Sem sinal').replace(/^📡\s*/u,'');if(button.dataset.signalLabel!==label||!button.querySelector('.signalIcon')){button.replaceChildren(el('span','signalIcon','📡'),el('small','',label));button.dataset.signalLabel=label}}}
   if(p.controlledBy){[bk,bsh,bdel,bcl,bp,bspec,bpa,bse,bh,bi,bg,bs,br,bl,be,bc,ub,fb].forEach(e=>{if(e)hv(e,true)});$('ventPanel').hidden=true}
 }
 function update(dt){
@@ -6479,7 +6496,7 @@ function netApplySnapshot(s,force=false){
     const oldBodies=new Map((G.bodies||[]).map(b=>[String(b.id),b]));G.bodies=s.bodies.map(r=>{const b=oldBodies.get(String(r.id))||{};Object.assign(b,r);const owner=charById(b.victimId||b.id);if(BOT_COLOR_NAMES.has(owner))bindBotColorName(b,owner);return b});G.deadPets=Array.isArray(s.deadPets)?s.deadPets.map(p=>({...p,sad:true})):[];
     const oldSplashes=new Map((G.killSplashes||[]).map(q=>[String(q.id),q]));G.killSplashes=Array.isArray(s.killSplashes)?s.killSplashes.map(q=>{const old=oldSplashes.get(String(q.id));return old?{...q,t:Math.min(Number(q.t)||0,Number(old.t)||0)}:{...q}}):[];const incomingSmoke=Array.isArray(s.spectralSmokes)?s.spectralSmokes:[];G.spectralSmokes=incomingSmoke.map(f=>({...f}));for(const f of G.spectralSmokes){if(!SPECTRAL_SEEN_SMOKES.has(f.id)){SPECTRAL_SEEN_SMOKES.add(f.id);spectralSoundNearby(f.x,f.y,f.phase==='show'?'done':'use')}}
     G.noisyAlerts=Array.isArray(s.noisyAlerts)?s.noisyAlerts.map(a=>({...a})):[];for(const a of G.noisyAlerts){if(noisyAudienceAllowed()&&!NOISY_SEEN_ALERTS.has(a.id)){NOISY_SEEN_ALERTS.add(a.id);Snd.noisyAlarm()}};G.guardianProtections=s.guardianProtections&&typeof s.guardianProtections==='object'?{...s.guardianProtections}:{};G.guardianBreakFx=Array.isArray(s.guardianBreakFx)?s.guardianBreakFx.map(f=>({...f})):[];for(const f of G.guardianBreakFx){if(!GUARDIAN_SEEN_BREAKS.has(f.id)){GUARDIAN_SEEN_BREAKS.add(f.id);Snd.roleFx('guardian','done')}};G.instructorTrails=Array.isArray(s.instructorTrails)?s.instructorTrails.map(t=>({...t,points:(t.points||[]).map(p=>({...p}))})):[];for(const tr of G.instructorTrails){if(!INSTRUCTOR_SEEN_TRAILS.has(tr.id)){INSTRUCTOR_SEEN_TRAILS.add(tr.id);const end=tr.points?.[tr.points.length-1];if(end){Snd.roleFx('instructor','done');if(String(tr.targetId)===String(G.player.id))toast('↔️ Um Instrutor marcou um caminho para você.',2400);else if(String(tr.ownerId)===String(G.player.id)){const tgt=charById(tr.targetId);toast('Trilha marcada'+(tgt?' para '+tgt.name:'')+'.',2200)}}}}
-    G.delayedMarks=s.delayedMarks&&typeof s.delayedMarks==='object'?{...s.delayedMarks}:{};G.parasiteInfections=s.parasiteInfections&&typeof s.parasiteInfections==='object'?{...s.parasiteInfections}:{};G.parasiteWinnerId=s.parasiteWinnerId||G.parasiteWinnerId||null;
+    G.delayedMarks=s.delayedMarks&&typeof s.delayedMarks==='object'?{...s.delayedMarks}:{};G.parasiteInfections=s.parasiteInfections&&typeof s.parasiteInfections==='object'?{...s.parasiteInfections}:{};G.parasiteWinnerId=s.parasiteWinnerId||null;
     if(s.cfg)netApplySettings(s.cfg);G.sab={...s.sab};if(s.decon&&typeof s.decon==='object')G.decon={...s.decon};const doorsChanged=doors.some((d,i)=>d.closed!==!!s.doors[i]);doors.forEach((d,i)=>{d.closed=!!s.doors[i]});if(doorsChanged){rebuildWalk();G.walkVer++}
     G.gt=s.gt;G.meetCd=s.meetCd;G.fixT=s.fixT;G.trackTarget=s.trackTarget||null;G.trackTime=s.trackTime||0;G.trackCd=s.trackCd||0;G.killCd=s.selfKillCd??G.player.netKillCd??0;G.player.netKillCd=G.killCd;G.sheriffCd=s.selfSheriffCd??G.player.netSheriffCd??G.sheriffCd;G.player.netSheriffCd=G.sheriffCd;G.delayedCd=s.selfDelayedCd??G.player.netDelayedCd??s.delayedCd??G.delayedCd;G.player.netDelayedCd=G.delayedCd;NET.pendingSheriffShot=false;NET.pendingDelayedMark=false;NET.pendingControl=false;G.role=s.role||G.player.role;G.locator=!!s.locator;G.observer=!!(s.observer||G.player.function==='observer');G.cleaner=!!(s.cleaner||G.player.function==='cleaner');G.parasite=!!(s.parasite||G.player.function==='parasite');G.paramedic=!!(s.paramedic||G.player.function==='paramedic');G.seer=!!(s.seer||G.player.function==='seer');G.noisy=!!(s.noisy||G.player.function==='noisy');G.judge=!!(s.judge||G.player.function==='judge');G.player.paramedicCd=s.selfParamedicCd??G.player.paramedicCd??0;G.player.paramedicSpent=s.selfParamedicSpent??G.player.paramedicSpent??0;G.paramedicCd=G.player.paramedicCd;G.player.seerCd=s.selfSeerCd??G.player.seerCd??0;G.seerReplay=s.selfSeerReplay&&typeof s.selfSeerReplay==='object'?{...s.selfSeerReplay,trace:(s.selfSeerReplay.trace||[]).map(f=>({...f}))}:null;G.player.seerReplay=G.seerReplay;G.player.parasiteReady=s.selfParasiteReady??G.player.parasiteReady??true;G.player.guardian=!!(s.selfGuardian??G.player.guardian);G.player.guardianTargetId=Object.prototype.hasOwnProperty.call(s,'selfGuardianTargetId')?s.selfGuardianTargetId:(G.player.guardianTargetId??null);G.player.instructor=!!(s.selfInstructor??G.player.instructor);G.player.instructorCd=s.selfInstructorCd??G.player.instructorCd??0;G.player.instructorTargetId=Object.prototype.hasOwnProperty.call(s,'selfInstructorTargetId')?s.selfInstructorTargetId:(G.player.instructorTargetId??null);G.instructorCd=G.player.instructorCd;G.instructorTargetId=G.player.instructorTargetId;G.cleanerCd=s.selfCleanerCd??G.player.cleanCd??G.cleanerCd;G.cleanerUses=s.selfCleanerUses??G.player.cleanUses??G.cleanerUses;G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses;G.over=!!s.over;G.winner=s.winner||null;G.endReason=s.endReason||'';if(!NET.inRoom||NET.isHost)G.cam={x:Number.isFinite(+s.cam?.x)?+s.cam.x:G.cam.x,y:Number.isFinite(+s.cam?.y)?+s.cam.y:G.cam.y};if(NET.inRoom&&!NET.isHost){if(G.player.vent&&s.state==='playing'){if(!G.player.controlledBy){const expected='Você está no duto: '+(ROOM_BY_ID[ventById[G.player.vent]?.room]?.name||'');$('ventPanel').hidden=false;if($('ventHere').textContent!==expected)refreshVentPanel()}else $('ventPanel').hidden=true}else $('ventPanel').hidden=true}
     if(s.state==='meeting'){
@@ -6615,7 +6632,7 @@ function netHostCommand(m){
   else if(command==='vent_exit'){if(activePlay&&ch.vent)exitVent(ch)}
   else if(command==='task_complete'){
     if(!activePlay||ch.vent)return;
-    if(m.fix){const f=FIX[m.fix];if(m.stepId!==f?.st)return;if(ch.alive&&ch.role==='crew'){if(f&&stationById[f.st]&&G.sab[m.fix]>0&&stationDist(stationById[f.st],ch)<=actionDistancePx('object'))resolveSab(m.fix)}return}
+    if(m.fix){const f=FIX[m.fix];if(m.stepId!==f?.st)return;if(ch.alive){if(f&&stationById[f.st]&&G.sab[m.fix]>0&&stationDist(stationById[f.st],ch)<=actionDistancePx('object'))resolveSab(m.fix)}return}
     const t=G.tasks.find(t=>String(t.id)===String(m.taskId)&&t.owner===ch.id);if(!t||t.fake||!ch.alive||ch.role!=='crew')return;const step=t.steps.find(s=>s.st===m.stepId);if(!step||step.done)return;const station=stationById[step.st];if(!station||stationDist(station,ch)>actionDistancePx('object'))return;step.done=true;t.done=t.steps.every(s=>s.done);if(ch.function==='lazy')lazyTasksDone(ch);checkEnd();
   }else if(command==='judge_vote'){
     const M=G.M,target=charById(m.targetId);if(!M||M.phase!=='vote'||!target||!target.alive||M.votes[ch.id]!==undefined)return;registerJudgeDecision(ch,target);
@@ -6771,13 +6788,13 @@ function appendRoomConfigNotice(m){
 function toggleRoomChat(){if(!NET.inRoom||NET.room?.status!=='lobby')return;const panel=$('roomChatPanel');panel.hidden=!panel.hidden;if(!panel.hidden){$('roomChatInput').focus();$('roomChatMessages').scrollTop=$('roomChatMessages').scrollHeight}}
 function canUseGhostChat(){return !!G.player&&G.player.alive===false&&['playing','meeting','task','tool'].includes(G.state)}
 function closeGhostChat(){const panel=$('ghostChatPanel'),btn=$('btnRoomChat');if(panel)panel.hidden=true;if(btn)btn.setAttribute('aria-expanded','false')}
-function resetGhostChatLocal(){GHOST_CHAT_LOCAL=[];const box=$('ghostChatMessages');if(box)box.innerHTML='';const quick=$('ghostQuickChips');if(quick)quick.innerHTML='';closeGhostChat()}
+function resetGhostChatLocal(){GHOST_LIVING_SEEN.clear();GHOST_CHAT_LOCAL=[];const box=$('ghostChatMessages');if(box)box.innerHTML='';const quick=$('ghostQuickChips');if(quick)quick.innerHTML='';closeGhostChat()}
 function appendGhostChatMessage(m,remember=true){
   if(!m)return;const clean={playerId:String(m.playerId||''),name:String(m.name||'Morto').slice(0,24),text:sanitizeChatText(m.text,180),quick:m.quick===true,at:Number(m.at)||Date.now()};if(!clean.text)return;
   if(remember){const sig=clean.playerId+'|'+clean.at+'|'+clean.text;if(GHOST_CHAT_LOCAL.some(x=>(x.playerId+'|'+x.at+'|'+x.text)===sig))return;GHOST_CHAT_LOCAL.push(clean);if(GHOST_CHAT_LOCAL.length>80)GHOST_CHAT_LOCAL.splice(0,GHOST_CHAT_LOCAL.length-80)}
   const box=$('ghostChatMessages');if(!box)return;const row=el('div','ghostChatMsg'),label=el('strong','',clean.name+':'),body=el('span','',clean.quick?translateRuntimeText(clean.text):clean.text);row.append(label,body);box.appendChild(row);while(box.children.length>80)box.removeChild(box.firstElementChild);box.scrollTop=box.scrollHeight;
 }
-function renderGhostChatHistory(list){GHOST_CHAT_LOCAL=[];const box=$('ghostChatMessages');if(box)box.innerHTML='';for(const m of (Array.isArray(list)?list:[]))appendGhostChatMessage(m,true)}
+function renderGhostChatHistory(list){GHOST_CHAT_LOCAL=[];const box=$('ghostChatMessages');if(box)box.innerHTML='';for(const m of (Array.isArray(list)?list:[]))appendGhostChatMessage(m,true);GHOST_LIVING_SEEN.clear();for(const m of G.M?.chat||[]){const from=charById(m.fromId);if(from)appendLivingMeetingForGhost(from,m.text)}}
 function updateDeadChatAccess(){
   const btn=$('btnRoomChat'),top=$('topRight');if(!btn||!top)return;const allowed=canUseGhostChat();btn.hidden=!allowed;top.classList.toggle('ghostMeeting',allowed&&G.state==='meeting');
   if(!allowed)closeGhostChat();else btn.setAttribute('aria-controls','ghostChatPanel');
