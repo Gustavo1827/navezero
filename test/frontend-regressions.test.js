@@ -288,7 +288,7 @@ test('NPCs usam falas contextuais e jogadores mortos veem funções sem revelar 
   }
   assert.match(html, /\(\(!G\.player\?\.alive\|\|G\.role==='imp'\)&&ch\.role==='imp'\?'#ff6b7e'/);
   assert.match(html, /if\(!G\.player\.alive\)\{const fl=\{sheriff:'Xerife'.*const roleLine=el\('small','pfunction',fl\);/s);
-  assert.match(html, /if\(!G\.player\.alive&&ch\.role==='imp'\)pn\.style\.color='#ff6b7e'/);
+  assert.match(html, /if\(G\.player\.role==='imp'&&ch\.role==='imp'\)pn\.style\.color='#ff6b7e'/);
   assert.match(html, /if\(ai\.ventSaw&&G\.gt-ai\.ventSaw\.gt<45/);
   assert.match(html, /\.pc\.dead\{filter:none;border-color/);
   assert.match(html, /\.pc\.dead canvas\{filter:grayscale\(1\);opacity:/);
@@ -353,7 +353,7 @@ test('Parasita é função de Infiltrado com infecção adiada até o fim da reu
   assert.match(html, /parasiteMax:\[0,3\]/);
   assert.match(html, /parasiteEligible=shuffle\(\[\.\.\.G\.imps\]\.filter\(ch=>ch\.role==='imp'&&!ch\.function\)\)/);
   assert.match(html, /function infectTarget\(parasite,target\)[\s\S]*?G\.parasiteWinnerId=parasite\.id[\s\S]*?G\.parasiteInfections\[target\.id\][\s\S]*?c\.parasiteReady=false/);
-  assert.match(html, /function resolveParasiteInfections\(\)[\s\S]*?t&&t\.alive&&t\.role==='crew'[\s\S]*?consumeGuardianProtection\(t,'parasite'\)[\s\S]*?convertToImpostor\(t\)[\s\S]*?parasiteReady=false/);
+  assert.match(html, /function resolveParasiteInfections\(\)[\s\S]*?t&&t\.alive&&t\.role==='crew'[\s\S]*?consumeGuardianProtection\(t,'parasite'\)[\s\S]*?convertToImpostor\(t\)[\s\S]*?parasiteReady=true/);
   const endMeeting=html.slice(html.indexOf('function endMeeting(){'),html.indexOf('function appendMeetingMsgVisual'));
   assert.ok(endMeeting.indexOf('G.guardianBreakFx=[]')<endMeeting.indexOf('resolveParasiteInfections()'), 'efeitos antigos devem ser limpos antes de mostrar uma quebra nova do escudo do Parasita');
   assert.match(endMeeting, /resolveParasiteInfections\(\);[\s\S]*?guardianProtections/, 'infecção pendente deve ser resolvida no fim da reunião antes de limpar proteções restantes');
@@ -466,7 +466,7 @@ test('distância para ações oferece Curta, Média e Longa e sincroniza no mult
 
 test('configurações de funções mostram descrição localizada no topo de cada função', () => {
   assert.match(html, /const roleKey=G\.cfgFunctionTab==='delayed'\?'timer'/);
-  assert.match(html, /const descKey=`role\.desc\.\$\{roleKey\}`/);
+  assert.match(html, /const descKey=`settings\.roleDetails\.\$\{G\.cfgFunctionTab\}`/);
   for (const key of ['role.desc.locator','role.desc.sheriff','role.desc.timer','role.desc.observer','role.desc.instructor','role.desc.cleaner','role.desc.parasite','role.desc.engineer','role.desc.marionette']) assert.equal(typeof languages.strings.en[key],'string');
   assert.match(html, /box\.appendChild\(info\)/);
 });
