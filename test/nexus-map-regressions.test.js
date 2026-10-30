@@ -109,13 +109,13 @@ test('Nexus usa minigames próprios e exatamente a rede de dutos planejada',()=>
   assert.match(html,/key:'nx_vision_lenses'.*game:'nx_lenses'/s);
   assert.match(html,/key:'nx_lab_anomaly'.*game:'nx_anomaly'/s);
   assert.match(html,/Atual: \$\{r\.value\}/,'controles de quantidade devem mostrar o valor atual ao jogador');
-  assert.match(html,/if\(best\?\.type!=='decon'.*label:t\('action\.enterVent'\)/s,'controles da Descontaminação devem ter prioridade sobre dutos próximos');
+  assert.match(html,/if\(best\?\.type!=='decon'.*label:P\.ventCd>0\?t\('runtime\.ventCooldown'.*:t\('action\.enterVent'\)/s,'controles da Descontaminação devem ter prioridade sobre dutos próximos');
 });
 
 test('interação das tarefas da Nexus é recalculada e fantasmas veem somente a própria posição no mapa',()=>{
   assert.match(html,/function stationUseRange\(s\)\{return actionDistancePx\('object'\)\}/);
-  assert.match(html,/btnUse'\)\.addEventListener\('pointerdown'[\s\S]*const p=G\.player,a=bestAction\(\);G\.action=a/);
+  assert.match(html,/btnUse'\)\.addEventListener\('pointerdown'[\s\S]*const p=G\.player;[\s\S]*?const a=bestAction\(\);G\.action=a/);
   assert.doesNotMatch(html,/setLineDash\(\[8,5\]\)/,'tarefas não devem manter delineado constante; apenas o destaque de proximidade permanece');
-  assert.match(html,/const showAll=observerAlive&&!commsDown/);
+  assert.match(html,/drawMapView\(mapc,512,368,true,false,true,true\)/);
   assert.match(html,/const ownGhost=personalMap&&ch\.isPlayer&&!ch\.alive/);
 });

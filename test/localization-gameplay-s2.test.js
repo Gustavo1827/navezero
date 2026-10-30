@@ -30,6 +30,6 @@ test('seleção de região usa rótulo localizado e mantém todas as regiões no
 test('interfaces de partida entram no escopo de localização sem alterar a lógica do jogo',()=>{
   for(const id of ['#hud','#modal','#meetingIntro','#meet','#confirmExit','#role','#end','#mpWaitOverlay'])assert.ok(html.includes(id),`escopo ausente: ${id}`);
   assert.match(html,/showModal\(t\('sabotage\.title'\),t\('sabotage\.choose'\)\)/);
-  assert.match(html,/showModal\(t\('freeplay\.computer'\),t\('freeplay\.computerDesc'\)\)/);
+  assert.match(html,/showModal\(t\('freeplay\.computer'\),t\('freeplay\.selectCharacter'\)\)/);
   assert.match(html,/c\.fillText\(t\('message\.noSignalText'\)/);
 });

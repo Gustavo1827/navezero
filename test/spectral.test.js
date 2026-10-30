@@ -11,7 +11,7 @@ test('Espectral tem configuração, aba e botão vermelhos',()=>{
   assert.match(html,/spectralChance:\[0,100\]/);
   assert.match(html,/spectralCooldown:\[5,20\]/);
   assert.match(html,/spectralDuration:\[10,90\]/);
-  assert.match(html,/spectralSpeed:\[0,10\]/);
+  assert.doesNotMatch(html,/spectralSpeed:/);
   assert.doesNotMatch(html,/spectralIntangible/);
   assert.match(html,/\.act2\.spectral,\.spectral-tab/);
 });
@@ -21,10 +21,10 @@ test('Espectral é distribuído somente entre Infiltrados sem outra função',()
   assert.match(html,/ch\.function='spectral'/);
 });
 
-test('invisibilidade bloqueia eliminação, acelera e some do mapa do Observador',()=>{
+test('invisibilidade bloqueia eliminação, mantém velocidade normal e oculta o jogador',()=>{
   assert.match(html,/k\.spectralInvisible\|\|!v\.alive/);
-  assert.match(html,/1\+CFG\.spectralSpeed\/10/);
-  assert.match(html,/observerReveal&&ch\.spectralInvisible\)return/);
+  assert.doesNotMatch(html,/CFG\.spectralSpeed/);
+  assert.match(html,/target\.vent\|\|target\.spectralInvisible/);
   assert.match(html,/spectralViewerAlpha/);
 });
 
@@ -38,13 +38,13 @@ test('fumaça, som próximo, NPCs e multiplayer do Espectral estão integrados',
 });
 
 
-test('velocidade do Espectral usa passos de 0,2x e contagem autoritativa monotônica',()=>{
-  assert.match(html,/if\(k==='spectralSpeed'\)\{wireRepeat\(minus,-2\);wireRepeat\(plus,2\)\}/);
+test('Espectral usa transições de um segundo e contagem autoritativa monotônica',()=>{
+  assert.match(html,/readyAt:G\.gt\+ROLE_FIXED\.spectralTransition/);
   assert.match(html,/spectralEndsAt=G\.gt\+duration/);
   assert.match(html,/function spectralRemaining\(ch\)/);
   assert.match(html,/proposed<ch\._spectralUiDeadline/);
   assert.match(html,/Voltar · \$\{Math\.max\(0,Math\.ceil\(time\)\)\}s/);
-  assert.match(server,/spectralSpeed:\[0,10\]/);
+  assert.doesNotMatch(server,/spectralSpeed:/);
   assert.doesNotMatch(server,/spectralIntangible/);
-  assert.match(server,/Math\.round\(out\.spectralSpeed\/2\)\*2/);
+  assert.doesNotMatch(server,/out\.spectralSpeed/);
 });

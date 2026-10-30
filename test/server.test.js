@@ -349,13 +349,13 @@ test('Parasita no servidor respeita máximo 3 e nunca excede os Infiltrados', ()
   assert.equal(cleanSettings({impostors:3,parasiteMax:3},15).parasiteMax,3);
 });
 
-test('Instrutor no servidor respeita limites de chance, quantidade, recarga e duração', () => {
+test('Instrutor no servidor respeita limites e ignora a antiga duração configurável', () => {
   const {cleanSettings}=require('../server');
   const s=cleanSettings({instructorChance:150,instructorMax:15,instructorCooldown:1,instructorDuration:99},8);
   assert.equal(s.instructorChance,100);
   assert.equal(s.instructorMax,8);
   assert.equal(s.instructorCooldown,20);
-  assert.equal(s.instructorDuration,15);
+  assert.equal(Object.hasOwn(s,'instructorDuration'),false);
 });
 
 test('ações online do Instrutor retransmitem seleção e ponto ao host', async t=>{

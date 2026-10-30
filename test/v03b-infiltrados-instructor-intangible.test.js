@@ -29,13 +29,13 @@ test('Instrutor cria percurso caminhável a partir do jogador e limita distânci
   assert.equal(s.instructorMaxDistance,1500);
 });
 
-test('Espectral não possui mais Intangibilidade e usa bônus de velocidade de 0,0x a 1,0x',()=>{
+test('Espectral mantém velocidade normal e ignora a opção antiga de bônus',()=>{
   assert.doesNotMatch(html,/spectralIntangible/);
   assert.doesNotMatch(html,/Intangibilidade ao ativar/);
-  assert.match(html,/spectralSpeed:\[0,10\]/);
+  assert.doesNotMatch(html,/spectralSpeed:/);
   assert.match(html,/function spectralIntangibilityActive\(ch\)\{return false\}/);
-  assert.match(html,/spectralInvisible\?\(1\+CFG\.spectralSpeed\/10\):1/);
+  assert.doesNotMatch(html,/CFG\.spectralSpeed/);
   assert.doesNotMatch(server,/spectralIntangible/);
   const s=cleanSettings({spectralSpeed:17},15);
-  assert.equal(s.spectralSpeed,10);
+  assert.equal(Object.hasOwn(s,'spectralSpeed'),false);
 });

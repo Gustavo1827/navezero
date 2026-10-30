@@ -53,24 +53,15 @@ test('Xerife tem configurações limitadas, aba própria e sincronização de sa
 
 
 
-test('Observador usa o mapa dos vivos, some em Comunicações e bloqueia movimento enquanto consulta', () => {
-  assert.match(html, /obsChance:\[0,100\]/);
-  assert.match(html, /obsMax:\[0,15\]/);
-  assert.match(server, /obsChance:\[0,100\]/);
-  assert.match(server, /obsMax:\[0,15\]/);
-  assert.match(html, /const observerEnabled=CFG\.obsMax>0&&CFG\.obsChance>0&&Math\.random\(\)\*100<CFG\.obsChance/);
-  assert.match(html, /observerEligible\.slice\(0,clamp\(CFG\.obsMax,0,15\)\)/);
-  assert.match(html, /const observerAlive=!!\(G\.player\?\.alive&&G\.player\?\.role==='crew'&&G\.player\?\.function==='observer'\)/);
-  assert.match(html, /const commsDown=\(G\.sab\.comms\|\|0\)>0/);
-  assert.match(html, /const showAll=observerAlive&&!commsDown/);
-  assert.match(html, /const ownGhost=personalMap&&ch\.isPlayer&&!ch\.alive/);
-  assert.match(html, /const showChars=!\(observerAlive&&commsDown\)/);
-  assert.match(html, /const observerMapLock=!!\(G\.mapOpen&&p\.alive&&p\.role==='crew'&&p\.function==='observer'\)/);
-  assert.match(html, /body\.observer-map-lock #stick\{[^}]*transform:translateY\(88px\)[^}]*pointer-events:none/);
-  assert.match(html, /document\.body\.classList\.add\('observer-map-lock'\)/);
-  assert.match(html, /document\.body\.classList\.remove\('observer-map-lock'\)/);
-  assert.match(server, /s\.observer=recipient\.function==='observer'/);
+test('Observador amplia somente a detecção de jogadores no mapa completo', () => {
+  assert.match(html,/obsChance:\[0,100\]/);assert.match(server,/obsMax:\[0,15\]/);
+  assert.match(html,/function observerMapRange\(ch\)\{return playerMapRange\(ch\)\*1\.6\}/);
+  assert.match(html,/personalMap&&!ch\.isPlayer\)\{if\(!mapCanDetectPlayer\(G\.player,ch\)\)return/);
+  assert.match(html,/drawMapView\(mapc,512,368,true,false,true,true\)/);
+  assert.doesNotMatch(html,/function drawObserverMap|observer-map-lock/);
+  assert.match(server,/s\.observer=recipient\.function==='observer'/);
 });
+
 test('disparo do Xerife é validado pelo host e respeita alcance, linha de visão e cooldown', () => {
   assert.match(html, /command==='sheriff_shoot'[\s\S]*?activePlay&&!G\.M&&ch\.alive&&ch\.role==='crew'&&ch\.function==='sheriff'[\s\S]*?dist\(ch,target\)<=actionDistancePx\('sheriff'\)&&losClear/);
   assert.match(server, /'sheriff_shoot'/);
@@ -95,8 +86,8 @@ test('descrições das funções e classes usam exatamente os textos solicitados
   assert.equal(languages.strings['pt-BR']['role.desc.sheriff'],'Xerife — Elimine o Infiltrado. Se você errar, será eliminado.');
   assert.equal(languages.strings['pt-BR']['role.defaultImpDesc'],'Mate a tripulação e sabote a nave.');
   assert.equal(languages.strings['pt-BR']['role.defaultCrewDesc'],'Faça suas tarefas e encontre o Infiltrado.');
-  assert.equal(languages.strings['pt-BR']['role.desc.timer'],'Temporizador — Mate suas vítimas lentamente.');
-  assert.equal(languages.strings['pt-BR']['role.desc.observer'],'Observador - Veja a Tripulação no seu mapa a qualquer momento.');
+  assert.equal(languages.strings['pt-BR']['role.desc.timer'],'Marcador — Mate suas vítimas lentamente.');
+  assert.equal(languages.strings['pt-BR']['role.desc.observer'],'Observador — Veja jogadores mais distantes no seu mapa.');
   assert.match(html, /roleMessageForPlayer[\s\S]*?t\('role\.desc\.'/);
 });
 
@@ -122,8 +113,8 @@ test('culling desenha camadas visuais por sala sem desativar colisões', () => {
 });
 
 
-test('Temporizador tem aba vermelha, ativação, duração limitada e marcação autoritativa', () => {
-  assert.match(html, /id="btnDelayedSection"[^>]*>⏱️ Temporizador/);
+test('Marcador tem aba vermelha, ativação, duração limitada e marcação autoritativa', () => {
+  assert.match(html, /id="btnDelayedSection"[^>]*>⏱️ Marcador/);
   assert.match(html, /id="btnDelayed"/);
   assert.match(html, /delayedEnabled:\[0,1\]/);
   assert.match(html, /delayedDuration:\[5,40\]/);
@@ -131,7 +122,7 @@ test('Temporizador tem aba vermelha, ativação, duração limitada e marcação
   assert.match(html, /settings\.timer\.markCooldownDesc/);
   assert.equal(languages.strings['pt-BR']['settings.timer.markCooldownLabel'],'⏱️ Tempo para marcar');
   assert.match(html, /if\(CFG\.delayedChance>0&&CFG\.delayedMax>0&&Math\.random\(\)\*100<CFG\.delayedChance\)/);
-  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Temporizador'/);
+  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Marcador'/);
   assert.doesNotMatch(html, /if\(CFG\.delayedEnabled&&CFG\.delayedChance>0/);
   assert.match(html, /function doDelayedMark\(shooter,target\)/);
   assert.match(html, /remaining:CFG\.delayedDuration/);
@@ -163,10 +154,10 @@ test('ajustes atuais: cooldowns maiores e uniformes, votos pulados identificados
   assert.match(html, /#roomBotsOk\{[^}]*font:800 20px/);
   assert.match(html, /wireRepeat\(minus,-1\);wireRepeat\(plus,1\)/);
   assert.match(html, /repeatTimer=setInterval\(\(\)=>\{if\(!canStep\(\)\)\{stop\(\);return\}change\(delta,true\)\},70\)/);
-  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Temporizador'/);
+  assert.doesNotMatch(html, /\['delayedEnabled','Ativar função Marcador'/);
 });
 
-test('ícones das funções usam os emojis definidos e Temporizador não recebe eliminação direta', () => {
+test('ícones das funções usam os emojis definidos e Marcador não recebe eliminação direta', () => {
   assert.match(html, /id="btnSheriff"[^>]*>🔫/);
   assert.match(html, /id="btnDelayed"[^>]*>⏱️/);
   assert.match(html, /id="btnLocator"[^>]*>🧭/);
@@ -236,20 +227,20 @@ test('NPCs não usam a causa interna do corpo para descobrir funções', () => {
 });
 
 test('Faxineiro tem configuração, atribuição, limpeza autoritativa e memória dos NPCs', () => {
-  for (const key of ['cleanerChance','cleanerMax','cleanerCooldown','cleanerUses']) {
+  for (const key of ['cleanerChance','cleanerMax','cleanerCooldown']) {
     assert.match(html, new RegExp("'"+key+"'"));
     assert.match(server, new RegExp(key+':\\['));
   }
   assert.match(html, /cleanerCooldown:\[10,60\]/);
-  assert.match(html, /cleanerDelay:\[1,5\]/);
-  assert.match(html, /cleanerUses:\[1,15\]/);
+  assert.doesNotMatch(server, /cleanerDelay:\[/);
+  assert.doesNotMatch(server, /cleanerUses:\[/);
   assert.match(html, /id="btnCleanerSection"[^>]*>🧹 Faxineiro/);
   assert.match(html, /id="btnCleaner"[^>]*>🧹/);
-  assert.equal(languages.strings['pt-BR']['role.desc.cleaner'],'Faxineiro - Limpe corpos e suma com as evidências.');
+  assert.equal(languages.strings['pt-BR']['role.desc.cleaner'],'Faxineiro — Limpe corpos em 2 segundos. Usos ilimitados, com recarga entre limpezas.');
   assert.match(html, /const cleanerEnabled|CFG\.cleanerChance>0&&CFG\.cleanerMax>0/);
-  assert.match(html, /function cleanBody\(cleaner,body\)[\s\S]*?cleaner\.cleanPending=\{bodyId:body\.id,remaining:CFG\.cleanerDelay\}/);
+  assert.match(html, /function cleanBody\(cleaner,body\)[\s\S]*?cleaner\.cleanPending=\{bodyId:body\.id,remaining:ROLE_FIXED\.cleanerDuration,readyAt:G\.gt\+ROLE_FIXED\.cleanerDuration\}/);
   assert.match(html, /function finishCleanBody\(cleaner,body\)[\s\S]*?G\.bodies=G\.bodies\.filter\(b=>b!==body\)/);
-  assert.match(html, /cleaner\.cleanUses=Math\.max\(0,\(cleaner\.cleanUses\|\|0\)-1\)/);
+  assert.match(html, /function bodyCleaningAlpha\(body\)/);
   assert.match(html, /cleaner\.cleanCd=CFG\.cleanerCooldown/);
   assert.match(html, /command==='clean_body'[\s\S]*?cleanBody\(ch,body\)/);
   assert.match(server, /'clean_body'/);
@@ -315,7 +306,7 @@ test('cosméticos têm catálogo, categorias, renderização centralizada e sinc
 test('catálogo de cosméticos fica no menu inicial e preserva a regra de cores únicas online', () => {
   assert.match(html, /id="btnFreePlay"[^>]*>Partida Livre<\/button><button class="chip" id="btnCosmetics"[^>]*>Inventário<\/button>/, 'Inventário deve usar o mesmo estilo compacto de Partida Livre no menu');
   assert.doesNotMatch(html, /roomActions[^\n]*id="btnCosmetics"/, 'o botão não deve permanecer na janela do lobby');
-  assert.match(html, /function openCosmetics\(\)\{if\(NET\.inRoom\)\{toast\((?:t\('cosmetics\.menuOnly'\)|'O Inventário é usado na tela inicial)/, 'Inventário deve ser aberto antes de entrar na sala');
+  assert.match(html, /function openCosmetics\(\)\{if\(NET\.inRoom&&NET\.room\?\.status!=='lobby'\)/, 'Inventário deve funcionar no menu e na sala de espera');
   assert.match(html, /id="lobbyColorSwatches"/, 'catálogo deve manter o seletor de cor');
   assert.match(html, /netSend\(\{type:'set_color',color:color\.id\}\)/, 'a proteção de cor única continua disponível para estado de lobby sincronizado');
   assert.match(html, /filter\(p=>p\.id!==NET\.id\)\.map\(p=>p\.color\)/, 'cores usadas por outros jogadores continuam detectadas');
@@ -371,7 +362,7 @@ test('Vidente inspeciona corpos com reconstituição privada e pistas factuais p
   assert.match(html, /seerMax:\[0,15\]/);
   assert.match(html, /seerCooldown:\[10,45\]/);
   assert.match(html, /seerDelay:\[0,5\]/);
-  assert.match(html, /seerDuration:\[5,10\]/);
+  assert.doesNotMatch(server, /seerDuration:\[/);assert.match(html, /seerDuration:10/);
   assert.match(html, /function inspectBody\(seer,body\)/);
   assert.match(html, /function drawSeerReplay\(c\)[\s\S]*?fillStyle='#050509'/);
   assert.match(html, /const fadeIn=clamp\(elapsed\/.45,0,1\),fadeOut=clamp\(\(duration-elapsed\)\/.55,0,1\)/);
@@ -389,10 +380,10 @@ test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comuni
   assert.match(html, /instructorChance:\[0,100\]/);
   assert.match(html, /instructorMax:\[0,15\]/);
   assert.match(html, /instructorCooldown:\[20,60\]/);
-  assert.match(html, /instructorDuration:\[5,15\]/);
+  assert.doesNotMatch(server, /instructorDuration:\[/);assert.match(html, /instructorDuration:10/);
   assert.match(html, /function activateInstructor\(ch\)[\s\S]*?ch\.alive[\s\S]*?ch\.role!=='crew'[\s\S]*?ch\.instructor=true/);
   assert.match(html, /function killChar\(c\)[\s\S]*?maybeActivateGhostRole\(c\)/);
-  assert.match(html, /function createInstructorTrail\(owner,target,x,y\)[\s\S]*?targetId:target\.id[\s\S]*?CFG\.instructorDuration/);
+  assert.match(html, /function createInstructorTrail\(owner,target,x,y\)[\s\S]*?targetId:target\.id[\s\S]*?ROLE_FIXED\.instructorDuration/);
   assert.match(html, /if\(type==='comms'\)\{G\.instructorTrails\.length=0/);
   assert.match(html, /function instructorNpcThink\(ch,dt\)/);
   assert.match(html, /action:'instructor_mark'/);
@@ -524,10 +515,10 @@ test('Paramédico libera usos por tarefas, revive uma única vez e sincroniza o 
     assert.match(html, new RegExp(key+':\\['));
     assert.match(server, new RegExp(key+':\\['));
   }
-  assert.equal(languages.strings['pt-BR']['role.desc.paramedic'],'Paramédico - Reviva Tripulantes por meio de seus corpos.');
+  assert.equal(languages.strings['pt-BR']['role.desc.paramedic'],'Paramédico — Complete tarefas para receber um conjunto de usos de Reviver. Gaste todos antes de obter outro conjunto.');
   assert.match(html, /paramedicEligible=shuffle\(G\.chars\.filter\(c=>c\.role==='crew'&&!c\.function\)\)/);
-  assert.match(html, /Math\.floor\(completedRealTasksFor\(ch\)\/Math\.max\(1,CFG\.paramedicTasksPerUse\)\)/);
-  assert.match(html, /function paramedicAvailableUses\(ch\)\{return Math\.max\(0,paramedicUnlockedUses\(ch\)-Math\.max\(0,ch\?\.paramedicSpent\|\|0\)\)\}/, 'usos liberados devem acumular até serem realmente gastos');
+  assert.match(html, /done-ch\.paramedicTaskBase>=CFG\.paramedicTasksPerUse/);
+  assert.match(html, /function paramedicAvailableUses\(ch\)\{return syncParamedicUses\(ch\)\}/, 'cada jogador deve manter um conjunto, sem acumular novos usos');
   assert.match(html, /Reviver \(\$\{pav\}\)/, 'o botão deve refletir mais de um uso acumulado');
   assert.match(html, /victim&&victim!==medic&&!victim\.alive&&victim\.role==='crew'&&!victim\.revivedOnce/);
   assert.match(html, /clearRevivedFunctionState\(victim\);victim\.role='crew';victim\.alive=true;victim\.ghost=false;victim\.revivedOnce=true/);
@@ -625,7 +616,7 @@ test('Chat Rápido contém as novas frases e reutiliza seletores de salas e joga
 
 test('Preguiçoso é Tripulante vivo com tarefas reduzidas e peso normal na barra', () => {
   assert.match(html, /id="btnLazySection"[^>]*>🍕 Preguiçoso/);
-  assert.equal(languages.strings['pt-BR']['role.desc.lazy'],'Preguiçoso - Suas tarefas são fáceis, complete elas e ajude a Tripulação.');
+  assert.equal(languages.strings['pt-BR']['role.desc.lazy'],'Preguiçoso — Faça suas poucas tarefas. Você anda mais devagar até concluí-las e volta à velocidade normal depois.');
   for (const key of ['lazyChance','lazyMax','lazySlowdown','lazyTasks']) {
     assert.match(html,new RegExp(key+':\\['));
     assert.match(server,new RegExp(key+':\\['));

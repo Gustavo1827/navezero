@@ -6,7 +6,7 @@ const fs=require('node:fs');
 const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
 function run(name,context){const start=html.indexOf('function '+name+'('),end=html.indexOf('\nfunction ',start+1);return vm.runInNewContext(html.slice(start,end)+'\n'+name+';',context)}
 test('fake station actions still translate when no pending task exists',()=>{
- const context={G:{role:'imp',player:{alive:true,id:'p'}},pendingAt:()=>null,FAKE_GAME:{station:{game:'wires'}},TOOLS:{},t:key=>key};
+ const context={FIX_KEYS:[],G:{role:'imp',player:{alive:true,id:'p'}},pendingAt:()=>null,FAKE_GAME:{station:{game:'wires'}},TOOLS:{},t:key=>key};
  const action=run('actionFor',context)({id:'station'});
  assert.equal(action.fake,undefined);assert.equal(action.task.fake,true);assert.equal(action.label,'task.fakeAction');
 });
