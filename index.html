@@ -221,6 +221,18 @@ body.touch #stick{display:block}
 @media(max-width:430px){.freeplayToolGrid,.freeplayChoiceGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.freeplayToolButton{min-height:82px;font-size:19px;padding:10px 7px}.freeplayChoiceButton{font-size:18px}}
 @media(max-width:360px){.freeplayToolGrid,.freeplayChoiceGrid{gap:8px}.freeplayToolButton{min-height:84px;font-size:18px;padding:9px 6px}.freeplayChoiceButton{font-size:18px}.freeplayPlayerButton{font-size:16px!important;grid-template-columns:18px minmax(0,1fr)!important}.freeplayPlayerButton>i:last-child,.freeplayPlayerButton>b:last-child{display:none}}
 .act2.paramedic{background:#79e8b1;color:#102739;box-shadow:0 6px 0 #3b9f75,0 8px 0 #10122a;font-size:25px}.act2.seer{background:#b98cff;color:#18102d;box-shadow:0 6px 0 #7656b2,0 8px 0 #10122a;font-size:25px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}.act2.paramedic small,.act2.seer small{display:block;font-size:10px;line-height:1.05}.act2.engineer{background:#e8f0ff;color:#26345d;box-shadow:0 6px 0 #9baedb,0 8px 0 #10122a;font-size:25px}.act2.engineer small,.act2.marionette small{display:block;font-size:10px;line-height:1.05}.act2.marionette{background:#9c7be8;color:#170d3b;box-shadow:0 6px 0 #6345a9,0 8px 0 #10122a;font-size:25px}.act2.hunter{font-size:24px}.act2.hunter small{display:block;font-size:10px;line-height:1.05}.act2.delayed,.act2.cleaner,.delayed-tab,.cleaner-tab,.act2.parasite,.parasite-tab,.act2.spectral,.spectral-tab,.marionette-tab,.act2.hunter,.hunter-tab{background:rgba(255,53,78,.58)!important;color:#fff!important;box-shadow:0 5px 0 #a91f39,0 7px 0 #10122a!important}
+.act2.miner{background:#cf9848;color:#31200c;box-shadow:0 6px 0 #89602b,0 8px 0 #10122a;font-size:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.act2.miner small{display:block;font-size:10px;line-height:1.1;padding:0 3px;max-width:100%;overflow-wrap:anywhere}
+#ventList.mineRoutes{display:block;background:none;border:0;padding:0;overflow:visible;pointer-events:none}
+#ventList.mineRoutes .ventRoute{width:44px;height:44px;min-width:0;min-height:0;padding:0;border-radius:50%;border-color:#b18446;background:#33271b;display:grid;place-items:center;pointer-events:auto}
+#ventList.mineRoutes .ventRouteArrow{font-size:27px;line-height:1}
+
+.act2.metamorph{background:#6b6b6b;color:var(--ink);box-shadow:0 6px 0 #41414e,0 8px 0 #10122a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:26px}
+.act2.metamorph .morphIcon{display:block;line-height:1;font-size:16px;align-self:center;text-align:center}
+@media(max-width:560px){.act2.metamorph .morphIcon{font-size:14px}}
+.act2.metamorph small{display:block;max-width:100%;padding:0 2px;font-size:10px;line-height:1.1;white-space:normal;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.act2.metamorph,.act2.metamorph.ready,.act2.metamorph:active{animation:none;transform:none}
+.act2.seer small,.act2.marionette small{max-width:100%;padding:0 2px;white-space:normal;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.act2.marionette{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
 .act2.delayed{font-size:29px!important}
 .act2.sheriff{background:#3c83e8!important;color:#fff!important;box-shadow:0 6px 0 #2055a5,0 8px 0 #10122a!important}
 .act2.sheriff .sheriffGunIcon{width:36px;height:27px}
@@ -460,7 +472,7 @@ body.touch #stick{display:block}
   <div class="card">
     <h1 class="logo">Nave Zero</h1>
     <p class="tag">A nave está falhando. Conclua as tarefas antes que seja tarde.</p>
-    <p class="phase" style="margin:-4px 0 8px">Versão 0.4b-s3</p>
+    <p class="phase" style="margin:-4px 0 8px">Versão 0.4b-s4</p>
     <canvas id="pv" width="280" height="260"></canvas>
     <div class="field"><label for="nameIn">Seu nome</label><input id="nameIn" maxlength="12" value="Você" autocomplete="off"></div>
     <div class="row onlineMenu"><button class="big" id="btnCreateRoom">Criar sala</button><button class="big alt" id="btnJoinRoom">Entrar na sala</button></div>
@@ -618,7 +630,7 @@ body.touch #stick{display:block}
   <div id="ventPanel" hidden><span id="ventHere" hidden></span><div id="ventList"></div></div>
   <div id="sabBar" hidden></div>
   <div id="stick"><i id="knob"></i></div>
-  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden>🔫<small class="sheriffButtonLabel">Atirar</small></button><button class="act2 delayed" id="btnDelayed" aria-label="Marcar vítima" title="Marcador — marcar um Tripulante próximo" hidden>⏱️<small>Marcar</small></button><button class="act2 cleaner" id="btnCleaner" aria-label="Limpar corpo" title="Faxineiro — limpar um corpo próximo" hidden>🧹<small>Limpar</small></button><button class="act2 parasite" id="btnParasite" aria-label="Infectar Tripulante" title="Parasita — infectar um Tripulante próximo" hidden>🦠<small>Infectar</small></button><button class="act2 spectral" id="btnSpectral" aria-label="Invisibilidade" title="Espectral — ficar invisível temporariamente" hidden>👻<small>Sumir</small></button><button class="act2 hunter" id="btnHunter" aria-label="Definir alvo" title="Caçador — definir o Tripulante vivo mais próximo como alvo" hidden>🎯<small>Definir alvo</small></button><button class="act2 paramedic" id="btnParamedic" aria-label="Reviver Tripulante" title="Paramédico — reviver um Tripulante morto próximo" hidden>⛑️<small>Reviver</small></button><button class="act2 seer" id="btnSeer" aria-label="Inspecionar corpo" title="Vidente — reconstruir os instantes após uma morte" hidden>🔮<small>Inspecionar</small></button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>🧭<small>Rastrear</small></button><button class="act2 instructor" id="btnInstructor" aria-label="Trilhar" title="Instrutor — indicar um caminho a um jogador vivo" hidden>↔️<small>Trilhar</small></button><button class="act2 guardian" id="btnGuardian" aria-label="Proteger" title="Anjo Guardião — proteger um jogador vivo" hidden>🪽<small>Proteger</small></button><button class="act2 engineer" id="btnEngineerVent" aria-label="Dutar" title="Engenheiro — entrar ou sair dos dutos" hidden>🔧<small>Dutar</small></button><button class="act2 marionette" id="btnControl" aria-label="Controlar" title="Marionetista — controlar um jogador próximo" hidden>✋<small>Controlar</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
+  <div id="actions"><div class="row2"><button class="act2 kill" id="btnKill" aria-label="Eliminar" hidden>Matar</button><button class="act2 sheriff" id="btnSheriff" aria-label="Disparar" title="Xerife — atirar em um jogador próximo" hidden>🔫<small class="sheriffButtonLabel">Atirar</small></button><button class="act2 delayed" id="btnDelayed" aria-label="Marcar vítima" title="Marcador — marcar um Tripulante próximo" hidden>⏱️<small>Marcar</small></button><button class="act2 cleaner" id="btnCleaner" aria-label="Limpar corpo" title="Faxineiro — limpar um corpo próximo" hidden>🧹<small>Limpar</small></button><button class="act2 parasite" id="btnParasite" aria-label="Infectar Tripulante" title="Parasita — infectar um Tripulante próximo" hidden>🦠<small>Infectar</small></button><button class="act2 spectral" id="btnSpectral" aria-label="Invisibilidade" title="Espectral — ficar invisível temporariamente" hidden>👻<small>Sumir</small></button><button class="act2 metamorph" id="btnMorph" hidden>🎭<small>Disfarçar</small></button><button class="act2 miner" id="btnMiner" hidden>⛏️<small>Cavar</small></button><button class="act2 hunter" id="btnHunter" aria-label="Definir alvo" title="Caçador — definir o Tripulante vivo mais próximo como alvo" hidden>🎯<small>Definir alvo</small></button><button class="act2 paramedic" id="btnParamedic" aria-label="Reviver Tripulante" title="Paramédico — reviver um Tripulante morto próximo" hidden>⛑️<small>Reviver</small></button><button class="act2 seer" id="btnSeer" aria-label="Investigar corpo" title="Vidente — reconstruir os instantes após uma morte" hidden>🔮<small>Inspecionar</small></button><button class="act2 sab" id="btnSab" aria-label="Sabotar" hidden>Sabotar</button><button class="act2 rep" id="btnReport" aria-label="Reportar corpo">Reportar</button><button class="act2 locator" id="btnLocator" aria-label="Localizador" title="Localizador — rastrear jogador próximo" hidden>🧭<small>Rastrear</small></button><button class="act2 instructor" id="btnInstructor" aria-label="Trilhar" title="Instrutor — indicar um caminho a um jogador vivo" hidden>↔️<small>Trilhar</small></button><button class="act2 guardian" id="btnGuardian" aria-label="Proteger" title="Anjo Guardião — proteger um jogador vivo" hidden>🪽<small>Proteger</small></button><button class="act2 engineer" id="btnEngineerVent" aria-label="Dutar" title="Engenheiro — entrar ou sair dos dutos" hidden>🔧<small>Dutar</small></button><button class="act2 marionette" id="btnControl" aria-label="Controlar" title="Marionetista — controlar um jogador próximo" hidden>✋<small>Controlar</small></button></div><div id="useHint"></div><div class="row2"><button id="btnFollow" aria-label="Seguir jogador" hidden>Seguir<br>jogador</button><button id="btnUse" aria-label="Usar">Usar</button></div></div>
 </div>
 
 <div id="deathIntro" hidden aria-live="assertive"><div class="deathCard"><h2>ELIMINADO!</h2><canvas id="deathCv" width="460" height="230" aria-hidden="true"></canvas><p id="deathDesc">Você foi eliminado.</p></div></div>
@@ -632,7 +644,7 @@ body.touch #stick{display:block}
   </div>
 </div>
 
-<div id="judgePronounce" hidden aria-live="assertive"><div class="judgePronounceCard">O Juiz se pronunciou! 🔨</div></div>
+<div id="judgePronounce" hidden aria-live="assertive"><div class="judgePronounceCard">O Juiz se pronunciou! 👨‍⚖️</div></div>
 
 <div id="meetingIntro" hidden aria-live="polite" aria-atomic="true">
   <div class="meetingIntroCard" role="status">
@@ -662,7 +674,7 @@ body.touch #stick{display:block}
     <h2 id="cfgTitle">Configurações</h2><div class="row" id="cfgTabs"><button class="big" id="cfgTabSettings">Configurações</button><button class="big alt" id="cfgTabFunctions">Funções</button><button class="big alt" id="cfgTabPresets">Predefinições</button></div>
     <p class="cfgnote" id="cfgNote">Tempos de recarga, em segundos.</p>
     <div id="cfgRows"></div>
-    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">🧭 Localizador</button><button class="big alt" id="btnSheriffSection" type="button">🔫 Xerife</button><button class="big alt" id="btnObserverSection" type="button">👀 Observador</button><button class="big alt" id="btnInstructorSection" type="button">↔️ Instrutor</button><button class="big alt" id="btnGuardianSection" type="button">🪽 Anjo Guardião</button><button class="big alt" id="btnParamedicSection" type="button">⛑️ Paramédico</button><button class="big alt" id="btnSeerSection" type="button">🔮 Vidente</button><button class="big alt" id="btnNoisySection" type="button">🔊 Barulhento</button><button class="big alt" id="btnJudgeSection" type="button">⚖️ Juiz</button><button class="big alt" id="btnLazySection" type="button">🍕 Preguiçoso</button><button class="big alt" id="btnEngineerSection" type="button">🔧 Engenheiro</button><button class="big alt delayed-tab" id="btnDelayedSection" type="button">⏱️ Marcador</button><button class="big alt cleaner-tab" id="btnCleanerSection" type="button">🧹 Faxineiro</button><button class="big alt parasite-tab" id="btnParasiteSection" type="button">🦠 Parasita</button><button class="big alt spectral-tab" id="btnSpectralSection" type="button">👻 Espectral</button><button class="big alt marionette-tab" id="btnMarionetteSection" type="button">✋ Marionetista</button><button class="big alt hunter-tab" id="btnHunterSection" type="button">🎯 Caçador</button></div></div>
+    <div id="cfgFunctionFooter" hidden><div class="row" id="cfgFunctionTabs"><button class="big" id="btnLocatorSection" type="button">🧭 Localizador</button><button class="big alt" id="btnSheriffSection" type="button">🔫 Xerife</button><button class="big alt" id="btnObserverSection" type="button">👀 Observador</button><button class="big alt" id="btnInstructorSection" type="button">↔️ Instrutor</button><button class="big alt" id="btnGuardianSection" type="button">🪽 Anjo Guardião</button><button class="big alt" id="btnParamedicSection" type="button">⛑️ Paramédico</button><button class="big alt" id="btnSeerSection" type="button">🔮 Vidente</button><button class="big alt" id="btnNoisySection" type="button">🔊 Barulhento</button><button class="big alt" id="btnJudgeSection" type="button">👨‍⚖️ Juiz</button><button class="big alt" id="btnLazySection" type="button">🍕 Preguiçoso</button><button class="big alt" id="btnEngineerSection" type="button">🔧 Engenheiro</button><button class="big alt delayed-tab" id="btnDelayedSection" type="button">⏱️ Marcador</button><button class="big alt cleaner-tab" id="btnCleanerSection" type="button">🧹 Faxineiro</button><button class="big alt parasite-tab" id="btnParasiteSection" type="button">🦠 Parasita</button><button class="big alt spectral-tab" id="btnSpectralSection" type="button">👻 Espectral</button><button class="big alt" id="btnMorphSection" type="button">🎭 Metamorfo</button><button class="big alt" id="btnMinerSection" type="button">⛏️ Minerador</button><button class="big alt marionette-tab" id="btnMarionetteSection" type="button">✋ Marionetista</button><button class="big alt hunter-tab" id="btnHunterSection" type="button">🎯 Caçador</button></div></div>
     <div class="row"><button class="big alt" id="cfgReset">Restaurar padrão</button><button class="big" id="cfgClose">Fechar</button></div>
   </div>
 </div>
@@ -1554,7 +1566,7 @@ function drawPetShape(c,id,x,y,phase=0,opts={}){
   c.restore();
 }
 
-function updateCosmeticPets(dt){if(!G.chars)return;for(const ch of G.chars){const pet=normalizeCosmetics(ch.cosmetics).pet;if(pet==='none'||ch.alive===false||ch.ghost||ch.vent||(ch.ventAnim&&ch.ventAnim.kind==='in')){ch.petX=ch.petY=undefined;continue}const v=netVisualState(ch),vx=v?v.x:ch.x,vy=v?v.y:ch.y;const tx=vx-(ch.face||1)*27,ty=vy+17;if(!Number.isFinite(ch.petX)||!Number.isFinite(ch.petY)||Math.hypot(ch.petX-tx,ch.petY-ty)>150){ch.petX=tx;ch.petY=ty;continue}const k=1-Math.exp(-Math.max(0,dt)*7);ch.petX+=(tx-ch.petX)*k;ch.petY+=(ty-ch.petY)*k}}
+function updateCosmeticPets(dt){if(!G.chars)return;for(const ch of G.chars){const pet=normalizeCosmetics(morphLook(ch).cosmetics).pet;if(pet==='none'||ch.alive===false||ch.ghost||ch.vent||(ch.ventAnim&&ch.ventAnim.kind==='in')){ch.petX=ch.petY=undefined;continue}const v=netVisualState(ch),vx=v?v.x:ch.x,vy=v?v.y:ch.y;const tx=vx-(ch.face||1)*27,ty=vy+17;if(!Number.isFinite(ch.petX)||!Number.isFinite(ch.petY)||Math.hypot(ch.petX-tx,ch.petY-ty)>150){ch.petX=tx;ch.petY=ty;continue}const k=1-Math.exp(-Math.max(0,dt)*7);ch.petX+=(tx-ch.petX)*k;ch.petY+=(ty-ch.petY)*k}}
 
 const BUB_CACHE={};
 function bubbleSprite(t){
@@ -1575,7 +1587,35 @@ function nameSprite(text,col){
   c.lineWidth=4; c.strokeStyle='rgba(8,9,28,.9)'; c.strokeText(text,w/2,19); c.fillStyle=col; c.fillText(text,w/2,19);
   sp=NAME_CACHE[k]={cv:cv2,w,h,asc:19}; return sp;
 }
+function drawMorphBubble(c,ch,x,y){
+  const real=COLOR_BY[ch.morphTrueColor||ch.color]||COLOR_BY.azul;
+  const progress=clamp(1-Math.max(0,Number(ch.morphTransition.remaining)||0),0,1);
+  const rgb=parseInt(real.main.slice(1),16),tint=alpha=>`rgba(${(rgb>>16)&255},${(rgb>>8)&255},${rgb&255},${alpha})`;
+  const strength=.75+.25*Math.sin(progress*Math.PI);
+  c.save();c.translate(x,y-16);
+  const film=c.createRadialGradient(-12,-25,2,0,0,59);
+  film.addColorStop(0,tint(.08));film.addColorStop(.5,tint(.2));film.addColorStop(1,tint(.46));
+  c.fillStyle=film;c.strokeStyle=tint(.9*strength);c.lineWidth=3.5;c.shadowColor=real.main;c.shadowBlur=12*strength;
+  c.beginPath();c.ellipse(0,0,40,53,0,0,Math.PI*2);c.fill();c.stroke();c.shadowBlur=0;
+  c.save();c.beginPath();c.ellipse(0,0,37,50,0,0,Math.PI*2);c.clip();
+  // Light ribbons and rising motes stay inside the suit-sized oval.
+  for(let i=0;i<3;i++){
+    const height=43-((progress*80+i*32)%100),sway=Math.sin(progress*Math.PI*2+i)*8;
+    c.strokeStyle=tint(.33*strength);c.lineWidth=2;
+    c.beginPath();c.moveTo(-38,height);c.bezierCurveTo(-16,height-17+sway,17,height+12-sway,38,height-8);c.stroke();
+  }
+  for(let i=0;i<8;i++){
+    const px=Math.sin(i*2.39+progress*2.5)*29,py=44-((progress*72+i*17)%96);
+    c.fillStyle=i%2?'rgba(255,255,255,.42)':tint(.7);c.beginPath();c.arc(px,py,1.2+(i%3)*.45,0,Math.PI*2);c.fill();
+  }
+  c.restore();
+  c.strokeStyle='rgba(255,255,255,.72)';c.lineWidth=3;c.lineCap='round';
+  c.beginPath();c.ellipse(-12,-23,13,20,-.35,Math.PI*1.08,Math.PI*1.68);c.stroke();
+  c.strokeStyle=tint(.6);c.lineWidth=1.5;c.beginPath();c.ellipse(0,0,35,47,0,progress*3,progress*3+1.9);c.stroke();
+  c.restore();
+}
 function drawChar(c,ch,showName=true,opts={}){
+  if(!opts.portrait)ch=morphLook(ch);
   const col=COLOR_BY[ch.color]||COLOR_BY.azul,cosmetics=normalizeCosmetics(ch.cosmetics);
   const visual=netVisualState(ch),vx=visual?visual.x:ch.x,vy=visual?visual.y:ch.y;
   const ghost=!!ch.ghost&&ch.alive===false;
@@ -1603,6 +1643,8 @@ function drawChar(c,ch,showName=true,opts={}){
   c._nzCosmeticColor=ch.color;if(!ghost)drawOutfitLegCosmetic(c,cosmetics.outfit,s);drawOutfitCosmetic(c,cosmetics.outfit);drawVisorCosmetic(c,cosmetics.visor);drawHatCosmetic(c,cosmetics.hat);c.restore();
   const worldPetVisible=ch.alive!==false&&!ch.ghost&&!ch.vent,showPet=!opts.noPet&&(opts.portrait||worldPetVisible);
   if(showPet){const petX=Number.isFinite(ch.petX)&&!opts.portrait?ch.petX:vx-(ch.face||1)*27,petY=Number.isFinite(ch.petY)&&!opts.portrait?ch.petY:vy+17;c._nzCosmeticColor=ch.color;drawPetShape(c,cosmetics.pet,petX,petY,String(ch.id||ch.name||'').length*.7)}
+  if(ch.minerDig&&!opts.portrait)drawMinerDig(c,ch,vx,vy);
+  if(ch.morphTransition&&!opts.portrait)drawMorphBubble(c,ch,vx,vy);
   if(showName&&ch.name){const sp=nameSprite(ch.name,ch.nameCol||'#fff');c.drawImage(sp.cv,vx-sp.w/2,vy-35-sp.asc,sp.w,sp.h)}
   if(showName&&G.player?.role==='imp'&&G.parasiteInfections?.[ch.id]){c.save();c.font='21px sans-serif';c.textAlign='center';c.fillText('🦠',vx,vy-60);c.restore()}
   if(showName&&hunterViewerCanSeeTargets()&&hunterOwnerForTarget(ch)){c.save();c.font='700 21px "Baloo 2","Trebuchet MS",sans-serif';c.textAlign='center';c.textBaseline='middle';c.lineWidth=3;c.strokeStyle='rgba(8,9,28,.9)';c.strokeText('🎯',vx,vy-74);c.fillText('🎯',vx,vy-74);c.restore()}
@@ -2033,7 +2075,7 @@ function pendingAt(stationId){
    JOGADOR, MOVIMENTO E COLISÃO
    ===================================================================== */
 function newChar(name,color,tx,ty,isPlayer){
-  return {id:isPlayer?'player':'npc'+Math.random().toString(36).slice(2,7),name,color,x:tx*TILE+TILE/2,y:ty*TILE+TILE/2,face:1,walk:0,moving:false,alive:true,ghost:false,guardian:false,guardianCd:0,guardianTargetId:null,hunterTargetId:null,hunterTargetCd:0,cleanPending:null,noisyTriggered:false,judgeUsed:false,judgeTargetId:null,vent:null,ventAnim:null,ventCd:0,ventMv:0,teleportSeq:0,killDash:null,bubble:null,isPlayer,parasiteReady:true,parasiteCd:0,cosmetics:cloneCosmetics(DEFAULT_COSMETICS),petX:undefined,petY:undefined,paramedicCd:0,paramedicSpent:0,paramedicUses:0,paramedicTaskBase:0,seerCd:0,seerPending:null,seerReplay:null,revivedOnce:false,lazyDone:false,spectralInvisible:false,spectralTime:0,spectralEndsAt:0,spectralSeq:0,spectralCd:0,spectralTransition:null};
+  return {id:isPlayer?'player':'npc'+Math.random().toString(36).slice(2,7),name,color,x:tx*TILE+TILE/2,y:ty*TILE+TILE/2,face:1,walk:0,moving:false,alive:true,ghost:false,guardian:false,guardianCd:0,guardianTargetId:null,hunterTargetId:null,hunterTargetCd:0,cleanPending:null,noisyTriggered:false,judgeUsed:false,judgeTargetId:null,vent:null,ventAnim:null,ventCd:0,ventMv:0,teleportSeq:0,killDash:null,minerCd:0,minerDig:null,morphAppearance:null,morphTransition:null,morphTime:0,morphCd:0,bubble:null,isPlayer,parasiteReady:true,parasiteCd:0,cosmetics:cloneCosmetics(DEFAULT_COSMETICS),petX:undefined,petY:undefined,paramedicCd:0,paramedicSpent:0,paramedicUses:0,paramedicTaskBase:0,seerCd:0,seerPending:null,seerReplay:null,revivedOnce:false,lazyDone:false,spectralInvisible:false,spectralTime:0,spectralEndsAt:0,spectralSeq:0,spectralCd:0,spectralTransition:null};
 }
 const HALF_W=11,HALF_H=9,OFF_Y=6;
 function boxBlocked(x,y,g){
@@ -2041,7 +2083,7 @@ function boxBlocked(x,y,g){
   return blockedPx(l,t,g)||blockedPx(r,t,g)||blockedPx(l,b,g)||blockedPx(r,b,g);
 }
 function moveChar(c,dx,dy){
-  if(c.killDash)return false;
+  if(c.killDash||c.morphTransition||c.minerDig)return false;
   let moved=false;
   if(c.ghost||spectralIntangibilityActive(c)){
     // Mortos e Espectrais intangíveis atravessam paredes/objetos, mas ficam perto dos limites do mapa.
@@ -2066,7 +2108,7 @@ function inputVec(){
   return {x,y};
 }
 function updatePlayer(dt){
-  const p=G.player, sp=moveSpeedFor(p,CFG.speed)*dt;if(p.killDash)return;let v=inputVec();
+  const p=G.player, sp=moveSpeedFor(p,CFG.speed)*dt;if(p.killDash||p.morphTransition||p.minerDig)return;let v=inputVec();
   if(p.ghost&&G.followTarget){const target=charById(G.followTarget);if(target&&target.alive){const dx=target.x-p.x,dy=target.y-p.y,d=Math.hypot(dx,dy);if(d>34)v={x:dx/d,y:dy/d};else v={x:0,y:0}}else G.followTarget=null}
   const moved=(v.x||v.y)?moveChar(p,v.x*sp,v.y*sp):false;
   p.moving=moved; if(moved)p.walk+=dt;
@@ -2121,6 +2163,7 @@ function bestAction(){
   // Dentro da Descontaminação, o controle da porta deve vencer o duto próximo.
   // Assim o jogador nunca perde o botão de abrir/liberar a câmara por estar ao lado da grade.
   if(best?.type!=='decon'&&P.alive&&(P.role||G.role)==='imp')for(const v of VENT_DEFS){const d=Math.hypot(P.x-v.px,P.y+4-v.py); if(d<=actionDistancePx('vent')&&d<bd){bd=d;best={type:'vent',vent:v,station:{x:v.x,y:v.y,w:1,h:1},label:P.ventCd>0?t('runtime.ventCooldown',{seconds:Math.ceil(P.ventCd)}):t('action.enterVent')}}}
+  if(P.alive&&P.role==='imp'&&P.function==='miner'&&!P.minerDig&&best?.type!=='decon')for(const hole of ownedMinerHoles(P)){const d=Math.hypot(P.x-hole.x,P.y-hole.y);if(d<=actionDistancePx('vent')&&d<=bd){bd=d;best={type:'mine',hole,station:{x:hole.x/TILE-.5,y:(hole.y+OFF_Y)/TILE-.5,w:1,h:1,room:hole.room},label:t('miner.enter')}}}
   return best;
 }
 function setDoorClosedById(id,closed){
@@ -2159,8 +2202,9 @@ function updateDecon(){
   if(D.phase==='exit'){resetDeconState()}
 }
 function doInteract(a){
-  if(G.player?.controlledBy||G.player?.killDash||G.state!=='playing'||uiBusy()||!a)return;
+  if(G.player?.minerDig||G.player?.controlledBy||G.player?.morphTransition||G.player?.killDash||G.state!=='playing'||uiBusy()||!a)return;
   if(!G.player.alive&&a.type!=='freecomputer'&&!(G.role==='crew'&&a.type==='task')){toast('Morto não pode interagir com isso.');return;}
+  if(a.type==='mine'){minerRequest('mine_enter',a.hole.id);return}
   if(a.type==='freecomputer')openFreePlayComputer();
   else if(a.type==='task')openTask(a);
   else if(a.type==='fix'&&!G.player.alive){toast('Morto não pode reparar sabotagens.');return;}
@@ -2749,7 +2793,7 @@ function offlineBotNames(owner){
   }
   return OFFLINE_BOT_ROSTER.names;
 }
-const ROLE_I18N_KEYS=Object.freeze({hunter:'hunter',parasite:'parasite',spectral:'spectral',cleaner:'cleaner',marionette:'puppeteer',delayed:'timer',engineer:'engineer',observer:'observer',sheriff:'sheriff',locator:'locator',paramedic:'paramedic',seer:'seer',noisy:'noisy',judge:'judge',lazy:'lazy',instructor:'instructor',guardian:'guardian'});
+const ROLE_I18N_KEYS=Object.freeze({hunter:'hunter',parasite:'parasite',spectral:'spectral',miner:'miner',metamorph:'metamorph',cleaner:'cleaner',marionette:'puppeteer',delayed:'timer',engineer:'engineer',observer:'observer',sheriff:'sheriff',locator:'locator',paramedic:'paramedic',seer:'seer',noisy:'noisy',judge:'judge',lazy:'lazy',instructor:'instructor',guardian:'guardian'});
 function roleLabelByFunction(code){const key=ROLE_I18N_KEYS[code];return key?t('role.'+key).replace(/^[^\p{L}\p{N}]+/u,''):''}
 function currentHudFunctionName(p){
   if(!p)return '';
@@ -2822,7 +2866,7 @@ function freePlayFunctionDisplayLabel(ch){
   const base=ch.function?(roleLabelByFunction(ch.function)||String(ch.function)):(ch.role==='imp'?t('role.teamImp'):t('role.teamCrew'));
   return ch.instructor?`${base} + ${roleLabelByFunction('instructor')} ↔️`:(ch.guardian?`${base} + ${roleLabelByFunction('guardian')} 🪽`:base);
 }
-function clearFreePlayFunctionState(ch){
+function clearFreePlayFunctionState(ch){clearMorph(ch);if(ch){ch.minerDig=null;if(isMinerHoleId(ch.vent)){ch.ventAnim=null;minerExit(ch)}}
   if(!ch)return;
   const oldFn=ch.function;
   if(ch.controlledBy){const controller=charById(ch.controlledBy);if(controller?.controlTargetId===ch.id)stopControl(controller)}
@@ -2862,9 +2906,9 @@ function setFreePlayFunction(ch,fn){
     if(ch===G.player){G.instructorCd=0;G.instructorTargetId=null;G.followTarget=null;G.ghostMode='free';Snd.roleFx('instructor','done');emitRoleFx(ch.x,ch.y,'instructor',1);toast('↔️ Instrutor ativado na Partida Livre. Você morreu e agora pode criar trilhas.',3600)}
     return true;
   }
-  const crewFns=['locator','sheriff','observer','engineer','lazy','seer','noisy','judge'], impFns=['delayed','cleaner','marionette','hunter'];crewFns.push('paramedic');impFns.push('parasite','spectral');
+  const crewFns=['locator','sheriff','observer','engineer','lazy','seer','noisy','judge'], impFns=['delayed','cleaner','marionette','hunter'];crewFns.push('paramedic');impFns.push('parasite','spectral','metamorph','miner');
   if((ch.role==='crew'&&!crewFns.includes(fn))||(ch.role==='imp'&&!impFns.includes(fn)))return false;
-  clearFreePlayFunctionState(ch);ch.function=fn;
+  clearFreePlayFunctionState(ch);ch.function=fn;if(fn==='metamorph')ch.morphCd=0;
   if(fn==='paramedic'){ch.paramedicCd=0;ch.paramedicSpent=0;ch.paramedicUses=0;ch.paramedicTaskBase=0}if(fn==='judge'){ch.judgeUsed=false;ch.judgeTargetId=null}if(fn==='noisy'){ch.noisyTriggered=false}if(fn==='seer'){ch.seerCd=0;ch.seerPending=null;ch.seerReplay=null}if(fn==='spectral'){ch.spectralTransition=null;ch.spectralInvisible=false;ch.spectralTime=0;ch.spectralEndsAt=0;ch.spectralSeq=(ch.spectralSeq||0)+1;ch.spectralCd=0}if(fn==='lazy'){ch.lazyDone=false;const common=taskTemplateSelection(TASK_POOLS.common,CFG.commonTasks),normal=createTasksFor(ch.id,common);ch.lazyNormalSteps=taskStepCount(normal);G.tasks=G.tasks.filter(t=>t.owner!==ch.id);G.tasks.push(...createLazyTasksFor(ch.id));renderTasks()}if(ch===G.player){G.locator=fn==='locator';G.observer=fn==='observer';G.cleaner=fn==='cleaner';G.parasite=fn==='parasite';G.paramedic=fn==='paramedic';G.seer=fn==='seer';G.noisy=fn==='noisy';G.judge=fn==='judge';G.paramedicCd=ch.paramedicCd||0;if(G.cleaner)G.cleanerUses=0;updateRolePanel(ch)}
   return true;
 }
@@ -2933,6 +2977,8 @@ function freePlayRoleInfo(ch){
   if(fn==='delayed')return cd(ch===G.player?G.delayedCd:ch.netDelayedCd||0);
   if(fn==='sheriff')return cd(ch===G.player?G.sheriffCd:ch.netSheriffCd||0);
   if(fn==='engineer')return ch.vent?t('runtime.ventRoom',{room:roomDisplayName(ROOM_BY_ID[ventById[ch.vent]?.room]?.name||'')}):cd(ch.engVentCd||0);
+  if(fn==='miner')return t('miner.count',{count:ownedMinerHoles(ch).length,max:CFG.minerHoles>15?'∞':CFG.minerHoles});
+  if(fn==='metamorph')return ch.morphTransition?'🫧':ch.morphAppearance?(ch.morphTime<0?'∞':Math.ceil(ch.morphTime)+'s'):cd(ch.morphCd||0);
   if(fn==='observer')return t('role.desc.observer');
   if(fn==='locator')return cd(ch===G.player?G.trackCd:ch.netTrackCd||0);
   if(fn==='instructor')return t('roleUpdate.trailFixed')+'\n'+cd(ch.instructorCd||0);
@@ -2982,7 +3028,7 @@ function showFreePlayPlayerList(mode,title,onPick){
 }
 function openFreePlayFunctionPicker(ch){
   showModal(t('freeplay.giveRole'),t('freeplay.rolePickerDesc',{name:ch.name,team:ch.role==='imp'?t('role.teamImp'):t('role.teamCrew')}));
-  const fns=ch.role==='imp'?[['delayed','⏱️ Marcador'],['cleaner','🧹 Faxineiro'],['parasite','🦠 Parasita'],['spectral','👻 Espectral'],['marionette','✋ Marionetista'],['hunter','🎯 Caçador']]:[['locator','🧭 Localizador'],['sheriff','🔫 Xerife'],['observer','👀 Observador'],['paramedic','⛑️ Paramédico'],['seer','🔮 Vidente'],['noisy','🔊 Barulhento'],['judge','⚖️ Juiz'],['lazy','🍕 Preguiçoso'],['engineer','🔧 Engenheiro'],['instructor','↔️ Instrutor'],['guardian','🪽 Anjo Guardião']];
+  const fns=ch.role==='imp'?[['miner','⛏️ Minerador'],['metamorph','🎭 Metamorfo'],['delayed','⏱️ Marcador'],['cleaner','🧹 Faxineiro'],['parasite','🦠 Parasita'],['spectral','👻 Espectral'],['marionette','✋ Marionetista'],['hunter','🎯 Caçador']]:[['locator','🧭 Localizador'],['sheriff','🔫 Xerife'],['observer','👀 Observador'],['paramedic','⛑️ Paramédico'],['seer','🔮 Vidente'],['noisy','🔊 Barulhento'],['judge','👨‍⚖️ Juiz'],['lazy','🍕 Preguiçoso'],['engineer','🔧 Engenheiro'],['instructor','↔️ Instrutor'],['guardian','🪽 Anjo Guardião']];
   const grid=el('div','freeplayChoiceGrid');
   fns.forEach(([id,label])=>{const icon=String(label).split(' ')[0];const b=el('button','mg freeplayChoiceButton',icon+' '+roleLabelByFunction(id));b.addEventListener('click',()=>{setFreePlayFunction(ch,id);openFreePlayComputer()});grid.appendChild(b)});$('mbody').appendChild(grid);
 }
@@ -3017,7 +3063,7 @@ function newGame(prepareOnline=false){
   activateMapData(SELECTED_MAP_ID,true);G.mapId=ACTIVE_MAP_ID;G.decon={phase:'idle',until:0,exitSide:null,entrySide:null};
   TID=0; resetMapDoors();
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); G.killT=null; $('ventPanel').hidden=true; VENT_DEFS.forEach(v=>v.flash=0);
-  G.over=false; G.followTarget=null; G.tasks=[]; G.pin=null; G.bodies=[]; G.deadPets=[]; G.killSplashes=[]; G.spectralSmokes=[];G.spectralSmokeSeq=0; G.instructorTrails=[];G.instructorTrailSeq=0;G.instructorCd=0;G.instructorTargetId=null;INSTRUCTOR_SEEN_TRAILS.clear();SPECTRAL_SEEN_SMOKES.clear(); G.M=null; G.spec=null; G.fx=0; G.fixT=0; G.gt=0;
+  G.over=false; G.followTarget=null; G.tasks=[]; G.pin=null; G.bodies=[];G.minerHoles=[]; G.deadPets=[]; G.killSplashes=[]; G.spectralSmokes=[];G.spectralSmokeSeq=0; G.instructorTrails=[];G.instructorTrailSeq=0;G.instructorCd=0;G.instructorTargetId=null;INSTRUCTOR_SEEN_TRAILS.clear();SPECTRAL_SEEN_SMOKES.clear(); G.M=null; G.spec=null; G.fx=0; G.fixT=0; G.gt=0;
   G.sab={lights:0,reactor:0,comms:0,doors:0,cd:CFG.sab}; G.parasiteInfections={};G.parasiteWinnerId=null;G.seerReplay=null;G.noisyAlerts=[];G.noisySeq=0;G.noisyUi=null;NOISY_SEEN_ALERTS.clear();if(typeof resetGhostChatLocal==='function')resetGhostChatLocal();G.guardianProtections={};G.guardianBreakFx=[];G.guardianBreakSeq=0;GUARDIAN_SEEN_BREAKS.clear(); G.killCd=Math.min(CFG.kill,15); G.sheriffCd=0;G.sheriffT=null;G.delayedCd=0;G.delayedT=null;G.delayedMarks={}; G.meetCd=CFG.meet; G.cfgOpen=false; $('settings').hidden=true; G.vision=G.visionTarget=CFG.crewVision;
   const online=!!(typeof NET!=='undefined'&&NET.inRoom&&NET.room&&(NET.room.status==='playing'||prepareOnline));
   const p=newChar(G.cfg.name,G.cfg.color,0,0,true); p.emUses=CFG.emergencyUses; if(online)p.id=NET.id;const ownRoom=online?NET.room.players.find(q=>q.id===NET.id):null;p.cosmetics=cloneCosmetics(ownRoom?.cosmetics||PLAYER_COSMETICS); G.player=p;
@@ -3082,6 +3128,8 @@ function newGame(prepareOnline=false){
   }
   if(CFG.engChance>0&&CFG.engMax>0&&Math.random()*100<CFG.engChance){const engineers=shuffle(G.chars.filter(ch=>ch.role==='crew'&&!ch.function));for(const ch of engineers.slice(0,Math.min(CFG.engMax,engineers.length)))ch.function='engineer'}
   if(CFG.marionChance>0&&CFG.marionMax>0&&Math.random()*100<CFG.marionChance){const marionettes=shuffle(G.chars.filter(ch=>ch.role==='imp'&&!ch.function));for(const ch of marionettes.slice(0,Math.min(CFG.marionMax,marionettes.length)))ch.function='marionette'}
+  if(CFG.minerChance>0&&Math.random()*100<CFG.minerChance)for(const ch of shuffle(G.imps.filter(c=>!c.function)).slice(0,Math.min(CFG.minerMax,CFG.impostors,3)))ch.function='miner';
+  if(CFG.morphChance>0&&Math.random()*100<CFG.morphChance)for(const ch of shuffle(G.imps.filter(c=>!c.function)).slice(0,Math.min(CFG.morphMax,CFG.impostors,3)))ch.function='metamorph';
   if(CFG.hunterChance>0&&CFG.hunterMax>0&&Math.random()*100<CFG.hunterChance){const hunters=shuffle(G.chars.filter(ch=>ch.role==='imp'&&!ch.function));for(const ch of hunters.slice(0,Math.min(clamp(CFG.hunterMax,0,3),hunters.length))){ch.function='hunter';ch.hunterTargetId=null;ch.hunterTargetCd=0}}
   if(G.freePlay)G.chars.forEach(ch=>{if(ch.freeDummy){ch.role='crew';ch.function=null;ch.ghost=false;ch.alive=true}});
   G.player.function=G.player.function||null; G.locator=G.player.function==='locator';G.observer=G.player.function==='observer';G.cleaner=G.player.function==='cleaner';G.parasite=G.player.function==='parasite';G.paramedic=G.player.function==='paramedic';G.seer=G.player.function==='seer';G.noisy=G.player.function==='noisy';G.judge=G.player.function==='judge';G.paramedicCd=G.player.paramedicCd||0;G.paramedicT=null;G.sheriffCd=0;G.delayedCd=0;G.cleanerCd=0;G.cleanerUses=G.cleaner?0:0;G.cleanerT=null;G.delayedT=null;G.delayedMarks={}; G.trackTarget=null;G.trackTime=0;G.trackCd=0;
@@ -3125,7 +3173,7 @@ function toMenu(){closeEmergencyDialog();
   closeConfirm(); G.mapOpen=false; $('mapView').hidden=true; G.cfgOpen=false; $('settings').hidden=true;
   closeModalSilent(); $('end').hidden=true; $('meet').hidden=true; $('role').hidden=true; $('hud').hidden=true; $('menu').hidden=false;
   // descarta tudo da partida anterior (as configurações do menu e o nome/cor permanecem)
-  G.M=null; G.chars=[]; G.bodies=[]; G.deadPets=[]; G.killSplashes=[]; G.spectralSmokes=[];G.spectralSmokeSeq=0; G.instructorTrails=[];G.instructorTrailSeq=0;G.instructorCd=0;G.instructorTargetId=null;G.guardianProtections={};G.guardianBreakFx=[]; G.tasks=[]; G.pin=null; G.spec=null; G.imp=null; G.player=null; G.action=null; G.killT=null;
+  G.M=null; G.chars=[]; G.bodies=[];G.minerHoles=[]; G.deadPets=[]; G.killSplashes=[]; G.spectralSmokes=[];G.spectralSmokeSeq=0; G.instructorTrails=[];G.instructorTrailSeq=0;G.instructorCd=0;G.instructorTargetId=null;G.guardianProtections={};G.guardianBreakFx=[]; G.tasks=[]; G.pin=null; G.spec=null; G.imp=null; G.player=null; G.action=null; G.killT=null;
   G.fx=0; G.fixT=0; G.gt=0; G.killCd=0; G.meetCd=0; G.role='crew'; G.ghostMode='tasks'; G.freePlay=false; G.over=false; G.camCtx=null; G.adminCtx=null;
   G.sab={lights:0,reactor:0,comms:0,doors:0,cd:0}; TID=0;
   resetMapDoors();
@@ -3305,6 +3353,7 @@ function drawWorld(c,cx,cy,vw,vh,o){
     const s=FREEPLAY_COMPUTER,x=(s.x+.5)*TILE,y=(s.y+.55)*TILE,ro=roomOpacity.get('cafe')??1;
     if(ro>.02){c.save();c.globalAlpha=ro;c.translate(x,y);c.fillStyle='#1c244f';c.strokeStyle='#10122a';c.lineWidth=3;rr(c,-18,-18,36,29,5);c.fill();c.stroke();c.fillStyle='#65d8ff';c.fillRect(-13,-13,26,14);c.fillStyle='#8795d8';c.fillRect(-4,11,8,7);c.fillRect(-12,18,24,4);c.restore()}
   }
+  drawMinerHoles(c,opacityForPoint);
   drawGuardianProtections(c);
   drawSeerReplay(c);
   VENT_DEFS.forEach(v=>{ if(v.flash>0){const va=roomOpacity.get(v.room)??1;if(va<=.02)return;const k=1-v.flash/.6; c.save();c.globalAlpha=va;c.strokeStyle=`rgba(160,170,255,${.7*(1-k)})`; c.lineWidth=4; c.beginPath(); c.ellipse(v.px,v.py+4,14+k*26,8+k*14,0,0,6.283); c.stroke(); c.restore()} });
@@ -3448,7 +3497,7 @@ function drawMapView(c,w,h,labels,all,showChars=true,personalMap=false){
   if(personalMap&&G.locator&&G.trackTarget&&G.trackTime>0){const tr=charById(G.trackTarget);if(tr&&tr.alive){const x=(Math.round(tr.x/TILE/3)*3+1.5)*k,y=(Math.round(tr.y/TILE/3)*3+1.5)*k,col=COLOR_BY[tr.color]||{main:'#fff'};c.save();c.strokeStyle='#65d8ff';c.fillStyle='rgba(101,216,255,.18)';c.lineWidth=2.5;c.beginPath();c.arc(x,y,Math.max(7,k*2.1),0,Math.PI*2);c.fill();c.stroke();c.beginPath();c.arc(x,y,Math.max(3.5,k*.95),0,Math.PI*2);c.fillStyle=col.main;c.fill();c.strokeStyle='#10122a';c.lineWidth=1.5;c.stroke();c.restore()}}
   if(labels){c.font='700 11px "Baloo 2",sans-serif';c.textAlign='center';c.fillStyle='rgba(255,255,255,.75)';
     ROOM_DEFS.forEach(r=>c.fillText(translateRuntimeText(r.name),(r.x+r.w/2)*k,(r.y+r.h/2)*k+4))}
-  if(showChars) G.chars.forEach(ch=>{ const ownGhost=personalMap&&ch.isPlayer&&!ch.alive; if(!ch.alive&&!ownGhost)return; if(personalMap&&!ch.isPlayer){if(!mapCanDetectPlayer(G.player,ch))return}else if(!all&&!ch.isPlayer)return; if(ch.vent&&!ch.isPlayer&&!specRoles())return; const col=COLOR_BY[ch.color];
+  if(showChars) G.chars.forEach(ch=>{ const ownGhost=personalMap&&ch.isPlayer&&!ch.alive; if(!ch.alive&&!ownGhost)return; if(personalMap&&!ch.isPlayer){if(!mapCanDetectPlayer(G.player,ch))return}else if(!all&&!ch.isPlayer)return; if(ch.vent&&!ch.isPlayer&&!specRoles())return; const col=COLOR_BY[morphLook(ch).color];
     const rv=specRoles(); c.fillStyle=col.main; c.strokeStyle=rv?(ch.role==='imp'?'#ff5468':'#3fe0a0'):(ch.isPlayer?'#fff':'#10122a'); c.lineWidth=(rv||ch.isPlayer)?2:1.5;
     c.beginPath(); c.arc(ch.x/TILE*k,ch.y/TILE*k,Math.max(3.5,k*.95),0,6.283); c.fill(); c.stroke()});
 }
@@ -3461,7 +3510,8 @@ function observerMapRange(ch){return playerMapRange(ch)*1.6}
 function mapCanDetectPlayer(viewer,target){
   if(!viewer?.alive||!target?.alive||target.ghost||target.vent||target.spectralInvisible||target===viewer)return false;
   const observer=viewer.role==='crew'&&viewer.function==='observer'&&!roleAbilityBlockedByComms();
-  const range=observer?observerMapRange(viewer):playerMapRange(viewer);
+  if(!observer)return false;
+  const range=observerMapRange(viewer);
   return Math.hypot(target.x-viewer.x,target.y-viewer.y)<=range;
 }
 function drawMapPanel(){mapc.setTransform(1,0,0,1,0,0);drawMapView(mapc,512,368,true,false,true,true)}
@@ -3476,7 +3526,7 @@ function closeMap(){
   G.mapOpen=false; $('mapView').hidden=true; $('btnMap').setAttribute('aria-pressed','false'); Snd.click();
 }
 const ROLE_FIXED=Object.freeze({instructorDuration:10,seerDuration:10,cleanerDuration:2,spectralTransition:1});
-const CFG_ROWS=[['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['emergencyUses','Botões de emergência','Quantidade de vezes que cada jogador pode convocar reunião de emergência',''],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','4–7 jogadores: 1; 8–9 jogadores: 1–2; 10 ou mais: 1–3',''],['actionDistance','Distância para ações','Alcance comum para matar, localizar, trilhar e outras habilidades de proximidade',''],['commonTasks','Tarefas Comuns','Quantidade de tarefas simples iguais para todos os Tripulantes',''],['mediumTasks','Tarefas Médias','Quantidade de tarefas intermediárias sorteadas para cada jogador',''],['longTasks','Tarefas Longas','Quantidade de tarefas demoradas sorteadas para cada jogador',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Recarga do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['obsChance','Chance de existir Observador','Porcentagem de chance de a função Observador existir na partida','%'],['obsMax','Quantidade de Observadores','Máximo de Observadores atribuídos aos Tripulantes',''],['instructorChance','Chance de Instrutores','Chance de um Tripulante morto despertar como Instrutor','%'],['instructorMax','Quantidade de Instrutores','Máximo de Instrutores por partida, limitado ao máximo de jogadores',''],['instructorCooldown','Recarga da trilha','Tempo até poder criar outra trilha','s'],['instructorMaxDistance','Distância máxima do jogador até o caminho','Comprimento máximo do percurso caminhável entre o jogador selecionado e o ponto marcado','px'],['guardianCooldown','Recarga para proteger','Tempo de recarga entre proteções do Anjo Guardião','s'],['guardianDuration','Duração do escudo','Tempo que a proteção permanece ativa antes de expirar','s'],['guardianChance','Chance de Anjos Guardiões','Chance de um Tripulante morto despertar como Anjo Guardião','%'],['guardianMax','Quantidade de Anjos Guardiões','Máximo de Anjos Guardiões por partida, limitado ao total de jogadores',''],['guardianImpostorVisible','Proteção visível a Infiltrados','0 = Não, 1 = Sim',''],['cleanerChance','Chance de existir Faxineiro','Porcentagem de chance de a função Faxineiro existir na partida','%'],['cleanerMax','Quantidade de Faxineiros','Máximo de Faxineiros, limitado aos Infiltrados',''],['cleanerCooldown','Tempo de recarga para limpar','Tempo entre limpezas de corpos','s'],['parasiteChance','Chance de Parasitas na partida','Chance de a função Parasita existir na partida','%'],['parasiteMax','Quantidade de Parasitas','Máximo de Parasitas, limitado aos Infiltrados e a 3',''],['spectralChance','Chance de Espectrais','Chance de a função Espectral existir na partida','%'],['spectralMax','Quantidade de Espectrais','Máximo de Espectrais atribuídos entre Infiltrados',''],['spectralCooldown','Recarga da Invisibilidade','Tempo de recarga depois de reaparecer','s'],['spectralDuration','Duração da Invisibilidade','Tempo máximo invisível antes de reaparecer','s'],['paramedicChance','Porcentagem de ser Paramédico','Chance de a função Paramédico existir na partida','%'],['paramedicMax','Quantidade de Paramédicos','Máximo de Paramédicos, limitado ao máximo de jogadores',''],['paramedicCooldown','Recarga para reviver','Tempo de recarga após uma ressurreição','s'],['paramedicTasksPerUse','Tarefas necessárias por conjunto','Tarefas novas exigidas para liberar um conjunto, depois de gastar todos os usos atuais',''],['paramedicMaxUses','Usos por conjunto','Quantidade de usos recebida ao completar as tarefas necessárias',''],['seerMax','Quantidade de Videntes','Máximo de Videntes atribuídos aos Tripulantes',''],['seerChance','Chance de existir Vidente','Porcentagem de chance de a função Vidente existir na partida','%'],['seerCooldown','Recarga da inspeção','Tempo até poder inspecionar outro corpo','s'],['seerDelay','Atraso da silhueta','Tempo entre a inspeção e o início da reconstituição','s'],['noisyDuration','Duração do alerta','Tempo que o alerta do Barulhento permanece visível e sonoro','s'],['noisyChance','Chance de Barulhentos na partida','Chance de a função Barulhento existir na partida','%'],['noisyMax','Quantidade de Barulhentos','Máximo de Barulhentos atribuídos aos Tripulantes',''],['noisyImpostorVisible','Alerta visível aos Infiltrados','0 = Não, 1 = Sim',''],['judgeChance','Chance de Juízes existirem','Chance de a função Juiz existir na partida','%'],['judgeMax','Quantidade de Juízes','Máximo de Juízes atribuídos aos Tripulantes',''],['judgeTaskPct','Porcentagem de tarefas para desbloquear','0, 25, 50, 75 ou 100%','%'],['lazyChance','Chance de existir Preguiçoso','Chance de a função Preguiçoso existir entre Tripulantes vivos','%'],['lazyMax','Quantidade de Preguiçosos','Máximo de Preguiçosos, limitado ao máximo de jogadores',''],['lazySlowdown','Lentidão antes de concluir tarefas','Fator de lentidão aplicado enquanto o Preguiçoso ainda tem tarefas; a velocidade normal volta ao concluir','x'],['lazyTasks','Tarefas do Preguiçoso','Quantidade de tarefas aleatórias exclusivas recebidas pelo Preguiçoso',''],['delayedChance','Chance da função','Chance de a função Marcador ser atribuída na partida','%'],['delayedMax','Quantidade de Marcadores','Máximo de Marcadores, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['engVentDuration','Tempo limite nos dutos','10–60 segundos; 61 representa tempo infinito','s'],['engChance','Chance de existir Engenheiro','Porcentagem de chance de atribuição','%'],['engMax','Quantidade de Engenheiros','Máximo de Engenheiros, limitado aos Tripulantes',''],['engCooldown','Recarga do duto','Recarga do Engenheiro após sair dos dutos','s'],['marionCooldown','Recarga de Controlar','Recarga da habilidade do Marionetista','s'],['marionDuration','Tempo limite do controle','Duração máxima do controle de outro jogador','s'],['marionChance','Chance de Marionetistas','Porcentagem de chance de atribuição','%'],['marionMax','Quantidade de Marionetistas','Máximo de Marionetistas, limitado aos Infiltrados',''],['hunterChance','Chance de existirem Caçadores','Porcentagem de chance de a função Caçador existir na partida','%'],['hunterMax','Quantidade de Caçadores','Máximo de Caçadores, limitado à quantidade de Infiltrados',''],['hunterTargetCooldown','Recarga de definir alvo','Tempo de recarga depois que uma marca do Caçador é encerrada','s']];
+const CFG_ROWS=[['minerCooldown','Recarga para escavar buracos','Espera após criar um buraco','s'],['minerChance','Chance de Minerador','Chance de existir Minerador','%'],['minerMax','Quantidade de Mineradores','Respeita o máximo de Infiltrados',''],['minerHoles','Máximo de buracos','5–15 buracos ou ∞',''],['morphCooldown','Recarga do disfarce','Intervalo após voltar ao normal','s'],['morphMax','Quantidade de Metamorfos','Respeita a quantidade de Infiltrados',''],['morphChance','Chance de Metamorfo','Chance de existir esta função','%'],['morphDuration','Duração do disfarce','5–30 segundos ou ∞','s'],['kill','Tempo para matar','Intervalo entre eliminações do Infiltrado','s'],['sab','Tempo para sabotar','Intervalo entre sabotagens','s'],['meet','Botão de emergência','Espera antes de poder usar o botão de novo','s'],['emergencyUses','Botões de emergência','Quantidade de vezes que cada jogador pode convocar reunião de emergência',''],['discussion','Tempo de discussão','Conversa e frases prontas antes de liberar votos','s'],['voting','Tempo de votação','Tempo disponível para registrar um voto','s'],['speed','Velocidade dos personagens','Velocidade de movimento',''],['impVision','Visão do Infiltrado','Alcance da lanterna do Infiltrado em pixels',''],['crewVision','Visão do Tripulante','Alcance da lanterna do Tripulante em pixels','px'],['renderDist','Distância de renderização','Distância visual máxima das salas; colisões e lógica continuam ativas','px'],['impostors','Quantidade de Infiltrados','4–7 jogadores: 1; 8–9 jogadores: 1–2; 10 ou mais: 1–3',''],['actionDistance','Distância para ações','Alcance comum para matar, localizar, trilhar e outras habilidades de proximidade',''],['commonTasks','Tarefas Comuns','Quantidade de tarefas simples iguais para todos os Tripulantes',''],['mediumTasks','Tarefas Médias','Quantidade de tarefas intermediárias sorteadas para cada jogador',''],['longTasks','Tarefas Longas','Quantidade de tarefas demoradas sorteadas para cada jogador',''],['locMax','Máximo de Localizadores','Quantidade máxima de tripulantes com a função',''],['locChance','Chance de receber Localizador','Porcentagem de chance para cada tripulante elegível','%'],['locCooldown','Recarga do rastreamento','Tempo de recarga após cancelar ou terminar','s'],['locDuration','Duração do rastreamento','Tempo que a posição aproximada fica visível','s'],['sheriffCooldown','Tempo para atirar','Intervalo entre disparos do Xerife','s'],['sheriffChance','Chance de existir Xerife','Porcentagem de chance para cada tripulante elegível','%'],['sheriffMax','Quantidade de Xerifes','Máximo de Xerifes atribuídos à partida',''],['obsChance','Chance de existir Observador','Porcentagem de chance de a função Observador existir na partida','%'],['obsMax','Quantidade de Observadores','Máximo de Observadores atribuídos aos Tripulantes',''],['instructorChance','Chance de Instrutores','Chance de um Tripulante morto despertar como Instrutor','%'],['instructorMax','Quantidade de Instrutores','Máximo de Instrutores por partida, limitado ao máximo de jogadores',''],['instructorCooldown','Recarga da trilha','Tempo até poder criar outra trilha','s'],['instructorMaxDistance','Distância máxima do jogador até o caminho','Comprimento máximo do percurso caminhável entre o jogador selecionado e o ponto marcado','px'],['guardianCooldown','Recarga para proteger','Tempo de recarga entre proteções do Anjo Guardião','s'],['guardianDuration','Duração do escudo','Tempo que a proteção permanece ativa antes de expirar','s'],['guardianChance','Chance de Anjos Guardiões','Chance de um Tripulante morto despertar como Anjo Guardião','%'],['guardianMax','Quantidade de Anjos Guardiões','Máximo de Anjos Guardiões por partida, limitado ao total de jogadores',''],['guardianImpostorVisible','Proteção visível a Infiltrados','0 = Não, 1 = Sim',''],['cleanerChance','Chance de existir Faxineiro','Porcentagem de chance de a função Faxineiro existir na partida','%'],['cleanerMax','Quantidade de Faxineiros','Máximo de Faxineiros, limitado aos Infiltrados',''],['cleanerCooldown','Tempo de recarga para limpar','Tempo entre limpezas de corpos','s'],['parasiteChance','Chance de Parasitas na partida','Chance de a função Parasita existir na partida','%'],['parasiteMax','Quantidade de Parasitas','Máximo de Parasitas, limitado aos Infiltrados e a 3',''],['spectralChance','Chance de Espectrais','Chance de a função Espectral existir na partida','%'],['spectralMax','Quantidade de Espectrais','Máximo de Espectrais atribuídos entre Infiltrados',''],['spectralCooldown','Recarga da Invisibilidade','Tempo de recarga depois de reaparecer','s'],['spectralDuration','Duração da Invisibilidade','Tempo máximo invisível antes de reaparecer','s'],['paramedicChance','Porcentagem de ser Paramédico','Chance de a função Paramédico existir na partida','%'],['paramedicMax','Quantidade de Paramédicos','Máximo de Paramédicos, limitado ao máximo de jogadores',''],['paramedicCooldown','Recarga para reviver','Tempo de recarga após uma ressurreição','s'],['paramedicTasksPerUse','Tarefas necessárias por conjunto','Tarefas novas exigidas para liberar um conjunto, depois de gastar todos os usos atuais',''],['paramedicMaxUses','Usos por conjunto','Quantidade de usos recebida ao completar as tarefas necessárias',''],['seerMax','Quantidade de Videntes','Máximo de Videntes atribuídos aos Tripulantes',''],['seerChance','Chance de existir Vidente','Porcentagem de chance de a função Vidente existir na partida','%'],['seerCooldown','Recarga da inspeção','Tempo até poder inspecionar outro corpo','s'],['seerDelay','Atraso da silhueta','Tempo entre a inspeção e o início da reconstituição','s'],['noisyDuration','Duração do alerta','Tempo que o alerta do Barulhento permanece visível e sonoro','s'],['noisyChance','Chance de Barulhentos na partida','Chance de a função Barulhento existir na partida','%'],['noisyMax','Quantidade de Barulhentos','Máximo de Barulhentos atribuídos aos Tripulantes',''],['noisyImpostorVisible','Alerta visível aos Infiltrados','0 = Não, 1 = Sim',''],['judgeChance','Chance de Juízes existirem','Chance de a função Juiz existir na partida','%'],['judgeMax','Quantidade de Juízes','Máximo de Juízes atribuídos aos Tripulantes',''],['judgeTaskPct','Porcentagem de tarefas para desbloquear','0, 25, 50, 75 ou 100%','%'],['lazyChance','Chance de existir Preguiçoso','Chance de a função Preguiçoso existir entre Tripulantes vivos','%'],['lazyMax','Quantidade de Preguiçosos','Máximo de Preguiçosos, limitado ao máximo de jogadores',''],['lazySlowdown','Lentidão antes de concluir tarefas','Fator de lentidão aplicado enquanto o Preguiçoso ainda tem tarefas; a velocidade normal volta ao concluir','x'],['lazyTasks','Tarefas do Preguiçoso','Quantidade de tarefas aleatórias exclusivas recebidas pelo Preguiçoso',''],['delayedChance','Chance da função','Chance de a função Marcador ser atribuída na partida','%'],['delayedMax','Quantidade de Marcadores','Máximo de Marcadores, limitado à quantidade de Infiltrados',''],['delayedDuration','Marcação até eliminação','Tempo entre a marcação e a eliminação automática','s'],['engVentDuration','Tempo limite nos dutos','10–60 segundos; 61 representa tempo infinito','s'],['engChance','Chance de existir Engenheiro','Porcentagem de chance de atribuição','%'],['engMax','Quantidade de Engenheiros','Máximo de Engenheiros, limitado aos Tripulantes',''],['engCooldown','Recarga do duto','Recarga do Engenheiro após sair dos dutos','s'],['marionCooldown','Recarga de Controlar','Recarga da habilidade do Marionetista','s'],['marionDuration','Tempo limite do controle','Duração máxima do controle de outro jogador','s'],['marionChance','Chance de Marionetistas','Porcentagem de chance de atribuição','%'],['marionMax','Quantidade de Marionetistas','Máximo de Marionetistas, limitado aos Infiltrados',''],['hunterChance','Chance de existirem Caçadores','Porcentagem de chance de a função Caçador existir na partida','%'],['hunterMax','Quantidade de Caçadores','Máximo de Caçadores, limitado à quantidade de Infiltrados',''],['hunterTargetCooldown','Recarga de definir alvo','Tempo de recarga depois que uma marca do Caçador é encerrada','s']];
 function selectedMapIdForConfig(){
   if(typeof NET!=='undefined'&&NET.inRoom){
     const id=NET.roomDraft?.mapId||NET.room?.settings?.mapId||SELECTED_MAP_ID;
@@ -3518,10 +3568,10 @@ function buildCfgUI(){
   if(G.cfgPage==='presets'){renderPresetCards(box);return}
   const locked=cfgEditingLocked();
   if(G.cfgPage==='settings')renderMapSelector(box,locked);
-  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnObserverSection').classList.toggle('alt',G.cfgFunctionTab!=='observer');$('btnInstructorSection').classList.toggle('alt',G.cfgFunctionTab!=='instructor');$('btnGuardianSection').classList.toggle('alt',G.cfgFunctionTab!=='guardian');$('btnCleanerSection').classList.toggle('alt',G.cfgFunctionTab!=='cleaner');$('btnParasiteSection').classList.toggle('alt',G.cfgFunctionTab!=='parasite');$('btnSpectralSection').classList.toggle('alt',G.cfgFunctionTab!=='spectral');$('btnParamedicSection').classList.toggle('alt',G.cfgFunctionTab!=='paramedic');$('btnSeerSection').classList.toggle('alt',G.cfgFunctionTab!=='seer');$('btnNoisySection').classList.toggle('alt',G.cfgFunctionTab!=='noisy');$('btnJudgeSection').classList.toggle('alt',G.cfgFunctionTab!=='judge');$('btnLazySection').classList.toggle('alt',G.cfgFunctionTab!=='lazy');$('btnEngineerSection').classList.toggle('alt',G.cfgFunctionTab!=='engineer');$('btnMarionetteSection').classList.toggle('alt',G.cfgFunctionTab!=='marionette');$('btnHunterSection').classList.toggle('alt',G.cfgFunctionTab!=='hunter');
+  $('btnLocatorSection').classList.toggle('alt',G.cfgFunctionTab!=='locator');$('btnSheriffSection').classList.toggle('alt',G.cfgFunctionTab!=='sheriff');$('btnDelayedSection').classList.toggle('alt',G.cfgFunctionTab!=='delayed');$('btnObserverSection').classList.toggle('alt',G.cfgFunctionTab!=='observer');$('btnInstructorSection').classList.toggle('alt',G.cfgFunctionTab!=='instructor');$('btnGuardianSection').classList.toggle('alt',G.cfgFunctionTab!=='guardian');$('btnCleanerSection').classList.toggle('alt',G.cfgFunctionTab!=='cleaner');$('btnParasiteSection').classList.toggle('alt',G.cfgFunctionTab!=='parasite');$('btnMinerSection').classList.toggle('alt',G.cfgFunctionTab!=='miner');$('btnMorphSection').classList.toggle('alt',G.cfgFunctionTab!=='metamorph');$('btnSpectralSection').classList.toggle('alt',G.cfgFunctionTab!=='spectral');$('btnParamedicSection').classList.toggle('alt',G.cfgFunctionTab!=='paramedic');$('btnSeerSection').classList.toggle('alt',G.cfgFunctionTab!=='seer');$('btnNoisySection').classList.toggle('alt',G.cfgFunctionTab!=='noisy');$('btnJudgeSection').classList.toggle('alt',G.cfgFunctionTab!=='judge');$('btnLazySection').classList.toggle('alt',G.cfgFunctionTab!=='lazy');$('btnEngineerSection').classList.toggle('alt',G.cfgFunctionTab!=='engineer');$('btnMarionetteSection').classList.toggle('alt',G.cfgFunctionTab!=='marionette');$('btnHunterSection').classList.toggle('alt',G.cfgFunctionTab!=='hunter');
   if(G.cfgPage==='functions'){
     const roleKey=G.cfgFunctionTab==='delayed'?'timer':G.cfgFunctionTab==='marionette'?'marionette':G.cfgFunctionTab;
-    const roleIcons={locator:'🧭',sheriff:'🔫',timer:'⏱️',observer:'👀',instructor:'↔️',guardian:'🪽',cleaner:'🧹',parasite:'🦠',spectral:'👻',paramedic:'⛑️',seer:'🔮',noisy:'🔊',judge:'⚖️',lazy:'🍕',engineer:'🔧',marionette:'✋',hunter:'🎯'};
+    const roleIcons={locator:'🧭',sheriff:'🔫',timer:'⏱️',observer:'👀',instructor:'↔️',guardian:'🪽',cleaner:'🧹',parasite:'🦠',spectral:'👻',metamorph:'🎭',miner:'⛏️',paramedic:'⛑️',seer:'🔮',noisy:'🔊',judge:'👨‍⚖️',lazy:'🍕',engineer:'🔧',marionette:'✋',hunter:'🎯'};
     const descKey=`settings.roleDetails.${G.cfgFunctionTab}`,raw=hasI18nKey(descKey)?t(descKey).replace(/^[^\p{L}\p{N}]+/u,''):'';if(raw){const info=el('div','fnDescription'),parts=raw.split(/\s+[—-]\s+/),title=parts.shift()||raw,desc=parts.join(' — ');info.append(el('b','',(roleIcons[roleKey]||'')+' '+title),document.createTextNode(desc?' — '+desc:''));box.appendChild(info)}
   }
   if(G.cfgPage==='functions'&&G.cfgFunctionTab==='delayed'){
@@ -3532,15 +3582,15 @@ function buildCfgUI(){
   }
   CFG_ROWS.forEach(([k,l,d,unit])=>{
     const fieldLabelKey=`settings.field.${k}.label`,fieldDescKey=`settings.field.${k}.desc`;l=hasI18nKey(fieldLabelKey)?t(fieldLabelKey):translateRuntimeText(l);d=hasI18nKey(fieldDescKey)?t(fieldDescKey):translateRuntimeText(d);
-    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedChance','delayedMax','delayedDuration'], observerKeys=['obsChance','obsMax'], instructorKeys=['instructorChance','instructorMax','instructorCooldown','instructorMaxDistance'], guardianKeys=['guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible'], cleanerKeys=['cleanerChance','cleanerMax','cleanerCooldown'], parasiteKeys=['parasiteChance','parasiteMax'], spectralKeys=['spectralChance','spectralMax','spectralCooldown','spectralDuration'], paramedicKeys=['paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses'], seerKeys=['seerChance','seerMax','seerCooldown','seerDelay'], noisyKeys=['noisyDuration','noisyChance','noisyMax','noisyImpostorVisible'], judgeKeys=['judgeChance','judgeMax','judgeTaskPct'], lazyKeys=['lazyChance','lazyMax','lazySlowdown','lazyTasks'], engineerKeys=['engVentDuration','engChance','engMax','engCooldown'], marionetteKeys=['marionCooldown','marionDuration','marionChance','marionMax'], hunterKeys=['hunterChance','hunterMax','hunterTargetCooldown'];
-    const isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isDelayed=delayedKeys.includes(k),isObserver=observerKeys.includes(k),isInstructor=instructorKeys.includes(k),isGuardian=guardianKeys.includes(k),isCleaner=cleanerKeys.includes(k),isParasite=parasiteKeys.includes(k),isSpectral=spectralKeys.includes(k),isParamedic=paramedicKeys.includes(k),isSeer=seerKeys.includes(k),isNoisy=noisyKeys.includes(k),isJudge=judgeKeys.includes(k),isLazy=lazyKeys.includes(k),isEngineer=engineerKeys.includes(k),isMarionette=marionetteKeys.includes(k),isHunter=hunterKeys.includes(k),isFn=isLocator||isSheriff||isDelayed||isObserver||isInstructor||isGuardian||isCleaner||isParasite||isSpectral||isParamedic||isSeer||isNoisy||isJudge||isLazy||isEngineer||isMarionette||isHunter;
-    if((G.cfgPage==='functions')!==isFn)return;
-    if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='locator'&&!isLocator)||(G.cfgFunctionTab==='sheriff'&&!isSheriff)||(G.cfgFunctionTab==='delayed'&&!isDelayed)||(G.cfgFunctionTab==='observer'&&!isObserver)||(G.cfgFunctionTab==='instructor'&&!isInstructor)||(G.cfgFunctionTab==='guardian'&&!isGuardian)||(G.cfgFunctionTab==='cleaner'&&!isCleaner)||(G.cfgFunctionTab==='parasite'&&!isParasite)||(G.cfgFunctionTab==='spectral'&&!isSpectral)||(G.cfgFunctionTab==='paramedic'&&!isParamedic)||(G.cfgFunctionTab==='seer'&&!isSeer)||(G.cfgFunctionTab==='noisy'&&!isNoisy)||(G.cfgFunctionTab==='judge'&&!isJudge)||(G.cfgFunctionTab==='lazy'&&!isLazy)||(G.cfgFunctionTab==='engineer'&&!isEngineer)||(G.cfgFunctionTab==='marionette'&&!isMarionette)||(G.cfgFunctionTab==='hunter'&&!isHunter)))return;
+    const locatorKeys=['locMax','locChance','locCooldown','locDuration'], sheriffKeys=['sheriffCooldown','sheriffChance','sheriffMax'], delayedKeys=['delayedChance','delayedMax','delayedDuration'], observerKeys=['obsChance','obsMax'], instructorKeys=['instructorChance','instructorMax','instructorCooldown','instructorMaxDistance'], guardianKeys=['guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible'], cleanerKeys=['cleanerChance','cleanerMax','cleanerCooldown'], parasiteKeys=['parasiteChance','parasiteMax'], spectralKeys=['spectralChance','spectralMax','spectralCooldown','spectralDuration','morphChance','morphMax','morphCooldown','morphDuration','minerCooldown','minerChance','minerMax','minerHoles'], paramedicKeys=['paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses'], seerKeys=['seerChance','seerMax','seerCooldown','seerDelay'], noisyKeys=['noisyDuration','noisyChance','noisyMax','noisyImpostorVisible'], judgeKeys=['judgeChance','judgeMax','judgeTaskPct'], lazyKeys=['lazyChance','lazyMax','lazySlowdown','lazyTasks'], engineerKeys=['engVentDuration','engChance','engMax','engCooldown'], marionetteKeys=['marionCooldown','marionDuration','marionChance','marionMax'], hunterKeys=['hunterChance','hunterMax','hunterTargetCooldown'];
+    const isMiner=k.startsWith('miner'),isMorph=k.startsWith('morph'),isLocator=locatorKeys.includes(k),isSheriff=sheriffKeys.includes(k),isDelayed=delayedKeys.includes(k),isObserver=observerKeys.includes(k),isInstructor=instructorKeys.includes(k),isGuardian=guardianKeys.includes(k),isCleaner=cleanerKeys.includes(k),isParasite=parasiteKeys.includes(k),isSpectral=spectralKeys.includes(k),isParamedic=paramedicKeys.includes(k),isSeer=seerKeys.includes(k),isNoisy=noisyKeys.includes(k),isJudge=judgeKeys.includes(k),isLazy=lazyKeys.includes(k),isEngineer=engineerKeys.includes(k),isMarionette=marionetteKeys.includes(k),isHunter=hunterKeys.includes(k),isFn=isLocator||isSheriff||isDelayed||isObserver||isInstructor||isGuardian||isCleaner||isParasite||isSpectral||isParamedic||isSeer||isNoisy||isJudge||isLazy||isEngineer||isMarionette||isHunter;
+    if((G.cfgPage==='functions')!==(isFn||isMiner))return;if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='miner'&&!isMiner)||(G.cfgFunctionTab!=='miner'&&isMiner)))return;if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='metamorph'&&!isMorph)||(G.cfgFunctionTab!=='metamorph'&&isMorph)))return;
+    if(G.cfgPage==='functions'&&((G.cfgFunctionTab==='locator'&&!isLocator)||(G.cfgFunctionTab==='sheriff'&&!isSheriff)||(G.cfgFunctionTab==='delayed'&&!isDelayed)||(G.cfgFunctionTab==='observer'&&!isObserver)||(G.cfgFunctionTab==='instructor'&&!isInstructor)||(G.cfgFunctionTab==='guardian'&&!isGuardian)||(G.cfgFunctionTab==='cleaner'&&!isCleaner)||(G.cfgFunctionTab==='parasite'&&!isParasite)||(G.cfgFunctionTab==='spectral'&&(!isSpectral||isMorph))||(G.cfgFunctionTab==='paramedic'&&!isParamedic)||(G.cfgFunctionTab==='seer'&&!isSeer)||(G.cfgFunctionTab==='noisy'&&!isNoisy)||(G.cfgFunctionTab==='judge'&&!isJudge)||(G.cfgFunctionTab==='lazy'&&!isLazy)||(G.cfgFunctionTab==='engineer'&&!isEngineer)||(G.cfgFunctionTab==='marionette'&&!isMarionette)||(G.cfgFunctionTab==='hunter'&&!isHunter)))return;
     const row=el('div','cfgrow'+(isFn?' fncompact':'')), top=el('div','cfgtop');
     if(isFn){
       const showCfgValue=()=>cfgValueIsInfinite(k,CFG[k])?'∞':(k==='noisyImpostorVisible'||k==='guardianImpostorVisible')?(CFG[k]?t('common.yes'):t('common.no')):(k==='lazySlowdown'?(CFG[k]/10).toFixed(1)+'x':CFG[k]+(unit?' '+unit:''));
       const value=el('b','',showCfgValue());
-      const icon=el('span','fnicon',isDelayed?'⏱️':isSheriff?'🔫':isObserver?'👀':isInstructor?'↔️':isGuardian?'🪽':isCleaner?'🧹':isParasite?'🦠':isSpectral?'👻':isParamedic?'⛑️':isSeer?'🔮':isNoisy?'🔊':isJudge?'⚖️':isLazy?'🍕':isEngineer?'🔧':isMarionette?'✋':isHunter?'🎯':'🧭'); top.append(icon,el('span','',l),value);
+      const icon=el('span','fnicon',isDelayed?'⏱️':isSheriff?'🔫':isObserver?'👀':isInstructor?'↔️':isGuardian?'🪽':isCleaner?'🧹':isParasite?'🦠':isMiner?'⛏️':isMorph?'🎭':isSpectral?'👻':isParamedic?'⛑️':isSeer?'🔮':isNoisy?'🔊':isJudge?'👨‍⚖️':isLazy?'🍕':isEngineer?'🔧':isMarionette?'✋':isHunter?'🎯':'🧭'); top.append(icon,el('span','',l),value);
       const stepper=el('div','fnstepper');
       const minus=el('button','','−'), number=el('output','',(k==='noisyImpostorVisible'||k==='guardianImpostorVisible')?(CFG[k]?t('common.yes'):t('common.no')):((k==='lazySlowdown')?(CFG[k]/10).toFixed(1):cfgNumericDisplay(k,CFG[k]))), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label',t('settings.decrease',{label:l})); plus.setAttribute('aria-label',t('settings.increase',{label:l})); number.setAttribute('aria-label',l);
@@ -3567,7 +3617,7 @@ function buildCfgUI(){
 }
 function setCfgPage(page){
   G.cfgPage=page==='functions'?'functions':page==='presets'?'presets':'settings';
-  if(!['locator','sheriff','delayed','observer','instructor','guardian','cleaner','parasite','spectral','paramedic','seer','noisy','judge','lazy','engineer','marionette','hunter'].includes(G.cfgFunctionTab))G.cfgFunctionTab='locator';
+  if(!['locator','sheriff','delayed','observer','instructor','guardian','cleaner','parasite','spectral','metamorph','miner','paramedic','seer','noisy','judge','lazy','engineer','marionette','hunter'].includes(G.cfgFunctionTab))G.cfgFunctionTab='locator';
   $('cfgTitle').textContent=G.cfgPage==='functions'?t('settings.roles'):G.cfgPage==='presets'?t('settings.presets'):t('settings.tabGeneral');
   $('cfgTabSettings').classList.toggle('alt',G.cfgPage!=='settings');
   $('cfgTabFunctions').classList.toggle('alt',G.cfgPage!=='functions');
@@ -3581,7 +3631,7 @@ function setCfgPage(page){
 function openCfg(){setCfgPage('settings');$('cfgTabs').hidden=false;G.cfgOpen=true;joy.x=joy.y=0;if(G.player)G.player.moving=false;$('settings').hidden=false;Snd.init();Snd.open()}
 function openFunctions(){openCfg();setCfgPage('functions')}
 function closeCfg(){const wasOpen=!!G.cfgOpen;G.cfgOpen=false;const panel=$('settings');if(panel)panel.hidden=true;if(wasOpen)Snd.click()}
-function toggleMap(){if(G.mapOpen)closeMap(); else openMap()}
+function toggleMap(){if(G.player?.morphTransition)return;if(G.mapOpen)closeMap(); else openMap()}
 function noSignal(){return G.sab.comms>0&&G.role==='crew'&&G.player.alive}
 function renderTool(){
   if(G.tool==='cams'&&G.camCtx){
@@ -3756,7 +3806,7 @@ function followPath(ch,dt){
   return false;
 }
 function separateChars(){
-  const L=G.chars.filter(c=>c.alive&&!c.vent&&!c.killDash);
+  const L=G.chars.filter(c=>c.alive&&!c.vent&&!c.killDash&&!c.morphTransition&&!c.minerDig);
   for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){
     const a=L[i], b=L[j], dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy); if(d>=22||d===0)continue;
     const push=(22-d)/2+.2, nx=dx/d, ny=dy/d;
@@ -3831,6 +3881,145 @@ function playerSpectralToggle(){
   const p=G.player;if(!p||p.controlledBy||p.vent||G.state!=='playing'||G.M||uiBusy()||!p.alive||p.role!=='imp'||p.function!=='spectral')return;
   if(typeof NET!=='undefined'&&NET.inRoom&&!NET.isHost){netSend({type:'action',action:'spectral_toggle'});return}
   if(!p.spectralInvisible&&(p.spectralCd||0)>0){toast('Invisibilidade recarregando: '+Math.ceil(p.spectralCd)+'s');Snd.err();return}setSpectralInvisible(p,!p.spectralInvisible);
+}
+function isMinerHoleId(id){return typeof id==='string'&&id.startsWith('mine_')}
+function minerHoleById(id){return (G.minerHoles||[]).find(h=>h.id===id)||null}
+function ownedMinerHoles(ch){return (G.minerHoles||[]).filter(h=>h.ownerId===ch?.id)}
+function minerHoleLimit(){return CFG.minerHoles>15?Infinity:CFG.minerHoles}
+function minerActive(ch){return !!ch?.alive&&ch.role==='imp'&&ch.function==='miner'&&!ch.controlledBy&&!G.M&&!G.over&&['playing','task','tool'].includes(G.state)}
+function minerCanDig(ch){return minerActive(ch)&&(ch.minerCd||0)<=0&&!ch.vent&&!ch.ventAnim&&!ch.minerDig&&!ch.killDash&&!ch.morphTransition&&ownedMinerHoles(ch).length<minerHoleLimit()&&!boxBlocked(ch.x,ch.y,false)&&!(G.minerHoles||[]).some(h=>Math.hypot(ch.x-h.x,ch.y-h.y)<28)}
+function beginMinerDig(ch){
+  if(!minerCanDig(ch))return false;
+  ch.minerDig={x:ch.x,y:ch.y,remaining:1};ch.moving=false;
+  if(ch.ai){ch.ai.path=[];ch.ai.state='idle';ch.ai.wait=1;ch.ai.minerNextDig=G.gt+8}
+  return true;
+}
+function minerRequest(action,id){
+  if(NET.inRoom&&!NET.isHost&&!NET.applying){netSend({type:'action',action,ventId:id});return true}
+  return action==='mine_dig'?beginMinerDig(G.player):minerEnter(G.player,id);
+}
+function playerMinerDig(){const p=G.player;if(!p||G.state!=='playing'||uiBusy()||p.minerDig)return;if(minerCanDig(p))minerRequest('mine_dig');else{toast(t(ownedMinerHoles(p).length>=minerHoleLimit()?'miner.full':'miner.invalid'));Snd.err()}}
+function updateMinerDigs(dt){
+  const authority=!NET.inRoom||NET.isHost;
+  for(const ch of G.chars||[]){
+    if(authority&&isMinerHoleId(ch.vent)&&(!minerActive(ch)||minerHoleById(ch.vent)?.ownerId!==ch.id)){ch.ventAnim=null;minerExit(ch)}
+    ch.minerCd=Math.max(0,(ch.minerCd||0)-dt);
+    const dig=ch.minerDig;if(!dig)continue;
+    if(!minerActive(ch)||ch.vent){ch.minerDig=null;continue}
+    dig.remaining=Math.max(0,dig.remaining-dt);ch.moving=false;
+    if(authority&&dig.remaining<=0){
+      if(ownedMinerHoles(ch).length<minerHoleLimit()&&!boxBlocked(dig.x,dig.y,false)&&Math.hypot(ch.x-dig.x,ch.y-dig.y)<4&&!(G.minerHoles||[]).some(h=>Math.hypot(dig.x-h.x,dig.y-h.y)<28)){
+        G.minerHoles=G.minerHoles||[];const number=ownedMinerHoles(ch).length+1;
+        G.minerHoles.push({id:'mine_'+ch.id+'_'+number,ownerId:ch.id,number,x:dig.x,y:dig.y,px:dig.x,py:dig.y+OFF_Y,room:roomAtPx(dig.x,dig.y)?.id||null});
+        ch.minerCd=CFG.minerCooldown;
+        if(ch.isPlayer){Snd.tone(130,.12,'triangle',.045);G.action=bestAction()}
+      }
+      ch.minerDig=null;
+    }
+  }
+}
+function minerEnter(ch,id){
+  const h=minerHoleById(id);if(!minerActive(ch)||!h||h.ownerId!==ch.id||ch.vent||ch.ventAnim||ch.minerDig||ch.killDash||(ch.ventCd||0)>0||dist(ch,h)>actionDistancePx('vent')||boxBlocked(h.x,h.y,false))return false;
+  ch.vent=h.id;ch.x=h.x;ch.y=h.y;ch.moving=false;ch.ventMv=0;ch.ventAnim={t:0,dur:.35,kind:'in'};
+  if(ch.ai){ch.ai.path=[];ch.ai.state='idle';ch.ai.ventT=1}
+  if(ch.isPlayer){G.action=null;openVentPanel()}
+  return true;
+}
+function minerTravel(ch,id){
+  const from=minerHoleById(ch?.vent),to=minerHoleById(id);
+  if(!minerActive(ch)||!from||!to||from.id===to.id||from.ownerId!==ch.id||to.ownerId!==ch.id||ownedMinerHoles(ch).length<2||ch.ventAnim||(ch.ventMv||0)>0||boxBlocked(to.x,to.y,false))return false;
+  ch.vent=to.id;ch.x=to.x;ch.y=to.y;ch.moving=false;ch.ventMv=.35;
+  if(ch.isPlayer)refreshVentPanel();return true;
+}
+function minerExit(ch){
+  if(!isMinerHoleId(ch?.vent)||ch.ventAnim)return false;
+  const h=minerHoleById(ch.vent),point=h?nearestWalkablePosition(h.x,h.y):nearestWalkablePosition(ch.x,ch.y);
+  if(point){ch.x=point.x;ch.y=point.y}ch.vent=null;ch.ventMv=0;ch.ventCd=.12;ch.moving=false;ch.ventAnim={t:0,dur:.18,kind:'out'};
+  if(ch.ai){ch.ai.path=[];ch.ai.state='idle';ch.ai.wait=.2}
+  if(ch.isPlayer){$('ventPanel').hidden=true;joy.x=joy.y=0;resetStick();refreshNearbyInteractions()}
+  return true;
+}
+function renderMinerRoutes(ch){
+  const h=minerHoleById(ch.vent);if(!h||h.ownerId!==ch.id){ch.ventAnim=null;exitVent(ch);return}
+  const box=$('ventList');box.replaceChildren();box.classList.add('mineRoutes');$('ventHere').textContent='';
+  const destinations=ownedMinerHoles(ch).filter(to=>to.id!==h.id);
+  for(const to of destinations){const button=el('button','ventRoute');button.type='button';button.dataset.ventId=to.id;button.setAttribute('aria-label',t('miner.travel',{destination:minerHoleLabel(to)}));const arrow=el('span','ventRouteArrow','➜');arrow.style.transform=`rotate(${Math.atan2(to.y-h.y,to.x-h.x)}rad)`;button.append(arrow);button.title=minerHoleLabel(to);button.addEventListener('click',e=>{e.stopPropagation();ventMove(G.player,to.id)});box.appendChild(button)}positionVentArrows();
+}
+function positionMinerArrows(body){
+  const from=minerHoleById(body.vent);if(!from)return;
+  const buttons=[...$('ventList').querySelectorAll('.ventRoute')],size=buttons.length>24?32:44,gap=size+6;
+  const origin={x:(body.x-G.cam.x)*ZOOM,y:(body.y-G.cam.y)*ZOOM},minX=size/2+6,maxX=innerWidth-size/2-6,minY=110+size/2,maxY=Math.max(minY,innerHeight-180-size/2),placed=[];
+  for(const button of buttons){
+    const to=minerHoleById(button.dataset.ventId);if(!to)continue;const angle=Math.atan2(to.y-from.y,to.x-from.x),radius=innerWidth<600?100:140;
+    const desired={x:clamp(origin.x+Math.cos(angle)*radius,minX,maxX),y:clamp(origin.y+Math.sin(angle)*radius,minY,maxY)},candidates=[desired];
+    for(let y=minY;y<=maxY;y+=gap)for(let x=minX;x<=maxX;x+=gap)candidates.push({x,y});
+    candidates.sort((a,b)=>Math.hypot(a.x-desired.x,a.y-desired.y)-Math.hypot(b.x-desired.x,b.y-desired.y));
+    const point=candidates.find(p=>placed.every(q=>Math.abs(p.x-q.x)>=gap||Math.abs(p.y-q.y)>=gap))||desired;placed.push(point);
+    button.style.left=point.x+'px';button.style.top=point.y+'px';button.style.width=button.style.height=size+'px';button.querySelector('.ventRouteArrow').style.transform=`rotate(${angle}rad)`;
+    button.disabled=!!body.ventAnim||(body.ventMv||0)>0||G.state!=='playing'||boxBlocked(to.x,to.y,false);
+  }
+}
+function minerHoleLabel(h){const room=roomDisplayName(ROOM_BY_ID[h.room]?.name||roomName(h.x,h.y));return t('miner.hole',{number:h.number})+' · '+room}
+function updateMinerButton(){
+  const p=G.player,b=$('btnMiner');if(!p)return;b.hidden=!(p.alive&&p.role==='imp'&&p.function==='miner');
+  const full=ownedMinerHoles(p).length>=minerHoleLimit(),label=p.minerDig?t('miner.digging'):full?t('miner.full'):(p.minerCd>0?Math.ceil(p.minerCd)+'s':t('miner.dig'));
+  b.disabled=G.state!=='playing'||uiBusy()||!!p.minerDig||!minerCanDig(p);b.classList.toggle('ready',!b.disabled);
+  if(b.dataset.caption!==label){b.dataset.caption=label;b.setAttribute('aria-label','⛏️ '+label);b.replaceChildren(el('span','','⛏️'),el('small','',label))}
+}
+function minerBotThink(ch,dt){
+  if(ch.minerDig)return true;if(ch.vent||!minerActive(ch))return false;
+  if(G.gt>=(ch.ai.minerNextDig||0)&&Math.random()<dt*.08&&beginMinerDig(ch))return true;
+  if(ownedMinerHoles(ch).length>1&&Math.random()<dt*.08){const near=ownedMinerHoles(ch).find(h=>dist(ch,h)<actionDistancePx('vent'));if(near&&minerEnter(ch,near.id))return true}return false;
+}
+function drawMinerHoles(c,opacity){
+  for(const h of G.minerHoles||[]){const alpha=opacity(h.x,h.y);if(alpha<=.02)continue;c.save();c.globalAlpha*=alpha;c.translate(h.x,h.y+15);c.lineWidth=3;c.strokeStyle='#34251a';c.fillStyle='#92613b';c.beginPath();c.ellipse(0,0,24,13,0,0,Math.PI*2);c.fill();c.stroke();c.fillStyle='#17120f';c.beginPath();c.ellipse(0,-1,17,8,0,0,Math.PI*2);c.fill();c.strokeStyle='#d5a65c';c.lineWidth=2;for(let i=0;i<5;i++){const a=i*Math.PI*.4;c.beginPath();c.moveTo(Math.cos(a)*20,Math.sin(a)*10);c.lineTo(Math.cos(a)*26,Math.sin(a)*13);c.stroke()}if(h.ownerId===G.player?.id){c.fillStyle='#ffe0a0';c.font='800 10px sans-serif';c.textAlign='center';c.fillText(String(h.number),0,3)}c.restore()}
+}
+function drawMinerDig(c,ch,x,y){
+  const progress=1-ch.minerDig.remaining;c.save();c.translate(x,y+12);c.strokeStyle='#d7a75f';c.lineWidth=2;c.setLineDash([4,4]);c.beginPath();c.ellipse(0,0,22,11,0,0,Math.PI*2);c.stroke();c.setLineDash([]);for(let i=0;i<7;i++){const a=i*2.4+progress*7,r=6+((progress*22+i*5)%22);c.fillStyle=i%2?'#c6914b':'#755132';c.fillRect(Math.cos(a)*r,Math.sin(a)*r*.45-5,3,3)}c.font='22px sans-serif';c.textAlign='center';c.save();c.translate(19,-21);c.rotate(Math.sin(progress*Math.PI*8)*.35);c.fillText('⛏️',0,0);c.restore();c.restore();
+}
+
+function morphLook(ch){const a=ch.morphAppearance;return a?{...ch,...a,name:a.isBot?colorDisplayName(COLOR_BY[a.color]):a.name,morphTrueColor:ch.color}:ch}
+function clearMorph(ch){if(!ch)return;ch.morphAppearance=null;ch.morphTransition=null;ch.morphTime=0;ch.morphCd=CFG.morphCooldown;ch.petX=ch.petY=undefined}
+function beginMorph(ch,target){
+  if(!ch?.alive||ch.role!=='imp'||ch.function!=='metamorph'||ch.vent||ch.controlledBy||ch.morphTransition||!['playing','task','tool'].includes(G.state)||G.M)return false;
+  const cancel=!!ch.morphAppearance;
+  if(!cancel&&((ch.morphCd||0)>0||!target||target===ch))return false;
+  const appearance=cancel?null:{name:target.name,color:target.color,cosmetics:cloneCosmetics(target.cosmetics),isBot:!!target.isBot||BOT_COLOR_NAMES.has(target),targetId:target.id};
+  if(cancel){ch.morphAppearance=null;ch.morphTime=0;ch.petX=ch.petY=undefined}
+  ch.morphTransition={remaining:1,appearance};ch.moving=false;
+  if(ch.ai)ch.ai.morphReport=true;
+  for(const o of G.chars)if(o!==ch&&o.ai&&o.alive&&o.role==='crew'&&npcCanSeeChar(o,ch))o.ai.morphSeen=ch.id;
+  return true;
+}
+function updateMorphs(dt){
+  const authority=!NET.inRoom||NET.isHost;
+  for(const ch of G.chars){
+    if(ch.function!=='metamorph'||!ch.alive){if(ch.morphAppearance||ch.morphTransition)clearMorph(ch);continue}
+    ch.morphCd=Math.max(0,(ch.morphCd||0)-dt);
+    const transition=ch.morphTransition;
+    if(transition){ch.moving=false;transition.remaining=Math.max(0,transition.remaining-dt);if(authority&&transition.remaining<=0){ch.morphAppearance=transition.appearance;ch.morphTransition=null;ch.petX=ch.petY=undefined;if(ch.morphAppearance)ch.morphTime=CFG.morphDuration>30?-1:CFG.morphDuration;else ch.morphCd=CFG.morphCooldown}continue}
+    if(ch.morphAppearance&&ch.morphTime>=0){ch.morphTime=Math.max(0,ch.morphTime-dt);if(authority&&ch.morphTime<=0){if(ch.vent){ch.ventAnim=null;exitVent(ch)}beginMorph(ch,null)}}
+  }
+}
+function updateMorphButton(){
+  const b=$('btnMorph'),p=G.player;if(!p)return;$('btnMap').disabled=!!p.morphTransition;
+  b.hidden=!(p.alive&&p.role==='imp'&&p.function==='metamorph')||!!p.morphTransition;
+  b.disabled=G.state!=='playing'||!!p.vent||uiBusy()||(!p.morphAppearance&&(p.morphCd||0)>0);
+  const label=p.morphAppearance?(p.morphTime<0?t('morph.cancel'):t('morph.cancelTimed',{seconds:Math.ceil(Math.max(0,p.morphTime))})):(p.morphCd>0?'🎭 '+Math.ceil(p.morphCd)+'s':t('morph.button'));
+  if(b.dataset.morphLabel!==label||!b.querySelector('.morphIcon')){
+    b.dataset.morphLabel=label;b.setAttribute('aria-label',label);
+    const icon=el('span','morphIcon','🎭');icon.setAttribute('aria-hidden','true');
+    b.replaceChildren(icon,el('small','',label.replace(/^🎭\s*/u,'')));
+  }
+  b.classList.toggle('ready',!b.disabled);
+}
+
+function playerMorph(){
+  const p=G.player;if(!p?.alive||p.role!=='imp'||p.function!=='metamorph'||p.morphTransition||p.vent||G.state!=='playing'||uiBusy())return;
+  const send=target=>{if(NET.inRoom&&!NET.isHost)netSend({type:'action',action:'morph',targetId:target?.id||null});else beginMorph(p,target)};
+  if(p.morphAppearance){send(null);return}if(p.morphCd>0)return;
+  G.state='tool';p.moving=false;showModal(t('morph.choose'),t('morph.chooseDesc'));const grid=el('div','freeplayRoster');
+  for(const target of G.chars.filter(c=>c!==p)){const b=el('button','mg freeplayChoiceButton',colorDisplayName(COLOR_BY[target.color])+' · '+target.name);b.style.borderLeft='8px solid '+COLOR_BY[target.color].main;b.addEventListener('click',()=>{closeModal();send(target)});grid.appendChild(b)}$('mbody').appendChild(grid);lockFreePlayComputerInput();
 }
 function spectralBotThink(ch,dt){
   if(!ch?.alive||ch.role!=='imp'||ch.function!=='spectral'||ch.vent||G.M||G.over)return false;
@@ -3910,7 +4099,7 @@ function instructorCount(){return G.chars.reduce((n,c)=>n+(c.instructor?1:0),0)}
 function activateInstructor(ch){
   if(!ch||ch.alive||ch.role!=='crew'||ch.instructor||ch.guardian)return false;
   ch.instructor=true;ch.instructorCd=0;ch.instructorTargetId=null;ch.instructorPoint=null;ch.instructorOrigin={x:ch.x,y:ch.y};
-  if(ch===G.player){G.instructorCd=0;G.instructorTargetId=null;G.followTarget=null;Snd.roleFx('instructor','done');emitRoleFx(ch.x,ch.y,'instructor',1);toast('↔️ Você despertou como Instrutor. Use Trilhar para ajudar um jogador vivo.',4200)}
+  if(ch===G.player){G.instructorCd=0;G.instructorTargetId=null;G.followTarget=null;Snd.roleFx('instructor','done');emitRoleFx(ch.x,ch.y,'instructor',1);toast(t('runtime.instructorAwake'),4200)}
   return true;
 }
 function maybeActivateInstructor(ch){
@@ -4016,9 +4205,12 @@ function updateGhostNPC(ch,dt){   // Mortos vagam sem colisões; Infiltrados mor
   if(ch.role==='imp'){ai.sabT-=dt;if(ai.sabT<=0){ai.sabT=1.6;if(G.gt>45&&G.sab.cd<=0&&Math.random()<.07)aiSabotage(ch)}}
 }
 function updateNPC(ch,dt){
-  if(ch.controlledBy||ch.killDash)return;
+  if(ch.controlledBy||ch.killDash||ch.morphTransition||ch.minerDig)return;
   if(ch.role==='crew'&&G.state==='playing'&&G.gt>20&&ch.ai&&G.gt>(ch.ai.nextTaskEncourage||45)&&Math.random()<dt*.015){const left=G.tasks.filter(t=>!t.fake&&!t.done).length;ch.ai.nextTaskEncourage=G.gt+rand(25,55);if(left>0){if(left<=5)npcSay(ch,'Faltam poucas tarefas, vamos!');else if(Math.random()<.5)npcSay(ch,'Vamos fazer tarefas para vencer!');else npcSay(ch,'Mortos, façam as suas tarefas!')}}
   const ai=ch.ai;
+  if(ch.function==='miner'&&minerBotThink(ch,dt))return;
+  if(ch.function==='metamorph'&&ch.role==='imp'&&!ch.morphAppearance&&!ch.morphTransition&&ch.morphCd<=0&&Math.random()<dt*.18){const target=shuffle(G.chars.filter(c=>c!==ch&&c.alive))[0];if(target)beginMorph(ch,target)}
+  if(ch.morphTransition)return;
   const paramedicBusy=ch.function==='paramedic'&&ch.role==='crew'&&paramedicBotThink(ch,dt);const seerBusy=ch.function==='seer'&&ch.role==='crew'&&seerBotThink(ch,dt);const cleanerBusy=ch.function==='cleaner'&&ch.role==='imp'&&cleanerBotThink(ch,dt);const parasiteBusy=ch.function==='parasite'&&ch.role==='imp'&&parasiteBotThink(ch,dt);const spectralBusy=ch.function==='spectral'&&ch.role==='imp'&&spectralBotThink(ch,dt);
   if(ch.function==='marionette'&&ch.role==='imp'&&ch.alive&&!ch.controlTargetId&&(ch.controlCd||0)<=0&&G.state==='playing'&&!G.M&&Math.random()<dt*.08){const target=controlTargetFor(ch);if(target&&!hasWitness(ch,target))startControl(ch,target)}
   if(ch.vent){ventUpdate(ch,dt);return}
@@ -4054,14 +4246,14 @@ const updateNPCBaseControl=updateNPC;
 updateNPC=function(ch,dt){if(ch.controlledBy)return;return withControlledBody(ch,()=>updateNPCBaseControl(ch,dt))};
 
 /* ---------- configurações, personalidades e memória de suspeita ---------- */
-const CFG={kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,parasiteChance:0,parasiteMax:1,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
-const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],emergencyUses:[0,10],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],obsChance:[0,100],obsMax:[0,15],instructorChance:[0,100],instructorMax:[0,15],instructorCooldown:[20,60],instructorMaxDistance:[100,2000],guardianCooldown:[35,60],guardianDuration:[10,30],guardianChance:[0,100],guardianMax:[0,15],guardianImpostorVisible:[0,1],cleanerChance:[0,100],cleanerMax:[0,15],cleanerCooldown:[10,60],parasiteChance:[0,100],parasiteMax:[0,3],spectralChance:[0,100],spectralMax:[0,15],spectralCooldown:[5,20],spectralDuration:[10,90],paramedicChance:[0,100],paramedicMax:[0,15],paramedicCooldown:[5,25],paramedicTasksPerUse:[1,5],paramedicMaxUses:[1,3],seerChance:[0,100],seerMax:[0,15],seerCooldown:[10,45],seerDelay:[0,5],noisyDuration:[5,15],noisyChance:[0,100],noisyMax:[0,15],noisyImpostorVisible:[0,1],judgeChance:[0,100],judgeMax:[0,15],judgeTaskPct:[0,100],lazyChance:[0,100],lazyMax:[0,15],lazySlowdown:[5,20],lazyTasks:[1,3],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],engVentDuration:[10,61],engChance:[0,100],engMax:[0,15],engCooldown:[5,25],marionCooldown:[15,60],marionDuration:[5,30],marionChance:[0,100],marionMax:[0,3],hunterChance:[0,100],hunterMax:[0,3],hunterTargetCooldown:[5,25],actionDistance:[0,2],commonTasks:[0,5],mediumTasks:[0,5],longTasks:[0,5],renderDist:[500,1500]};
-const CFG_DEF={kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,parasiteChance:0,parasiteMax:1,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
+const CFG={kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,parasiteChance:0,parasiteMax:1,minerCooldown:10,minerChance:0,minerMax:1,minerHoles:5,morphChance:0,morphMax:1,morphCooldown:15,morphDuration:15,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
+const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],emergencyUses:[0,10],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],obsChance:[0,100],obsMax:[0,15],instructorChance:[0,100],instructorMax:[0,15],instructorCooldown:[20,60],instructorMaxDistance:[100,2000],guardianCooldown:[35,60],guardianDuration:[10,30],guardianChance:[0,100],guardianMax:[0,15],guardianImpostorVisible:[0,1],cleanerChance:[0,100],cleanerMax:[0,15],cleanerCooldown:[10,60],parasiteChance:[0,100],parasiteMax:[0,3],minerCooldown:[5,30],minerChance:[0,100],minerMax:[0,3],minerHoles:[5,16],morphChance:[0,100],morphMax:[0,3],morphCooldown:[5,25],morphDuration:[5,31],spectralChance:[0,100],spectralMax:[0,15],spectralCooldown:[5,20],spectralDuration:[10,90],paramedicChance:[0,100],paramedicMax:[0,15],paramedicCooldown:[5,25],paramedicTasksPerUse:[1,5],paramedicMaxUses:[1,3],seerChance:[0,100],seerMax:[0,15],seerCooldown:[10,45],seerDelay:[0,5],noisyDuration:[5,15],noisyChance:[0,100],noisyMax:[0,15],noisyImpostorVisible:[0,1],judgeChance:[0,100],judgeMax:[0,15],judgeTaskPct:[0,100],lazyChance:[0,100],lazyMax:[0,15],lazySlowdown:[5,20],lazyTasks:[1,3],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],engVentDuration:[10,61],engChance:[0,100],engMax:[0,15],engCooldown:[5,25],marionCooldown:[15,60],marionDuration:[5,30],marionChance:[0,100],marionMax:[0,3],hunterChance:[0,100],hunterMax:[0,3],hunterTargetCooldown:[5,25],actionDistance:[0,2],commonTasks:[0,5],mediumTasks:[0,5],longTasks:[0,5],renderDist:[500,1500]};
+const CFG_DEF={kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,parasiteChance:0,parasiteMax:1,minerCooldown:10,minerChance:0,minerMax:1,minerHoles:5,morphChance:0,morphMax:1,morphCooldown:15,morphDuration:15,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
 function maxImpostorsForPlayers(count){const n=Math.max(4,Math.min(15,Math.round(Number(count)||4)));return n>=10?3:n>=8?2:1}
 function configuredPlayerCount(){if(typeof NET!=='undefined'&&NET.inRoom&&NET.room)return Math.max(4,Math.min(15,Number(NET.room.size)||4));return 15}
-function cfgValueIsInfinite(key,value){return Number(value)===Infinity||(key==='engVentDuration'&&Number(value)>60)}
+function cfgValueIsInfinite(key,value){return Number(value)===Infinity||(key==='engVentDuration'&&Number(value)>60)||(key==='morphDuration'&&Number(value)>30)||(key==='minerHoles'&&Number(value)>15)}
 function cfgNumericDisplay(key,value){return cfgValueIsInfinite(key,value)?'∞':String(value)}
-function cfgLimitFor(key){if(key==='impostors')return [1,maxImpostorsForPlayers(configuredPlayerCount())];if(key==='instructorMax'||key==='guardianMax'||key==='paramedicMax'||key==='seerMax'||key==='noisyMax'||key==='judgeMax'||key==='lazyMax'||key==='spectralMax')return [0,Math.max(0,Math.min(configuredPlayerCount(),15))];if(key==='cleanerMax')return [0,Math.max(0,Math.min(CFG.impostors,CFG_LIM.cleanerMax[1]))];if(key==='hunterMax')return [0,Math.max(0,Math.min(CFG.impostors,3))];if(key==='parasiteMax')return [0,Math.max(0,Math.min(CFG.impostors,3))];return CFG_LIM[key]}
+function cfgLimitFor(key){if(key==='minerMax')return [0,Math.min(CFG.impostors,3)];if(key==='morphMax')return [0,Math.min(CFG.impostors,3)];if(key==='impostors')return [1,maxImpostorsForPlayers(configuredPlayerCount())];if(key==='instructorMax'||key==='guardianMax'||key==='paramedicMax'||key==='seerMax'||key==='noisyMax'||key==='judgeMax'||key==='lazyMax'||key==='spectralMax')return [0,Math.max(0,Math.min(configuredPlayerCount(),15))];if(key==='cleanerMax')return [0,Math.max(0,Math.min(CFG.impostors,CFG_LIM.cleanerMax[1]))];if(key==='hunterMax')return [0,Math.max(0,Math.min(CFG.impostors,3))];if(key==='parasiteMax')return [0,Math.max(0,Math.min(CFG.impostors,3))];return CFG_LIM[key]}
 const ACTION_DISTANCE_LABELS=['Curta','Média','Longa'];
 const ACTION_DISTANCE_VALUES=[100,130,160];
 function actionDistancePx(kind='default'){const lv=clamp(Math.round(Number(CFG.actionDistance)||0),0,2);return ACTION_DISTANCE_VALUES[lv]}
@@ -4072,7 +4264,7 @@ function actionDistancePx(kind='default'){const lv=clamp(Math.round(Number(CFG.a
 }catch(e){}})();
 CFG.cleanerMax=Math.min(CFG.cleanerMax,CFG.impostors);CFG.hunterMax=Math.min(CFG.hunterMax,CFG.impostors,3);CFG.parasiteMax=Math.min(CFG.parasiteMax,CFG.impostors,3);CFG.lazyMax=Math.min(CFG.lazyMax,15);
 function saveCfg(force=false){if(!force&&typeof NET!=='undefined'&&NET.inRoom)return;if(accountActive()){if(!ACCOUNT.applying){if(force||!(typeof NET!=='undefined'&&NET.inRoom))ACCOUNT.roomProfile=accountCaptureCurrentRoomSettings();accountScheduleSync()}return}try{const data={};for(const k of Object.keys(CFG_DEF))data[k]=CFG[k];localStorage.setItem('nz_cfg',JSON.stringify(data))}catch(e){}}
-function normalizeCfgCaps(cfg){cfg.cleanerMax=Math.min(cfg.cleanerMax,cfg.impostors);cfg.hunterMax=Math.min(cfg.hunterMax,cfg.impostors,3);cfg.parasiteMax=Math.min(cfg.parasiteMax,cfg.impostors,3);cfg.spectralMax=Math.min(cfg.spectralMax,configuredPlayerCount(),15);cfg.guardianMax=Math.min(cfg.guardianMax,configuredPlayerCount(),15);cfg.paramedicMax=Math.min(cfg.paramedicMax,configuredPlayerCount(),15);cfg.seerMax=Math.min(cfg.seerMax,configuredPlayerCount(),15);cfg.noisyMax=Math.min(cfg.noisyMax,configuredPlayerCount(),15);cfg.judgeMax=Math.min(cfg.judgeMax,configuredPlayerCount(),15);cfg.judgeTaskPct=clamp(Math.round((cfg.judgeTaskPct||0)/25)*25,0,100);cfg.hunterTargetCooldown=clamp(Math.round((cfg.hunterTargetCooldown||10)/5)*5,5,25);cfg.lazyMax=Math.min(cfg.lazyMax,configuredPlayerCount(),15);cfg.impostors=Math.min(cfg.impostors,maxImpostorsForPlayers(configuredPlayerCount()));return cfg}
+function normalizeCfgCaps(cfg){cfg.minerMax=Math.min(cfg.minerMax,cfg.impostors,3);cfg.morphMax=Math.min(cfg.morphMax,cfg.impostors,3);cfg.cleanerMax=Math.min(cfg.cleanerMax,cfg.impostors);cfg.hunterMax=Math.min(cfg.hunterMax,cfg.impostors,3);cfg.parasiteMax=Math.min(cfg.parasiteMax,cfg.impostors,3);cfg.spectralMax=Math.min(cfg.spectralMax,configuredPlayerCount(),15);cfg.guardianMax=Math.min(cfg.guardianMax,configuredPlayerCount(),15);cfg.paramedicMax=Math.min(cfg.paramedicMax,configuredPlayerCount(),15);cfg.seerMax=Math.min(cfg.seerMax,configuredPlayerCount(),15);cfg.noisyMax=Math.min(cfg.noisyMax,configuredPlayerCount(),15);cfg.judgeMax=Math.min(cfg.judgeMax,configuredPlayerCount(),15);cfg.judgeTaskPct=clamp(Math.round((cfg.judgeTaskPct||0)/25)*25,0,100);cfg.hunterTargetCooldown=clamp(Math.round((cfg.hunterTargetCooldown||10)/5)*5,5,25);cfg.lazyMax=Math.min(cfg.lazyMax,configuredPlayerCount(),15);cfg.impostors=Math.min(cfg.impostors,maxImpostorsForPlayers(configuredPlayerCount()));return cfg}
 function presetBaseConfig(){const cfg={...CFG_DEF};cfg.locChance=0;cfg.locMax=0;cfg.sheriffChance=0;cfg.sheriffMax=0;cfg.obsChance=0;cfg.obsMax=0;cfg.instructorChance=0;cfg.instructorMax=0;cfg.guardianChance=0;cfg.guardianMax=0;cfg.cleanerChance=0;cfg.cleanerMax=0;cfg.hunterChance=0;cfg.hunterMax=0;cfg.parasiteChance=0;cfg.parasiteMax=0;cfg.spectralChance=0;cfg.spectralMax=0;cfg.paramedicChance=0;cfg.paramedicMax=0;cfg.seerChance=0;cfg.seerMax=0;cfg.noisyChance=0;cfg.noisyMax=0;cfg.judgeChance=0;cfg.judgeMax=0;cfg.lazyChance=0;cfg.lazyMax=0;cfg.delayedEnabled=0;cfg.delayedChance=0;cfg.delayedMax=0;cfg.engChance=0;cfg.engMax=0;cfg.marionChance=0;cfg.marionMax=0;return normalizeCfgCaps(cfg)}
 function preservedPresetConfig(id){const cfg=presetBaseConfig();if(id==='chaos'||id==='help'||id==='infiltrados'){cfg.locChance=100;cfg.locMax=1;cfg.sheriffChance=100;cfg.sheriffMax=1;cfg.obsChance=100;cfg.obsMax=1;cfg.instructorChance=100;cfg.instructorMax=1;cfg.guardianChance=100;cfg.guardianMax=1;cfg.paramedicChance=100;cfg.paramedicMax=1;cfg.noisyChance=100;cfg.noisyMax=1;cfg.judgeChance=100;cfg.judgeMax=1;cfg.lazyChance=100;cfg.lazyMax=1;cfg.engChance=100;cfg.engMax=1;cfg.delayedEnabled=1;cfg.delayedChance=50;cfg.delayedMax=1;cfg.cleanerChance=50;cfg.cleanerMax=1;cfg.parasiteChance=50;cfg.parasiteMax=1;cfg.spectralChance=50;cfg.spectralMax=1;cfg.marionChance=50;cfg.marionMax=1;cfg.hunterChance=50;cfg.hunterMax=1;}
   if(id==='help'||id==='infiltrados'){cfg.locMax=2;cfg.sheriffMax=2;cfg.obsMax=2;cfg.instructorMax=2;cfg.guardianMax=2;cfg.paramedicMax=2;cfg.noisyMax=2;cfg.judgeMax=2;cfg.lazyMax=2;cfg.engMax=2;cfg.delayedChance=100;cfg.cleanerChance=100;cfg.parasiteChance=100;cfg.spectralChance=100;cfg.marionChance=100;cfg.hunterChance=100;cfg.delayedMax=Math.min(2,maxImpostorsForPlayers(configuredPlayerCount()));cfg.cleanerMax=Math.min(2,maxImpostorsForPlayers(configuredPlayerCount()));cfg.parasiteMax=Math.min(2,maxImpostorsForPlayers(configuredPlayerCount()),3);cfg.spectralMax=Math.min(2,configuredPlayerCount(),15);cfg.marionMax=Math.min(2,maxImpostorsForPlayers(configuredPlayerCount()),3);cfg.hunterMax=Math.min(2,maxImpostorsForPlayers(configuredPlayerCount()),3);}
@@ -4080,7 +4272,7 @@ function preservedPresetConfig(id){const cfg=presetBaseConfig();if(id==='chaos'|
   if(id==='infiltrados'){cfg.impostors=Math.min(3,maxImpostorsForPlayers(configuredPlayerCount()));cfg.delayedChance=25;cfg.cleanerChance=25;cfg.spectralChance=25;cfg.marionChance=25;cfg.hunterChance=25;cfg.parasiteChance=100;cfg.parasiteMax=Math.min(3,cfg.impostors);}
   return normalizeCfgCaps(cfg)}
 const PRESET_CREW_ROLE_KEYS=['loc','sheriff','obs','eng','paramedic','seer','noisy','judge','lazy','instructor','guardian'];
-const PRESET_IMP_ROLES=[{id:'delayed',key:'delayed'},{id:'cleaner',key:'cleaner'},{id:'parasite',key:'parasite'},{id:'spectral',key:'spectral'},{id:'marionette',key:'marion'},{id:'hunter',key:'hunter'}];
+const PRESET_IMP_ROLES=[{id:'delayed',key:'delayed'},{id:'cleaner',key:'cleaner'},{id:'parasite',key:'parasite'},{id:'miner',key:'miner'},{id:'metamorph',key:'morph'},{id:'spectral',key:'spectral'},{id:'marionette',key:'marion'},{id:'hunter',key:'hunter'}];
 function presetConfig(id){
   // Keep the existing Dead Ascension preset independent of the revised Help preset.
   if(id==='dead')return preservedPresetConfig('dead');
@@ -4357,7 +4549,7 @@ function noteEngineerVentSeen(ch,v,act){
 }
 function enterVent(ch,v){if(ch?.function==='engineer'&&ch===G.player){emitRoleFx(ch.x,ch.y,'engineer');Snd.roleFx('engineer','use')}
   const engineer=ch.function==='engineer'&&ch.role==='crew';
-  if(ch.killDash||!ch.alive||!(ch.role==='imp'||engineer)||ch.vent||ch.ventCd>0||ch.ventAnim)return false;
+  if(ch.killDash||ch.morphTransition||ch.minerDig||!ch.alive||!(ch.role==='imp'||engineer)||ch.vent||ch.ventCd>0||ch.ventAnim)return false;
   if(engineer&&((G.sab.comms||0)>0||(ch.engVentCd||0)>0))return false;
   if(!(Math.hypot(ch.x-v.px,ch.y+4-v.py)<=actionDistancePx('vent')))return false;
   if(engineer){noteEngineerVentSeen(ch,v,'enter');ch.engVentTime=CFG.engVentDuration>60?61:CFG.engVentDuration}else noteVentSeen(ch,v,'enter');
@@ -4368,6 +4560,7 @@ function enterVent(ch,v){if(ch?.function==='engineer'&&ch===G.player){emitRoleFx
   return true;
 }
 function ventMove(ch,toId){
+  if(isMinerHoleId(ch?.vent))return minerTravel(ch,toId);
   if(!ch.vent||ch.ventAnim||ch.ventMv>0)return false;
   const from=ventById[ch.vent], to=ventById[toId];
   if(!from||!to||!VENT_ADJ[ch.vent]?.includes(toId))return false;   // só destinos realmente conectados
@@ -4381,6 +4574,7 @@ function refreshNearbyInteractions(){
   G.action=G.state==='playing'?bestAction():null;const hint=$('useHint');setCls(hint,'on',!!G.action);if(G.action)setTxt(hint,translateRuntimeText(G.action.label));updateButtons();
 }
 function exitVent(ch){
+  if(isMinerHoleId(ch?.vent))return minerExit(ch);
   if(!ch?.vent||ch.ventAnim)return false;
   const ventId=ch.vent,v=ventById[ventId],wasEngineer=ch.function==='engineer'&&ch.role==='crew';
   // Um snapshot antigo ou uma troca de mapa nunca pode deixar o jogador preso num duto inexistente.
@@ -4466,12 +4660,13 @@ function tickVents(dt){
 function openVentPanel(){$('ventPanel').hidden=false;refreshVentPanel()}
 function refreshVentPanel(){
   const p=G.player;if(!p||!p.vent){$('ventPanel').hidden=true;return}
+  $('ventList').classList.toggle('mineRoutes',isMinerHoleId(p.vent));if(isMinerHoleId(p.vent)){renderMinerRoutes(p);return}
   if(!ventById[p.vent]||!VENT_ADJ[p.vent]){p.ventAnim=null;exitVent(p);return}
   const box=$('ventList');box.replaceChildren();$('ventHere').textContent=t('runtime.ventRoom',{room:roomDisplayName(ROOM_BY_ID[ventById[p.vent].room].name)});
   for(const id of VENT_ADJ[p.vent]){const to=ventById[id];if(!to)continue;const room=roomDisplayName(ROOM_BY_ID[to.room]?.name||'');const button=el('button','ventRoute');button.type='button';button.dataset.ventId=id;button.setAttribute('aria-label',t('roleUpdate.ventTo',{room}));button.append(el('span','ventRouteArrow','➜'),el('span','ventRouteLabel',room));button.addEventListener('click',e=>{e.stopPropagation();if(ventMove(G.player,id))Snd.click();else Snd.err()});box.appendChild(button)}positionVentArrows();
 }
 function positionVentArrows(){
-  const p=G.player,body=controlledBodyFor(p),from=ventById[body?.vent];if(!from)return;
+  const p=G.player,body=controlledBodyFor(p);if(isMinerHoleId(body?.vent)){positionMinerArrows(body);return}const from=ventById[body?.vent];if(!from)return;
   const x=(body.x-G.cam.x)*ZOOM,y=(body.y-G.cam.y)*ZOOM,mobile=innerWidth<600,rx=mobile?103:146,ry=mobile?90:118;
   const buttons=[...$('ventList').querySelectorAll('.ventRoute')],routes=buttons.map(button=>{const to=ventById[button.dataset.ventId];return {button,angle:Math.atan2(to.py-from.py,to.px-from.px)}}).sort((a,b)=>a.angle-b.angle);
   for(let i=1;i<routes.length;i++)if(routes[i].angle-routes[i-1].angle<.7)routes[i].angle=routes[i-1].angle+.7;
@@ -4490,7 +4685,8 @@ function ventFlee(k){   // NPC impostor foge por um duto próximo depois de elim
   const v=VENT_DEFS.filter(v=>Math.hypot(v.px-k.x,v.py-k.y)<750).sort((a,b)=>Math.hypot(a.px-k.x,a.py-k.y)-Math.hypot(b.px-k.x,b.py-k.y))[0];
   return !!v&&goTo(k,{type:'vent',v},(x,y)=>Math.abs(x-v.x)+Math.abs(y-v.y)<=1);
 }
-function ventUpdate(ch,dt){   // NPCs dentro do duto: Infiltrados podem sabotar; Engenheiros usam a passagem limitada
+function ventUpdate(ch,dt){
+  if(isMinerHoleId(ch.vent)){if(!ch.ventAnim&&ch.ventMv<=0){ch.ai.ventT=(ch.ai.ventT||1)-dt;if(ch.ai.ventT<=0){ch.ai.ventT=1;const other=ownedMinerHoles(ch).filter(h=>h.id!==ch.vent);if(other.length&&Math.random()<.5)minerTravel(ch,pick(other).id);else minerExit(ch)}}return}   // NPCs dentro do duto: Infiltrados podem sabotar; Engenheiros usam a passagem limitada
   const ai=ch.ai; ch.moving=false;
   if(ch.role==='imp'){ai.sabT-=dt; if(ai.sabT<=0){ai.sabT=1.2; if(G.gt>45&&G.sab.cd<=0&&Math.random()<.07)aiSabotage(ch)}}
   if(ch.ventAnim||ch.ventMv>0)return;
@@ -4729,7 +4925,7 @@ function hunterNpcPickTarget(ch){if(!ch?.alive||ch.role!=='imp'||ch.function!=='
 function updateHunterStates(dt){for(const ch of G.chars||[]){if(ch.function!=='hunter')continue;if((ch.hunterTargetCd||0)>0)ch.hunterTargetCd=Math.max(0,ch.hunterTargetCd-dt);if(ch.hunterTargetId)hunterTargetFor(ch)}}
 function resetHunterKillCooldown(hunter){if(!hunter)return;if(hunter===G.player){G.killCd=0;hunter.netKillCd=0}else{hunter.netKillCd=0;if(hunter.ai)hunter.ai.killCd=0}}
 function applyHunterWrongKillPenalty(hunter){if(!hunter)return;const cd=CFG.kill*2;if(hunter===G.player){G.killCd=cd;hunter.netKillCd=cd}else{hunter.netKillCd=cd;if(hunter.ai)hunter.ai.killCd=cd}}
-function killChar(c){if(c){c.spectralTransition=null;finishDirectKillDash(c)}
+function killChar(c){if(c){c.minerDig=null;if(isMinerHoleId(c.vent)){c.ventAnim=null;minerExit(c)}clearMorph(c);c.spectralTransition=null;finishDirectKillDash(c)}
   if(c?.controlTargetId)stopControl(c,'death');
   if(c?.controlledBy){const owner=charById(c.controlledBy);if(owner)stopControl(owner,'death')}
   if(c?.function==='hunter'&&c.hunterTargetId)endHunterTarget(c,false);
@@ -4755,9 +4951,8 @@ function startDirectKillDash(k,body){
   const dx=body.x-k.x,dy=body.y-k.y,distance=Math.hypot(dx,dy),ux=distance>1?dx/distance:(k.face||1),uy=distance>1?dy/distance:0;
   const point=safeKillDashSegment(k,{x:body.x+ux*28,y:body.y+uy*28});
   if(Math.hypot(point.x-k.x,point.y-k.y)<1)return false;
-  k.teleportSeq=(k.teleportSeq||0)+1;
-  k.killDash={seq:k.teleportSeq,ownerId:k.id,fromX:k.x,fromY:k.y,toX:point.x,toY:point.y,elapsed:0,duration:DIRECT_KILL_DASH_DURATION};
-  k.moving=true;if(Math.abs(ux)>.05)k.face=Math.sign(ux);
+  k.teleportSeq=(k.teleportSeq||0)+1;k.killDash=null;k.x=point.x;k.y=point.y;k.moving=false;
+  if(Math.abs(ux)>.05)k.face=Math.sign(ux);
   if(k.ai){k.ai.path=[];k.ai.goal=null}
   if(k===G.player)NET.reconcileX=NET.reconcileY=0;
   return true;
@@ -4789,7 +4984,7 @@ function doKill(k,v){
   const markedHunterTarget=k?.function==='hunter'?hunterTargetFor(k):null;
   const hunterHit=!!(markedHunterTarget&&v&&String(markedHunterTarget.id)===String(v.id));
   const hunterWrongHit=!!(markedHunterTarget&&v&&String(markedHunterTarget.id)!==String(v.id));
-  if(!k||!v||!k.alive||k.role!=='imp'||k.function==='delayed'||k.killDash||k.spectralInvisible||!v.alive||v.role==='imp'||k===v||k.vent||v.vent||dist(k,v)>actionDistancePx('kill')||!losClear(k.x,k.y,v.x,v.y))return false;
+  if(!k||!v||!k.alive||k.role!=='imp'||k.function==='delayed'||k.killDash||k.morphTransition||k.minerDig||k.spectralInvisible||!v.alive||v.role==='imp'||k===v||k.vent||v.vent||dist(k,v)>actionDistancePx('kill')||!losClear(k.x,k.y,v.x,v.y))return false;
   if(guardianProtectionFor(v))rememberGuardianAttackSource(v,k);
   if(consumeGuardianProtection(v,'kill')){if(k.ai){k.netKillCd=CFG.kill;k.ai.killCd=k.netKillCd}if(k.isPlayer){G.killCd=CFG.kill;k.netKillCd=G.killCd;toast('O ataque foi bloqueado por uma proteção.',1800)}return false}
   spawnKillSplash(k,v);killChar(v);
@@ -5239,6 +5434,7 @@ function alibiMsg(ch,M,room){
 }
 function npcStatement(ch,M){
   const ai=ch.ai, P=PERS[ai.pers];
+  if(ai.morphReport){ai.morphReport=false;return {from:ch,text:t('morph.botReport'),claim:{from:ch.id,kind:'statement',role:'metamorph'}}}
   if(M.body&&ch===M.caller&&Math.random()<.85)return {from:ch,text:pickLine([`Corpo de ${M.body.name} em ${M.body.room}.`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}`,`Encontrei o corpo de ${M.body.name} em ${M.body.room}!`]),claim:{from:ch.id,kind:'bodyReport',target:M.body.id,room:M.body.room,time:M.body.tKill}};
   if(M.body&&Math.random()<.12)return {from:ch,text:`Onde que mataram ${M.body.name}?`,claim:{from:ch.id,kind:'ask',bodyInquiry:true}};
   if(G.sab.reactor>0&&Math.random()<.35)return {from:ch,text:'Cuidado! Vamos resolver o reator!',claim:null};
@@ -5247,6 +5443,7 @@ function npcStatement(ch,M){
   const blocked=ai.guardianBlocked;if(blocked&&!blocked.reported&&G.gt-(Number(blocked.gt)||0)<120){blocked.reported=true;const attacker=blocked.attackerId?charById(blocked.attackerId):null;if(attacker)return {from:ch,text:`Alguém me protegeu de um ataque de ${attacker.name}.`,claim:{from:ch.id,kind:'guardianProtected',target:attacker.id,strong:true}};return {from:ch,text:'Alguém me protegeu!',claim:{from:ch.id,kind:'guardianProtected',strong:true}}}
   const received=ai.guardianReceived;if(received&&!received.reported&&G.gt-(Number(received.gt)||0)<120){received.reported=true;return {from:ch,text:'Alguém me protegeu!',claim:{from:ch.id,kind:'guardianProtected',strong:false}}}
   // Só relata trilhas que este NPC realmente recebeu do Instrutor.
+  if(ai.morphSeen){const who=charById(ai.morphSeen);ai.morphSeen=null;if(who)return {from:ch,text:t('morph.witness',{name:who.name}),claim:{from:ch.id,kind:'accuse',target:who.id,strong:true,role:'metamorph'}}}
   const trailHint=(ai.instructorTrailHints||[]).slice().reverse().find(h=>!h.reported&&G.gt-(Number(h.gt)||0)<240);
   if(trailHint){trailHint.reported=true;const pointed=trailHint.targetId?charById(trailHint.targetId):null;if(pointed&&pointed.alive)return {from:ch,text:`Recebi uma trilha que apontava a ${pointed.name}.`,claim:{from:ch.id,kind:'instructorTrail',target:pointed.id,room:trailHint.room,time:trailHint.gt,strong:false,trail:true}};if(trailHint.room)return {from:ch,text:`Recebi uma trilha que levava a ${trailHint.room}.`,claim:{from:ch.id,kind:'instructorTrail',room:trailHint.room,time:trailHint.gt,strong:false,trail:true}}}
   // Pergunta o motivo sobretudo quando outra pessoa chamou uma reunião de emergência sem contexto evidente para este NPC.
@@ -5767,9 +5964,9 @@ function callMeeting(caller,reason,body,forceSync=false){
     caller.emUses--;
   }
   G.chars.forEach(c=>{if(c.controlTargetId)stopControl(c,'meeting')});
-  closeEmergencyDialog();G.chars.forEach(c=>{c.spectralTransition=null;finishDirectKillDash(c)});closeModalSilent();G.state='meeting';closeMap();G.cfgOpen=false;$('settings').hidden=true;
+  closeEmergencyDialog();G.chars.forEach(c=>{c.spectralTransition=null;c.minerDig=null;finishDirectKillDash(c);clearMorph(c)});closeModalSilent();G.state='meeting';closeMap();G.cfgOpen=false;$('settings').hidden=true;
   if(G.sab.doors>0){G.sab.doors=0;openSabotageDoors()}
-  G.chars.forEach(c=>{c.moving=false;if(c.vent){const v=ventById[c.vent];c.vent=null;c.x=v.px;c.y=v.py-OFF_Y}c.ventAnim=null});
+  G.chars.forEach(c=>{c.moving=false;if(c.vent){const v=ventById[c.vent]||minerHoleById(c.vent);c.vent=null;if(v){c.x=v.px;c.y=v.py-OFF_Y}}c.ventAnim=null});
   $('ventPanel').hidden=true;
   let evid=null;
   if(!caller.isPlayer&&caller.ai&&reason==='emergency'){
@@ -5801,7 +5998,7 @@ function buildMeetUI(){
     b.addEventListener('click',()=>cardClick(ch.id));M.cards[ch.id]=b;
     const cardSlot=el('div','meetingCardSlot');cardSlot.appendChild(b);
     const confirm=el('div','meetingVoteConfirm');confirm.dataset.targetId=ch.id;confirm.hidden=true;
-    const yes=el('button','voteConfirmYes','✔️'),no=el('button','voteConfirmNo','❌'),judge=el('button','judgeVoteBtn','🔨');yes.type=no.type=judge.type='button';yes.title=t('meeting.confirmVote');no.title=t('meeting.cancelVote');judge.title=t('meeting.judgeVote');yes.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();confirmMeetingVote(ch.id)});no.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();cancelMeetingVote()});judge.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();useJudgeVote(ch.id)});confirm.append(yes,no,judge);cardSlot.appendChild(confirm);wrap.appendChild(cardSlot);
+    const yes=el('button','voteConfirmYes','✔️'),no=el('button','voteConfirmNo','❌'),judge=el('button','judgeVoteBtn','👨‍⚖️');yes.type=no.type=judge.type='button';yes.title=t('meeting.confirmVote');no.title=t('meeting.cancelVote');judge.title=t('meeting.judgeVote');yes.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();confirmMeetingVote(ch.id)});no.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();cancelMeetingVote()});judge.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();useJudgeVote(ch.id)});confirm.append(yes,no,judge);cardSlot.appendChild(confirm);wrap.appendChild(cardSlot);
     const onlineHuman=!!(NET.inRoom&&NET.room?.players?.some(p=>String(p.id)===String(ch.id)));
     if(onlineHuman&&String(ch.id)!==String(NET.id)){
       const mw=el('div','meetingModWrap');mw.dataset.targetId=ch.id;mw.hidden=true;
@@ -6006,6 +6203,13 @@ function showResult(){
    ===================================================================== */
 let last=performance.now(), toolAcc=0;
 const simActive=()=>(G.state==='playing'||G.state==='task'||G.state==='tool')&&!G.confirmOpen;
+function setAbilityCaption(button,icon,label){
+  const text=String(label).replace(/^[^\p{L}\p{N}]+/u,'');
+  const signature=icon+' '+text;
+  if(button.dataset.abilityCaption===signature&&button.querySelector('.abilityCaption'))return;
+  button.dataset.abilityCaption=signature;button.setAttribute('aria-label',signature);
+  button.replaceChildren(el('span','abilityIcon',icon),el('small','abilityCaption',text));
+}
 function updateButtons(){
   const p=G.player, can=G.state==='playing'&&(p.alive||ghostCanSab()), imp=playerIsImpostor(), directKill=imp&&p.function!=='delayed'&&!p.spectralInvisible;
   syncMatchLanguageAccess();if(typeof updateDeadChatAccess==='function')updateDeadChatAccess();
@@ -6043,6 +6247,7 @@ function updateButtons(){
   if(!bg.hidden){const own=Object.values(G.guardianProtections||{}).find(pr=>String(pr.ownerId)===String(p.id)&&G.gt<Number(pr.until||0)),target=own&&charById(own.targetId),near=!commsAbilityDown&&guardianSelectableTargets(p).length>0,cd=p.guardianCd||0,lab=commsAbilityDown?'📡 Sem sinal':(own?String(Math.ceil(Math.max(0,Number(own.until)-G.gt)))+'s':(cd>0?String(Math.ceil(cd)):'Proteger'));bg.disabled=commsAbilityDown||!!own||cd>0||!near;setCls(bg,'ready',!bg.disabled);setCls(bg,'cooldown-label',commsAbilityDown||(!own&&cd>0));if(bg._l!==lab){bg._l=lab;if(lab==='📡 Sem sinal')bg.textContent=lab;else bg.innerHTML=lab==='Proteger'?'🪽<small>Proteger</small>':`🪽<small>${lab}</small>`}}
   for(const button of [bsh,bpa,bse,bl,be,bi,bg]){const blocked=(button===bpa?paramedicCommsDown:commsAbilityDown);button.classList.toggle('no-signal',blocked);if(blocked){const label=translateRuntimeText('📡 Sem sinal').replace(/^📡\s*/u,'');if(button.dataset.signalLabel!==label||!button.querySelector('.signalIcon')){button.replaceChildren(el('span','signalIcon','📡'),el('small','',label));button.dataset.signalLabel=label}}}
   if(p.vent){setTxt(ub,t('common.exit'));ub.disabled=!!p.ventAnim;hv(ub,engineer);setCls(ub,'ready',!ub.disabled)}else{hv(ub,false);ub.disabled=G.action?.type==='vent'&&((p.ventCd||0)>0||!!p.ventAnim);setCls(ub,'ready',(!!G.action||(!p.alive&&G.state==='playing'))&&!ub.disabled);setTxt(ub,translateRuntimeText((p.alive||ghostActs())?'Usar':'Trocar'))}
+  if(p.minerDig||p.morphTransition)[bk,bsh,bdel,bcl,bp,bspec,bpa,bse,bh,bi,bg,bs,br,bl,be,bc,ub].forEach(button=>{button.disabled=true;setCls(button,'ready',false)});updateMorphButton();updateMinerButton();
   if(p.killDash)[bk,bsh,bdel,bcl,bp,bspec,bpa,bse,bh,bi,bg,bs,br,bl,be,bc,ub].forEach(button=>{button.disabled=true;setCls(button,'ready',false)});
   if(p.controlledBy){[bk,bsh,bdel,bcl,bp,bspec,bpa,bse,bh,bi,bg,bs,br,bl,be,bc,ub,fb].forEach(e=>{if(e)hv(e,true)});$('ventPanel').hidden=true}
 }
@@ -6051,7 +6256,7 @@ function update(dt){
   const p=G.player;
   if(G.mapOpen&&G.state!=='playing')closeMap();
   if(G.state==='task'&&G.mini&&G.mini.task.fix&&!G.mini.finished&&!(G.sab[G.mini.task.fix]>0))closeModal();
-  tickVents(dt);tickControls(dt);updateDirectKillDashes(simActive()?dt:0);
+  tickVents(dt);tickControls(dt);updateMinerDigs(simActive()?dt:0);updateMorphs(simActive()?dt:0);updateDirectKillDashes(simActive()?dt:0);
   if(NET.inRoom&&!NET.isHost)netUpdateVisualInterpolation();
   if(G.state==='playing'&&(p.alive||ghostActs())&&!uiBusy()&&!controlledBodyFor(p)?.vent&&!p.controlledBy)updatePlayer(dt); else p.moving=false;
   if(simActive()){
@@ -6124,7 +6329,7 @@ function drawEndChar(dt){
    ENTRADAS
    ===================================================================== */
 const typing=()=>isTextEntry();
-function triggerFunctionKey(){const p=G.player;if(!p||controlledBodyFor(p)?.killDash)return;if(!p.alive&&p.instructor)return playerInstructorAction();if(!p.alive&&p.guardian)return playerGuardianProtect();if(!p.alive)return;switch(p.function){case 'sheriff':return playerSheriffShot();case 'delayed':return playerDelayedMark();case 'cleaner':return playerCleanBody();case 'parasite':return playerInfect();case 'spectral':return playerSpectralToggle();case 'paramedic':return playerRevive();case 'seer':return playerSeerInspect();case 'engineer':return playerEngineerVent();case 'marionette':return playerControl();case 'hunter':return playerHunterTarget();case 'locator':return startLocator();}if(G.locator)return startLocator()}
+function triggerFunctionKey(){const p=G.player;if(!p||controlledBodyFor(p)?.killDash)return;if(!p.alive&&p.instructor)return playerInstructorAction();if(!p.alive&&p.guardian)return playerGuardianProtect();if(!p.alive)return;switch(p.function){case 'sheriff':return playerSheriffShot();case 'delayed':return playerDelayedMark();case 'cleaner':return playerCleanBody();case 'parasite':return playerInfect();case 'miner':return playerMinerDig();case 'metamorph':return playerMorph();case 'spectral':return playerSpectralToggle();case 'paramedic':return playerRevive();case 'seer':return playerSeerInspect();case 'engineer':return playerEngineerVent();case 'marionette':return playerControl();case 'hunter':return playerHunterTarget();case 'locator':return startLocator();}if(G.locator)return startLocator()}
 function adjustFocusedOption(dir){if(!G.cfgOpen)return false;let a=document.activeElement,row=a?.closest?.('.cfgrow');if(a?.type==='range'){a.value=clamp(+a.value+dir,+a.min,+a.max);a.dispatchEvent(new Event('input',{bubbles:true}));return true}if(!row)row=$('cfgRows')?.querySelector('.cfgrow');if(!row)return false;const step=row.querySelector('.fnstepper');if(step){const bs=step.querySelectorAll('button');(dir>0?bs[1]:bs[0])?.click();return true}const choices=[...row.querySelectorAll('.cfgChoice button')];if(choices.length){let i=choices.findIndex(b=>b.getAttribute('aria-pressed')==='true');i=clamp(i+dir,0,choices.length-1);choices[i]?.click();return true}const r=row.querySelector('input[type=range]');if(r){r.value=clamp(+r.value+dir,+r.min,+r.max);r.dispatchEvent(new Event('input',{bubbles:true}));return true}return false}
 function toggleQuickChatKey(){if(G.state!=='meeting'||!G.player?.alive)return;const chips=$('sayChips'),say=$('meetSay'),open=chips.hidden;chips.hidden=!open;say.hidden=!open;if(open&&!chips.children.length)renderQuickPhrases()}
 addEventListener('keydown',e=>{
@@ -6148,7 +6353,7 @@ addEventListener('keydown',e=>{
   if(G.cfgOpen&&(isBind('increase')||isBind('decrease'))){e.preventDefault();adjustFocusedOption(isBind('increase')?1:-1);return}
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)&&G.state!=='menu'&&!uiBusy())e.preventDefault();
   if(uiBusy())return;
-  keys.add(e.code);
+  keys.add(e.code);if(G.player?.morphTransition||G.player?.minerDig){e.preventDefault();return}
   const use=isBind('use');
   if(G.state==='playing'&&!e.repeat){
     if(isBind('map'))toggleMap();
@@ -6171,7 +6376,7 @@ addEventListener('blur',()=>keys.clear());
 $('btnUse').addEventListener('pointerdown',e=>{FREEPLAY_USE_POINTERS.add(e.pointerId);try{e.currentTarget.setPointerCapture(e.pointerId)}catch{}e.preventDefault();Snd.init();const p=G.player;if(controlledBodyFor(p)?.vent&&p.function!=='engineer'){exitVent(p);return}const a=bestAction();G.action=a;if(!p.alive&&!(a&&a.type==='freecomputer')&&!(G.role==='crew'&&p.ghost&&a&&a.type==='task')){toast('Morto só pode realizar tarefas permitidas.');return;}doInteract(a)});
 $('btnKill').addEventListener('pointerdown',e=>{e.preventDefault();playerKill()});$('btnSheriff').addEventListener('pointerdown',e=>{e.preventDefault();playerSheriffShot()});$('btnDelayed').addEventListener('pointerdown',e=>{e.preventDefault();playerDelayedMark()});$('btnCleaner').addEventListener('pointerdown',e=>{e.preventDefault();playerCleanBody()});$('btnHunter').addEventListener('pointerdown',e=>{e.preventDefault();playerHunterTarget()});$('btnParamedic').addEventListener('pointerdown',e=>{e.preventDefault();playerRevive()});$('btnSeer').addEventListener('pointerdown',e=>{e.preventDefault();playerSeerInspect()});$('btnEngineerVent').addEventListener('pointerdown',e=>{e.preventDefault();playerEngineerVent()});$('btnControl').addEventListener('pointerdown',e=>{e.preventDefault();playerControl()});
 $('btnSab').addEventListener('pointerdown',e=>{e.preventDefault();playerSab()});
-$('btnReport').addEventListener('pointerdown',e=>{e.preventDefault();playerReport()});$('btnInstructor').addEventListener('pointerdown',e=>{e.preventDefault();playerInstructorAction()});$('btnGuardian').addEventListener('pointerdown',e=>{e.preventDefault();playerGuardianProtect()});$('btnParasite').addEventListener('pointerdown',e=>{e.preventDefault();playerInfect()});$('btnSpectral').addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();playerSpectralToggle()});$('btnLocator').addEventListener('pointerdown',e=>{e.preventDefault();startLocator()});
+$('btnReport').addEventListener('pointerdown',e=>{e.preventDefault();playerReport()});$('btnInstructor').addEventListener('pointerdown',e=>{e.preventDefault();playerInstructorAction()});$('btnGuardian').addEventListener('pointerdown',e=>{e.preventDefault();playerGuardianProtect()});$('btnParasite').addEventListener('pointerdown',e=>{e.preventDefault();playerInfect()});$('btnMiner').addEventListener('pointerdown',e=>{e.preventDefault();playerMinerDig()});$('btnMinerSection').addEventListener('click',()=>{G.cfgFunctionTab='miner';setCfgPage('functions');Snd.click()});$('btnMorph').addEventListener('pointerdown',e=>{FREEPLAY_USE_POINTERS.add(e.pointerId);try{e.currentTarget.setPointerCapture(e.pointerId)}catch{}e.preventDefault();playerMorph()});$('btnMorphSection').addEventListener('click',()=>{G.cfgFunctionTab='metamorph';setCfgPage('functions');Snd.click()});$('btnSpectral').addEventListener('pointerdown',e=>{e.preventDefault();Snd.init();playerSpectralToggle()});$('btnLocator').addEventListener('pointerdown',e=>{e.preventDefault();startLocator()});
 $('btnSkip').addEventListener('click',()=>playerVote('skip'));
 $('btnRole').addEventListener('click',startPlay);
 $('btnCfg').addEventListener('click',openCfg);  $('cfgClose').addEventListener('click',closeCfg);
@@ -6336,7 +6541,7 @@ function netUpdateVisualInterpolation(){
     c.netVisualMoving=alpha<1?(!!c.netFromMoving||!!c.netToMoving):!!c.netToMoving;
   }
 }
-const NET_SETTING_KEYS=['kill','sab','meet','emergencyUses','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorMaxDistance','guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible','cleanerChance','cleanerMax','cleanerCooldown','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','seerChance','seerMax','seerCooldown','seerDelay','noisyDuration','noisyChance','noisyMax','noisyImpostorVisible','judgeChance','judgeMax','judgeTaskPct','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedEnabled','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','hunterChance','hunterMax','hunterTargetCooldown','actionDistance','commonTasks','mediumTasks','longTasks','renderDist'];
+const NET_SETTING_KEYS=['kill','sab','meet','emergencyUses','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorMaxDistance','guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible','cleanerChance','cleanerMax','cleanerCooldown','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','morphChance','morphMax','morphCooldown','morphDuration','minerCooldown','minerChance','minerMax','minerHoles','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','seerChance','seerMax','seerCooldown','seerDelay','noisyDuration','noisyChance','noisyMax','noisyImpostorVisible','judgeChance','judgeMax','judgeTaskPct','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedEnabled','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','hunterChance','hunterMax','hunterTargetCooldown','actionDistance','commonTasks','mediumTasks','longTasks','renderDist'];
 function netSettings(){const o={mapId:SELECTED_MAP_ID};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
 function netApplySettings(s){if(!s)return;let changed=false;if(MAP_LIBRARY[s.mapId]&&s.mapId!==SELECTED_MAP_ID){SELECTED_MAP_ID=s.mapId;saveMapSelection(s.mapId);activateMapData(s.mapId,true);G.mapId=s.mapId;changed=true}for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){let v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(k==='judgeTaskPct')v=clamp(Math.round(v/25)*25,0,100);if(k==='instructorMaxDistance')v=clamp(Math.round(v/100)*100,100,2000);if(k==='hunterTargetCooldown')v=clamp(Math.round(v/5)*5,5,25);if(CFG[k]!==v){CFG[k]=v;changed=true}}}const cappedCleaner=Math.min(CFG.cleanerMax,CFG.impostors);if(CFG.cleanerMax!==cappedCleaner){CFG.cleanerMax=cappedCleaner;changed=true}const cappedHunter=Math.min(CFG.hunterMax,CFG.impostors,3);if(CFG.hunterMax!==cappedHunter){CFG.hunterMax=cappedHunter;changed=true}const cappedParasite=Math.min(CFG.parasiteMax,CFG.impostors,3);if(CFG.parasiteMax!==cappedParasite){CFG.parasiteMax=cappedParasite;changed=true}const cappedSpectral=Math.min(CFG.spectralMax,configuredPlayerCount(),15);if(CFG.spectralMax!==cappedSpectral){CFG.spectralMax=cappedSpectral;changed=true}const cappedParamedic=Math.min(CFG.paramedicMax,configuredPlayerCount(),15);if(CFG.paramedicMax!==cappedParamedic){CFG.paramedicMax=cappedParamedic;changed=true}const cappedSeer=Math.min(CFG.seerMax,configuredPlayerCount(),15);if(CFG.seerMax!==cappedSeer){CFG.seerMax=cappedSeer;changed=true}const cappedLazy=Math.min(CFG.lazyMax,configuredPlayerCount(),15);if(CFG.lazyMax!==cappedLazy){CFG.lazyMax=cappedLazy;changed=true}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
@@ -6470,7 +6675,7 @@ function renderRoomViewSettings(){
   const section=(title,rows,translate=true)=>{const tx=v=>translate?translateRuntimeText(v):String(v);const h=el('h3','',tx(title)),list=el('div','roomViewSettingsList');if(!translate){h.setAttribute('data-i18n-skip','');list.setAttribute('data-i18n-skip','')}for(const [label,value] of rows){const row=el('div','roomViewSettingRow');row.append(el('span','',tx(label)),el('b','',tx(String(value))));list.appendChild(row)}body.append(h,list)};
   const map=MAP_LIBRARY[settings.mapId]||MAP_LIBRARY.nave;
   section('Sala',[['Mapa',map?.name||settings.mapId||'—'],['Tamanho fixo da sala',r.size],['Bots',r.bots??0],['Região',regionLabel(r.region)],['Idioma da sala',GAME_LANGUAGES[r.language]||r.language||'—']]);
-  const fnKeys=new Set(['locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorMaxDistance','guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible','cleanerChance','cleanerMax','cleanerCooldown','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','seerMax','seerChance','seerCooldown','seerDelay','noisyDuration','noisyChance','noisyMax','noisyImpostorVisible','judgeChance','judgeMax','judgeTaskPct','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','hunterChance','hunterMax','hunterTargetCooldown']);
+  const fnKeys=new Set(['locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorMaxDistance','guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible','cleanerChance','cleanerMax','cleanerCooldown','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','morphChance','morphMax','morphCooldown','morphDuration','minerCooldown','minerChance','minerMax','minerHoles','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','seerMax','seerChance','seerCooldown','seerDelay','noisyDuration','noisyChance','noisyMax','noisyImpostorVisible','judgeChance','judgeMax','judgeTaskPct','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','hunterChance','hunterMax','hunterTargetCooldown']);
   const general=[],functions=[];
   for(const [key,label,_desc,unit] of CFG_ROWS){const raw=settings[key]??CFG[key];const item=[label,roomViewSettingValue(key,raw,unit)];(fnKeys.has(key)?functions:general).push(item)}
   section('Configurações',general);section('Funções',functions,false);
@@ -6601,7 +6806,7 @@ function netHandleMessage(m){
   if(m.type==='room_closed'){toMenu();toast('A sala foi encerrada porque todos os jogadores saíram.',3000);return}
 }
 const ROOM_CFG_LABELS=Object.fromEntries(CFG_ROWS.map(([k,l,,u])=>[k,{label:l,unit:u}]));
-const ROOM_CFG_ICONS={locMax:'🧭',locChance:'🧭',locCooldown:'🧭',locDuration:'🧭',sheriffCooldown:'🔫',sheriffChance:'🔫',sheriffMax:'🔫',delayedChance:'⏱️',delayedMax:'⏱️',delayedDuration:'⏱️',obsChance:'👀',obsMax:'👀',instructorChance:'↔️',instructorMax:'↔️',instructorCooldown:'↔️',instructorMaxDistance:'↔️',guardianCooldown:'🪽',guardianDuration:'🪽',guardianChance:'🪽',guardianMax:'🪽',guardianImpostorVisible:'🪽',cleanerChance:'🧹',cleanerMax:'🧹',cleanerCooldown:'🧹',parasiteChance:'🦠',parasiteMax:'🦠',spectralChance:'👻',spectralMax:'👻',spectralCooldown:'👻',spectralDuration:'👻',paramedicChance:'⛑️',paramedicMax:'⛑️',paramedicCooldown:'⛑️',paramedicTasksPerUse:'⛑️',paramedicMaxUses:'⛑️',seerChance:'🔮',seerMax:'🔮',seerCooldown:'🔮',seerDelay:'🔮',noisyDuration:'🔊',noisyChance:'🔊',noisyMax:'🔊',noisyImpostorVisible:'🔊',judgeChance:'⚖️',judgeMax:'⚖️',judgeTaskPct:'⚖️',lazyChance:'🍕',lazyMax:'🍕',lazySlowdown:'🍕',lazyTasks:'🍕',engVentDuration:'🔧',engChance:'🔧',engMax:'🔧',engCooldown:'🔧',marionCooldown:'✋',marionDuration:'✋',marionChance:'✋',marionMax:'✋',hunterChance:'🎯',hunterMax:'🎯',hunterTargetCooldown:'🎯'};
+const ROOM_CFG_ICONS={minerCooldown:'⛏️',minerChance:'⛏️',minerMax:'⛏️',minerHoles:'⛏️',morphChance:'🎭',morphMax:'🎭',morphCooldown:'🎭',morphDuration:'🎭',locMax:'🧭',locChance:'🧭',locCooldown:'🧭',locDuration:'🧭',sheriffCooldown:'🔫',sheriffChance:'🔫',sheriffMax:'🔫',delayedChance:'⏱️',delayedMax:'⏱️',delayedDuration:'⏱️',obsChance:'👀',obsMax:'👀',instructorChance:'↔️',instructorMax:'↔️',instructorCooldown:'↔️',instructorMaxDistance:'↔️',guardianCooldown:'🪽',guardianDuration:'🪽',guardianChance:'🪽',guardianMax:'🪽',guardianImpostorVisible:'🪽',cleanerChance:'🧹',cleanerMax:'🧹',cleanerCooldown:'🧹',parasiteChance:'🦠',parasiteMax:'🦠',spectralChance:'👻',spectralMax:'👻',spectralCooldown:'👻',spectralDuration:'👻',paramedicChance:'⛑️',paramedicMax:'⛑️',paramedicCooldown:'⛑️',paramedicTasksPerUse:'⛑️',paramedicMaxUses:'⛑️',seerChance:'🔮',seerMax:'🔮',seerCooldown:'🔮',seerDelay:'🔮',noisyDuration:'🔊',noisyChance:'🔊',noisyMax:'🔊',noisyImpostorVisible:'🔊',judgeChance:'👨‍⚖️',judgeMax:'👨‍⚖️',judgeTaskPct:'👨‍⚖️',lazyChance:'🍕',lazyMax:'🍕',lazySlowdown:'🍕',lazyTasks:'🍕',engVentDuration:'🔧',engChance:'🔧',engMax:'🔧',engCooldown:'🔧',marionCooldown:'✋',marionDuration:'✋',marionChance:'✋',marionMax:'✋',hunterChance:'🎯',hunterMax:'🎯',hunterTargetCooldown:'🎯'};
 const ROOM_CFG_NOTICE_TIMERS=new Map();
 function roomCfgDisplayValue(key,value){if(cfgValueIsInfinite(key,value))return '∞';if(key==='speed')return (Number(value)/120).toFixed(1)+'x';if(key==='lazySlowdown')return (Number(value)/10).toFixed(1)+'x';if(key==='noisyImpostorVisible')return Number(value)?'Sim':'Não';if(key==='actionDistance')return ACTION_DISTANCE_LABELS[clamp(Number(value)||0,0,2)];const meta=ROOM_CFG_LABELS[key];return String(value)+(meta?.unit?meta.unit:'')}
 function netAnnounceConfigChange(key,value){if(!NET.inRoom||!NET.isHost||NET.room?.status!=='lobby')return;const meta=ROOM_CFG_LABELS[key]||{label:key};const icon=ROOM_CFG_ICONS[key]||'⚙️';const text=`${icon} ${meta.label} → ${roomCfgDisplayValue(key,value)}`;clearTimeout(ROOM_CFG_NOTICE_TIMERS.get(key));ROOM_CFG_NOTICE_TIMERS.set(key,setTimeout(()=>{ROOM_CFG_NOTICE_TIMERS.delete(key);netSend({type:'room_config_notice',text})},120));}
@@ -6638,16 +6843,16 @@ function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=
 function netCaptureSnapshot(){if(G.player){G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses}
   const st=(G.state==='task'||G.state==='tool')?'playing':G.state;
   if(G.player){G.player.netKillCd=G.killCd;G.player.netDelayedCd=G.delayedCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
-  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,teleportSeq:c.teleportSeq||0,killDash:c.killDash?{...c.killDash}:null,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0,parasiteReady:c.parasiteReady!==false,parasiteCd:c.parasiteCd||0,parasiteTargetId:c.parasiteTargetId||null,cleanCd:c.cleanCd||0,cleanUses:c.cleanUses||0,cleanPending:c.cleanPending?{...c.cleanPending}:null,paramedicCd:c.paramedicCd||0,paramedicSpent:c.paramedicSpent||0,paramedicUses:c.paramedicUses||0,paramedicTaskBase:c.paramedicTaskBase||0,seerCd:c.seerCd||0,seerPending:c.seerPending?{...c.seerPending}:null,revivedOnce:!!c.revivedOnce,noisyTriggered:!!c.noisyTriggered,judgeUsed:!!c.judgeUsed,judgeTargetId:c.judgeTargetId||null,lazyNormalSteps:c.lazyNormalSteps||0,lazyDone:!!c.lazyDone,spectralInvisible:!!c.spectralInvisible,spectralTime:c.spectralTime||0,spectralEndsAt:c.spectralEndsAt||0,spectralSeq:c.spectralSeq||0,spectralCd:c.spectralCd||0,spectralTransition:c.spectralTransition?{...c.spectralTransition}:null,guardian:!!c.guardian,guardianCd:c.guardianCd||0,guardianTargetId:c.guardianTargetId||null,hunterTargetId:c.hunterTargetId||null,hunterTargetCd:c.hunterTargetCd||0,instructor:!!c.instructor,instructorCd:c.instructorCd||0,instructorTargetId:c.instructorTargetId||null,cosmetics:cloneCosmetics(c.cosmetics)}));
+  const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,teleportSeq:c.teleportSeq||0,killDash:c.killDash?{...c.killDash}:null,minerCd:c.minerCd||0,minerDig:c.minerDig?{...c.minerDig}:null,morphAppearance:c.morphAppearance?{...c.morphAppearance,cosmetics:cloneCosmetics(c.morphAppearance.cosmetics)}:null,morphTransition:c.morphTransition?{...c.morphTransition}:null,morphTime:c.morphTime||0,morphCd:c.morphCd||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0,parasiteReady:c.parasiteReady!==false,parasiteCd:c.parasiteCd||0,parasiteTargetId:c.parasiteTargetId||null,cleanCd:c.cleanCd||0,cleanUses:c.cleanUses||0,cleanPending:c.cleanPending?{...c.cleanPending}:null,paramedicCd:c.paramedicCd||0,paramedicSpent:c.paramedicSpent||0,paramedicUses:c.paramedicUses||0,paramedicTaskBase:c.paramedicTaskBase||0,seerCd:c.seerCd||0,seerPending:c.seerPending?{...c.seerPending}:null,revivedOnce:!!c.revivedOnce,noisyTriggered:!!c.noisyTriggered,judgeUsed:!!c.judgeUsed,judgeTargetId:c.judgeTargetId||null,lazyNormalSteps:c.lazyNormalSteps||0,lazyDone:!!c.lazyDone,spectralInvisible:!!c.spectralInvisible,spectralTime:c.spectralTime||0,spectralEndsAt:c.spectralEndsAt||0,spectralSeq:c.spectralSeq||0,spectralCd:c.spectralCd||0,spectralTransition:c.spectralTransition?{...c.spectralTransition}:null,guardian:!!c.guardian,guardianCd:c.guardianCd||0,guardianTargetId:c.guardianTargetId||null,hunterTargetId:c.hunterTargetId||null,hunterTargetCd:c.hunterTargetCd||0,instructor:!!c.instructor,instructorCd:c.instructorCd||0,instructorTargetId:c.instructorTargetId||null,cosmetics:cloneCosmetics(c.cosmetics)}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,lazy:!!t.lazy,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
   const bodies=G.bodies.map(b=>({id:b.id,victimId:b.victimId??b.id,name:b.name,color:b.color,cosmetics:cloneCosmetics(b.cosmetics),x:b.x,y:b.y,room:b.room,tKill:b.tKill,face:b.face||1,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null,killerTrace:Array.isArray(b.killerTrace)?b.killerTrace.map(f=>({...f})):[]}));
   const deadPets=(G.deadPets||[]).map(p=>({id:p.id,ownerId:p.ownerId,pet:p.pet,x:p.x,y:p.y,face:p.face||1,phase:p.phase||0,sad:true}));
   const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chat:(G.M.chat||[]).map(m=>({fromId:m.fromId,text:m.text})),chatCount:$('meetChat').children.length,botNextChatAt:G.M.nextBotChatAt||0,voteSoundCount:G.M.voteSoundCount||0,judge:G.M.judge?{...G.M.judge}:null}:null;
-  return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,deadPets,killSplashes:(G.killSplashes||[]).map(s=>({...s})),spectralSmokes:(G.spectralSmokes||[]).map(f=>({...f})),noisyAlerts:(G.noisyAlerts||[]).filter(a=>G.gt<(a.until||0)).map(a=>({...a})),guardianProtections:{...(G.guardianProtections||{})},guardianBreakFx:(G.guardianBreakFx||[]).map(f=>({...f})),instructorTrails:(G.instructorTrails||[]).map(t=>({id:t.id,ownerId:t.ownerId,targetId:t.targetId,points:(t.points||[]).map(p=>({x:p.x,y:p.y})),t:t.t,max:t.max})),delayedMarks:{...G.delayedMarks},parasiteInfections:{...(G.parasiteInfections||{})},parasiteWinnerId:G.parasiteWinnerId||null,seerReplays:Object.fromEntries((G.chars||[]).filter(c=>c.seerReplay&&G.gt<(c.seerReplay.until||0)).map(c=>[c.id,{...c.seerReplay,trace:(c.seerReplay.trace||[]).map(f=>({...f}))}])),sab:{...G.sab},doors:doors.map(d=>!!d.closed),decon:{...(G.decon||{})},cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,observer:G.observer,cleaner:G.cleaner,parasite:G.parasite,paramedic:G.paramedic,seer:G.seer,noisy:G.noisy,judge:G.judge,lazy:G.player?.function==='lazy',selfParamedicCd:G.player?.paramedicCd||0,selfParamedicSpent:G.player?.paramedicSpent||0,selfSeerCd:G.player?.seerCd||0,selfSeerReplay:G.seerReplay?{...G.seerReplay,trace:(G.seerReplay.trace||[]).map(f=>({...f}))}:null,selfParasiteReady:G.player?.parasiteReady!==false,selfGuardian:!!G.player?.guardian,selfGuardianTargetId:G.player?.guardianTargetId||null,selfInstructor:!!G.player?.instructor,selfInstructorCd:G.player?.instructorCd||0,selfInstructorTargetId:G.player?.instructorTargetId||null,selfCleanerCd:G.cleanerCd,selfCleanerUses:G.cleanerUses,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
+  return {seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,deadPets,minerHoles:(G.minerHoles||[]).map(h=>({...h})),killSplashes:(G.killSplashes||[]).map(s=>({...s})),spectralSmokes:(G.spectralSmokes||[]).map(f=>({...f})),noisyAlerts:(G.noisyAlerts||[]).filter(a=>G.gt<(a.until||0)).map(a=>({...a})),guardianProtections:{...(G.guardianProtections||{})},guardianBreakFx:(G.guardianBreakFx||[]).map(f=>({...f})),instructorTrails:(G.instructorTrails||[]).map(t=>({id:t.id,ownerId:t.ownerId,targetId:t.targetId,points:(t.points||[]).map(p=>({x:p.x,y:p.y})),t:t.t,max:t.max})),delayedMarks:{...G.delayedMarks},parasiteInfections:{...(G.parasiteInfections||{})},parasiteWinnerId:G.parasiteWinnerId||null,seerReplays:Object.fromEntries((G.chars||[]).filter(c=>c.seerReplay&&G.gt<(c.seerReplay.until||0)).map(c=>[c.id,{...c.seerReplay,trace:(c.seerReplay.trace||[]).map(f=>({...f}))}])),sab:{...G.sab},doors:doors.map(d=>!!d.closed),decon:{...(G.decon||{})},cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,observer:G.observer,cleaner:G.cleaner,parasite:G.parasite,paramedic:G.paramedic,seer:G.seer,noisy:G.noisy,judge:G.judge,lazy:G.player?.function==='lazy',selfParamedicCd:G.player?.paramedicCd||0,selfParamedicSpent:G.player?.paramedicSpent||0,selfSeerCd:G.player?.seerCd||0,selfSeerReplay:G.seerReplay?{...G.seerReplay,trace:(G.seerReplay.trace||[]).map(f=>({...f}))}:null,selfParasiteReady:G.player?.parasiteReady!==false,selfGuardian:!!G.player?.guardian,selfGuardianTargetId:G.player?.guardianTargetId||null,selfInstructor:!!G.player?.instructor,selfInstructorCd:G.player?.instructorCd||0,selfInstructorTargetId:G.player?.instructorTargetId||null,selfCleanerCd:G.cleanerCd,selfCleanerUses:G.cleanerUses,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
 }
 function netCaptureMotion(){
   const q=n=>Math.round((Number(n)||0)*10)/10;
-  return {seq:++NET.motionSeq,chars:G.chars.map(c=>({id:c.id,x:q(c.x),y:q(c.y),face:c.face<0?-1:1,walk:q(c.walk||0),moving:!!c.moving,teleportSeq:c.teleportSeq||0,killDash:c.killDash?{...c.killDash}:null,vent:c.vent||null,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,netInputAck:c.netInputAck||0}))};
+  return {seq:++NET.motionSeq,chars:G.chars.map(c=>({id:c.id,x:q(c.x),y:q(c.y),face:c.face<0?-1:1,walk:q(c.walk||0),moving:!!c.moving,minerCd:c.minerCd||0,minerDig:c.minerDig?{...c.minerDig}:null,teleportSeq:c.teleportSeq||0,killDash:c.killDash?{...c.killDash}:null,vent:c.vent||null,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,netInputAck:c.netInputAck||0}))};
 }
 function netReconcileOwnAuthoritative(p,targetX,targetY,ack=0,hard=false){
   if(!p||!Number.isFinite(targetX)||!Number.isFinite(targetY))return;
@@ -6673,8 +6878,8 @@ function netApplyMotion(m){
   const arrival=performance.now(),interval=NET.lastMotionAt>0?clamp((arrival-NET.lastMotionAt)/1000,.025,.09):.04;NET.lastMotionAt=arrival;
   const byId=new Map((G.chars||[]).map(c=>[c.id,c]));
   for(const record of m.chars){
-    let r=record;const c=byId.get(r.id);if(!c)continue;const teleportSeq=Number(r.teleportSeq)||0;if(teleportSeq<(c.teleportSeq||0))continue;const teleported=teleportSeq>(c.teleportSeq||0);c.teleportSeq=teleportSeq;const wasDashing=!!c.killDash;r=netPrepareKillDashRecord(c,r);c.killDash=r.killDash;if(c.killDash){c.face=r.face<0?-1:1;c.moving=true}
-    if((c.id===NET.id&&!r.controlTargetId&&!r.controlledBy)||r.controlledBy===NET.id){const ack=Math.max(0,Number(r.netInputAck)||0),tx=Number(r.x),ty=Number(r.y);if(Number.isFinite(tx)&&Number.isFinite(ty))netReconcileOwnAuthoritative(c,tx,ty,ack,teleported||wasDashing||!!c.killDash);else if(ack>NET.inputAck)NET.inputAck=ack;continue}
+    let r=record;const c=byId.get(r.id);if(!c)continue;const teleportSeq=Number(r.teleportSeq)||0;if(teleportSeq<(c.teleportSeq||0))continue;const teleported=teleportSeq>(c.teleportSeq||0);c.teleportSeq=teleportSeq;const wasDashing=!!c.killDash;r=netPrepareKillDashRecord(c,r);c.killDash=r.killDash;const minerWasDigging=!!c.minerDig;c.minerDig=r.minerDig?{...r.minerDig}:null;c.minerCd=r.minerCd||0;if(c.killDash){c.face=r.face<0?-1:1;c.moving=true}
+    if((c.id===NET.id&&!r.controlTargetId&&!r.controlledBy)||r.controlledBy===NET.id){const ack=Math.max(0,Number(r.netInputAck)||0),tx=Number(r.x),ty=Number(r.y);if(Number.isFinite(tx)&&Number.isFinite(ty))netReconcileOwnAuthoritative(c,tx,ty,ack,teleported||wasDashing||!!c.killDash||minerWasDigging||!!c.minerDig);else if(ack>NET.inputAck)NET.inputAck=ack;continue}
     const targetX=Number(r.x),targetY=Number(r.y);if(!Number.isFinite(targetX)||!Number.isFinite(targetY))continue;
     const fromX=Number.isFinite(c.netVisualX)?c.netVisualX:c.x,fromY=Number.isFinite(c.netVisualY)?c.netVisualY:c.y;
     const fromWalk=Number.isFinite(c.netVisualWalk)?c.netVisualWalk:(c.walk||0),fromMoving=typeof c.netVisualMoving==='boolean'?c.netVisualMoving:!!c.moving;
@@ -6697,6 +6902,7 @@ function netApplySnapshot(s,force=false){
   try{
     const oldState=G.state, prevPlayer=G.player, wasAlive=prevPlayer?prevPlayer.alive:true;
     const arrival=performance.now();
+    G.minerHoles=Array.isArray(s.minerHoles)?s.minerHoles.map(h=>({...h})):[];
     const clientSnapshot=!force&&NET.inRoom&&!NET.isHost;
     const snapshotDuration=NET.lastSnapshotAt>0?clamp((arrival-NET.lastSnapshotAt)/1000,.05,.25):.15;
     if(clientSnapshot){NET.snapshotBlendDuration=snapshotDuration;NET.lastSnapshotAt=arrival}
@@ -6706,7 +6912,7 @@ function netApplySnapshot(s,force=false){
       let r=record;
       let c=oldChars.get(r.id);const hadOld=!!c;if(!c)c=newChar(r.name,r.color,0,0,r.id===NET.id);
       const teleported=(Number(r.teleportSeq)||0)>(c.teleportSeq||0);if((Number(r.teleportSeq)||0)<(c.teleportSeq||0))r={...r,x:c.x,y:c.y,teleportSeq:c.teleportSeq,killDash:c.killDash};
-      const wasDashing=!!c.killDash;r=netPrepareKillDashRecord(c,r);
+      const wasDashing=!!c.killDash,minerWasDigging=!!c.minerDig;r=netPrepareKillDashRecord(c,r);
       const oldX=+c.x,oldY=+c.y,oldWalk=+c.walk,oldMoving=!!c.moving,oldAlive=!!c.alive,oldGhost=!!c.ghost,oldVent=c.vent||null;
       const oldControlTargetId=c.controlTargetId||null,oldControlledBy=c.controlledBy||null;
       const oldVisualX=Number.isFinite(+c.netVisualX)?+c.netVisualX:oldX,oldVisualY=Number.isFinite(+c.netVisualY)?+c.netVisualY:oldY;
@@ -6719,7 +6925,7 @@ function netApplySnapshot(s,force=false){
       // Mantemos a posição prevista localmente e acumulamos apenas a diferença que realmente precisa ser reconciliada.
       if(ownPredicted){
         const relationSame=oldControlTargetId===(r.controlTargetId||null)&&oldControlledBy===(r.controlledBy||null);
-        const hardStateChanged=teleported||wasDashing||!!r.killDash||oldAlive!==!!r.alive||oldGhost!==!!r.ghost||oldVent!==(r.vent||null)||!relationSame;
+        const hardStateChanged=teleported||wasDashing||!!r.killDash||minerWasDigging||!!r.minerDig||oldAlive!==!!r.alive||oldGhost!==!!r.ghost||oldVent!==(r.vent||null)||!relationSame;
         const ack=Math.max(0,Number(r.netInputAck)||0);
         c.x=predictedX;c.y=predictedY;c.walk=predictedWalk;c.moving=predictedMoving;c.face=predictedFace;
         netReconcileOwnAuthoritative(c,targetX,targetY,ack,hardStateChanged);if(r.killDash){c.face=r.face<0?-1:1;c.moving=true}
@@ -6823,7 +7029,10 @@ function netHostCommand(m){
   const activePlay=['playing','task','tool'].includes(G.state);
   if(command==='input'){const inputSeq=Math.max(0,Math.floor(Number(m.inputSeq)||0));NET.remoteInputs.set(ch.id,{x:clamp(+m.x||0,-1,1),y:clamp(+m.y||0,-1,1),at:Date.now(),seq:inputSeq});ch.netInputAck=Math.max(ch.netInputAck||0,inputSeq);return}
   if(ch.controlledBy&&command!=='control_release')return;
-  if(ch.killDash&&command!=='control_release')return;
+  if((ch.killDash||ch.morphTransition||ch.minerDig)&&command!=='control_release')return;
+  if(command==='mine_dig'){if(activePlay)beginMinerDig(ch);return}
+  if(command==='mine_enter'){if(activePlay)minerEnter(ch,m.ventId);return}
+  if(command==='morph'){if(activePlay)beginMorph(ch,m.targetId?charById(m.targetId):null);return}
   if(command==='decon_button'){
     const st=stationById[String(m.stationId||'')];if(activePlay&&ch.alive&&st?.kind==='decon'&&stationDist(st,ch)<=actionDistancePx('object'))useDeconButton(ch,st);
   }else if(command==='control'){const target=G.chars.find(c=>c.id===m.targetId);if(activePlay&&ch.alive&&ch.role==='imp'&&ch.function==='marionette'&&!ch.vent&&(ch.controlCd||0)<=0)startControl(ch,target)}
@@ -6907,7 +7116,7 @@ function netWithRemotePlayer(ch,fn){
   }
 }
 function moveRemoteWithInput(target,inp,dt,canMove){
-  if(target.killDash)return false;
+  if(target.killDash||target.morphTransition||target.minerDig)return false;
   const ix=Number.isFinite(+inp.x)?+inp.x:0,iy=Number.isFinite(+inp.y)?+inp.y:0,mag=Math.hypot(ix,iy);
   // Jogadores mortos continuam controláveis quando já viraram fantasmas. Antes, o host
   // bloqueava todo personagem com alive=false e por isso ignorava o joystick dos mortos online.
