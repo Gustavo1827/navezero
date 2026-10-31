@@ -60,6 +60,19 @@ test('Observador amplia somente a detecção de jogadores no mapa completo', () 
   assert.match(html,/drawMapView\(mapc,512,368,true,false,true,true\)/);
   assert.doesNotMatch(html,/function drawObserverMap|observer-map-lock/);
   assert.match(server,/s\.observer=recipient\.function==='observer'/);
+  const detection=html.match(/function mapCanDetectPlayer\(viewer,target\)\{[\s\S]*?\n\}/)[0];
+  const vm=require('node:vm');let blocked=false;
+  const context={roleAbilityBlockedByComms:()=>blocked,observerMapRange:()=>480};
+  vm.runInNewContext(detection,context);
+  const viewer={alive:true,role:'crew',function:null,x:0,y:0},target={alive:true,x:100,y:0};
+  for(const fn of [null,...Object.keys(languages.strings['pt-BR']).filter(k=>k.startsWith('settings.roleDetails.')).map(k=>k.split('.').at(-1))]){
+    viewer.function=fn;assert.equal(context.mapCanDetectPlayer(viewer,target),fn==='observer',String(fn));
+  }
+  viewer.function='observer';viewer.role='imp';assert.equal(context.mapCanDetectPlayer(viewer,target),false);
+  viewer.role='crew';target.x=481;assert.equal(context.mapCanDetectPlayer(viewer,target),false);
+  viewer.x=100;assert.equal(context.mapCanDetectPlayer(viewer,target),true);
+  blocked=true;assert.equal(context.mapCanDetectPlayer(viewer,target),false);
+
 });
 
 test('disparo do Xerife é validado pelo host e respeita alcance, linha de visão e cooldown', () => {
@@ -236,7 +249,7 @@ test('Faxineiro tem configuração, atribuição, limpeza autoritativa e memóri
   assert.doesNotMatch(server, /cleanerUses:\[/);
   assert.match(html, /id="btnCleanerSection"[^>]*>🧹 Faxineiro/);
   assert.match(html, /id="btnCleaner"[^>]*>🧹/);
-  assert.equal(languages.strings['pt-BR']['role.desc.cleaner'],'Faxineiro — Limpe corpos em 2 segundos. Usos ilimitados, com recarga entre limpezas.');
+  assert.equal(languages.strings['pt-BR']['role.desc.cleaner'],'Faxineiro - Limpe corpos e suma com as evidências.');
   assert.match(html, /const cleanerEnabled|CFG\.cleanerChance>0&&CFG\.cleanerMax>0/);
   assert.match(html, /function cleanBody\(cleaner,body\)[\s\S]*?cleaner\.cleanPending=\{bodyId:body\.id,remaining:ROLE_FIXED\.cleanerDuration,readyAt:G\.gt\+ROLE_FIXED\.cleanerDuration\}/);
   assert.match(html, /function finishCleanBody\(cleaner,body\)[\s\S]*?G\.bodies=G\.bodies\.filter\(b=>b!==body\)/);
@@ -515,7 +528,7 @@ test('Paramédico libera usos por tarefas, revive uma única vez e sincroniza o 
     assert.match(html, new RegExp(key+':\\['));
     assert.match(server, new RegExp(key+':\\['));
   }
-  assert.equal(languages.strings['pt-BR']['role.desc.paramedic'],'Paramédico — Complete tarefas para receber um conjunto de usos de Reviver. Gaste todos antes de obter outro conjunto.');
+  assert.equal(languages.strings['pt-BR']['role.desc.paramedic'],'Paramédico - Reviva Tripulantes por meio de seus corpos.');
   assert.match(html, /paramedicEligible=shuffle\(G\.chars\.filter\(c=>c\.role==='crew'&&!c\.function\)\)/);
   assert.match(html, /done-ch\.paramedicTaskBase>=CFG\.paramedicTasksPerUse/);
   assert.match(html, /function paramedicAvailableUses\(ch\)\{return syncParamedicUses\(ch\)\}/, 'cada jogador deve manter um conjunto, sem acumular novos usos');
@@ -616,7 +629,7 @@ test('Chat Rápido contém as novas frases e reutiliza seletores de salas e joga
 
 test('Preguiçoso é Tripulante vivo com tarefas reduzidas e peso normal na barra', () => {
   assert.match(html, /id="btnLazySection"[^>]*>🍕 Preguiçoso/);
-  assert.equal(languages.strings['pt-BR']['role.desc.lazy'],'Preguiçoso — Faça suas poucas tarefas. Você anda mais devagar até concluí-las e volta à velocidade normal depois.');
+  assert.equal(languages.strings['pt-BR']['role.desc.lazy'],'Preguiçoso - Suas tarefas são fáceis, complete elas e ajude a Tripulação.');
   for (const key of ['lazyChance','lazyMax','lazySlowdown','lazyTasks']) {
     assert.match(html,new RegExp(key+':\\['));
     assert.match(server,new RegExp(key+':\\['));

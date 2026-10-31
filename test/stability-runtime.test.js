@@ -26,10 +26,34 @@ test('sabotage panel builds four working actions and respects cooldown',()=>{
  nodes.mbody.children=[];G.sab.cd=5;open();assert.ok(nodes.mbody.children[0].children.every(b=>b.disabled));
 });
 test('stale vent panels recover and invalid vent routes are refused',()=>{
- const panel={hidden:false};const player={vent:'removed',ventAnim:{kind:'in'}};let recovered=false;
- run('refreshVentPanel',{G:{player},$:()=>panel,ventById:{},VENT_ADJ:{},exitVent:p=>{recovered=true;p.vent=null}})();
+ const panel={hidden:false,classList:{toggle(){}}};const player={vent:'removed',ventAnim:{kind:'in'}};let recovered=false;
+ run('refreshVentPanel',{isMinerHoleId:()=>false,G:{player},$:()=>panel,ventById:{},VENT_ADJ:{},exitVent:p=>{recovered=true;p.vent=null}})();
  assert.equal(recovered,true);assert.equal(player.ventAnim,null);assert.equal(player.vent,null);
  run('refreshVentPanel',{G:{player},$:()=>panel})();assert.equal(panel.hidden,true);
- const move=run('ventMove',{ventById:{destination:{}},VENT_ADJ:{}});
+ const move=run('ventMove',{isMinerHoleId:()=>false,ventById:{destination:{}},VENT_ADJ:{}});
  assert.equal(move({vent:'removed',ventMv:0},'destination'),false);
+});
+
+function minerHarness(){
+ const actor={id:'owner',alive:true,role:'imp',function:'miner',x:0,y:0},other={id:'other',alive:true,role:'imp',function:'miner',x:0,y:0};
+ const G={state:'playing',over:false,chars:[actor,other],gt:0,minerHoles:[]},CFG={minerHoles:5,minerCooldown:5};
+ const context={G,CFG,NET:{inRoom:false},OFF_Y:6,roomAtPx:()=>({id:'room'}),boxBlocked:()=>false,dist:(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),actionDistancePx:()=>100,nearestWalkablePosition:(x,y)=>({x,y})};
+ const start=html.indexOf('function isMinerHoleId('),end=html.indexOf('\nfunction morphLook(',start);
+ vm.runInNewContext(html.slice(start,end),context);return {context,G,CFG,actor,other};
+}
+test('Minerador conclui escavação em 1 segundo e respeita limite ou infinito',()=>{
+ const {context:c,G,CFG,actor}=minerHarness();
+ assert.equal(c.beginMinerDig(actor),true);c.updateMinerDigs(.5);assert.equal(G.minerHoles.length,0);c.updateMinerDigs(.5);assert.equal(G.minerHoles.length,1);assert.equal(actor.minerDig,null);assert.equal(actor.minerCd,5);assert.equal(c.beginMinerDig(actor),false);
+ for(let i=1;i<5;i++){actor.x=i*60;c.updateMinerDigs(5);assert.equal(c.beginMinerDig(actor),true);c.updateMinerDigs(1)}
+ actor.x=360;assert.equal(c.beginMinerDig(actor),false);assert.equal(G.minerHoles.length,5);
+ CFG.minerHoles=16;c.updateMinerDigs(5);assert.equal(c.beginMinerDig(actor),true);c.updateMinerDigs(1);assert.equal(G.minerHoles.length,6);
+});
+test('Minerador recusa buracos alheios e conexões com dutos normais',()=>{
+ const {context:c,G,actor,other}=minerHarness();c.beginMinerDig(actor);c.updateMinerDigs(1);const first=G.minerHoles[0];
+ assert.equal(c.minerEnter(other,first.id),false);assert.equal(c.minerEnter(actor,first.id),true);actor.ventAnim=null;
+ assert.equal(c.minerTravel(actor,first.id),false);assert.equal(c.minerTravel(actor,'v_cafe'),false);c.minerExit(actor);actor.ventAnim=null;actor.ventCd=0;
+ actor.x=60;c.updateMinerDigs(5);c.beginMinerDig(actor);c.updateMinerDigs(1);other.x=120;c.beginMinerDig(other);c.updateMinerDigs(1);actor.x=first.x;
+ assert.equal(c.minerEnter(actor,first.id),true);actor.ventAnim=null;
+ assert.equal(c.minerTravel(actor,G.minerHoles[2].id),false);assert.equal(c.minerTravel(actor,G.minerHoles[1].id),true);assert.equal(actor.x,60);
+ const count=G.minerHoles.length;G.M={};c.updateMinerDigs(0);assert.equal(actor.vent,null);assert.equal(G.minerHoles.length,count);
 });

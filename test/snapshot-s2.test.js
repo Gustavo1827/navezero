@@ -10,8 +10,8 @@ function onceMessage(client,predicate,timeout=2600){return new Promise((resolve,
 async function connect(url,name='Host'){const ws=new WebSocket(url),client={ws,messages:[]};ws.addEventListener('message',e=>{try{client.messages.push(JSON.parse(e.data))}catch{}});await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true})});ws.send(JSON.stringify({type:'hello',name,color:'azul'}));const welcome=await onceMessage(client,m=>m.type==='welcome');client.id=welcome.id;return client}
 async function closeClient(c){try{c?.ws?.close()}catch{}await new Promise(r=>setTimeout(r,25))}
 
-test('0.4b-s3 inclui streamer mode, idiomas e prévia de sala com estrutura de localização',()=>{
-  assert.match(html,/Versão 0\.4b-s3/);
+test('0.4b-s4 inclui streamer mode, idiomas e prévia de sala com estrutura de localização',()=>{
+  assert.match(html,/Versão 0\.4b-s4/);
   assert.match(html,/id="streamerModeIn"/);assert.match(html,/Modo para Streamers/);assert.match(html,/maskedRoomCode/);assert.match(html,/navigator\.clipboard\.writeText\(code\)/);
   for(const label of ['Português (Brasil)','Português (Portugal)','Español','English','Русский','日本語'])assert.ok(html.includes(label),`idioma ausente: ${label}`);
   assert.match(html,/let I18N=/);assert.match(html,/function t\(key,vars=\{\}\)/);assert.match(html,/languages\.json/);assert.match(html,/navezero_user_preferences_v1/);
