@@ -1,0 +1,11 @@
+.modeChoices{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.modeChoices .chip[aria-pressed="true"]{border-color:var(--amber);color:var(--amber);background:#30260f}
+#hnsStatus{position:fixed;z-index:22;top:calc(8px + var(--st));left:50%;transform:translateX(-50%);max-width:44vw;padding:5px 12px;border:2px solid #8d344c;border-radius:14px;background:rgba(20,9,30,.9);text-align:center;pointer-events:none;font-size:15px;line-height:1.2;color:#fff}#hnsStatus b{display:block;font-size:24px;color:#ffc233}#hnsStatus.final{border-color:#ff5368;box-shadow:0 0 14px #b5153b}
+#hnsBlind{position:fixed;inset:0;z-index:125;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff}#hnsBlind h2{color:#ff5468;font-size:32px}#hnsBlind p{font-size:24px}#hnsVignette{position:fixed;inset:0;z-index:21;pointer-events:none;box-shadow:inset 0 0 90px 25px #ff1839;opacity:0}
+#barFill.hnsFinal{background:repeating-linear-gradient(115deg,#ff5468 0 12px,#bf3454 12px 24px)}
+
+#btnEngineerVent.hnsHide{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}#btnEngineerVent.hnsHide .abilityIcon{font-size:19px;line-height:21px}#btnEngineerVent.hnsHide .abilityCaption{max-width:100%;font-size:10px;line-height:1.05;overflow-wrap:anywhere}#btnEngineerVent.hnsHide .hnsVentInfo{font-size:10px;line-height:11px;color:inherit}
+
+#hnsCrewCount{display:flex;align-items:center;gap:5px;pointer-events:none;max-width:100%;white-space:nowrap}#hnsCrewCount canvas{width:20px;height:24px;flex:none}
+#btnEngineerVent.hnsHide.cooldown-label{display:block}
+
+#role.hnsReveal #roleTitle{color:var(--coral);text-shadow:0 4px 0 #7a1b2a}
