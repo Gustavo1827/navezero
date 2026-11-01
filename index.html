@@ -323,10 +323,11 @@ body.touch #stick{display:block}
 #meetStatus{text-align:center;min-height:22px;margin:4px 0 6px;font-weight:700;color:var(--ink2)}
 #meetFoot{display:flex;justify-content:center}
 #role{position:fixed;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:rgba(4,5,18,.82);padding:14px;text-align:center}
-#role .card{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+#role .card{animation:pop .5s cubic-bezier(.2,1.4,.4,1);max-height:100%;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
 #roleTitle{margin:0;font-size:clamp(34px,8vw,50px);font-weight:800;line-height:1.05}
 #role.crew #roleTitle{color:var(--mint);text-shadow:0 4px 0 #0d6e4c}
 #role.imp #roleTitle{color:var(--coral);text-shadow:0 4px 0 #7a1b2a}
+#roleDetails{margin:0 0 16px;color:var(--ink2);font-size:17px;line-height:1.35}
 #roleMsg{margin:10px 0 16px;color:var(--ink2);font-size:17px;line-height:1.35}
 #roleCv{width:160px;height:120px;display:block;margin:0 auto}
 @media (max-width:560px){#meetGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.act2{width:68px;height:68px;font-size:14px}}
@@ -450,8 +451,6 @@ body.touch #stick{display:block}
 .mpWaitInner{padding:24px;animation:mpPulse 1.3s ease-in-out infinite}
 #mpWaitCount{font-size:clamp(76px,18vw,150px);line-height:1;font-weight:900;color:#fff;text-shadow:0 0 28px rgba(110,185,255,.45)}
 #mpWaitTitle{font-size:clamp(22px,5vw,36px);font-weight:800;margin-top:14px}
-#mpWaitOverlay.starting #mpWaitTitle{font-size:clamp(16px,3.5vw,24px);font-weight:700;margin-top:8px}
-#mpWaitOverlay.starting #mpWaitCount{font-size:clamp(40px,10vw,76px)}
 #mpWaitDesc{color:#b9c5df;margin-top:8px}
 @keyframes mpPulse{50%{opacity:.76;transform:scale(.985)}}
 #btnSaveRoomConfig{display:block;margin:4px auto}
@@ -472,7 +471,7 @@ body.touch #stick{display:block}
 .publicRoomsCard{width:min(640px,96vw)}.publicRoomFilters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0;text-align:left}.publicRoomFilters label{display:grid;gap:5px;font-weight:800;min-width:0}.publicRoomFilters select{width:100%;min-width:0;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0d1230;color:var(--ink);font:700 14px var(--font)}.publicRoomList{display:grid;gap:7px;max-height:48vh;overflow:auto;margin:12px 0}.publicRoomRow{display:flex;align-items:center;gap:9px;width:100%;min-height:48px;padding:9px 12px;border:1px solid var(--line);border-radius:11px;background:#111744;color:var(--ink);font:700 13px var(--font);cursor:pointer;text-align:left}.publicRoomRow:hover{border-color:#80dcad}.publicRoomRow strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.publicRoomRow span{white-space:nowrap}.roomPrivacyLine{text-align:center;margin:-2px 0 10px}.roomPrivacyLine button{font-weight:900}.roomPrivacyLine button[data-privacy="public"]{border-color:#50c981;color:#8defad}.roomPrivacyLine button[data-privacy="private"]{border-color:#d46d75;color:#ffb7bd}@media(max-width:430px){.publicRoomFilters{grid-template-columns:1fr 1fr}.publicRoomFilters label:last-child{grid-column:1/-1}.publicRoomRow{font-size:12px;gap:7px;padding:9px}}
 .freeplayRoster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.freeplayPlayerButton{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:12px;min-height:146px;padding:14px!important;text-align:left;border:2px solid var(--crew-accent,var(--edge));border-radius:18px;background:linear-gradient(135deg,#151d43,#0c1230);color:var(--ink);width:100%}.freeplayPlayerButton:disabled{opacity:.45}.freeplayPlayerButton canvas{width:64px;height:76px}.freeplayPlayerInfo{display:grid;gap:5px;min-width:0}.freeplayPlayerName{font-size:20px;line-height:1.1;overflow-wrap:anywhere}.freeplayPlayerColor{font-size:12px;color:var(--ink2)}.freeplayPlayerState{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}.freeplayPlayerState b{border:1px solid currentColor;border-radius:12px;padding:1px 8px}.freeplayPlayerDetail{font-size:12px;color:#cbd5f4;line-height:1.35;white-space:pre-line}.emergencyCard{width:min(420px,94vw)}.emergencyConsole{margin:14px auto;width:126px;height:100px;display:grid;place-items:center;background:#19234b;border:3px solid #52659a;border-radius:22px;box-shadow:0 7px 0 #080c22;transform:perspective(300px) rotateX(12deg)}.emergencyConsole span{display:block;width:62px;height:58px;border:5px solid #642936;border-radius:50%;background:radial-gradient(circle at 34% 25%,#ff9f9f,#f74660 60%);box-shadow:0 8px 0 #8d2038}.emergencyCard button:disabled{filter:grayscale(1);opacity:.4;cursor:not-allowed;box-shadow:none}.emergencyRemaining{font-weight:800;font-size:20px}.ventRoute{position:absolute;width:140px;min-height:58px;display:grid;justify-items:center;gap:2px;padding:7px 10px;border:2px solid #6bded2;border-radius:15px;background:rgba(12,22,49,.95);color:#f0fcff;font:800 13px var(--font);box-shadow:0 4px 0 #050919;pointer-events:auto;transform:translate(-50%,-50%)}.ventRoute:disabled{opacity:.45;cursor:wait}.ventRouteArrow{font-size:30px;line-height:1;display:block;color:#79f2d1}.ventRouteLabel{text-align:center;line-height:1.1;overflow-wrap:anywhere}#ventPanel{position:fixed;inset:0!important;width:auto!important;max-width:none!important;height:auto!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;pointer-events:none;z-index:20}#ventList{position:absolute;inset:0;pointer-events:none}@media(max-width:600px){.freeplayRoster{grid-template-columns:1fr}.freeplayPlayerButton{min-height:124px}.ventRoute{width:116px;font-size:12px;min-height:55px}}
 </style>
-<link rel="stylesheet" href="assets/ui-shared.css?v=a5f1dcbd9a64b3bb">
+<link rel="stylesheet" href="assets/ui-shared.css?v=551c1ef04019adb6">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -702,6 +701,7 @@ body.touch #stick{display:block}
     <canvas id="roleCv" width="320" height="240"></canvas>
     <h2 id="roleTitle"></h2>
     <p id="roleMsg"></p>
+    <p id="roleDetails" hidden></p>
     <button class="big" id="btnRole">Começar</button><div id="roleCountdown" role="timer" aria-live="polite" hidden style="font-size:18px;font-weight:700"></div>
   </div>
 </div>
@@ -1043,7 +1043,7 @@ function applyGameLanguage(){
   const participants=document.querySelector('#roomLobby > .card > h3');if(participants)participants.textContent=t('lobby.participants');
   const options=document.querySelector('#hostRoomConfig h3');if(options)options.textContent=t('lobby.options');
   renderLanguageMenu();syncStreamerVisuals();localizeScopedUi();
-  if(G.player){for(const ch of G.chars)if(!ch.isPlayer&&!ch.isRemoteHuman&&(ch.ai||ch.isBot))bindBotColorName(ch);renderTasks();updateRolePanel(G.player);updateSabUI();updateButtons()}
+  if(G.player){for(const ch of G.chars)if(!ch.isPlayer&&!ch.isRemoteHuman&&(ch.ai||ch.isBot))bindBotColorName(ch);renderTasks();updateRolePanel(G.player);if(G.state==='role')updateRolePresentationDetails(G.player);updateSabUI();updateButtons()}
   syncAccountVisibilityLabels();refreshBotNameUi();
   if(!$('cosmeticsOverlay')?.hidden)renderCosmeticsCatalog();
   if(G.cfgOpen)buildCfgUI();
@@ -2219,6 +2219,8 @@ function useDeconButton(ch,st){
   if(ACTIVE_MAP_ID!=='nexus'||!ch?.alive||!st||st.kind!=='decon'||!['w','e'].includes(st.side)||stationDist(st,ch)>actionDistancePx('object'))return false;
   const D=G.decon||(G.decon={phase:'idle',until:0,exitSide:null,entrySide:null});
   if(!st.inside){
+    if(G.gt<(D.externalUntil||0))return false;
+    D.externalUntil=G.gt+.8;
     const occupied=G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c));
     if(D.phase==='idle'||st.side===D.entrySide||(!occupied&&!['ready','exit'].includes(D.phase))){
       D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+2.4;applyDeconDoors(D.entrySide);
@@ -2874,6 +2876,11 @@ function roleMessageForPlayer(p){
   const key=ROLE_I18N_KEYS[p.function];
   return key?t('role.desc.'+(p.function==='marionette'?'marionette':key)):(p.role==='imp'?t('role.defaultImpDesc'):t('role.defaultCrewDesc'));
 }
+function updateRolePresentationDetails(p){
+  const box=$('roleDetails'),key=p?.function?'settings.roleDetails.'+p.function:'';
+  box.textContent=key&&hasI18nKey(key)?t(key):'';box.hidden=!box.textContent;
+}
+
 function showLocalRoleReveal(resetTimer=false){
   const p=G.player;if(!p)return false;
   G.role=p.role||'crew';G.locator=p.function==='locator';G.observer=p.function==='observer';G.cleaner=p.function==='cleaner';G.parasite=p.function==='parasite';G.paramedic=p.function==='paramedic';G.seer=p.function==='seer';G.noisy=p.function==='noisy';G.judge=p.function==='judge';G.vision=G.visionTarget=(G.role==='imp'?CFG.impVision:CFG.crewVision);
@@ -2882,7 +2889,7 @@ function showLocalRoleReveal(resetTimer=false){
   updateRolePanel(p);
   $('role').className=G.role==='imp'?'imp':'crew';
   $('roleTitle').textContent=G.role==='imp'?t('role.revealImp'):t('role.revealCrew');
-  $('roleMsg').textContent=roleMessageForPlayer(p);$('roleMsg').hidden=false;$('role').hidden=false;
+  $('roleMsg').textContent=roleMessageForPlayer(p);$('roleMsg').hidden=false;updateRolePresentationDetails(p);$('role').hidden=false;
   if(resetTimer){G.roleT=NET.inRoom?6:9;G.roleDeadline=NET.inRoom&&NET.isHost?Date.now()+6000:null}G.state='role';updateRoleCountdown();
   return true;
 }
@@ -3256,25 +3263,15 @@ function toast(m,ms=2200){
    RENDER
    ===================================================================== */
 const cv=$('game'), ctx=cv.getContext('2d',{alpha:false}); let DPR=1, ZOOM=1, VW=1000, VH=640;
-let DPRMAX=Math.min(2,window.devicePixelRatio||1);   // teto de resolução; cai sozinho se o aparelho não acompanhar
 const fogCv=document.createElement('canvas'), fogC=fogCv.getContext('2d'), FOG_DIV=4;
 function resize(){
-  DPR=Math.min(DPRMAX,window.devicePixelRatio||1); const w=innerWidth,h=innerHeight;
+  DPR=Math.max(1,window.devicePixelRatio||1); const w=innerWidth,h=innerHeight;
   cv.width=Math.round(w*DPR); cv.height=Math.round(h*DPR);
   fogCv.width=Math.ceil(w/FOG_DIV); fogCv.height=Math.ceil(h/FOG_DIV);
   ZOOM=clamp(Math.min(w/1000,h/640),.62,1.5); VW=w/ZOOM; VH=h/ZOOM;
 }
 addEventListener('resize',resize);
-// resolução adaptativa: se a média de quadros passar de ~24 ms, reduz a resolução interna (o visual e a interface não mudam)
-const PERF={acc:0,n:0,cool:0};
-function perfWatch(ms){
-  if(ms>200)return;                       // ignora pausas (aba em segundo plano)
-  PERF.acc+=ms; PERF.n++; PERF.cool=Math.max(0,PERF.cool-ms);
-  if(PERF.n>=60){
-    const avg=PERF.acc/PERF.n; PERF.acc=0; PERF.n=0;
-    if(avg>26&&PERF.cool<=0&&DPRMAX>.75){DPRMAX=Math.max(.75,+(DPRMAX-.25).toFixed(2)); PERF.cool=1500; resize()}
-  }
-}
+// Preserve the display resolution; frame pacing must not reduce image quality.
 
 const DEATH_FALL_DURATION=.48;
 function bodyCleaningAlpha(body){
@@ -6322,7 +6319,7 @@ function updateButtons(){
   if(!bi.hidden){const it=charById(p.instructorTargetId||G.instructorTargetId),cd=p.instructorCd||G.instructorCd||0,nearby=!it&&!commsAbilityDown&&instructorSelectableTargets(p).length>0,lab=commsAbilityDown?'📡 Sem sinal':(cd>0?String(Math.ceil(cd)):(it&&it.alive?'Marcar ponto':'Trilhar'));bi.disabled=commsAbilityDown||cd>0||(!it&&!nearby);setCls(bi,'ready',!bi.disabled);if(bi._l!==lab){bi._l=lab;bi.innerHTML=lab==='Trilhar'?'↔️<small>Trilhar</small>':lab==='Marcar ponto'?'↔️<small>Marcar ponto</small>':lab}}
   if(!bg.hidden){const own=Object.values(G.guardianProtections||{}).find(pr=>String(pr.ownerId)===String(p.id)&&G.gt<Number(pr.until||0)),target=own&&charById(own.targetId),near=!commsAbilityDown&&guardianSelectableTargets(p).length>0,cd=p.guardianCd||0,lab=commsAbilityDown?'📡 Sem sinal':(own?String(Math.ceil(Math.max(0,Number(own.until)-G.gt)))+'s':(cd>0?String(Math.ceil(cd)):'Proteger'));bg.disabled=commsAbilityDown||!!own||cd>0||!near;setCls(bg,'ready',!bg.disabled);setCls(bg,'cooldown-label',commsAbilityDown||(!own&&cd>0));if(bg._l!==lab){bg._l=lab;if(lab==='📡 Sem sinal')bg.textContent=lab;else bg.innerHTML=lab==='Proteger'?'🪽<small>Proteger</small>':`🪽<small>${lab}</small>`}}
   for(const button of [bsh,bpa,bse,bl,be,bi,bg]){const blocked=(button===bpa?paramedicCommsDown:commsAbilityDown);button.classList.toggle('no-signal',blocked);if(blocked){const label=translateRuntimeText('📡 Sem sinal').replace(/^📡\s*/u,'');if(button.dataset.signalLabel!==label||!button.querySelector('.signalIcon')){button.replaceChildren(el('span','signalIcon','📡'),el('small','',label));button.dataset.signalLabel=label}}}
-  if(p.vent){setTxt(ub,t('common.exit'));ub.disabled=!!p.ventAnim;hv(ub,engineer);setCls(ub,'ready',!ub.disabled)}else{hv(ub,false);ub.disabled=G.action?.type==='vent'&&((p.ventCd||0)>0||!!p.ventAnim);setCls(ub,'ready',(!!G.action||(!p.alive&&G.state==='playing'))&&!ub.disabled);setTxt(ub,translateRuntimeText((p.alive||ghostActs())?'Usar':'Trocar'))}
+  if(p.vent){setTxt(ub,t('common.exit'));ub.disabled=!!p.ventAnim;hv(ub,engineer);setCls(ub,'ready',!ub.disabled)}else{hv(ub,false);ub.disabled=(G.action?.type==='vent'&&((p.ventCd||0)>0||!!p.ventAnim))||(G.action?.type==='decon'&&!G.action.station.inside&&G.gt<(G.decon?.externalUntil||0));setCls(ub,'ready',(!!G.action||(!p.alive&&G.state==='playing'))&&!ub.disabled);setTxt(ub,translateRuntimeText((p.alive||ghostActs())?'Usar':'Trocar'))}
   if(p.minerDig||p.morphTransition)[bk,bsh,bdel,bcl,bp,bspec,bpa,bse,bh,bi,bg,bs,br,bl,be,bc,ub].forEach(button=>{button.disabled=true;setCls(button,'ready',false)});updateMorphButton();updateMinerButton();
   if(p.killDash)[bk,bsh,bdel,bcl,bp,bspec,bpa,bse,bh,bi,bg,bs,br,bl,be,bc,ub].forEach(button=>{button.disabled=true;setCls(button,'ready',false)});
   if(p.controlledBy){[bk,bsh,bdel,bcl,bp,bspec,bpa,bse,bh,bi,bg,bs,br,bl,be,bc,ub,fb].forEach(e=>{if(e)hv(e,true)});$('ventPanel').hidden=true}
@@ -6371,7 +6368,6 @@ function drawRoleChar(dt){
 const FR={n:0};
 function frame(now){
   const raw=now-last, dt=Math.min(.05,raw/1000); last=now; G.t+=dt; G.dt=dt;
-  if(G.state==='playing'||G.state==='task'||G.state==='tool')perfWatch(raw);
   netHeartbeatStep();
   if(G.state==='menu'){drawPreview(dt)}
   else if(G.player){
@@ -7422,7 +7418,7 @@ window.addEventListener('beforeunload',()=>{if(ACCOUNT.authenticated&&!ACCOUNT.a
 netStartSnapshots();
 
 </script>
-<script src="assets/hide-seek.js?v=d044252b4c3cff48"></script>
+<script src="assets/hide-seek.js?v=9bbd82ae1c60e319"></script>
 <script src="assets/how-to-play.js?v=85fed6d5fb6d972d"></script>
 </body>
 </html>
