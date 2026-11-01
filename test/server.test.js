@@ -182,6 +182,11 @@ test('servidor publica o HTML e responde ao health check', async t=>{
   const base=`http://127.0.0.1:${app.server.address().port}`;
   const page=await fetch(base);assert.equal(page.status,200);
   const html=await page.text();assert.match(html,/Criar sala/i);assert.match(html,/Entrar na sala/i);
+  for(const [name,ext] of [['hide-seek','js'],['how-to-play','js'],['ui-shared','css']]){
+    const ref=html.match(new RegExp('assets/'+name+'\\.'+ext+'\\?v=([a-f0-9]+)'));assert.ok(ref,'o HTML precisa invalidar versões antigas de '+ext);
+    const asset=await fetch(base+'/'+ref[0]);assert.equal(asset.status,200);assert.equal(asset.headers.get('cache-control'),'no-cache');assert.match(asset.headers.get('content-type'),ext==='css'?/text\/css/:/javascript/);
+    const content=await asset.text(),hash=require('node:crypto').createHash('sha256').update(content).digest('hex');assert.ok(hash.startsWith(ref[1]),'a versão do endereço deve corresponder ao conteúdo de '+ext);
+  }
   const health=await fetch(base+'/health');assert.equal(health.status,200);assert.equal((await health.json()).ok,true);
 });
 
@@ -448,3 +453,25 @@ test('uma conta autenticada não ocupa duas vagas multiplayer ao mesmo tempo', a
   const joined=await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.some(p=>p.id===guest.id));
   assert.equal(joined.room.players.length,2,'jogadores sem conta continuam podendo entrar normalmente');
 });
+
+test('Esconde-Esconde isola descoberta, mantém configurações e bloqueia ações do Clássico',async t=>{
+ const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:5,loadingMs:5});await new Promise(r=>app.server.once('listening',r));const url=`ws://127.0.0.1:${app.server.address().port}`,all=[];
+ t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+ const host=await connect(url,'Host'),guest=await connect(url,'Guest','verde');all.push(host,guest);
+ send(host,{type:'create_room',mode:'esconde-esconde',region:'north-america',language:'en',size:6,bots:2,settings:{hnsKillerVision:1800,hnsCrewVision:2500,hnsAlertDuration:3,hnsAlertInterval:9,hnsStartDuration:100,hnsFinalDuration:80,hnsCrewSpeed:999,hnsKillerSpeed:-1,hnsKillerFinalSpeed:999,hnsVentUses:99,hnsVentDuration:99}});
+ const created=await onceMessage(host,m=>m.type==='room_state'),code=created.room.code;assert.equal(created.room.mode,'esconde-esconde');assert.equal(created.room.settings.hnsKillerVision,1200);assert.equal(created.room.settings.hnsCrewVision,900);assert.equal(created.room.settings.hnsAlertInterval,9);assert.equal(created.room.settings.hnsCrewSpeed,300);assert.equal(created.room.settings.hnsKillerSpeed,310);assert.equal(created.room.settings.hnsKillerFinalSpeed,500);assert.equal(created.room.settings.hnsVentUses,5);assert.equal(created.room.settings.hnsVentDuration,10);
+ send(host,{type:'set_room_privacy',privacy:'public'});await onceMessage(host,m=>m.type==='room_state'&&m.room.privacy==='public');
+ for(const [mode,expected] of [['classic',0],['esconde-esconde',1]]){send(guest,{type:'list_rooms',requestId:mode,mode,region:'north-america',language:'en'});const list=await onceMessage(guest,m=>m.type==='room_list'&&m.requestId===mode);assert.equal(list.rooms.length,expected);if(expected)assert.equal(list.rooms[0].mode,mode)}
+ send(guest,{type:'join_room',code});await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.length===2);send(host,{type:'start_game'});await onceMessage(host,m=>m.type==='game_start');await onceMessage(guest,m=>m.type==='game_start');host.messages=[];
+ send(guest,{type:'action',action:'sabotage',sabotage:'lights'});send(guest,{type:'action',action:'emergency'});send(guest,{type:'action',action:'vote',targetId:host.id});send(guest,{type:'action',action:'vent_enter',ventId:'test'});const allowed=await onceMessage(host,m=>m.type==='host_command');assert.equal(allowed.command,'vent_enter');assert.equal(host.messages.some(m=>m.type==='host_command'),false);
+ const snapshot={seq:1,state:'role',hns:{killerId:host.id,phase:'preparing',remaining:10},chars:[{id:host.id,role:'imp',function:null,alive:true},{id:guest.id,role:'crew',function:null,alive:true}],cfg:{},tasks:[],bodies:[]};send(host,{type:'state_snapshot',snapshot});const received=await onceMessage(guest,m=>m.type==='snapshot');assert.equal(received.snapshot.chars.find(c=>c.id===host.id).role,'imp','o Assassino é público neste modo');assert.equal(received.snapshot.hns.remaining,10);
+ send(host,{type:'state_snapshot',snapshot:{...snapshot,seq:2,state:'playing',hns:{...snapshot.hns,phase:'final'}}});await onceMessage(guest,m=>m.type==='snapshot'&&m.snapshot.seq===2);host.messages=[];send(guest,{type:'action',action:'task_complete',taskId:'late'});send(guest,{type:'input',x:0,y:0});const input=await onceMessage(host,m=>m.type==='host_command');assert.equal(input.command,'input','o servidor rejeita tarefas após o início do Esconderijo Final');
+ send(host,{type:'game_end',winner:'crew',reason:'Final Hide',snapshot:{...snapshot,state:'over',over:true,winner:'crew'}});await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='ended');send(host,{type:'rematch'});const rematch=await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='lobby');assert.equal(rematch.room.code,code);assert.equal(rematch.room.mode,'esconde-esconde');assert.equal(rematch.room.settings.hnsFinalDuration,80);
+});
+
+ test('visão e velocidade respeitam faixas por equipe e usam passos de 5',()=>{
+ const base=cleanSettings();assert.equal(base.speed,180);assert.equal(base.impVision,700);assert.equal(base.crewVision,520);
+ const capped=cleanSettings({speed:999,impVision:9999,crewVision:1});assert.equal(capped.speed,280);assert.equal(capped.impVision,1200);assert.equal(capped.crewVision,260);
+ const stepped=cleanSettings({speed:183,impVision:707,crewVision:518,hnsCrewSpeed:183,hnsKillerSpeed:333,hnsKillerFinalSpeed:427,hnsKillerVision:813,hnsCrewVision:1113});for(const key of ['speed','impVision','crewVision','hnsCrewSpeed','hnsKillerSpeed','hnsKillerFinalSpeed','hnsKillerVision','hnsCrewVision'])assert.equal(stepped[key]%5,0,key);
+ assert.ok(stepped.hnsKillerFinalSpeed>stepped.hnsKillerSpeed&&stepped.hnsKillerSpeed>stepped.hnsCrewSpeed);
+ });
