@@ -241,7 +241,7 @@ body.touch #stick{display:block}
 #cfgFunctionTabs .functionGroup{min-width:0;width:100%}#cfgFunctionTabs h3{margin:0 0 10px;font-size:17px;text-align:left;color:var(--mint)}#cfgFunctionTabs .impGroup h3{color:var(--coral)}
 #cfgFunctionTabs .crewGroup h3,.fnDescription.crew b{color:#bceeff}
 #cfgFunctionTabs .functionButtons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:8px}
-#cfgFunctionTabs button{width:100%;min-width:0;min-height:62px;height:100%;margin:0;padding:10px 7px;font-size:clamp(14px,3.6vw,18px);line-height:1.15;overflow-wrap:anywhere;box-sizing:border-box}
+#cfgFunctionTabs button{width:100%;min-width:0;min-height:62px;height:100%;margin:0;padding:10px 7px;font-size:1.08em;line-height:1.15;overflow-wrap:anywhere;box-sizing:border-box}
 @media(max-width:340px){#cfgFunctionTabs .functionButtons{grid-template-columns:1fr}}
 
 #cfgRows .fncompact .cfgtop .fnicon{font-size:1.3em;vertical-align:-1px}
@@ -450,6 +450,8 @@ body.touch #stick{display:block}
 .mpWaitInner{padding:24px;animation:mpPulse 1.3s ease-in-out infinite}
 #mpWaitCount{font-size:clamp(76px,18vw,150px);line-height:1;font-weight:900;color:#fff;text-shadow:0 0 28px rgba(110,185,255,.45)}
 #mpWaitTitle{font-size:clamp(22px,5vw,36px);font-weight:800;margin-top:14px}
+#mpWaitOverlay.starting #mpWaitTitle{font-size:clamp(16px,3.5vw,24px);font-weight:700;margin-top:8px}
+#mpWaitOverlay.starting #mpWaitCount{font-size:clamp(40px,10vw,76px)}
 #mpWaitDesc{color:#b9c5df;margin-top:8px}
 @keyframes mpPulse{50%{opacity:.76;transform:scale(.985)}}
 #btnSaveRoomConfig{display:block;margin:4px auto}
@@ -470,6 +472,7 @@ body.touch #stick{display:block}
 .publicRoomsCard{width:min(640px,96vw)}.publicRoomFilters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0;text-align:left}.publicRoomFilters label{display:grid;gap:5px;font-weight:800;min-width:0}.publicRoomFilters select{width:100%;min-width:0;padding:8px;border:1px solid var(--line);border-radius:10px;background:#0d1230;color:var(--ink);font:700 14px var(--font)}.publicRoomList{display:grid;gap:7px;max-height:48vh;overflow:auto;margin:12px 0}.publicRoomRow{display:flex;align-items:center;gap:9px;width:100%;min-height:48px;padding:9px 12px;border:1px solid var(--line);border-radius:11px;background:#111744;color:var(--ink);font:700 13px var(--font);cursor:pointer;text-align:left}.publicRoomRow:hover{border-color:#80dcad}.publicRoomRow strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.publicRoomRow span{white-space:nowrap}.roomPrivacyLine{text-align:center;margin:-2px 0 10px}.roomPrivacyLine button{font-weight:900}.roomPrivacyLine button[data-privacy="public"]{border-color:#50c981;color:#8defad}.roomPrivacyLine button[data-privacy="private"]{border-color:#d46d75;color:#ffb7bd}@media(max-width:430px){.publicRoomFilters{grid-template-columns:1fr 1fr}.publicRoomFilters label:last-child{grid-column:1/-1}.publicRoomRow{font-size:12px;gap:7px;padding:9px}}
 .freeplayRoster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.freeplayPlayerButton{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:12px;min-height:146px;padding:14px!important;text-align:left;border:2px solid var(--crew-accent,var(--edge));border-radius:18px;background:linear-gradient(135deg,#151d43,#0c1230);color:var(--ink);width:100%}.freeplayPlayerButton:disabled{opacity:.45}.freeplayPlayerButton canvas{width:64px;height:76px}.freeplayPlayerInfo{display:grid;gap:5px;min-width:0}.freeplayPlayerName{font-size:20px;line-height:1.1;overflow-wrap:anywhere}.freeplayPlayerColor{font-size:12px;color:var(--ink2)}.freeplayPlayerState{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}.freeplayPlayerState b{border:1px solid currentColor;border-radius:12px;padding:1px 8px}.freeplayPlayerDetail{font-size:12px;color:#cbd5f4;line-height:1.35;white-space:pre-line}.emergencyCard{width:min(420px,94vw)}.emergencyConsole{margin:14px auto;width:126px;height:100px;display:grid;place-items:center;background:#19234b;border:3px solid #52659a;border-radius:22px;box-shadow:0 7px 0 #080c22;transform:perspective(300px) rotateX(12deg)}.emergencyConsole span{display:block;width:62px;height:58px;border:5px solid #642936;border-radius:50%;background:radial-gradient(circle at 34% 25%,#ff9f9f,#f74660 60%);box-shadow:0 8px 0 #8d2038}.emergencyCard button:disabled{filter:grayscale(1);opacity:.4;cursor:not-allowed;box-shadow:none}.emergencyRemaining{font-weight:800;font-size:20px}.ventRoute{position:absolute;width:140px;min-height:58px;display:grid;justify-items:center;gap:2px;padding:7px 10px;border:2px solid #6bded2;border-radius:15px;background:rgba(12,22,49,.95);color:#f0fcff;font:800 13px var(--font);box-shadow:0 4px 0 #050919;pointer-events:auto;transform:translate(-50%,-50%)}.ventRoute:disabled{opacity:.45;cursor:wait}.ventRouteArrow{font-size:30px;line-height:1;display:block;color:#79f2d1}.ventRouteLabel{text-align:center;line-height:1.1;overflow-wrap:anywhere}#ventPanel{position:fixed;inset:0!important;width:auto!important;max-width:none!important;height:auto!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;pointer-events:none;z-index:20}#ventList{position:absolute;inset:0;pointer-events:none}@media(max-width:600px){.freeplayRoster{grid-template-columns:1fr}.freeplayPlayerButton{min-height:124px}.ventRoute{width:116px;font-size:12px;min-height:55px}}
 </style>
+<link rel="stylesheet" href="assets/ui-shared.css?v=a5f1dcbd9a64b3bb">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -491,6 +494,7 @@ body.touch #stick{display:block}
         <label for="createRegionIn">Região<select id="createRegionIn" required><option value="">Selecione uma região</option><option value="north-america">América do Norte</option><option value="asia">Ásia</option><option value="europe">Europa</option></select></label>
         <label for="createLanguageIn">Idioma da sala<select id="createLanguageIn" required><option value="">Selecione um idioma</option><option value="pt-BR">Português (Brasil)</option><option value="pt-PT">Português (Portugal)</option><option value="es">Español</option><option value="en">English</option><option value="ru">Русский</option><option value="ja">日本語</option></select></label>
       </div>
+      <div id="createModeButtons" class="modeChoices" role="group" aria-label="Modo"></div>
       <p class="phase">O tamanho fica fixo após criar a sala. Jogadores humanos e bots ocupam vagas.</p>
       <div class="row"><button class="big" id="btnCreateConfirm">Criar sala agora</button><button class="big alt" id="btnCreateCancel">Cancelar</button></div>
     </div>
@@ -568,7 +572,7 @@ body.touch #stick{display:block}
 
 <div id="languageOverlay" class="languageOverlay" hidden aria-live="polite"><div class="card languageCard" role="dialog" aria-modal="true" aria-labelledby="languageTitle"><h2 id="languageTitle">Idioma do jogo</h2><p class="phase">Escolha o idioma da interface. A estrutura de localização já fica preparada para as traduções do jogo.</p><div id="languageList" class="languageList"></div><div class="row"><button class="big" id="btnLanguageClose" type="button">Fechar</button></div></div></div>
 <div id="emergencyOverlay" class="roomInfoOverlay" hidden><div class="card emergencyCard" role="dialog" aria-modal="true" aria-labelledby="emergencyTitle"><h2 id="emergencyTitle">Reunião de emergência</h2><div class="emergencyConsole" aria-hidden="true"><span></span></div><p id="emergencyRemaining" class="emergencyRemaining"></p><p id="emergencyReason" class="phase" role="status"></p><div class="row"><button class="big" id="emergencyConfirm" type="button">Chamar reunião</button><button class="big alt" id="emergencyClose" type="button">Fechar</button></div></div></div>
-<div id="publicRoomsOverlay" class="roomInfoOverlay" hidden><div class="card roomInfoCard publicRoomsCard" role="dialog" aria-modal="true" aria-labelledby="publicRoomsTitle"><h2 id="publicRoomsTitle">Procurar salas</h2><div class="publicRoomFilters"><label><span id="publicRegionLabel">Região</span><select id="publicRegionIn"></select></label><label><span id="publicLanguageLabel">Idioma</span><select id="publicLanguageIn"></select></label><label><span id="publicModeLabel">Modo</span><select id="publicModeIn"><option value="classic">Clássico</option></select></label></div><p id="publicRoomsStatus" class="phase" role="status" aria-live="polite"></p><div id="publicRoomList" class="publicRoomList"></div><div class="row"><button id="btnRefreshPublicRooms" class="big" type="button">Atualizar</button><button id="btnClosePublicRooms" class="big alt" type="button">Voltar</button></div></div></div>
+<div id="publicRoomsOverlay" class="roomInfoOverlay" hidden><div class="card roomInfoCard publicRoomsCard" role="dialog" aria-modal="true" aria-labelledby="publicRoomsTitle"><h2 id="publicRoomsTitle">Procurar salas</h2><div class="publicRoomFilters"><label><span id="publicRegionLabel">Região</span><select id="publicRegionIn"></select></label><label><span id="publicLanguageLabel">Idioma</span><select id="publicLanguageIn"></select></label><label><span id="publicModeLabel">Modo</span><select id="publicModeIn"><option value="classic">Clássico</option><option value="esconde-esconde">Esconde-Esconde</option></select></label></div><p id="publicRoomsStatus" class="phase" role="status" aria-live="polite"></p><div id="publicRoomList" class="publicRoomList"></div><div class="row"><button id="btnRefreshPublicRooms" class="big" type="button">Atualizar</button><button id="btnClosePublicRooms" class="big alt" type="button">Voltar</button></div></div></div>
 <div id="roomInfoOverlay" class="roomInfoOverlay" hidden aria-live="polite"><div class="card roomInfoCard" role="dialog" aria-modal="true" aria-labelledby="roomInfoTitle"><h2 id="roomInfoTitle">Sala encontrada</h2><div class="roomInfoDetails"><div id="roomInfoPlayers">👥 Jogadores: —</div><div id="roomInfoHost">👑 Dono: —</div><div id="roomInfoImpostors">🦠 Infiltrados: —</div><div id="roomInfoMode">Modo: Clássico</div><div id="roomInfoRegion">🌍 Região: —</div><div id="roomInfoLanguage">🗣️ Idioma: —</div></div><p id="roomInfoStatus" class="phase"></p><div class="row"><button class="big" id="btnRoomInfoEnter" type="button">Entrar</button><button class="big alt" id="btnRoomInfoRefresh" type="button">Atualizar</button><button class="big alt" id="btnRoomInfoCancel" type="button">Cancelar</button></div></div></div>
 <div id="accountOverlay" hidden aria-live="polite">
   <div class="card accountCard" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
@@ -698,7 +702,7 @@ body.touch #stick{display:block}
     <canvas id="roleCv" width="320" height="240"></canvas>
     <h2 id="roleTitle"></h2>
     <p id="roleMsg"></p>
-    <button class="big" id="btnRole">Começar</button><div id="roleCountdown" role="timer" aria-live="polite" hidden style="font-size:30px;font-weight:800"></div>
+    <button class="big" id="btnRole">Começar</button><div id="roleCountdown" role="timer" aria-live="polite" hidden style="font-size:18px;font-weight:700"></div>
   </div>
 </div>
 
@@ -934,10 +938,12 @@ function localizedBotDisplayName(name){const raw=String(name||''),catalog=window
 const BOT_COLOR_NAMES=new WeakSet(),BOT_NAME_REFERENCES=new Map();
 function bindBotColorName(ch,owner=ch){
   if(!ch||BOT_COLOR_NAMES.has(ch))return ch;
+  let cachedColor,cachedCatalog,cachedId,cachedLanguage,cachedName;
   Object.defineProperty(ch,'name',{enumerable:true,configurable:true,get(){
-    const color=COLOR_BY[owner.color],key='color.'+owner.color;
-    for(const table of Object.values(I18N))if(table[key])BOT_NAME_REFERENCES.set(table[key],owner.id);
-    return colorDisplayName(color)||owner.color;
+    const changed=cachedColor!==owner.color||cachedCatalog!==I18N||cachedId!==owner.id;
+    if(changed){const key='color.'+owner.color;for(const table of Object.values(I18N))if(table[key])BOT_NAME_REFERENCES.set(table[key],owner.id);cachedColor=owner.color;cachedCatalog=I18N;cachedId=owner.id}
+    if(changed||cachedLanguage!==USER_PREFS.language){cachedName=colorDisplayName(COLOR_BY[owner.color])||owner.color;cachedLanguage=USER_PREFS.language}
+    return cachedName;
   },set(value){}});BOT_COLOR_NAMES.add(ch);return ch;
 }
 function botReferenceName(value){const raw=String(value||'');if(G.chars.some(ch=>(ch.isPlayer||ch.isRemoteHuman)&&ch.name===raw))return raw;const bot=charById(BOT_NAME_REFERENCES.get(raw));return bot&&!bot.isPlayer&&!bot.isRemoteHuman?bot.name:raw}
@@ -1880,12 +1886,31 @@ function loadGameVolume(){if(!ACCOUNT.sessionResolved)return 1;try{
   localStorage.setItem('navezero_game_volume_v2',String(migrated));return migrated;
 }catch{return 1}}
 function saveGameVolume(v){if(accountActive()){if(!ACCOUNT.applying)accountScheduleSync();return}try{localStorage.setItem('navezero_game_volume_v2',String(clamp(v,0,2)))}catch{}}
-const Snd={ctx:null,on:true,volume:loadGameVolume(),
-  init(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}} if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume()},
+const Snd={ctx:null,master:null,limiter:null,ceiling:null,boost:3,_on:true,_volume:loadGameVolume(),
+  get on(){return this._on},set on(value){this._on=!!value;this.syncOutput()},
+  get volume(){return this._volume},set volume(value){this._volume=clamp(Number(value)||0,0,2);this.syncOutput()},
+  syncOutput(){
+    if(!this.master||!this.ctx)return;const t=this.ctx.currentTime,g=this.master.gain,target=this.on?this.volume*this.boost:0;
+    g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(target,t+.025);
+  },
+  output(){
+    if(!this.ctx)return null;if(this.master?.context===this.ctx)return this.master;
+    const c=this.ctx;this.master=c.createGain();this.master.gain.value=0;this.limiter=c.createDynamicsCompressor();
+    this.limiter.threshold.value=-3;this.limiter.knee.value=3;this.limiter.ratio.value=20;this.limiter.attack.value=.003;this.limiter.release.value=.12;
+    // Transparent below the safety knee; bounded peaks protect the final mixed signal.
+    this.ceiling=c.createWaveShaper();const curve=new Float32Array(4097);
+    for(let i=0;i<curve.length;i++){const x=i*2/(curve.length-1)-1,a=Math.abs(x);curve[i]=Math.sign(x)*(a<=.85?a:.85+.13*(1-Math.exp(-(a-.85)/.13)))}
+    this.ceiling.curve=curve;this.ceiling.oversample='2x';
+    // Compensate compressor makeup; the last non-oversampled guard catches reconstruction peaks.
+    this.outputTrim=c.createGain();this.outputTrim.gain.value=.87;this.peakGuard=c.createWaveShaper();const guard=new Float32Array(4097);
+    for(let i=0;i<guard.length;i++){const x=i*2/(guard.length-1)-1,a=Math.abs(x);guard[i]=Math.sign(x)*(a<=.94?a:.94+.03*(1-Math.exp(-(a-.94)/.03)))}
+    this.peakGuard.curve=guard;this.master.connect(this.limiter).connect(this.ceiling).connect(this.outputTrim).connect(this.peakGuard).connect(c.destination);this.syncOutput();return this.master;
+  },
+  init(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}} if(this.ctx){this.output();if(this.ctx.state==='suspended')this.ctx.resume()}},
   tone(f,d=.12,type='sine',vol=.08,slide=0,delay=0){
     if(!this.on||!this.ctx||this.volume<=0)return; const c=this.ctx,t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
     o.type=type;o.frequency.setValueAtTime(f,t); if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);
-    g.gain.setValueAtTime(Math.max(.0001,vol*this.volume),t); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(g).connect(c.destination); o.start(t); o.stop(t+d+.02)},
+    g.gain.setValueAtTime(Math.max(.0001,vol),t); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(g).connect(this.output()); o.start(t); o.stop(t+d+.02)},
   morphTransform(){this.init();this.tone(160,.75,'sine',.055,470);this.tone(520,.65,'triangle',.025,-310,.12);this.tone(970,.4,'sine',.02,-250,.5)},
   click(){this.tone(520,.06,'square',.04)},
   chatMessage(){if(!this.on||!this.ctx||this.volume<=0)return;const now=this.ctx.currentTime;if(now-(this._chatAt??-10)<.15)return;this._chatAt=now;this.tone(720,.075,'sine',.025,180);this.tone(1060,.09,'sine',.018,-80,.045)},
@@ -2183,31 +2208,45 @@ function resetDeconState(){
   if(ACTIVE_MAP_ID==='nexus'){setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true)}
 }
 function charInsideDecon(ch){return roomAtPx(ch.x,ch.y)?.id==='decon'}
+function deconDoorOccupied(side){
+  const door=doors.find(d=>d.id===deconDoorId(side));if(!door)return false;
+  return G.chars.some(c=>c.alive&&!c.ghost&&!c.vent&&c.x+HALF_W>=door.x*TILE&&c.x-HALF_W<=(door.x+door.w)*TILE&&c.y+OFF_Y+HALF_H>=door.y*TILE&&c.y+OFF_Y-HALF_H<=(door.y+door.h)*TILE);
+}
+function applyDeconDoors(openSide){
+  let settled=true;for(const side of ['w','e']){const close=side!==openSide;if(close&&deconDoorOccupied(side)){setDoorClosedById(deconDoorId(side),false);settled=false}else setDoorClosedById(deconDoorId(side),close)}return settled;
+}
 function useDeconButton(ch,st){
-  if(ACTIVE_MAP_ID!=='nexus'||!ch?.alive||!st||st.kind!=='decon'||stationDist(st,ch)>actionDistancePx('object'))return false;
+  if(ACTIVE_MAP_ID!=='nexus'||!ch?.alive||!st||st.kind!=='decon'||!['w','e'].includes(st.side)||stationDist(st,ch)>actionDistancePx('object'))return false;
   const D=G.decon||(G.decon={phase:'idle',until:0,exitSide:null,entrySide:null});
-  if(D.phase==='idle'&&!st.inside){
-    D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+2.4;
-    setDoorClosedById(deconDoorId(D.entrySide),false);setDoorClosedById(deconDoorId(D.exitSide),true);
-    toast(t('runtime.deconEntry'),1500);Snd.click();return true;
+  if(!st.inside){
+    const occupied=G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c));
+    if(D.phase==='idle'||st.side===D.entrySide||(!occupied&&!['ready','exit'].includes(D.phase))){
+      D.phase='entry';D.entrySide=st.side;D.exitSide=st.side==='w'?'e':'w';D.until=G.gt+2.4;applyDeconDoors(D.entrySide);
+      toast(t('runtime.deconEntry'),1500);Snd.click();return true;
+    }
+    D.exitSide=st.side;D.phase='exit';D.until=G.gt+2.5;applyDeconDoors(D.exitSide);
+    toast(t('runtime.deconExit'),1700);Snd.ok();return true;
   }
-  if(D.phase==='ready'&&st.inside&&charInsideDecon(ch)){
-    D.exitSide=st.side;D.phase='exit';D.until=G.gt+2.5;setDoorClosedById(deconDoorId(D.exitSide),false);
+  if(D.phase==='ready'&&charInsideDecon(ch)){
+    D.exitSide=st.side;D.phase='exit';D.until=G.gt+2.5;applyDeconDoors(D.exitSide);
     toast(t('runtime.deconExit'),1700);Snd.ok();return true;
   }
   return false;
 }
 function updateDecon(){
   if(ACTIVE_MAP_ID!=='nexus'||!G.decon)return;
-  const D=G.decon;if(!(D.until>0)||G.gt<D.until)return;
+  const D=G.decon;
+  if(D.phase!=='idle')applyDeconDoors(D.phase==='entry'?D.entrySide:D.phase==='exit'?D.exitSide:null);
+  if(!(D.until>0)||G.gt<D.until)return;
   if(D.phase==='entry'){
-    setDoorClosedById(deconDoorId('w'),true);setDoorClosedById(deconDoorId('e'),true);
+    if(!applyDeconDoors(null)){D.until=G.gt+.25;return}
     if(!G.chars.some(c=>c.alive&&!c.vent&&charInsideDecon(c))){resetDeconState();return}
     D.phase='cleaning';D.until=G.gt+2.6;toast(t('runtime.deconRunning'),1400);return;
   }
-  if(D.phase==='cleaning'){D.phase='ready';D.until=0;toast(t('runtime.deconDone'),1800);return}
-  if(D.phase==='exit'){resetDeconState()}
+  if(D.phase==='cleaning'){if(!applyDeconDoors(null)){D.until=G.gt+.25;return}D.phase='ready';D.until=0;toast(t('runtime.deconDone'),1800);return}
+  if(D.phase==='exit'){if(deconDoorOccupied('w')||deconDoorOccupied('e')){D.until=G.gt+.25;return}resetDeconState()}
 }
+
 function doInteract(a){
   if(G.player?.minerDig||G.player?.controlledBy||G.player?.morphTransition||G.player?.killDash||G.state!=='playing'||uiBusy()||!a)return;
   if(!G.player.alive&&a.type!=='freecomputer'&&!(G.role==='crew'&&a.type==='task')){toast('Morto não pode interagir com isso.');return;}
@@ -3191,7 +3230,7 @@ function askExit(){
   if(G.over||G.state==='over'){toMenu();return}   // partida já terminou: sai direto
   G.confirmOpen=true; joy.x=joy.y=0; if(G.player)G.player.moving=false; $('confirmExit').hidden=false; Snd.open();
 }
-function toMenu(){closeEmergencyDialog();
+function toMenu(){if(typeof HNS!=='undefined')HNS.clear();closeEmergencyDialog();
   $('ventPanel').hidden=true; $('meetingIntro').hidden=true; VENT_DEFS.forEach(v=>v.flash=0);
   closeConfirm(); G.mapOpen=false; $('mapView').hidden=true; G.cfgOpen=false; $('settings').hidden=true;
   closeModalSilent(); $('end').hidden=true; $('meet').hidden=true; $('role').hidden=true; $('hud').hidden=true; $('menu').hidden=false;
@@ -3636,10 +3675,11 @@ function buildCfgUI(){
         top.append(el('span','',l),value);row.append(top,choices,el('small','',d));box.appendChild(row);return;
       }
       const lim=cfgLimitFor(k);if(CFG[k]>lim[1])CFG[k]=lim[1];
-      const out=el('b','',CFG[k]+(unit?' '+unit:''));
-      const inp=document.createElement('input'); inp.type='range'; inp.min=lim[0]; inp.max=lim[1]; inp.step=1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
+      const visionField=k==='impVision'||k==='crewVision',formatValue=()=>visionField?CFG[k]+' px':CFG[k]+(unit?' '+unit:'');
+      const out=el('b','',formatValue());
+      const inp=document.createElement('input'); inp.type='range'; inp.min=lim[0]; inp.max=lim[1]; inp.step=visionField||k==='speed'?5:1; inp.value=CFG[k]; inp.className='range'; inp.setAttribute('aria-label',l);
       inp.disabled=locked;
-      inp.addEventListener('input',()=>{if(locked){inp.value=CFG[k];return}const activeLim=cfgLimitFor(k);CFG[k]=clamp(+inp.value,activeLim[0],activeLim[1]);if(k==='impostors'&&CFG.cleanerMax>CFG.impostors){CFG.cleanerMax=CFG.impostors;if(typeof netNoteRoomSetting==='function')netNoteRoomSetting('cleanerMax',CFG.cleanerMax)}if(k==='impostors'&&CFG.parasiteMax>CFG.impostors){CFG.parasiteMax=CFG.impostors;if(typeof netNoteRoomSetting==='function')netNoteRoomSetting('parasiteMax',CFG.parasiteMax)}if(k==='impostors'&&CFG.hunterMax>CFG.impostors){CFG.hunterMax=CFG.impostors;if(typeof netNoteRoomSetting==='function')netNoteRoomSetting('hunterMax',CFG.hunterMax)}out.textContent=CFG[k]+(unit?' '+unit:'');saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
+      inp.addEventListener('input',()=>{if(locked){inp.value=CFG[k];return}const activeLim=cfgLimitFor(k);CFG[k]=clamp(+inp.value,activeLim[0],activeLim[1]);if(k==='impostors'&&CFG.cleanerMax>CFG.impostors){CFG.cleanerMax=CFG.impostors;if(typeof netNoteRoomSetting==='function')netNoteRoomSetting('cleanerMax',CFG.cleanerMax)}if(k==='impostors'&&CFG.parasiteMax>CFG.impostors){CFG.parasiteMax=CFG.impostors;if(typeof netNoteRoomSetting==='function')netNoteRoomSetting('parasiteMax',CFG.parasiteMax)}if(k==='impostors'&&CFG.hunterMax>CFG.impostors){CFG.hunterMax=CFG.impostors;if(typeof netNoteRoomSetting==='function')netNoteRoomSetting('hunterMax',CFG.hunterMax)}out.textContent=formatValue();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k])});
       top.append(el('span','',l),out); row.append(top,inp,el('small','',d));
     }
     box.appendChild(row);
@@ -4276,7 +4316,7 @@ updateNPC=function(ch,dt){if(ch.controlledBy)return;return withControlledBody(ch
 
 /* ---------- configurações, personalidades e memória de suspeita ---------- */
 const CFG={kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,parasiteChance:0,parasiteMax:1,minerCooldown:10,minerChance:0,minerMax:1,minerHoles:5,morphChance:0,morphMax:1,morphCooldown:15,morphDuration:15,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
-const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],emergencyUses:[0,10],speed:[100,280],impVision:[260,900],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],obsChance:[0,100],obsMax:[0,15],instructorChance:[0,100],instructorMax:[0,15],instructorCooldown:[20,60],instructorMaxDistance:[100,2000],guardianCooldown:[35,60],guardianDuration:[10,30],guardianChance:[0,100],guardianMax:[0,15],guardianImpostorVisible:[0,1],cleanerChance:[0,100],cleanerMax:[0,15],cleanerCooldown:[10,60],parasiteChance:[0,100],parasiteMax:[0,3],minerCooldown:[5,30],minerChance:[0,100],minerMax:[0,3],minerHoles:[5,16],morphChance:[0,100],morphMax:[0,3],morphCooldown:[5,25],morphDuration:[5,31],spectralChance:[0,100],spectralMax:[0,15],spectralCooldown:[5,20],spectralDuration:[10,90],paramedicChance:[0,100],paramedicMax:[0,15],paramedicCooldown:[5,25],paramedicTasksPerUse:[1,5],paramedicMaxUses:[1,3],seerChance:[0,100],seerMax:[0,15],seerCooldown:[10,45],seerDelay:[0,5],noisyDuration:[5,15],noisyChance:[0,100],noisyMax:[0,15],noisyImpostorVisible:[0,1],judgeChance:[0,100],judgeMax:[0,15],judgeTaskPct:[0,100],lazyChance:[0,100],lazyMax:[0,15],lazySlowdown:[5,20],lazyTasks:[1,3],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],engVentDuration:[10,61],engChance:[0,100],engMax:[0,15],engCooldown:[5,25],marionCooldown:[15,60],marionDuration:[5,30],marionChance:[0,100],marionMax:[0,3],hunterChance:[0,100],hunterMax:[0,3],hunterTargetCooldown:[5,25],actionDistance:[0,2],commonTasks:[0,5],mediumTasks:[0,5],longTasks:[0,5],renderDist:[500,1500]};
+const CFG_LIM={kill:[10,60],sab:[10,90],meet:[10,60],emergencyUses:[0,10],speed:[100,280],impVision:[260,1200],crewVision:[260,900],impostors:[1,3],discussion:[5,90],voting:[5,90],locMax:[0,15],locChance:[0,100],locCooldown:[15,60],locDuration:[40,90],sheriffCooldown:[50,120],sheriffChance:[0,100],sheriffMax:[0,15],obsChance:[0,100],obsMax:[0,15],instructorChance:[0,100],instructorMax:[0,15],instructorCooldown:[20,60],instructorMaxDistance:[100,2000],guardianCooldown:[35,60],guardianDuration:[10,30],guardianChance:[0,100],guardianMax:[0,15],guardianImpostorVisible:[0,1],cleanerChance:[0,100],cleanerMax:[0,15],cleanerCooldown:[10,60],parasiteChance:[0,100],parasiteMax:[0,3],minerCooldown:[5,30],minerChance:[0,100],minerMax:[0,3],minerHoles:[5,16],morphChance:[0,100],morphMax:[0,3],morphCooldown:[5,25],morphDuration:[5,31],spectralChance:[0,100],spectralMax:[0,15],spectralCooldown:[5,20],spectralDuration:[10,90],paramedicChance:[0,100],paramedicMax:[0,15],paramedicCooldown:[5,25],paramedicTasksPerUse:[1,5],paramedicMaxUses:[1,3],seerChance:[0,100],seerMax:[0,15],seerCooldown:[10,45],seerDelay:[0,5],noisyDuration:[5,15],noisyChance:[0,100],noisyMax:[0,15],noisyImpostorVisible:[0,1],judgeChance:[0,100],judgeMax:[0,15],judgeTaskPct:[0,100],lazyChance:[0,100],lazyMax:[0,15],lazySlowdown:[5,20],lazyTasks:[1,3],delayedEnabled:[0,1],delayedChance:[0,100],delayedMax:[0,3],delayedDuration:[5,40],engVentDuration:[10,61],engChance:[0,100],engMax:[0,15],engCooldown:[5,25],marionCooldown:[15,60],marionDuration:[5,30],marionChance:[0,100],marionMax:[0,3],hunterChance:[0,100],hunterMax:[0,3],hunterTargetCooldown:[5,25],actionDistance:[0,2],commonTasks:[0,5],mediumTasks:[0,5],longTasks:[0,5],renderDist:[500,1500]};
 const CFG_DEF={kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,impostors:1,discussion:25,voting:25,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,parasiteChance:0,parasiteMax:1,minerCooldown:10,minerChance:0,minerMax:1,minerHoles:5,morphChance:0,morphMax:1,morphCooldown:15,morphDuration:15,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
 function maxImpostorsForPlayers(count){const n=Math.max(4,Math.min(15,Math.round(Number(count)||4)));return n>=10?3:n>=8?2:1}
 function configuredPlayerCount(){if(typeof NET!=='undefined'&&NET.inRoom&&NET.room)return Math.max(4,Math.min(15,Number(NET.room.size)||4));return 15}
@@ -6238,7 +6278,7 @@ function showResult(){
    LOOP PRINCIPAL
    ===================================================================== */
 let last=performance.now(), toolAcc=0;
-const simActive=()=>(G.state==='playing'||G.state==='task'||G.state==='tool')&&!G.confirmOpen;
+const simActive=()=>(G.state==='playing'||G.state==='task'||G.state==='tool')&&(!G.confirmOpen||!!G.hns);
 function setAbilityCaption(button,icon,label){
   const text=String(label).replace(/^[^\p{L}\p{N}]+/u,'');
   const signature=icon+' '+text;
@@ -6259,7 +6299,7 @@ function updateButtons(){
   setCls(be,'cooldown-label',commsAbilityDown||(p.engVentCd||0)>0);if(be._l!==ventLabel){be._l=ventLabel;if(ventLabel==='📡 Sem sinal')be.textContent=ventLabel;else if(p.vent)be.innerHTML='🔧<small>'+ventLabel+'</small>';else be.innerHTML=ventLabel==='Dutar'?'🔧<small>Dutar</small>':ventLabel}
   if(!bspec.hidden){const cd=p.spectralCd||0,time=p.spectralInvisible?spectralRemaining(p):0,lab=p.spectralTransition?'…':p.spectralInvisible?'Voltar':(cd>0?String(Math.ceil(cd)):'Sumir');bspec.disabled=!!p.spectralTransition||(!p.spectralInvisible&&cd>0);setCls(bspec,'ready',!bspec.disabled);setCls(bspec,'cooldown-label',cd>0&&!p.spectralInvisible);if(bspec._l!==lab||bspec._sec!==Math.ceil(time)){bspec._l=lab;bspec._sec=Math.ceil(time);bspec.innerHTML=lab==='Sumir'?'👻<small>Sumir</small>':lab==='Voltar'?`👻<small>Voltar · ${Math.max(0,Math.ceil(time))}s</small>`:lab}}
   const ctlTarget=controlTargetFor(p,actionDistancePx('control')),ctlLabel=p.controlTargetId?('Controlando '+Math.ceil(p.controlTime)+'s'):((p.controlCd||0)>0?String(Math.ceil(p.controlCd)):(NET?.pendingControl?'…':'Controlar'));bc.disabled=!p.controlTargetId&&(!ctlTarget||(p.controlCd||0)>0);bc.classList.toggle('ready',!!ctlTarget&&!(p.controlCd||0)&&!p.controlTargetId);if(bc._l!==ctlLabel){bc._l=ctlLabel;bc.innerHTML=ctlLabel==='Controlar'?'✋<small>Controlar</small>':ctlLabel}
-  const fb=$('btnFollow'); hv(fb,!(G.state==='playing'&&!p.alive&&!p.instructor&&!p.guardian)); if(!fb.hidden){const t=G.followTarget&&charById(G.followTarget);fb.replaceChildren(document.createTextNode(t&&t.alive?translateKnownText('Seguindo'):translateKnownText('Seguir jogador')),...(t&&t.alive?[document.createElement('br'),document.createTextNode(t.name)]:[]));fb.title=translateRuntimeText(t&&t.alive?'Toque para trocar de alvo; toque duas vezes para cancelar':'Toque para começar a seguir');}
+  const fb=$('btnFollow'); hv(fb,!(G.state==='playing'&&!p.alive&&!p.instructor&&!p.guardian)); if(!fb.hidden){const t=G.followTarget&&charById(G.followTarget);const labelKey=USER_PREFS.language+'|'+(t?.id||'')+'|'+(t?.name||'')+'|'+!!t?.alive;if(fb._followLabelKey!==labelKey||fb._followCatalog!==I18N){fb._followLabelKey=labelKey;fb._followCatalog=I18N;fb.replaceChildren(document.createTextNode(t&&t.alive?translateKnownText('Seguindo'):translateKnownText('Seguir jogador')),...(t&&t.alive?[document.createElement('br'),document.createTextNode(t.name)]:[]));fb.title=translateRuntimeText(t&&t.alive?'Toque para trocar de alvo; toque duas vezes para cancelar':'Toque para começar a seguir')}}
   updateRolePanel(p);
   const lab=(p.alive||ghostActs())?'Usar':'Trocar'; if(ub._l!==lab){ub._l=lab;ub.textContent=lab}
   G.killT=null;
@@ -6366,7 +6406,7 @@ function drawEndChar(dt){
    ===================================================================== */
 const typing=()=>isTextEntry();
 function triggerFunctionKey(){const p=G.player;if(!p||controlledBodyFor(p)?.killDash)return;if(!p.alive&&p.instructor)return playerInstructorAction();if(!p.alive&&p.guardian)return playerGuardianProtect();if(!p.alive)return;switch(p.function){case 'sheriff':return playerSheriffShot();case 'delayed':return playerDelayedMark();case 'cleaner':return playerCleanBody();case 'parasite':return playerInfect();case 'miner':return playerMinerDig();case 'metamorph':return playerMorph();case 'spectral':return playerSpectralToggle();case 'paramedic':return playerRevive();case 'seer':return playerSeerInspect();case 'engineer':return playerEngineerVent();case 'marionette':return playerControl();case 'hunter':return playerHunterTarget();case 'locator':return startLocator();}if(G.locator)return startLocator()}
-function adjustFocusedOption(dir){if(!G.cfgOpen)return false;let a=document.activeElement,row=a?.closest?.('.cfgrow');if(a?.type==='range'){a.value=clamp(+a.value+dir,+a.min,+a.max);a.dispatchEvent(new Event('input',{bubbles:true}));return true}if(!row)row=$('cfgRows')?.querySelector('.cfgrow');if(!row)return false;const step=row.querySelector('.fnstepper');if(step){const bs=step.querySelectorAll('button');(dir>0?bs[1]:bs[0])?.click();return true}const choices=[...row.querySelectorAll('.cfgChoice button')];if(choices.length){let i=choices.findIndex(b=>b.getAttribute('aria-pressed')==='true');i=clamp(i+dir,0,choices.length-1);choices[i]?.click();return true}const r=row.querySelector('input[type=range]');if(r){r.value=clamp(+r.value+dir,+r.min,+r.max);r.dispatchEvent(new Event('input',{bubbles:true}));return true}return false}
+function adjustFocusedOption(dir){if(!G.cfgOpen)return false;let a=document.activeElement,row=a?.closest?.('.cfgrow');if(a?.type==='range'){if(a.disabled)return false;a.value=clamp(+a.value+dir*(Number(a.step)||1),+a.min,+a.max);a.dispatchEvent(new Event('input',{bubbles:true}));return true}if(!row)row=$('cfgRows')?.querySelector('.cfgrow');if(!row)return false;const step=row.querySelector('.fnstepper');if(step){const bs=step.querySelectorAll('button');(dir>0?bs[1]:bs[0])?.click();return true}const choices=[...row.querySelectorAll('.cfgChoice button')];if(choices.length){let i=choices.findIndex(b=>b.getAttribute('aria-pressed')==='true');i=clamp(i+dir,0,choices.length-1);choices[i]?.click();return true}const r=row.querySelector('input[type=range]');if(r){if(r.disabled)return false;r.value=clamp(+r.value+dir*(Number(r.step)||1),+r.min,+r.max);r.dispatchEvent(new Event('input',{bubbles:true}));return true}return false}
 function toggleQuickChatKey(){if(G.state!=='meeting'||!G.player?.alive)return;const chips=$('sayChips'),say=$('meetSay'),open=chips.hidden;chips.hidden=!open;say.hidden=!open;if(open&&!chips.children.length)renderQuickPhrases()}
 addEventListener('keydown',e=>{
   if(KEY_CAPTURE){e.preventDefault();e.stopPropagation();assignCapturedKey(e.code);return}
@@ -6457,7 +6497,7 @@ cv.addEventListener('pointerdown',e=>{
   const wx=e.clientX/ZOOM+G.cam.x, wy=e.clientY/ZOOM+G.cam.y;
   const s=STATION_DEFS.find(s=>wx>=s.x*TILE-10&&wx<=(s.x+s.w)*TILE+10&&wy>=s.y*TILE-14&&wy<=(s.y+s.h)*TILE+10);
   if(!s){
-    if(wx>=TABLE.x*TILE&&wx<=(TABLE.x+TABLE.w)*TILE&&wy>=TABLE.y*TILE&&wy<=(TABLE.y+TABLE.h)*TILE){
+    if(!G.hns&&wx>=TABLE.x*TILE&&wx<=(TABLE.x+TABLE.w)*TILE&&wy>=TABLE.y*TILE&&wy<=(TABLE.y+TABLE.h)*TILE){
       if(stationDist(TABLE,G.player)>actionDistancePx('object')){toast('Chegue mais perto do botão de emergência.');return}
       Snd.init();doInteract({type:'emergency'});
     }
@@ -6579,7 +6619,7 @@ function netUpdateVisualInterpolation(){
 }
 const NET_SETTING_KEYS=['kill','sab','meet','emergencyUses','speed','impVision','crewVision','discussion','voting','impostors','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorMaxDistance','guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible','cleanerChance','cleanerMax','cleanerCooldown','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','morphChance','morphMax','morphCooldown','morphDuration','minerCooldown','minerChance','minerMax','minerHoles','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','seerChance','seerMax','seerCooldown','seerDelay','noisyDuration','noisyChance','noisyMax','noisyImpostorVisible','judgeChance','judgeMax','judgeTaskPct','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedEnabled','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','hunterChance','hunterMax','hunterTargetCooldown','actionDistance','commonTasks','mediumTasks','longTasks','renderDist'];
 function netSettings(){const o={mapId:SELECTED_MAP_ID};for(const k of NET_SETTING_KEYS)o[k]=CFG[k];return o}
-function netApplySettings(s){if(!s)return;let changed=false;if(MAP_LIBRARY[s.mapId]&&s.mapId!==SELECTED_MAP_ID){SELECTED_MAP_ID=s.mapId;saveMapSelection(s.mapId);activateMapData(s.mapId,true);G.mapId=s.mapId;changed=true}for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){let v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(k==='judgeTaskPct')v=clamp(Math.round(v/25)*25,0,100);if(k==='instructorMaxDistance')v=clamp(Math.round(v/100)*100,100,2000);if(k==='hunterTargetCooldown')v=clamp(Math.round(v/5)*5,5,25);if(CFG[k]!==v){CFG[k]=v;changed=true}}}const cappedCleaner=Math.min(CFG.cleanerMax,CFG.impostors);if(CFG.cleanerMax!==cappedCleaner){CFG.cleanerMax=cappedCleaner;changed=true}const cappedHunter=Math.min(CFG.hunterMax,CFG.impostors,3);if(CFG.hunterMax!==cappedHunter){CFG.hunterMax=cappedHunter;changed=true}const cappedParasite=Math.min(CFG.parasiteMax,CFG.impostors,3);if(CFG.parasiteMax!==cappedParasite){CFG.parasiteMax=cappedParasite;changed=true}const cappedSpectral=Math.min(CFG.spectralMax,configuredPlayerCount(),15);if(CFG.spectralMax!==cappedSpectral){CFG.spectralMax=cappedSpectral;changed=true}const cappedParamedic=Math.min(CFG.paramedicMax,configuredPlayerCount(),15);if(CFG.paramedicMax!==cappedParamedic){CFG.paramedicMax=cappedParamedic;changed=true}const cappedSeer=Math.min(CFG.seerMax,configuredPlayerCount(),15);if(CFG.seerMax!==cappedSeer){CFG.seerMax=cappedSeer;changed=true}const cappedLazy=Math.min(CFG.lazyMax,configuredPlayerCount(),15);if(CFG.lazyMax!==cappedLazy){CFG.lazyMax=cappedLazy;changed=true}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
+function netApplySettings(s){if(!s)return;let changed=false;if(MAP_LIBRARY[s.mapId]&&s.mapId!==SELECTED_MAP_ID){SELECTED_MAP_ID=s.mapId;saveMapSelection(s.mapId);activateMapData(s.mapId,true);G.mapId=s.mapId;changed=true}for(const k of NET_SETTING_KEYS){const lim=CFG_LIM[k];if(lim&&Number.isFinite(+s[k])){let v=clamp(Math.round(+s[k]),lim[0],lim[1]);if(['speed','impVision','crewVision','hnsKillerVision','hnsCrewVision','hnsCrewSpeed','hnsKillerSpeed','hnsKillerFinalSpeed'].includes(k))v=clamp(Math.round(v/5)*5,lim[0],lim[1]);if(k==='judgeTaskPct')v=clamp(Math.round(v/25)*25,0,100);if(k==='instructorMaxDistance')v=clamp(Math.round(v/100)*100,100,2000);if(k==='hunterTargetCooldown')v=clamp(Math.round(v/5)*5,5,25);if(CFG[k]!==v){CFG[k]=v;changed=true}}}const cappedCleaner=Math.min(CFG.cleanerMax,CFG.impostors);if(CFG.cleanerMax!==cappedCleaner){CFG.cleanerMax=cappedCleaner;changed=true}const cappedHunter=Math.min(CFG.hunterMax,CFG.impostors,3);if(CFG.hunterMax!==cappedHunter){CFG.hunterMax=cappedHunter;changed=true}const cappedParasite=Math.min(CFG.parasiteMax,CFG.impostors,3);if(CFG.parasiteMax!==cappedParasite){CFG.parasiteMax=cappedParasite;changed=true}const cappedSpectral=Math.min(CFG.spectralMax,configuredPlayerCount(),15);if(CFG.spectralMax!==cappedSpectral){CFG.spectralMax=cappedSpectral;changed=true}const cappedParamedic=Math.min(CFG.paramedicMax,configuredPlayerCount(),15);if(CFG.paramedicMax!==cappedParamedic){CFG.paramedicMax=cappedParamedic;changed=true}const cappedSeer=Math.min(CFG.seerMax,configuredPlayerCount(),15);if(CFG.seerMax!==cappedSeer){CFG.seerMax=cappedSeer;changed=true}const cappedLazy=Math.min(CFG.lazyMax,configuredPlayerCount(),15);if(CFG.lazyMax!==cappedLazy){CFG.lazyMax=cappedLazy;changed=true}if(changed&&!(typeof NET!=='undefined'&&NET.inRoom))saveCfg()}
 function netDefaultUrl(){if(location.protocol==='file:')return 'ws://localhost:8080';return (location.protocol==='https:'?'wss://':'ws://')+location.host}
 if($('serverUrlIn'))$('serverUrlIn').value=netDefaultUrl();
 function netSend(o){if(NET.ws&&NET.ws.readyState===WebSocket.OPEN){try{NET.ws.send(JSON.stringify(o));return true}catch(e){}}return false}
@@ -6631,13 +6671,13 @@ function requestPublicRooms(){
 function renderPublicRooms(){
   const list=$('publicRoomList');list.replaceChildren();$('btnRefreshPublicRooms').disabled=NET.browsePending;
   $('publicRoomsStatus').textContent=NET.browsePending?t('public.loading'):NET.browseError||(!NET.publicRooms.length?t('public.empty'):'');
-  for(const info of NET.publicRooms){const button=el('button','publicRoomRow');button.type='button';button.append(el('strong','',info.hostName||'Host'),el('span','',`👥 ${info.current}/${info.size}`),el('span','',t('public.impShort',{count:info.impostors})),el('span','',t('public.classic')));if(info.full)button.title=t('room.full');button.addEventListener('click',()=>{NET.publicJoinFilters={...publicRoomFilters()};NET.pendingJoinCode=info.code;NET.roomInfoError='';showRoomInfo(info);requestRoomInfo(false)});list.appendChild(button)}
+  for(const info of NET.publicRooms){const button=el('button','publicRoomRow');button.type='button';button.append(el('strong','',info.hostName||'Host'),el('span','',`👥 ${info.current}/${info.size}`),el('span','',t('public.impShort',{count:info.impostors})),el('span','',t(info.mode==='esconde-esconde'?'hns.mode':'public.classic')));if(info.full)button.title=t('room.full');button.addEventListener('click',()=>{NET.publicJoinFilters={...publicRoomFilters()};NET.pendingJoinCode=info.code;NET.roomInfoError='';showRoomInfo(info);requestRoomInfo(false)});list.appendChild(button)}
 }
 function netJoinRoom(){
   const code=String($('roomCodeIn').value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);setJoinError('');if(!/^[A-Z0-9]{6}$/.test(code)){setJoinError('Código inválido. Tente novamente');Snd.err();return}Snd.init();NET.publicJoinFilters=null;NET.pendingJoinCode=code;NET.lastRoomInfo=null;NET.roomInfoError='';requestRoomInfo(false);
 }
 function showRoomInfo(info){
-  NET.lastRoomInfo=info?{...info}:null;NET.pendingJoinCode=String(info?.code||NET.pendingJoinCode||'');$('roomInfoPlayers').textContent=t('room.players',{current:Number(info?.current)||0,size:Number(info?.size)||0});$('roomInfoHost').textContent=t('room.host',{host:String(info?.hostName||'—')});$('roomInfoImpostors').textContent=t('public.impostors',{count:info?.impostors??'—'});$('roomInfoMode').textContent=t('public.modeInfo',{mode:t('public.classic')});$('roomInfoRegion').textContent=t('room.region',{region:regionLabel(info?.region)});$('roomInfoLanguage').textContent=t('room.language',{language:GAME_LANGUAGES[info?.language]||'—'});$('roomInfoRegion').hidden=$('roomInfoLanguage').hidden=!!NET.publicJoinFilters;const full=info?.full===true;$('roomInfoStatus').textContent=NET.roomInfoError||(NET.roomInfoPending?t('public.updating'):full?t('room.full'):'');$('btnRoomInfoEnter').disabled=full||!!NET.roomInfoError||NET.roomInfoPending;$('btnRoomInfoRefresh').disabled=NET.roomInfoPending;$('roomInfoOverlay').hidden=false;
+  NET.lastRoomInfo=info?{...info}:null;NET.pendingJoinCode=String(info?.code||NET.pendingJoinCode||'');$('roomInfoPlayers').textContent=t('room.players',{current:Number(info?.current)||0,size:Number(info?.size)||0});$('roomInfoHost').textContent=t('room.host',{host:String(info?.hostName||'—')});$('roomInfoImpostors').textContent=t('public.impostors',{count:info?.impostors??'—'});$('roomInfoMode').textContent=t('public.modeInfo',{mode:t(info?.mode==='esconde-esconde'?'hns.mode':'public.classic')});$('roomInfoRegion').textContent=t('room.region',{region:regionLabel(info?.region)});$('roomInfoLanguage').textContent=t('room.language',{language:GAME_LANGUAGES[info?.language]||'—'});$('roomInfoRegion').hidden=$('roomInfoLanguage').hidden=!!NET.publicJoinFilters;const full=info?.full===true;$('roomInfoStatus').textContent=NET.roomInfoError||(NET.roomInfoPending?t('public.updating'):full?t('room.full'):'');$('btnRoomInfoEnter').disabled=full||!!NET.roomInfoError||NET.roomInfoPending;$('btnRoomInfoRefresh').disabled=NET.roomInfoPending;$('roomInfoOverlay').hidden=false;
 }
 function requestRoomInfo(confirming=false){
   if(!NET.pendingJoinCode)return;const code=NET.pendingJoinCode,requestId=NET.roomInfoRequest=++NET.discoverySeq,filters=NET.publicJoinFilters?{publicEntry:true,...NET.publicJoinFilters}:{};NET.roomInfoPending=true;NET.roomInfoConfirming=confirming;NET.roomInfoError='';$('btnRoomInfoEnter').disabled=true;$('btnRoomInfoRefresh').disabled=true;$('roomInfoStatus').textContent=t('public.updating');
@@ -6847,7 +6887,7 @@ function netHandleMessage(m){
 const ROOM_CFG_LABELS=Object.fromEntries(CFG_ROWS.map(([k,l,,u])=>[k,{label:l,unit:u}]));
 const ROOM_CFG_ICONS={minerCooldown:'⛏️',minerChance:'⛏️',minerMax:'⛏️',minerHoles:'⛏️',morphChance:'🎭',morphMax:'🎭',morphCooldown:'🎭',morphDuration:'🎭',locMax:'🧭',locChance:'🧭',locCooldown:'🧭',locDuration:'🧭',sheriffCooldown:'🔫',sheriffChance:'🔫',sheriffMax:'🔫',delayedChance:'⏱️',delayedMax:'⏱️',delayedDuration:'⏱️',obsChance:'👀',obsMax:'👀',instructorChance:'↔️',instructorMax:'↔️',instructorCooldown:'↔️',instructorMaxDistance:'↔️',guardianCooldown:'🪽',guardianDuration:'🪽',guardianChance:'🪽',guardianMax:'🪽',guardianImpostorVisible:'🪽',cleanerChance:'🧹',cleanerMax:'🧹',cleanerCooldown:'🧹',parasiteChance:'🦠',parasiteMax:'🦠',spectralChance:'👻',spectralMax:'👻',spectralCooldown:'👻',spectralDuration:'👻',paramedicChance:'⛑️',paramedicMax:'⛑️',paramedicCooldown:'⛑️',paramedicTasksPerUse:'⛑️',paramedicMaxUses:'⛑️',seerChance:'🔮',seerMax:'🔮',seerCooldown:'🔮',seerDelay:'🔮',noisyDuration:'🔊',noisyChance:'🔊',noisyMax:'🔊',noisyImpostorVisible:'🔊',judgeChance:'👨‍⚖️',judgeMax:'👨‍⚖️',judgeTaskPct:'👨‍⚖️',lazyChance:'🍕',lazyMax:'🍕',lazySlowdown:'🍕',lazyTasks:'🍕',engVentDuration:'🔧',engChance:'🔧',engMax:'🔧',engCooldown:'🔧',marionCooldown:'✋',marionDuration:'✋',marionChance:'✋',marionMax:'✋',hunterChance:'🎯',hunterMax:'🎯',hunterTargetCooldown:'🎯'};
 const ROOM_CFG_NOTICE_TIMERS=new Map();
-function roomCfgDisplayValue(key,value){if(cfgValueIsInfinite(key,value))return '∞';if(key==='speed')return (Number(value)/120).toFixed(1)+'x';if(key==='lazySlowdown')return (Number(value)/10).toFixed(1)+'x';if(key==='noisyImpostorVisible')return Number(value)?'Sim':'Não';if(key==='actionDistance')return ACTION_DISTANCE_LABELS[clamp(Number(value)||0,0,2)];const meta=ROOM_CFG_LABELS[key];return String(value)+(meta?.unit?meta.unit:'')}
+function roomCfgDisplayValue(key,value){if(cfgValueIsInfinite(key,value))return '∞';if(key==='speed')return String(value);if(key==='lazySlowdown')return (Number(value)/10).toFixed(1)+'x';if(key==='noisyImpostorVisible')return Number(value)?'Sim':'Não';if(key==='actionDistance')return ACTION_DISTANCE_LABELS[clamp(Number(value)||0,0,2)];const meta=ROOM_CFG_LABELS[key];return String(value)+(meta?.unit?meta.unit:'')}
 function netAnnounceConfigChange(key,value){if(!NET.inRoom||!NET.isHost||NET.room?.status!=='lobby')return;const meta=ROOM_CFG_LABELS[key]||{label:key};const icon=ROOM_CFG_ICONS[key]||'⚙️';const text=`${icon} ${meta.label} → ${roomCfgDisplayValue(key,value)}`;clearTimeout(ROOM_CFG_NOTICE_TIMERS.get(key));ROOM_CFG_NOTICE_TIMERS.set(key,setTimeout(()=>{ROOM_CFG_NOTICE_TIMERS.delete(key);netSend({type:'room_config_notice',text})},120));}
 function netAnnounceBots(value){if(!NET.inRoom||!NET.isHost||NET.room?.status!=='lobby')return;netSend({type:'room_config_notice',text:`⚙ Bots → ${value}`})}
 function netEnsureRoomDraft(){if(!NET.room)return null;if(!NET.roomDraft)NET.roomDraft={...(NET.room.settings||netSettings()),bots:NET.room.bots};return NET.roomDraft}
@@ -6876,9 +6916,9 @@ function netApplyRoomToCFG(){if(NET.room?.settings)netApplySettings(NET.room.set
 function netStartGame(){if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;netSaveRoomSettings();NET.startRequested=true;if(!netSend({type:'start_game'}))NET.startRequested=false}
 function netSaveRoomSettings(){if(!NET.isHost||!NET.room||NET.room.status!=='lobby')return;const cfg=netRoomSettingsFromControls();NET.roomDraft={...cfg.settings,bots:cfg.bots};NET.roomDraftDirty=false;netApplySettings(cfg.settings);saveCfg(true);netSend({type:'set_room',bots:cfg.bots,settings:cfg.settings})}
 function netSyncRoomControlsFromCFG(){if(!NET.room)return;const r=NET.room;const st=(NET.roomDraft||r.settings||netSettings());$('roomSizeIn').value=r.size;$('roomSizeIn').disabled=true;$('roomBotsIn').value=st.bots??r.bots;for(const [id,key] of [['roomSpeedIn','speed'],['roomKillIn','kill'],['roomSabIn','sab'],['roomMeetIn','meet'],['roomDiscussionIn','discussion'],['roomVotingIn','voting'],['roomCrewVisionIn','crewVision']])$(id).value=st[key]??CFG[key]}
-function netShowCountdown(seconds=5){const overlay=$('mpWaitOverlay');clearInterval(NET.countdownUiTimer);overlay.hidden=false;overlay.classList.remove('loading');$('mpWaitTitle').textContent=t('game.starting');$('mpWaitDesc').textContent=t('runtime.startWait');const end=Date.now()+Math.max(1,seconds)*1000;const draw=()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));$('mpWaitCount').textContent=String(left);if(left<=0){overlay.classList.add('loading');$('mpWaitTitle').textContent=t('loading.preparing');$('mpWaitDesc').textContent=t('loading.shipParticipants')}};draw();NET.countdownUiTimer=setInterval(draw,100)}
-function netShowLoading(){const overlay=$('mpWaitOverlay');clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=0;overlay.hidden=false;overlay.classList.add('loading');$('mpWaitCount').textContent='';$('mpWaitTitle').textContent=t('loading.loading');$('mpWaitDesc').textContent=t('loading.prepareAll')}
-function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=0;$('mpWaitOverlay').hidden=true;$('mpWaitOverlay').classList.remove('loading')}
+function netShowCountdown(seconds=5){const overlay=$('mpWaitOverlay');clearInterval(NET.countdownUiTimer);overlay.hidden=false;overlay.classList.remove('loading');overlay.classList.add('starting');$('mpWaitTitle').textContent=t('game.starting');$('mpWaitDesc').textContent=t('runtime.startWait');const end=Date.now()+Math.max(1,seconds)*1000;const draw=()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));$('mpWaitCount').textContent=String(left);if(left<=0){$('mpWaitCount').textContent='';overlay.classList.add('loading');overlay.classList.remove('starting');$('mpWaitTitle').textContent=t('loading.preparing');$('mpWaitDesc').textContent=t('loading.shipParticipants')}};draw();NET.countdownUiTimer=setInterval(draw,100)}
+function netShowLoading(){const overlay=$('mpWaitOverlay');clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=0;overlay.hidden=false;overlay.classList.add('loading');overlay.classList.remove('starting');$('mpWaitCount').textContent='';$('mpWaitTitle').textContent=t('loading.loading');$('mpWaitDesc').textContent=t('loading.prepareAll')}
+function netHideWait(){clearInterval(NET.countdownUiTimer);NET.countdownUiTimer=0;$('mpWaitOverlay').hidden=true;$('mpWaitOverlay').classList.remove('loading','starting')}
 function netCaptureSnapshot(){if(G.player){G.player.cleanCd=G.cleanerCd;G.player.cleanUses=G.cleanerUses}
   const st=(G.state==='task'||G.state==='tool')?'playing':G.state;
   if(G.player){G.player.netKillCd=G.killCd;G.player.netDelayedCd=G.delayedCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
@@ -7382,5 +7422,7 @@ window.addEventListener('beforeunload',()=>{if(ACCOUNT.authenticated&&!ACCOUNT.a
 netStartSnapshots();
 
 </script>
+<script src="assets/hide-seek.js?v=d044252b4c3cff48"></script>
+<script src="assets/how-to-play.js?v=85fed6d5fb6d972d"></script>
 </body>
 </html>

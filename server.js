@@ -3,6 +3,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const {createStaticSender}=require('./static-files');
 const {moderate:moderateChat}=require('./assets/chat-moderation');
 const { WebSocketServer, WebSocket } = require('./websocket');
 
@@ -58,11 +59,14 @@ function cleanExclusiveCosmeticIds(value){const src=Array.isArray(value)?value:[
 function cleanRedeemedExclusiveCodes(value){const src=Array.isArray(value)?value:[],out=[];for(const code0 of src){const code=String(code0||'');if(/^[A-Za-z0-9]{10}$/.test(code)&&!out.includes(code))out.push(code)}return out}
 function cleanCosmeticsForClient(input,client){const out=cleanCosmetics(input),owned=new Set(client?.exclusiveCosmetics instanceof Set?[...client.exclusiveCosmetics]:cleanExclusiveCosmeticIds(client?.exclusiveCosmetics));for(const [slot,id] of Object.entries(out))if(EXCLUSIVE_COSMETIC_BY_ID.has(id)&&(!client?.accountId||!owned.has(id)))out[slot]='none';return out}
 const LIMITS = {
-  kill:[10,60], sab:[10,90], meet:[10,60], emergencyUses:[0,10], speed:[100,280], impVision:[260,900], crewVision:[260,900],
+  kill:[10,60], sab:[10,90], meet:[10,60], emergencyUses:[0,10], speed:[100,280], impVision:[260,1200], crewVision:[260,900],
   discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], obsChance:[0,100], obsMax:[0,15], instructorChance:[0,100], instructorMax:[0,15], instructorCooldown:[20,60],  instructorMaxDistance:[100,2000], guardianCooldown:[35,60], guardianDuration:[10,30], guardianChance:[0,100], guardianMax:[0,15], guardianImpostorVisible:[0,1], cleanerChance:[0,100], cleanerMax:[0,15], cleanerCooldown:[10,60],   parasiteChance:[0,100], parasiteMax:[0,3], minerCooldown:[5,30],minerChance:[0,100],minerMax:[0,3],minerHoles:[5,16],morphChance:[0,100],morphMax:[0,3],morphCooldown:[5,25],morphDuration:[5,31],spectralChance:[0,100], spectralMax:[0,15], spectralCooldown:[5,20], spectralDuration:[10,90],  paramedicChance:[0,100], paramedicMax:[0,15], paramedicCooldown:[5,25], paramedicTasksPerUse:[1,5], paramedicMaxUses:[1,3], seerChance:[0,100], seerMax:[0,15], seerCooldown:[10,45], seerDelay:[0,5],  noisyDuration:[5,15], noisyChance:[0,100], noisyMax:[0,15], noisyImpostorVisible:[0,1], judgeChance:[0,100], judgeMax:[0,15], judgeTaskPct:[0,100], lazyChance:[0,100], lazyMax:[0,15], lazySlowdown:[5,20], lazyTasks:[1,3], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], engVentDuration:[10,61], engChance:[0,100], engMax:[0,15], engCooldown:[5,25], marionCooldown:[15,60], marionDuration:[5,30], marionChance:[0,100], marionMax:[0,3], hunterChance:[0,100], hunterMax:[0,3], hunterTargetCooldown:[5,25], actionDistance:[0,2], commonTasks:[0,5], mediumTasks:[0,5], longTasks:[0,5], renderDist:[500,1500]
 };
+const ROOM_MODES=new Set(['classic','esconde-esconde']);
+Object.assign(LIMITS,{hnsKillerVision:[260,1200],hnsCrewVision:[260,900],hnsAlertDuration:[1,3],hnsAlertInterval:[3,10],hnsStartDuration:[60,120],hnsFinalDuration:[60,120],hnsCrewSpeed:[120,300],hnsKillerSpeed:[310,400],hnsKillerFinalSpeed:[410,500],hnsVentUses:[1,5],hnsVentDuration:[1,10]});
 const MAP_IDS=new Set(['nave','nexus']);
 const DEFAULT_SETTINGS = {mapId:'nave',kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,parasiteChance:0,parasiteMax:1,minerCooldown:10,minerChance:0,minerMax:1,minerHoles:5,morphChance:0,morphMax:1,morphCooldown:15,morphDuration:15,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
+Object.assign(DEFAULT_SETTINGS,{hnsKillerVision:700,hnsCrewVision:900,hnsAlertDuration:2,hnsAlertInterval:6,hnsStartDuration:90,hnsFinalDuration:60,hnsCrewSpeed:180,hnsKillerSpeed:320,hnsKillerFinalSpeed:420,hnsVentUses:3,hnsVentDuration:5});
 const BOT_NAMES_FALLBACK = Array.from({length:15},(_,i)=>`Tripulante ${i+1}`);
 let BOT_NAMES_BY_LANGUAGE={};
 try{const catalog=JSON.parse(fs.readFileSync(LANGUAGES_FILE,'utf8'));if(catalog?.botNames&&typeof catalog.botNames==='object')BOT_NAMES_BY_LANGUAGE=catalog.botNames}catch(err){console.error('Falha ao carregar nomes localizados dos bots:',err.message)}
@@ -93,6 +97,7 @@ function cleanSettings(input={}, playerCount=15) {
   for(const [key,[lo,hi]] of Object.entries(LIMITS)) {
     const n=Number(input[key]); if(Number.isFinite(n))out[key]=Math.min(hi,Math.max(lo,Math.round(n)));
   }
+  for(const key of ['speed','impVision','crewVision','hnsKillerVision','hnsCrewVision','hnsCrewSpeed','hnsKillerSpeed','hnsKillerFinalSpeed']){const [lo,hi]=LIMITS[key];out[key]=Math.min(hi,Math.max(lo,Math.round(out[key]/5)*5))}
   out.instructorMaxDistance=Math.min(2000,Math.max(100,Math.round(out.instructorMaxDistance/100)*100));
   out.hunterTargetCooldown=Math.min(25,Math.max(5,Math.round(out.hunterTargetCooldown/5)*5));
   out.impostors=Math.min(out.impostors,maxImpostorsForCount(playerCount));
@@ -123,12 +128,12 @@ function pickColor(requested, room) {
 function resetLobbyExpiry(room,maxMs=600000){room.lobbyMaxMs=Math.max(1000,Number(maxMs)||600000);room.lobbyRemainingMs=room.lobbyMaxMs;room.createdAt=Date.now();room.lobbyExpiresAt=room.createdAt+room.lobbyRemainingMs}
 function pauseLobbyExpiry(room){if(!room||room.status!=='lobby')return;const now=Date.now();room.lobbyRemainingMs=Math.max(0,Number(room.lobbyExpiresAt||now)-now);room.lobbyExpiresAt=null}
 function resumeLobbyExpiry(room){if(!room||room.status!=='lobby')return;const remain=Math.max(0,Number(room.lobbyRemainingMs??room.lobbyMaxMs??600000));room.lobbyExpiresAt=Date.now()+remain}
-function roomPublic(room){ensureBotRoster(room);const waiting=['lobby','countdown','loading'].includes(room.status),expires=waiting?(Number(room.lobbyExpiresAt)||null):null,remaining=expires?Math.max(0,expires-Date.now()):null;return {code:room.code,hostId:room.hostId,privacy:room.privacy==='public'?'public':'private',mode:'classic',size:room.size,bots:room.bots,region:cleanRoomRegion(room.region),language:cleanRoomLanguage(room.language),botRoster:room.botRoster.map(b=>({...b})),status:room.status,round:room.round,lobbyExpiresAt:expires,lobbyRemainingMs:remaining,settings:{...room.settings},players:room.players.map(p=>({id:p.id,name:p.name,color:p.color,ready:!!p.ready,cosmetics:cleanCosmetics(p.cosmetics)}))};}
+function roomPublic(room){ensureBotRoster(room);const waiting=['lobby','countdown','loading'].includes(room.status),expires=waiting?(Number(room.lobbyExpiresAt)||null):null,remaining=expires?Math.max(0,expires-Date.now()):null;return {code:room.code,hostId:room.hostId,privacy:room.privacy==='public'?'public':'private',mode:room.mode||'classic',size:room.size,bots:room.bots,region:cleanRoomRegion(room.region),language:cleanRoomLanguage(room.language),botRoster:room.botRoster.map(b=>({...b})),status:room.status,round:room.round,lobbyExpiresAt:expires,lobbyRemainingMs:remaining,settings:{...room.settings},players:room.players.map(p=>({id:p.id,name:p.name,color:p.color,ready:!!p.ready,cosmetics:cleanCosmetics(p.cosmetics)}))};}
 function sendRoomState(room){const pub=roomPublic(room);for(const p of room.players){const c=clients.get(p.id);if(c)send(c.ws,{type:'room_state',room:pub,youId:p.id})}}
 function roomFor(client){return client.roomCode?rooms.get(client.roomCode):null}
 function error(ws,message,extra={}){send(ws,{type:'room_error',message,...extra})}
-function roomListing(room){const current=room.players.length+room.bots;return {code:room.code,current,size:room.size,hostName:room.players.find(p=>p.id===room.hostId)?.name||'Host',region:cleanRoomRegion(room.region),language:cleanRoomLanguage(room.language),mode:'classic',impostors:room.settings.impostors,status:room.status,privacy:room.privacy==='public'?'public':'private',full:current>=room.size}}
-function publicRoomCompatible(room,m){return room.privacy==='public'&&cleanRoomRegion(room.region)===String(m.region)&&cleanRoomLanguage(room.language)===String(m.language)&&m.mode==='classic'}
+function roomListing(room){const current=room.players.length+room.bots;return {code:room.code,current,size:room.size,hostName:room.players.find(p=>p.id===room.hostId)?.name||'Host',region:cleanRoomRegion(room.region),language:cleanRoomLanguage(room.language),mode:room.mode||'classic',impostors:room.mode==='esconde-esconde'?1:room.settings.impostors,status:room.status,privacy:room.privacy==='public'?'public':'private',full:current>=room.size}}
+function publicRoomCompatible(room,m){return room.privacy==='public'&&cleanRoomRegion(room.region)===String(m.region)&&cleanRoomLanguage(room.language)===String(m.language)&&(room.mode||'classic')===m.mode}
 function moderateSnapshotChat(snapshot){if(Array.isArray(snapshot?.meeting?.chat))for(const msg of snapshot.meeting.chat)if(msg&&typeof msg==='object')msg.text=moderateChat(String(msg.text||'').slice(0,180));return snapshot}
 function snapshotAlive(room,id){const ch=room.lastSnapshot?.chars?.find(c=>String(c.id)===String(id));return ch?ch.alive!==false:true}
 function ensureModeration(room){if(!(room.modVotes instanceof Map))room.modVotes=new Map();if(!(room.banned instanceof Set))room.banned=new Set();return room.modVotes}
@@ -197,7 +202,7 @@ function personalizeSnapshot(snapshot, recipientId){
   const s=JSON.parse(JSON.stringify(snapshot));
   const ended=s.state==='over'||s.over;
   const recipient=s.chars?.find(c=>c.id===recipientId);
-  if(!ended && recipient?.alive!==false){
+  if(!s.hns && !ended && recipient?.alive!==false){
     const recipientIsImp=recipient?.role==='imp';
     for(const c of (s.chars||[])){if(c.id!==recipientId){c.instructor=false;c.guardian=false}if(c.id!==recipientId && !(recipientIsImp&&c.role==='imp')){c.role='crew';c.function=null}}
   }else if(!ended && (recipient?.instructor||recipient?.guardian)){
@@ -285,13 +290,13 @@ function handle(ws, raw, timings={}){
     const requestedBots=Number(m.bots);const bots=Math.min(size-1,Math.max(0,Math.round(Number.isFinite(requestedBots)?requestedBots:3)));
     const code=makeCode();
     const region=cleanRoomRegion(m.region),language=cleanRoomLanguage(m.language);
-    const room={code,hostId:c.id,size,bots,region,language,privacy:'private',mode:'classic',status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,ghostChatHistory:[],createdAt:Date.now(),lobbyMaxMs:Math.max(1000,Number(timings.lobbyMaxMs)||600000),lobbyRemainingMs:0,lobbyExpiresAt:null,countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,rematchLobby:false,rematchWaiters:new Set(),botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};resetLobbyExpiry(room,room.lobbyMaxMs);
+    const room={code,hostId:c.id,size,bots,region,language,privacy:'private',mode:ROOM_MODES.has(m.mode)?m.mode:'classic',status:'lobby',round:0,settings:cleanSettings(m.settings,size),players:[],lastSnapshot:null,ghostChatHistory:[],createdAt:Date.now(),lobbyMaxMs:Math.max(1000,Number(timings.lobbyMaxMs)||600000),lobbyRemainingMs:0,lobbyExpiresAt:null,countdownToken:0,countdownTimer:null,loadingTimer:null,countdownRoster:null,rematchPending:false,rematchLobby:false,rematchWaiters:new Set(),botRoster:[],botNameSeq:0,banned:new Set(),modVotes:new Map(),modStateSig:''};resetLobbyExpiry(room,room.lobbyMaxMs);
     room.players.push({id:c.id,name:safeText(m.name||c.name),color:pickColor(m.color||c.color,room),ready:false,cosmetics:cleanCosmeticsForClient(m.cosmetics,c)});
     c.name=room.players[0].name;c.color=room.players[0].color;c.roomCode=code;rooms.set(code,room);
     sendRoomState(room);return;
   }
   if(m.type==='list_rooms'){
-    if(!ROOM_REGIONS.has(m.region)||!ROOM_LANGUAGES.has(m.language)||m.mode!=='classic')return send(ws,{type:'room_list',requestId:m.requestId,rooms:[],message:'Filtros de sala inválidos.'});
+    if(!ROOM_REGIONS.has(m.region)||!ROOM_LANGUAGES.has(m.language)||!ROOM_MODES.has(m.mode))return send(ws,{type:'room_list',requestId:m.requestId,rooms:[],message:'Filtros de sala inválidos.'});
     const banKey=moderationBanKey(c);
     const available=[...rooms.values()].filter(room=>publicRoomCompatible(room,m)&&['lobby','countdown','loading'].includes(room.status)&&(!room.lobbyExpiresAt||room.lobbyExpiresAt>Date.now())&&!(banKey&&room.banned?.has(banKey))).map(roomListing);
     send(ws,{type:'room_list',requestId:m.requestId,rooms:available});return;
@@ -483,7 +488,9 @@ function handle(ws, raw, timings={}){
   }
   if(m.type==='action'){
     if(isHost||room.status!=='playing')return;
-    const action=String(m.action||'');const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','mine_dig','mine_enter','morph','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','hunter_target','guardian_protect','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','decon_button']);if(!allowed.has(action))return;
+    const action=String(m.action||'');
+    if(room.mode==='esconde-esconde'&&action==='task_complete'&&room.lastSnapshot?.hns?.phase==='final')return;
+    if(room.mode==='esconde-esconde'&&!new Set(['input','kill','vent_enter','vent_move','vent_exit','task_complete','decon_button']).has(action))return;const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','mine_dig','mine_enter','morph','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','hunter_target','guardian_protect','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','decon_button']);if(!allowed.has(action))return;
     if(action==='chat'){const now=Date.now();if(now-(c.lastMeetingChatAt||0)<3000)return;c.lastMeetingChatAt=now}
     const host=clients.get(room.hostId);if(!host)return;
     const allowedData={command:action,playerId:c.id};
@@ -615,25 +622,23 @@ function createAccountService(opts={}){
 }
 
 function createGameServer(opts={}){
-  const port=opts.port??PORT;const host=opts.host??HOST;const accountService=createAccountService(opts);
+  const port=opts.port??PORT;const host=opts.host??HOST;const accountService=createAccountService(opts);const sendStatic=createStaticSender();
   const server=http.createServer((req,res)=>{
     const pathname=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`).pathname;
     if(pathname.startsWith('/api/account/')){accountService.handle(req,res,pathname).catch(err=>{if(res.headersSent)return;jsonResponse(res,err?.status||500,{ok:false,message:err?.status&&err.status<500?err.message:'Erro interno ao processar a conta.'})});return}
     if(pathname==='/health'){res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({ok:true,rooms:rooms.size,clients:clients.size}));return}
-    if(pathname==='/languages.json'){
-      fs.readFile(LANGUAGES_FILE,(err,data)=>{if(err){res.writeHead(500);res.end('languages.json indisponível');return}res.writeHead(200,{'content-type':'application/json; charset=utf-8','cache-control':'no-cache'});res.end(data)});return;
-    }
-    if(pathname==='/'||pathname==='/index.html'){
-      fs.readFile(HTML_FILE,(err,data)=>{if(err){res.writeHead(500);res.end('Não foi possível abrir index.html');return}res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-cache'});res.end(data)});return;
-    }
+    if(pathname==='/languages.json'){void sendStatic(req,res,LANGUAGES_FILE,'application/json; charset=utf-8',500);return}
+    if(pathname==='/'||pathname==='/index.html'){void sendStatic(req,res,HTML_FILE,'text/html; charset=utf-8',500);return}
     if(pathname.startsWith('/assets/')){
       const filePath=path.join(__dirname,pathname);
       if(!filePath.startsWith(path.join(__dirname,'assets'))) {res.writeHead(403);res.end('Proibido');return}
+      const ext=path.extname(filePath).toLowerCase();if(['.js','.css','.json'].includes(ext)){void sendStatic(req,res,filePath,ext==='.js'?'text/javascript; charset=utf-8':ext==='.css'?'text/css; charset=utf-8':'application/json; charset=utf-8');return}
       fs.readFile(filePath,(err,data)=>{
         if(err){res.writeHead(404,{'content-type':'text/plain; charset=utf-8'});res.end('Não encontrado');return}
         const ext=path.extname(filePath).toLowerCase();
-        const type=ext==='.js'?'text/javascript; charset=utf-8':ext==='.png'?'image/png':ext==='.jpg'||ext==='.jpeg'?'image/jpeg':ext==='.webp'?'image/webp':'application/octet-stream';
-        res.writeHead(200,{'content-type':type,'cache-control':'public, max-age=3600'});res.end(data)
+        const type=ext==='.json'?'application/json; charset=utf-8':ext==='.css'?'text/css; charset=utf-8':ext==='.js'?'text/javascript; charset=utf-8':ext==='.png'?'image/png':ext==='.jpg'||ext==='.jpeg'?'image/jpeg':ext==='.webp'?'image/webp':'application/octet-stream';
+        const cacheControl=ext==='.js'||ext==='.css'||ext==='.json'?'no-cache':'public, max-age=3600';
+        res.writeHead(200,{'content-type':type,'cache-control':cacheControl});res.end(data)
       });return;
     }
     res.writeHead(404,{'content-type':'text/plain; charset=utf-8'});res.end('Não encontrado');
