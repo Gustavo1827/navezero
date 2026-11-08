@@ -1,0 +1,6 @@
+#btnPotatoPass{background:#ff9b36;color:#281600;box-shadow:0 5px 0 #9c521b,0 7px 0 #10122a;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:25px}#btnPotatoPass .abilityCaption{font-size:10px;line-height:1.05}
+#hpEdge{position:fixed;inset:0;pointer-events:none;z-index:21;box-shadow:inset 0 0 65px 12px #ff8d25;animation:hpPulse 1s ease-in-out infinite alternate}
+@keyframes hpPulse{to{opacity:.5}}
+#tasksPanel.hpTime #pct{color:#ff9b36}#tasksPanel.hpTime #barFill{background:linear-gradient(90deg,#e97920,#ffac42)}
+#hpBombTime{margin:7px 0 5px;display:block;font-size:14px;font-weight:800;color:#ff9b36;text-align:center;border-color:#9c632c}
+#deathIntro.hpDeath{background:radial-gradient(circle at center,#ff9b36 0%,#a54208 48%,#291307 100%)}

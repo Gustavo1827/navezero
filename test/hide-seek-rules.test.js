@@ -26,3 +26,17 @@ test('proteção do esconderijo termina na saída e rejeita ataques locais ou re
  }
  on=false;assert.equal(context.doKill({},{}),true,'Clássico continua delegado à implementação original');
 });
+
+test('escolha manual do Assassino funciona só na sala privada e delega os outros sorteios',()=>{
+ const NET={inRoom:true,room:{mode:'esconde-esconde',privacy:'private',players:[{id:'h',name:'Host'},{id:'g',name:'Convidado'}],bots:1,botRoster:[{id:'b',name:'Bot'}]}},CFG={hnsKillerId:'g'},G={freePlay:false};let draws=0;
+ const ctx={NET,CFG,G,MODE:'esconde-esconde',drawImpostors:participants=>{draws++;return participants.slice(0,1)}};
+ for(const name of ['killerOptions','validKillerId'])vm.runInNewContext(source.match(new RegExp(' const '+name+'=.*?;\\n'))[0],ctx);
+ vm.runInNewContext(source.match(/ const oldDrawImpostors=drawImpostors;drawImpostors=.*?;\n/)[0],ctx);
+ const participants=[{id:'h'},{id:'g'},{id:'b'}];
+ assert.equal(ctx.drawImpostors(participants,1)[0].id,'g');assert.equal(draws,0);
+ CFG.hnsKillerId='b';assert.equal(ctx.drawImpostors(participants,1)[0].id,'b');
+ NET.room.privacy='public';assert.equal(ctx.drawImpostors(participants,1)[0].id,'h');
+ NET.room.privacy='private';NET.room.mode='classic';ctx.drawImpostors(participants,1);
+ NET.room.mode='esconde-esconde';CFG.hnsKillerId='gone';ctx.drawImpostors(participants,1);
+ CFG.hnsKillerId='g';G.freePlay=true;ctx.drawImpostors(participants,1);assert.equal(draws,4);
+});

@@ -39,7 +39,7 @@ test('Nexus HQ mantém a área inicial ampla e a malha caminhável sem bolsões 
 });
 
 test('Nexus usa Nave no início, Cafeteria após reuniões e spawn válido na Partida Livre',()=>{
-  assert.match(html,/function startSpawnPoints\(n\)\{return roomSpawnPoints\(ACTIVE_MAP_ID==='nexus'\?'ship':'cafe',n\)\}/);
+  assert.match(html,/function startSpawnPoints\(n\)\{return roomSpawnPoints\(\['nexus','kryos'\]\.includes\(ACTIVE_MAP_ID\)\?'ship':'cafe',n\)\}/);
   assert.match(html,/function meetingSpawnPoints\(n\)\{return roomSpawnPoints\('cafe',n\)\}/);
   assert.match(html,/const freeSpawn=startSpawnPoints\(1\)\[0\];placeChar\(p,freeSpawn\|\|\{x:SPAWN\.x,y:SPAWN\.y\}\)/);
 });
@@ -120,21 +120,23 @@ test('interação das tarefas da Nexus é recalculada e fantasmas veem somente a
   assert.match(html,/const ownGhost=personalMap&&ch\.isPlayer&&!ch\.alive/);
 });
 
-test('Descontaminação libera o lado oposto e reinicia pela entrada com ocupantes',()=>{
+test('Descontaminação executa um ciclo automático por vez em ambos os sentidos',()=>{
  const vm=require('node:vm');
- const names=['deconDoorId','resetDeconState','charInsideDecon','deconDoorOccupied','applyDeconDoors','useDeconButton','updateDecon'];
+ const names=['deconDoorId','resetDeconState','charInsideDecon','deconDoorOccupied','applyDeconDoors','deconButtonReady','useDeconButton','beginDeconCycle','updateDecon','advanceDeconCycle'];
  const source=names.map(n=>{const a=html.indexOf('function '+n+'('),b=html.indexOf('\nfunction ',a+1);return html.slice(a,b)}).join('\n');
  for(const entry of ['w','e']){
-  const blue={alive:true,x:200,y:100,inside:true},green={alive:true,x:-200,y:-100,inside:false};
+  const blue={alive:true,x:200,y:100,inside:false},green={alive:true,x:-200,y:-100,inside:false};
   const G={gt:0,chars:[blue,green],decon:{phase:'idle',until:0}},doors=[{id:'w',x:0,y:0,w:1,h:1,closed:true},{id:'e',x:10,y:0,w:1,h:1,closed:true}];
   const context={G,doors,TILE:48,HALF_W:12,HALF_H:12,OFF_Y:6,ACTIVE_MAP_ID:'nexus',MAP_LIBRARY:{nexus:{decon:{doorW:'w',doorE:'e'}}},stationDist:()=>0,actionDistancePx:()=>130,roomAtPx:(x,y)=>({id:G.chars.find(c=>c.x===x&&c.y===y)?.inside?'decon':'outside'}),setDoorClosedById:(id,closed)=>{doors.find(d=>d.id===id).closed=closed},toast:()=>{},t:x=>x,Snd:{click(){},ok(){}}};
-  const api=vm.runInNewContext(source+'\n;({useDeconButton,updateDecon})',context),opposite=entry==='w'?'e':'w',control=side=>({kind:'decon',side,inside:false});
-  assert.equal(api.useDeconButton(green,control(entry)),true);G.gt=3;api.updateDecon();assert.equal(G.decon.phase,'cleaning');
-  assert.equal(api.useDeconButton(green,control(opposite)),true);assert.equal(G.decon.phase,'exit');assert.equal(doors.find(d=>d.id===opposite).closed,false);
-  assert.equal(api.useDeconButton(green,control(entry)),false,'bloqueia reinício imediato pelo mesmo lado');assert.equal(api.useDeconButton(green,control(opposite)),false,'o bloqueio externo é compartilhado');assert.equal(G.decon.phase,'exit');G.gt=3.81;assert.equal(api.useDeconButton(green,control(entry)),true);assert.equal(G.decon.phase,'entry');assert.equal(G.decon.entrySide,entry);assert.equal(doors.find(d=>d.id===entry).closed,false);assert.equal(doors.find(d=>d.id===opposite).closed,true);
-  blue.x=entry==='w'?24:504;blue.y=18;G.gt=6;api.updateDecon();assert.equal(G.decon.phase,'entry');assert.equal(doors.find(d=>d.id===entry).closed,false,'não fecha sobre um jogador');
-  blue.x=200;blue.y=100;G.gt=6.3;api.updateDecon();assert.equal(G.decon.phase,'cleaning');G.gt=9;api.updateDecon();assert.equal(G.decon.phase,'ready');
-  assert.equal(api.useDeconButton(blue,{kind:'decon',side:opposite,inside:true}),true);blue.x=opposite==='w'?24:504;blue.y=18;G.gt=12;api.updateDecon();assert.equal(G.decon.phase,'exit');assert.equal(doors.find(d=>d.id===opposite).closed,false);
-  blue.x=-200;blue.y=100;blue.inside=false;G.gt=12.3;api.updateDecon();assert.equal(G.decon.phase,'idle');assert.ok(doors.every(d=>d.closed));
+  const api=vm.runInNewContext(source+'\n;({useDeconButton,updateDecon,deconButtonReady})',context),opposite=entry==='w'?'e':'w',control=(side,inside=false)=>({kind:'decon',side,inside});
+  assert.equal(api.useDeconButton(blue,control(entry)),true);blue.inside=true;
+  const blocked=()=>{const until=G.decon.until;for(const side of ['w','e']){assert.equal(api.useDeconButton(green,control(side)),false);assert.equal(api.useDeconButton(blue,control(side,true)),false)}assert.equal(G.decon.until,until)};
+  blocked();blue.x=entry==='w'?24:504;blue.y=18;G.gt=3;api.updateDecon();assert.equal(G.decon.phase,'sealing');assert.equal(doors.find(d=>d.id===entry).closed,false,'não fecha sobre ocupante');blocked();
+  blue.x=200;blue.y=100;G.gt=3.3;api.updateDecon();assert.equal(G.decon.phase,'cleaning');assert.ok(doors.every(d=>d.closed));blocked();
+  G.gt=6;api.updateDecon();assert.equal(G.decon.phase,'exit');assert.equal(doors.find(d=>d.id===opposite).closed,false,'abre automaticamente a saída oposta');blocked();
+  blue.x=opposite==='w'?24:504;blue.y=18;G.gt=9;api.updateDecon();assert.equal(G.decon.phase,'closing');assert.equal(doors.find(d=>d.id===opposite).closed,false);blocked();
+  blue.x=200;blue.y=100;G.gt=9.3;api.updateDecon();assert.equal(G.decon.phase,'idle');assert.ok(doors.every(d=>d.closed));
+  assert.equal(api.deconButtonReady(blue,control(entry,true)),true,'ocupante pode iniciar novo ciclo interno após fechamento total');
+  assert.equal(api.useDeconButton(blue,control(entry,true)),true);assert.equal(G.decon.phase,'cleaning');blocked();G.gt=12;api.updateDecon();assert.equal(G.decon.phase,'exit');assert.equal(G.decon.exitSide,entry);
  }
 });

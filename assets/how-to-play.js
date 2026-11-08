@@ -1,7 +1,7 @@
 /* Data-driven help. Adding a category does not modify either mode's rules. */
 'use strict';
 const HOW_TO_PLAY=(()=>{
- const dataUrl='assets/how-to-play-i18n.json?v=19a789ac3323b958';
+ const dataUrl='assets/how-to-play-i18n.json?v=5e111d0517dcc0c1';
  let catalog=null,pending=null,category='classic',previousFocus=null;
  const button=el('button','chip');button.type='button';button.id='btnHowToPlay';$('btnFreePlay').parentElement.append(button);
  const overlay=el('div');overlay.id='howToPlay';overlay.hidden=true;overlay.setAttribute('data-i18n-skip','');
@@ -22,9 +22,10 @@ const HOW_TO_PLAY=(()=>{
  function renderArticle(){
   const data=strings()?.[category];if(!data)return;const article=$('guideArticle');article.replaceChildren();const h=el('h3','',data.title);h.id='guideArticleTitle';article.append(h);
   for(const paragraph of data.paragraphs)article.append(el('p','',paragraph));
+  if(category==='maps'){const gallery=el('div','guideMaps');for(const map of Object.values(MAP_LIBRARY)){const figure=el('figure'),img=document.createElement('img');img.src=map.icon;img.alt=translateRuntimeText(map.name);img.loading='lazy';img.style.cssText='width:100%;height:auto;max-height:180px;object-fit:contain';figure.append(img,el('figcaption','',translateRuntimeText(map.name)+' — '+translateRuntimeText(map.subtitle)));gallery.append(figure)}article.append(gallery)}
   if(category==='roles'){
-   for(const [team,ids] of [['crew',['locator','sheriff','observer','engineer','paramedic','seer','noisy','judge','lazy','instructor','guardian']],['imp',['delayed','cleaner','parasite','spectral','marionette','hunter','metamorph','miner']]]){
-    article.append(el('h3','',t(team==='crew'?'role.teamCrew':'role.teamImp')));const list=el('ul','guideRoles');for(const id of ids){const key='settings.roleDetails.'+id;const text=hasI18nKey(key)?t(key):roleLabelByFunction(id);const item=el('li','',text);item.dataset.guideRole=id;list.append(item)}article.append(list);
+   for(const [team,ids] of [['crew',['locator','sheriff','observer','engineer','paramedic','seer','noisy','judge','lazy','instructor','guardian']],['neutral',['jester']],['imp',['delayed','cleaner','parasite','spectral','marionette','hunter','metamorph','miner']]]){
+    article.append(el('h3','',t(team==='neutral'?'neutral.category':team==='crew'?'role.teamCrew':'role.teamImp')));const list=el('ul','guideRoles');for(const id of ids){const key='settings.roleDetails.'+id;const text=hasI18nKey(key)?t(key):roleLabelByFunction(id);const item=el('li','',text);item.dataset.guideRole=id;list.append(item)}article.append(list);
    }
   }
   if(category==='controls'){const list=el('dl','guideKeys');for(const [id,name] of KEY_ACTIONS){const r=el('div');r.append(el('dt','',translateRuntimeText(name)),el('dd','',translateRuntimeText(keyLabel(KEY_BINDINGS[id]))));list.append(r)}article.append(list)}

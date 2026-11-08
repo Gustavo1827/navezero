@@ -60,13 +60,13 @@ function cleanRedeemedExclusiveCodes(value){const src=Array.isArray(value)?value
 function cleanCosmeticsForClient(input,client){const out=cleanCosmetics(input),owned=new Set(client?.exclusiveCosmetics instanceof Set?[...client.exclusiveCosmetics]:cleanExclusiveCosmeticIds(client?.exclusiveCosmetics));for(const [slot,id] of Object.entries(out))if(EXCLUSIVE_COSMETIC_BY_ID.has(id)&&(!client?.accountId||!owned.has(id)))out[slot]='none';return out}
 const LIMITS = {
   kill:[10,60], sab:[10,90], meet:[10,60], emergencyUses:[0,10], speed:[100,280], impVision:[260,1200], crewVision:[260,900],
-  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], obsChance:[0,100], obsMax:[0,15], instructorChance:[0,100], instructorMax:[0,15], instructorCooldown:[20,60],  instructorMaxDistance:[100,2000], guardianCooldown:[35,60], guardianDuration:[10,30], guardianChance:[0,100], guardianMax:[0,15], guardianImpostorVisible:[0,1], cleanerChance:[0,100], cleanerMax:[0,15], cleanerCooldown:[10,60],   parasiteChance:[0,100], parasiteMax:[0,3], minerCooldown:[5,30],minerChance:[0,100],minerMax:[0,3],minerHoles:[5,16],morphChance:[0,100],morphMax:[0,3],morphCooldown:[5,25],morphDuration:[5,31],spectralChance:[0,100], spectralMax:[0,15], spectralCooldown:[5,20], spectralDuration:[10,90],  paramedicChance:[0,100], paramedicMax:[0,15], paramedicCooldown:[5,25], paramedicTasksPerUse:[1,5], paramedicMaxUses:[1,3], seerChance:[0,100], seerMax:[0,15], seerCooldown:[10,45], seerDelay:[0,5],  noisyDuration:[5,15], noisyChance:[0,100], noisyMax:[0,15], noisyImpostorVisible:[0,1], judgeChance:[0,100], judgeMax:[0,15], judgeTaskPct:[0,100], lazyChance:[0,100], lazyMax:[0,15], lazySlowdown:[5,20], lazyTasks:[1,3], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], engVentDuration:[10,61], engChance:[0,100], engMax:[0,15], engCooldown:[5,25], marionCooldown:[15,60], marionDuration:[5,30], marionChance:[0,100], marionMax:[0,3], hunterChance:[0,100], hunterMax:[0,3], hunterTargetCooldown:[5,25], actionDistance:[0,2], commonTasks:[0,5], mediumTasks:[0,5], longTasks:[0,5], renderDist:[500,1500]
+  discussion:[5,90], voting:[5,90], impostors:[1,3], locMax:[0,15], locChance:[0,100], locCooldown:[15,60], locDuration:[40,90], sheriffCooldown:[50,120], sheriffChance:[0,100], sheriffMax:[0,15], obsChance:[0,100], obsMax:[0,15], instructorChance:[0,100], instructorMax:[0,15], instructorCooldown:[20,60],  instructorMaxDistance:[100,2000], guardianCooldown:[35,60], guardianDuration:[10,30], guardianChance:[0,100], guardianMax:[0,15], guardianImpostorVisible:[0,1], cleanerChance:[0,100], cleanerMax:[0,15], cleanerCooldown:[10,60],   parasiteChance:[0,100], parasiteMax:[0,3], minerCooldown:[5,30],minerChance:[0,100],minerMax:[0,3],minerHoles:[5,16],morphChance:[0,100],morphMax:[0,3],morphCooldown:[5,25],morphDuration:[5,31],spectralChance:[0,100], spectralMax:[0,15], spectralCooldown:[5,20], spectralDuration:[10,90],  paramedicChance:[0,100], paramedicMax:[0,15], paramedicCooldown:[5,25], paramedicTasksPerUse:[1,5], paramedicMaxUses:[1,3], seerChance:[0,100], seerMax:[0,15], seerCooldown:[10,45], seerDelay:[0,5],  noisyDuration:[5,15], noisyChance:[0,100], noisyMax:[0,15], noisyImpostorVisible:[0,1], judgeChance:[0,100], judgeMax:[0,15], judgeTaskPct:[0,100], lazyChance:[0,100], lazyMax:[0,15], lazySlowdown:[5,20], lazyTasks:[1,3], delayedEnabled:[0,1], delayedChance:[0,100], delayedMax:[0,3], delayedDuration:[5,40], engVentDuration:[10,61], engChance:[0,100], engMax:[0,15], engCooldown:[5,25], marionCooldown:[15,60], marionDuration:[5,30], marionChance:[0,100], marionMax:[0,3], hunterChance:[0,100], hunterMax:[0,3], hunterTargetCooldown:[5,25], commsExpanded:[0,1], actionDistance:[0,2], commonTasks:[1,5], mediumTasks:[1,5], longTasks:[1,5], renderDist:[500,1500]
 };
-const ROOM_MODES=new Set(['classic','esconde-esconde']);
-Object.assign(LIMITS,{hnsKillerVision:[260,1200],hnsCrewVision:[260,900],hnsAlertDuration:[1,3],hnsAlertInterval:[3,10],hnsStartDuration:[60,120],hnsFinalDuration:[60,120],hnsCrewSpeed:[120,300],hnsKillerSpeed:[310,400],hnsKillerFinalSpeed:[410,500],hnsVentUses:[1,5],hnsVentDuration:[1,10]});
-const MAP_IDS=new Set(['nave','nexus']);
-const DEFAULT_SETTINGS = {mapId:'nave',kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,parasiteChance:0,parasiteMax:1,minerCooldown:10,minerChance:0,minerMax:1,minerHoles:5,morphChance:0,morphMax:1,morphCooldown:15,morphDuration:15,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
-Object.assign(DEFAULT_SETTINGS,{hnsKillerVision:700,hnsCrewVision:900,hnsAlertDuration:2,hnsAlertInterval:6,hnsStartDuration:90,hnsFinalDuration:60,hnsCrewSpeed:180,hnsKillerSpeed:320,hnsKillerFinalSpeed:420,hnsVentUses:3,hnsVentDuration:5});
+const ROOM_MODES=new Set(['classic','esconde-esconde','batata-quente']);
+Object.assign(LIMITS,{hnsKillerVision:[260,1200],hnsCrewVision:[260,900],hnsAlertDuration:[1,3],hnsAlertInterval:[3,10],hnsStartDuration:[60,90],hnsFinalDuration:[30,60],hnsCrewSpeed:[120,300],hnsKillerSpeed:[310,400],hnsKillerFinalSpeed:[410,500],hnsVentUses:[1,5],hnsVentDuration:[1,10]});
+const MAP_IDS=new Set(['nave','nexus','kryos']);
+const DEFAULT_SETTINGS = {mapId:'nave',kill:25,sab:30,meet:20,emergencyUses:1,speed:180,impVision:700,crewVision:520,discussion:25,voting:25,impostors:1,locMax:2,locChance:35,locCooldown:15,locDuration:40,sheriffCooldown:50,sheriffChance:35,sheriffMax:1,obsChance:0,obsMax:1,instructorChance:0,instructorMax:1,instructorCooldown:30,instructorMaxDistance:2000,guardianCooldown:35,guardianDuration:18,guardianChance:0,guardianMax:1,guardianImpostorVisible:1,cleanerChance:0,cleanerMax:1,cleanerCooldown:30,parasiteChance:0,parasiteMax:1,minerCooldown:10,minerChance:0,minerMax:1,minerHoles:5,morphChance:0,morphMax:1,morphCooldown:15,morphDuration:15,spectralChance:0,spectralMax:1,spectralCooldown:10,spectralDuration:25,paramedicChance:0,paramedicMax:1,paramedicCooldown:20,paramedicTasksPerUse:3,paramedicMaxUses:2,seerChance:0,seerMax:1,seerCooldown:25,seerDelay:2,noisyDuration:8,noisyChance:0,noisyMax:1,noisyImpostorVisible:1,judgeChance:0,judgeMax:1,judgeTaskPct:50,lazyChance:0,lazyMax:1,lazySlowdown:15,lazyTasks:2,delayedEnabled:0,delayedChance:35,delayedMax:1,delayedDuration:20,engVentDuration:30,engChance:25,engMax:1,engCooldown:15,marionCooldown:30,marionDuration:15,marionChance:25,marionMax:1,hunterChance:0,hunterMax:1,hunterTargetCooldown:10,commsExpanded:0,actionDistance:1,commonTasks:2,mediumTasks:3,longTasks:2,renderDist:820};
+Object.assign(DEFAULT_SETTINGS,{hnsKillerId:'',hnsKillerVision:700,hnsCrewVision:900,hnsAlertDuration:2,hnsAlertInterval:6,hnsStartDuration:90,hnsFinalDuration:60,hnsCrewSpeed:180,hnsKillerSpeed:320,hnsKillerFinalSpeed:420,hnsVentUses:3,hnsVentDuration:5});
 const BOT_NAMES_FALLBACK = Array.from({length:15},(_,i)=>`Tripulante ${i+1}`);
 let BOT_NAMES_BY_LANGUAGE={};
 try{const catalog=JSON.parse(fs.readFileSync(LANGUAGES_FILE,'utf8'));if(catalog?.botNames&&typeof catalog.botNames==='object')BOT_NAMES_BY_LANGUAGE=catalog.botNames}catch(err){console.error('Falha ao carregar nomes localizados dos bots:',err.message)}
@@ -86,20 +86,63 @@ function ensureBotRoster(room){
   }
   room.botRoster.length=room.bots;return room.botRoster;
 }
+Object.assign(LIMITS,{neutrals:[0,5],jesterMax:[0,5],jesterChance:[0,100]});Object.assign(DEFAULT_SETTINGS,{neutrals:0,jesterMax:5,jesterChance:100});
+Object.assign(LIMITS,{hpType:[0,1],hpDuration:[60,120],hpPassCooldown:[5,15],hpExplosion:[10,30]});Object.assign(DEFAULT_SETTINGS,{hpType:0,hpDuration:90,hpPassCooldown:5,hpExplosion:20});
 const safeText = (v, max=12, fallback='Tripulante') => String(v ?? '').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,max) || fallback;
 const send = (ws, obj) => { if(ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify(obj)); };
 const broadcast = (room, obj, exceptId=null) => { for(const p of room.players){ if(p.id===exceptId)continue; const c=clients.get(p.id); if(c)send(c.ws,obj); } };
 const broadcastSystemNotice=(room,text)=>broadcast(room,{type:'system_notice',text:String(text||'').slice(0,160)});
+// Read the game's own trusted map literals once; the server and UI share the same door catalog.
+const SabRules=require('./assets/sabotage-rules');
+const MAP_SABOTAGE_DATA=(()=>{const source=fs.readFileSync(HTML_FILE,'utf8'),start=source.indexOf('const MAP_LIBRARY='),end=source.indexOf('\n};\nfunction loadMapSelection',start)+3;return require('node:vm').runInNewContext(source.slice(start,end)+';MAP_LIBRARY',{},{timeout:1000})})();
+const MAP_DOOR_CATALOG=Object.fromEntries(Object.entries(MAP_SABOTAGE_DATA).map(([id,map])=>[id,SabRules.catalog(map)]));
+function roomDoorControl(room){if(!room.doorControl||room.doorControl.mapId!==room.settings.mapId){room.doorControl=SabRules.create(room.settings.mapId);room.doorRepairs=new Map()}return room.doorControl}
+function publishDoorControl(room){broadcast(room,{type:'door_state',round:room.round,control:{...roomDoorControl(room),serverNow:Date.now()}})}
+function advanceRoomDoors(room){if(room.mode!=='classic'||room.status!=='playing')return;const state=roomDoorControl(room),now=Date.now();if(SabRules.expire(state,now))publishDoorControl(room);if(state.main?.pending&&now-state.main.at>5000){state.main.at=now;const host=clients.get(room.hostId);if(host)send(host.ws,{type:'sabotage_commit',round:room.round,actorId:room.sabPendingActorId,sabotage:state.main.type})}}
+function sabotageActor(room,c,m){const id=m.actorId&&c.id===room.hostId?String(m.actorId):c.id;return room.lastSnapshot?.chars?.find(ch=>ch.id===id&&(id===c.id||ch.isBot))}
+function handleSabotageRequest(room,c,m){
+ if(room.mode!=='classic'||room.status!=='playing'||room.lastSnapshot?.state!=='playing')return;const actor=sabotageActor(room,c,m),state=roomDoorControl(room),now=Date.now(),cat=MAP_DOOR_CATALOG[room.settings.mapId];advanceRoomDoors(room);
+ if(!actor||actor.role!=='imp'||(!actor.alive&&!actor.ghost)||actor.controlledBy||actor.killDash||actor.minerDig||actor.morphTransition)return;
+ if(m.sabotage==='doors'){
+  const group=cat.groups.find(g=>g.id===m.roomId),ids=group?.doorIds||[];
+  // Do not close a physical gate around an occupant.
+  const occupied=ids.some(id=>{const d=cat.doors.find(d=>d.id===id);return d&&room.lastSnapshot.chars.some(ch=>ch.alive&&!ch.vent&&ch.x+11>d.x*48&&ch.x-11<(d.x+d.w)*48&&ch.y+6+9>d.y*48&&ch.y+6-9<(d.y+d.h)*48)});
+  if(!occupied&&SabRules.lock(state,cat,m.roomId,m.doorId,now))publishDoorControl(room);
+ }else if(SabRules.reserve(state,String(m.sabotage),now,Number(room.lastSnapshot.sab?.cd)||0)){
+  room.sabPendingActorId=actor.id;publishDoorControl(room);const host=clients.get(room.hostId);if(host)send(host.ws,{type:'sabotage_commit',round:room.round,requestId:state.revision,actorId:actor.id,sabotage:m.sabotage});
+ }
+}
+function handleDoorRepair(room,c,m){
+ const reject=()=>send(c.ws,{type:'door_repair_rejected',round:room.round,actorId:c.id===room.hostId&&typeof m.actorId==='string'?m.actorId:c.id,doorId:m.doorId});
+ if(room.mode!=='classic'||room.status!=='playing'||room.settings.mapId!=='kryos'||room.lastSnapshot?.state!=='playing')return reject();
+ const ch=sabotageActor(room,c,m),state=roomDoorControl(room),cat=MAP_DOOR_CATALOG.kryos,d=cat.doors.find(d=>d.id===m.doorId),range=[48,120,220][room.settings.actionDistance]||120;
+ if(!state.locks[d?.id]||!SabRules.nearby(ch,d,range))return reject();
+ const key=ch.id,now=Date.now();if(m.type==='door_repair_begin'){
+  const target=Array.from({length:5},()=>crypto.randomInt(2)),nonce=crypto.randomBytes(12).toString('hex');room.doorRepairs.set(key,{doorId:d.id,target,nonce,at:now});send(c.ws,{type:'door_repair_ready',round:room.round,actorId:ch.id,doorId:d.id,target,nonce});
+ }else{const r=room.doorRepairs.get(key);if(!r||r.doorId!==d.id||r.nonce!==m.nonce||now-r.at<1500||now-r.at>120000||!Array.isArray(m.values)||m.values.length!==5||m.values.some((v,i)=>v!==r.target[i]))return reject();
+  room.doorRepairs.delete(key);SabRules.open(state,d.id,now);publishDoorControl(room);
+ }
+}
+function syncDoorSnapshot(room,snapshot){
+ if(room.mode!=='classic')return;const state=roomDoorControl(room),now=Date.now();advanceRoomDoors(room);if(SabRules.sync(state,snapshot.sab,now,room.settings.sab))publishDoorControl(room);
+ const map=MAP_SABOTAGE_DATA[room.settings.mapId];if(Array.isArray(snapshot.doors))map.doors.forEach((d,i)=>{if(!d.decon)snapshot.doors[i]=!!state.locks[d.id]});
+ if(snapshot.sab)snapshot.sab.doors=Object.keys(state.locks).length?Math.max(1,...Object.values(state.locks).map(l=>l.until?Math.max(0,(l.until-now)/1000):1)):0;
+ snapshot.doorControl={...JSON.parse(JSON.stringify(state)),serverNow:now};
+}
+
 function maxImpostorsForCount(count){const n=Math.max(4,Math.min(15,Math.round(Number(count)||4)));return n>=10?3:n>=8?2:1}
 function cleanSettings(input={}, playerCount=15) {
   const out={...DEFAULT_SETTINGS};
   const mapId=String(input?.mapId||'');out.mapId=MAP_IDS.has(mapId)?mapId:'nave';
+  out.hnsKillerId=typeof input.hnsKillerId==='string'?input.hnsKillerId.slice(0,80):'';
   for(const [key,[lo,hi]] of Object.entries(LIMITS)) {
     const n=Number(input[key]); if(Number.isFinite(n))out[key]=Math.min(hi,Math.max(lo,Math.round(n)));
   }
   for(const key of ['speed','impVision','crewVision','hnsKillerVision','hnsCrewVision','hnsCrewSpeed','hnsKillerSpeed','hnsKillerFinalSpeed']){const [lo,hi]=LIMITS[key];out[key]=Math.min(hi,Math.max(lo,Math.round(out[key]/5)*5))}
   out.instructorMaxDistance=Math.min(2000,Math.max(100,Math.round(out.instructorMaxDistance/100)*100));
   out.hunterTargetCooldown=Math.min(25,Math.max(5,Math.round(out.hunterTargetCooldown/5)*5));
+  out.hpPassCooldown=Math.min(out.hpPassCooldown,out.hpExplosion-1);
+  out.neutrals=Math.min(out.neutrals,Math.floor(playerCount/3));out.jesterMax=out.neutrals;
   out.impostors=Math.min(out.impostors,maxImpostorsForCount(playerCount));
   out.cleanerMax=Math.min(out.cleanerMax,out.impostors);
   out.minerMax=Math.min(out.minerMax,out.impostors,3);
@@ -117,6 +160,18 @@ function cleanSettings(input={}, playerCount=15) {
   out.spectralMax=Math.min(out.spectralMax,Math.max(0,Math.min(15,playerCount)));
   return out;
 }
+// The host simulates this mode; the server derives and broadcasts each player's result.
+function hotPotatoResult(room,snapshot){
+  if(!snapshot?.hp||!Array.isArray(snapshot.chars))return null;
+  const ids=new Set([...room.players,...(room.botRoster||[]).slice(0,room.bots)].map(p=>p.id));
+  const alive=snapshot.chars.filter(c=>c.alive&&ids.has(c.id)),holderId=snapshot.hp.holderId;
+  if(!alive.length)return {winnerIds:[],endCause:'allDead'};
+  if(alive.length===1&&alive[0].id===holderId)return {winnerIds:[holderId],endCause:'survivor'};
+  if(!alive.some(c=>c.id===holderId))return null;
+  const aliveIds=new Set(alive.map(c=>c.id)),steps=(snapshot.tasks||[]).filter(t=>!t.fake&&aliveIds.has(t.owner)).flatMap(t=>t.steps||[]);
+  const done=room.settings.hpType?steps.length>0&&steps.every(s=>s.done):Number.isFinite(snapshot.hp.matchRemaining)&&snapshot.hp.matchRemaining<=0;
+  return done?{winnerIds:alive.filter(c=>c.id!==holderId).map(c=>c.id),endCause:room.settings.hpType?'tasks':'time'}:null;
+}
 const ROOM_CODE_CHARS='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 function makeCode(){let code;do{code='';for(let i=0;i<6;i++)code+=ROOM_CODE_CHARS[crypto.randomInt(ROOM_CODE_CHARS.length)]}while(rooms.has(code));return code}
 function pickColor(requested, room) {
@@ -128,12 +183,12 @@ function pickColor(requested, room) {
 function resetLobbyExpiry(room,maxMs=600000){room.lobbyMaxMs=Math.max(1000,Number(maxMs)||600000);room.lobbyRemainingMs=room.lobbyMaxMs;room.createdAt=Date.now();room.lobbyExpiresAt=room.createdAt+room.lobbyRemainingMs}
 function pauseLobbyExpiry(room){if(!room||room.status!=='lobby')return;const now=Date.now();room.lobbyRemainingMs=Math.max(0,Number(room.lobbyExpiresAt||now)-now);room.lobbyExpiresAt=null}
 function resumeLobbyExpiry(room){if(!room||room.status!=='lobby')return;const remain=Math.max(0,Number(room.lobbyRemainingMs??room.lobbyMaxMs??600000));room.lobbyExpiresAt=Date.now()+remain}
-function roomPublic(room){ensureBotRoster(room);const waiting=['lobby','countdown','loading'].includes(room.status),expires=waiting?(Number(room.lobbyExpiresAt)||null):null,remaining=expires?Math.max(0,expires-Date.now()):null;return {code:room.code,hostId:room.hostId,privacy:room.privacy==='public'?'public':'private',mode:room.mode||'classic',size:room.size,bots:room.bots,region:cleanRoomRegion(room.region),language:cleanRoomLanguage(room.language),botRoster:room.botRoster.map(b=>({...b})),status:room.status,round:room.round,lobbyExpiresAt:expires,lobbyRemainingMs:remaining,settings:{...room.settings},players:room.players.map(p=>({id:p.id,name:p.name,color:p.color,ready:!!p.ready,cosmetics:cleanCosmetics(p.cosmetics)}))};}
-function sendRoomState(room){const pub=roomPublic(room);for(const p of room.players){const c=clients.get(p.id);if(c)send(c.ws,{type:'room_state',room:pub,youId:p.id})}}
+function roomPublic(room){ensureBotRoster(room);if(room.mode!=='esconde-esconde'||room.privacy!=='private'||![...room.players,...room.botRoster].some(p=>p.id===room.settings.hnsKillerId))room.settings.hnsKillerId='';const waiting=['lobby','countdown','loading'].includes(room.status),expires=waiting?(Number(room.lobbyExpiresAt)||null):null,remaining=expires?Math.max(0,expires-Date.now()):null;return {code:room.code,hostId:room.hostId,privacy:room.privacy==='public'?'public':'private',mode:room.mode||'classic',size:room.size,bots:room.bots,region:cleanRoomRegion(room.region),language:cleanRoomLanguage(room.language),botRoster:room.botRoster.map(b=>({...b})),status:room.status,round:room.round,lobbyExpiresAt:expires,lobbyRemainingMs:remaining,settings:{...room.settings},players:room.players.map(p=>({id:p.id,name:p.name,color:p.color,ready:!!p.ready,cosmetics:cleanCosmetics(p.cosmetics)}))};}
+function sendRoomState(room){if(room.mode==='classic'&&room.status==='lobby'){const cap=Math.floor((room.players.length+room.bots)/3);room.settings.neutrals=Math.min(room.settings.neutrals||0,cap);room.settings.jesterMax=Math.min(room.settings.jesterMax||0,room.settings.neutrals)}const pub=roomPublic(room);for(const p of room.players){const c=clients.get(p.id);if(c)send(c.ws,{type:'room_state',room:pub,youId:p.id})}}
 function roomFor(client){return client.roomCode?rooms.get(client.roomCode):null}
 function error(ws,message,extra={}){send(ws,{type:'room_error',message,...extra})}
-function roomListing(room){const current=room.players.length+room.bots;return {code:room.code,current,size:room.size,hostName:room.players.find(p=>p.id===room.hostId)?.name||'Host',region:cleanRoomRegion(room.region),language:cleanRoomLanguage(room.language),mode:room.mode||'classic',impostors:room.mode==='esconde-esconde'?1:room.settings.impostors,status:room.status,privacy:room.privacy==='public'?'public':'private',full:current>=room.size}}
-function publicRoomCompatible(room,m){return room.privacy==='public'&&cleanRoomRegion(room.region)===String(m.region)&&cleanRoomLanguage(room.language)===String(m.language)&&(room.mode||'classic')===m.mode}
+function roomListing(room){const current=room.players.length+room.bots;return {code:room.code,current,size:room.size,hostName:room.players.find(p=>p.id===room.hostId)?.name||'Host',region:cleanRoomRegion(room.region),language:cleanRoomLanguage(room.language),mode:room.mode||'classic',mapId:room.settings.mapId,impostors:room.mode==='batata-quente'?0:room.mode==='esconde-esconde'?1:room.settings.impostors,status:room.status,privacy:room.privacy==='public'?'public':'private',full:current>=room.size}}
+function publicRoomCompatible(room,m){return room.privacy==='public'&&cleanRoomRegion(room.region)===String(m.region)&&cleanRoomLanguage(room.language)===String(m.language)&&(room.mode||'classic')===m.mode&&(!m.mapId||m.mapId==='all'||room.settings.mapId===m.mapId)}
 function moderateSnapshotChat(snapshot){if(Array.isArray(snapshot?.meeting?.chat))for(const msg of snapshot.meeting.chat)if(msg&&typeof msg==='object')msg.text=moderateChat(String(msg.text||'').slice(0,180));return snapshot}
 function snapshotAlive(room,id){const ch=room.lastSnapshot?.chars?.find(c=>String(c.id)===String(id));return ch?ch.alive!==false:true}
 function ensureModeration(room){if(!(room.modVotes instanceof Map))room.modVotes=new Map();if(!(room.banned instanceof Set))room.banned=new Set();return room.modVotes}
@@ -229,7 +284,7 @@ function startGameNow(room, rematch=false){
   if(total<4 && !(rematch && total===3)){error(clients.get(room.hostId)?.ws,'Adicione bots ou espere mais jogadores: uma nova partida precisa de pelo menos 4 participantes.');return false}
   if(total>room.size||total>15){error(clients.get(room.hostId)?.ws,'A quantidade total excede o limite da sala.');return false}
   if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);
-  room.countdownTimer=null;room.loadingTimer=null;room.status='playing';room.lobbyExpiresAt=null;room.round++;room.lastSnapshot=null;room.ghostChatHistory=[];room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=false;room.countdownRoster=null;
+  room.countdownTimer=null;room.loadingTimer=null;room.doorControl=null;room.doorRepairs=new Map();room.status='playing';room.lobbyExpiresAt=null;room.round++;room.lastSnapshot=null;room.ghostChatHistory=[];room.winner=null;room.endReason='';room.rematchPending=false;room.rematchLobby=false;room.countdownRoster=null;
   sendRoomState(room);
   broadcast(room,{type:'game_start',room:roomPublic(room),round:room.round,rematch});
   return true;
@@ -296,7 +351,7 @@ function handle(ws, raw, timings={}){
     sendRoomState(room);return;
   }
   if(m.type==='list_rooms'){
-    if(!ROOM_REGIONS.has(m.region)||!ROOM_LANGUAGES.has(m.language)||!ROOM_MODES.has(m.mode))return send(ws,{type:'room_list',requestId:m.requestId,rooms:[],message:'Filtros de sala inválidos.'});
+    if(!ROOM_REGIONS.has(m.region)||!ROOM_LANGUAGES.has(m.language)||!ROOM_MODES.has(m.mode)||(m.mapId&&m.mapId!=='all'&&!MAP_IDS.has(m.mapId)))return send(ws,{type:'room_list',requestId:m.requestId,rooms:[],message:'Filtros de sala inválidos.'});
     const banKey=moderationBanKey(c);
     const available=[...rooms.values()].filter(room=>publicRoomCompatible(room,m)&&['lobby','countdown','loading'].includes(room.status)&&(!room.lobbyExpiresAt||room.lobbyExpiresAt>Date.now())&&!(banKey&&room.banned?.has(banKey))).map(roomListing);
     send(ws,{type:'room_list',requestId:m.requestId,rooms:available});return;
@@ -431,13 +486,19 @@ function handle(ws, raw, timings={}){
     }
     room.rematchWaiters=new Set();sendRoomState(room);return;
   }
+  if(m.type==='sabotage_request'){handleSabotageRequest(room,c,m);return}
+  if(m.type==='door_repair_begin'||m.type==='door_repair_finish'){handleDoorRepair(room,c,m);return}
+  if(m.type==='sabotage_ack'){if(isHost&&room.doorControl?.main?.type===m.sabotage&&m.success===false){room.doorControl.main=null;room.doorControl.revision++;publishDoorControl(room)}return}
   if(m.type==='game_end'){
     if(!isHost)return;
     if(room.status!=='playing')return;
-    room.status='ended';room.winner=m.winner==='imp'?'imp':'crew';room.endReason=safeText(m.reason,160,'A partida terminou.');
     const finalSnapshot=m.snapshot&&typeof m.snapshot==='object'&&Array.isArray(m.snapshot.chars)?m.snapshot:null;
+    const hpResult=room.mode==='batata-quente'?hotPotatoResult(room,finalSnapshot):null;
+    if(room.mode==='batata-quente'&&!hpResult)return;
+    room.status='ended';room.winner=hpResult?(hpResult.winnerIds.length?'crew':'imp'):room.mode==='classic'&&m.winner==='neutral'?'neutral':m.winner==='imp'?'imp':'crew';room.endReason=safeText(m.reason,160,'A partida terminou.');
+    if(hpResult){finalSnapshot.hp={...finalSnapshot.hp,...hpResult,endPending:false};finalSnapshot.over=true;finalSnapshot.state='over';finalSnapshot.winner=room.winner;finalSnapshot.endReason=room.endReason;}
     if(finalSnapshot)room.lastSnapshot=moderateSnapshotChat(finalSnapshot);
-    for(const p of room.players){if(p.id===c.id)continue;const target=clients.get(p.id);if(target)send(target.ws,{type:'game_end',winner:room.winner,reason:room.endReason,snapshot:finalSnapshot?personalizeSnapshot(finalSnapshot,p.id):null});}
+    for(const p of room.players){if(p.id===c.id&&!hpResult)continue;const target=clients.get(p.id);if(target)send(target.ws,{type:'game_end',winner:room.winner,reason:room.endReason,snapshot:finalSnapshot?personalizeSnapshot(finalSnapshot,p.id):null});}
     sendRoomState(room);return;
   }
   if(m.type==='state_snapshot'){
@@ -445,7 +506,7 @@ function handle(ws, raw, timings={}){
     const previousSnapshot=room.lastSnapshot;
     const wasMeeting=previousSnapshot?.state==='meeting',isMeeting=m.snapshot.state==='meeting';
     const meetingStarted=!wasMeeting&&isMeeting&&m.snapshot.meeting;
-    moderateSnapshotChat(m.snapshot);room.lastSnapshot=m.snapshot;
+    syncDoorSnapshot(room,m.snapshot);moderateSnapshotChat(m.snapshot);room.lastSnapshot=m.snapshot;
     // Quando um humano passa a morto, recebe o histórico privado do canal dos mortos.
     // Esse histórico nunca é incluído no room_state/snapshot enviado aos vivos.
     for(const p of room.players){
@@ -489,12 +550,14 @@ function handle(ws, raw, timings={}){
   if(m.type==='action'){
     if(isHost||room.status!=='playing')return;
     const action=String(m.action||'');
+    if(action==='sabotage'){handleSabotageRequest(room,c,m);return}
+    if(action==='hp_pass'&&room.mode!=='batata-quente')return;
     if(room.mode==='esconde-esconde'&&action==='task_complete'&&room.lastSnapshot?.hns?.phase==='final')return;
-    if(room.mode==='esconde-esconde'&&!new Set(['input','kill','vent_enter','vent_move','vent_exit','task_complete','decon_button']).has(action))return;const allowed=new Set(['kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','mine_dig','mine_enter','morph','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','hunter_target','guardian_protect','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','decon_button']);if(!allowed.has(action))return;
+    if(room.mode==='esconde-esconde'&&!new Set(['input','kill','vent_enter','vent_move','vent_exit','task_complete','decon_button']).has(action))return;if(room.mode==='batata-quente'&&!['input','hp_pass','task_complete','decon_button'].includes(action))return;const allowed=new Set(['reactor_hold','hp_pass','kill','report','emergency','locator','sheriff_shoot','delayed_mark','parasite_infect','mine_dig','mine_enter','morph','spectral_toggle','instructor_select','instructor_mark','clean_body','revive_body','seer_inspect','control','control_release','hunter_target','guardian_protect','sabotage','vent_enter','vent_move','vent_exit','task_complete','vote','chat','decon_button']);if(!allowed.has(action))return;
     if(action==='chat'){const now=Date.now();if(now-(c.lastMeetingChatAt||0)<3000)return;c.lastMeetingChatAt=now}
     const host=clients.get(room.hostId);if(!host)return;
     const allowedData={command:action,playerId:c.id};
-    for(const k of ['targetId','x','y','sabotage','ventId','stationId','taskId','stepId','fix','text','claim'])if(m[k]!==undefined)allowedData[k]=m[k];if(action==='chat')allowedData.text=moderateChat(String(m.text||'').slice(0,180));if(m.bodyId!==undefined)allowedData.bodyId=m.bodyId;
+    for(const k of ['targetId','x','y','sabotage','ventId','stationId','taskId','stepId','fix','text','claim','hpSeq'])if(m[k]!==undefined)allowedData[k]=m[k];if(action==='reactor_hold')allowedData.holding=m.holding===true;if(action==='chat')allowedData.text=moderateChat(String(m.text||'').slice(0,180));if(m.bodyId!==undefined)allowedData.bodyId=m.bodyId;
     send(host.ws,{type:'host_command',...allowedData});return;
   }
   if(m.type==='ghost_chat'){
@@ -543,7 +606,7 @@ function parseCookies(req){const out={};for(const part of String(req.headers.coo
 function sessionCookie(req,token,maxAge=ACCOUNT_SESSION_MAX_AGE){const secure=String(req.headers['x-forwarded-proto']||'').split(',')[0].trim()==='https'||!!req.socket?.encrypted;return `${ACCOUNT_SESSION_COOKIE}=${encodeURIComponent(token||'')}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${Math.max(0,Math.floor(maxAge))}${secure?'; Secure':''}`}
 function readJsonBody(req,maxBytes=64*1024){return new Promise((resolve,reject)=>{let total=0,parts=[];req.on('data',chunk=>{total+=chunk.length;if(total>maxBytes){reject(Object.assign(new Error('Corpo muito grande'),{status:413}));req.destroy();return}parts.push(chunk)});req.on('end',()=>{try{resolve(parts.length?JSON.parse(Buffer.concat(parts).toString('utf8')):{})}catch{reject(Object.assign(new Error('JSON inválido'),{status:400}))}});req.on('error',reject)})}
 function cleanAccountKeys(input){const out={};const src=input&&typeof input==='object'?input:{};for(const key of ACCOUNT_KEY_ACTIONS){const v=src[key];if(v===null)out[key]=null;else if(typeof v==='string'&&v.length<=40&&/^[A-Za-z0-9]+$/.test(v))out[key]=v}return out}
-function cleanAccountProfile(input={},protectedInput=null){const src=input&&typeof input==='object'?input:{};const protectedSrc=protectedInput&&typeof protectedInput==='object'?protectedInput:src;const personal=src.personalSettings&&typeof src.personalSettings==='object'?src.personalSettings:{};const room=src.roomSettings&&typeof src.roomSettings==='object'?src.roomSettings:{};const size=Math.min(15,Math.max(4,Math.round(Number(room.size)||10)));const bots=Math.min(size-1,Math.max(0,Math.round(Number(room.bots)||0)));const exclusiveCosmetics=cleanExclusiveCosmeticIds(protectedSrc.exclusiveCosmetics),owned=new Set(exclusiveCosmetics),cosmetics=cleanCosmetics(src.cosmetics);for(const [slot,id] of Object.entries(cosmetics))if(EXCLUSIVE_COSMETIC_BY_ID.has(id)&&!owned.has(id))cosmetics[slot]='none';return {name:safeText(src.name,12,'Você'),color:COLORS.includes(normalizeColor(src.color))?normalizeColor(src.color):'azul',cosmetics,exclusiveCosmetics,redeemedExclusiveCodes:cleanRedeemedExclusiveCodes(protectedSrc.redeemedExclusiveCodes),personalSettings:{volume:Math.min(2,Math.max(0,Number.isFinite(Number(personal.volume))?Number(personal.volume):1)),keys:cleanAccountKeys(personal.keys),streamerMode:personal.streamerMode===true,language:ROOM_LANGUAGES.has(String(personal.language||''))?String(personal.language):'pt-BR'},roomSettings:{mapId:MAP_IDS.has(String(room.mapId||''))?String(room.mapId):'nave',size,bots,cfg:cleanSettings(room.cfg&&typeof room.cfg==='object'?room.cfg:{},size)}}}
+function cleanAccountProfile(input={},protectedInput=null){const src=input&&typeof input==='object'?input:{};const protectedSrc=protectedInput&&typeof protectedInput==='object'?protectedInput:src;const personal=src.personalSettings&&typeof src.personalSettings==='object'?src.personalSettings:{};const room=src.roomSettings&&typeof src.roomSettings==='object'?src.roomSettings:{};const size=Math.min(15,Math.max(4,Math.round(Number(room.size)||10)));const bots=Math.min(size-1,Math.max(0,Math.round(Number(room.bots)||0)));const exclusiveCosmetics=cleanExclusiveCosmeticIds(protectedSrc.exclusiveCosmetics),owned=new Set(exclusiveCosmetics),cosmetics=cleanCosmetics(src.cosmetics);for(const [slot,id] of Object.entries(cosmetics))if(EXCLUSIVE_COSMETIC_BY_ID.has(id)&&!owned.has(id))cosmetics[slot]='none';return {name:safeText(src.name,12,'Você'),color:COLORS.includes(normalizeColor(src.color))?normalizeColor(src.color):'azul',cosmetics,exclusiveCosmetics,redeemedExclusiveCodes:cleanRedeemedExclusiveCodes(protectedSrc.redeemedExclusiveCodes),personalSettings:{volume:Math.min(2,Math.max(0,Number.isFinite(Number(personal.volume))?Number(personal.volume):1)),keys:cleanAccountKeys(personal.keys),streamerMode:personal.streamerMode===true,orientation:personal.orientation==='landscape'?'landscape':'portrait',language:ROOM_LANGUAGES.has(String(personal.language||''))?String(personal.language):'pt-BR'},roomSettings:{mapId:MAP_IDS.has(String(room.mapId||''))?String(room.mapId):'nave',size,bots,cfg:cleanSettings(room.cfg&&typeof room.cfg==='object'?room.cfg:{},size)}}}
 function createAccountService(opts={}){
   const supabaseUrl=String(opts.supabaseUrl||process.env.SUPABASE_URL||'').replace(/\/+$/,'');
   const supabaseSecretKey=String(opts.supabaseSecretKey||process.env.SUPABASE_SECRET_KEY||'').trim();
@@ -644,7 +707,7 @@ function createGameServer(opts={}){
     res.writeHead(404,{'content-type':'text/plain; charset=utf-8'});res.end('Não encontrado');
   });
   const wss=new WebSocketServer({server,maxPayload:2*1024*1024});
-  const lobbySweep=setInterval(()=>{const now=Date.now();for(const [code,room] of rooms){if(!['lobby','countdown','loading'].includes(room.status)||!Number.isFinite(Number(room.lobbyExpiresAt))||Number(room.lobbyExpiresAt)>now)continue;if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);room.countdownTimer=null;room.loadingTimer=null;const message='A Sala de Espera expirou após 10 minutos sem iniciar uma partida.';for(const p of [...room.players]){const cl=clients.get(p.id);if(!cl)continue;send(cl.ws,{type:'room_expired',code,message});cl.roomCode=null;cl.rematchCode=null;cl.rematchProfile=null}rooms.delete(code)}},Math.max(100,Math.min(1000,Number(opts.lobbySweepMs)||500)));
+  const lobbySweep=setInterval(()=>{const now=Date.now();for(const [code,room] of rooms){advanceRoomDoors(room);if(!['lobby','countdown','loading'].includes(room.status)||!Number.isFinite(Number(room.lobbyExpiresAt))||Number(room.lobbyExpiresAt)>now)continue;if(room.countdownTimer)clearTimeout(room.countdownTimer);if(room.loadingTimer)clearTimeout(room.loadingTimer);room.countdownTimer=null;room.loadingTimer=null;const message='A Sala de Espera expirou após 10 minutos sem iniciar uma partida.';for(const p of [...room.players]){const cl=clients.get(p.id);if(!cl)continue;send(cl.ws,{type:'room_expired',code,message});cl.roomCode=null;cl.rematchCode=null;cl.rematchProfile=null}rooms.delete(code)}},Math.max(100,Math.min(1000,Number(opts.lobbySweepMs)||500)));
   wss.on('connection',(ws,req)=>{
     ws.client={id:null,roomCode:null,name:'Tripulante',color:'azul',clientKey:null,accountId:null,exclusiveCosmetics:new Set(),ws};
     const accountReady=accountService.accountFromRequest(req).then(auth=>{ws.client.accountId=auth?.account?.id||null;ws.client.exclusiveCosmetics=new Set(cleanExclusiveCosmeticIds(auth?.account?.profile?.exclusiveCosmetics))}).catch(err=>{ws.client.accountId=null;ws.client.exclusiveCosmetics=new Set();console.warn('Falha ao identificar conta no WebSocket:',err.message)});

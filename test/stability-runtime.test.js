@@ -13,13 +13,13 @@ test('fake station actions still translate when no pending task exists',()=>{
 test('all active sabotages render their status without shadowing translation',()=>{
  const bar={};const G={sab:{reactor:12,lights:1,comms:1,doors:4},state:'playing'};
  const update=run('updateSabUI',{G,$:()=>bar,t:key=>key});update();
- for(const type of ['reactor','lights','comms','doors'])assert.ok(bar.innerHTML.includes('sabotage.bar.'+type));
+ for(const type of ['reactor','lights','comms'])assert.ok(bar.innerHTML.includes('sabotage.bar.'+type));assert.ok(!bar.innerHTML.includes('sabotage.bar.doors'),'portas não emitem avisos globais');
  G.sab={};update();assert.equal(bar.hidden,true);
 });
 test('sabotage panel builds four working actions and respects cooldown',()=>{
  const nodes={mbody:{children:[],appendChild(n){this.children.push(n)}}};let chosen;
  const G={sab:{cd:0},player:{}};
- const context={G,$:id=>nodes[id],showModal:()=>{},t:key=>key,closeModal:()=>{},Snd:{err:()=>{}},startSabotage:type=>{chosen=type;return true},el:(tag,cls,text)=>({text,style:{},children:[],appendChild(n){this.children.push(n)},addEventListener(_,fn){this.click=fn}})};
+ const context={ACTIVE_MAP_ID:'nave',G,$:id=>nodes[id],showModal:()=>{},t:key=>key,closeModal:()=>{},Snd:{err:()=>{}},startSabotage:type=>{chosen=type;return true},el:(tag,cls,text)=>({text,style:{},children:[],appendChild(n){this.children.push(n)},addEventListener(_,fn){this.click=fn}})};
  const open=run('openSabPanel',context);open();const buttons=nodes.mbody.children[0].children;
  assert.equal(buttons.length,4);
  for(const [i,type] of ['lights','reactor','comms','doors'].entries()){assert.equal(buttons[i].disabled,false);buttons[i].click();assert.equal(chosen,type)}
@@ -37,7 +37,7 @@ test('stale vent panels recover and invalid vent routes are refused',()=>{
 function minerHarness(){
  const actor={id:'owner',alive:true,role:'imp',function:'miner',x:0,y:0},other={id:'other',alive:true,role:'imp',function:'miner',x:0,y:0};
  const G={state:'playing',over:false,chars:[actor,other],gt:0,minerHoles:[]},CFG={minerHoles:5,minerCooldown:5};
- const context={G,CFG,NET:{inRoom:false},OFF_Y:6,roomAtPx:()=>({id:'room'}),boxBlocked:()=>false,dist:(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),actionDistancePx:()=>100,nearestWalkablePosition:(x,y)=>({x,y})};
+ const context={playVentSound(){},G,CFG,NET:{inRoom:false},OFF_Y:6,roomAtPx:()=>({id:'room'}),boxBlocked:()=>false,dist:(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),actionDistancePx:()=>100,nearestWalkablePosition:(x,y)=>({x,y})};
  const start=html.indexOf('function isMinerHoleId('),end=html.indexOf('\nfunction morphLook(',start);
  vm.runInNewContext(html.slice(start,end),context);return {context,G,CFG,actor,other};
 }

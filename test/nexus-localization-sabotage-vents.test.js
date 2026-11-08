@@ -17,7 +17,7 @@ test('Nexus traduz salas, estações, mensagens e nomes exibidos no mapa',()=>{
     for(const key of ['roomName.ship','roomName.shipCorridor','roomName.medbay','roomName.decon','roomName.vision','roomName.reactor','roomName.lab','roomName.o2','roomName.admin','roomName.electrical','roomName.comms','roomName.storage','roomName.cafeteria','roomName.balcony'])assert.equal(typeof catalog.strings[lang][key],'string',`${lang}:${key}`);
   }
   assert.equal(catalog.strings.en['nexus.station.reactor'],'Reactor core');
-  assert.equal(catalog.strings.es['nexus.station.adminmap'],'Mapa de Nexus HQ');
+  assert.equal(catalog.strings.es['nexus.station.adminmap'],catalog.strings.es['room.admin']);
   assert.equal(catalog.strings.ru['nexus.station.unlock'],'Управление дверями');
   assert.equal(catalog.strings.ja['nexus.station.decon_w_out'],'除染室を開く');
   assert.match(html,/function stationDisplayLabel\(st\)/);
@@ -59,7 +59,7 @@ test('saída do duto limpa estado residual sem alterar regras de Engenheiro e In
   assert.match(body,/puppet\.vent=null;puppet\.ventMv=0/);
   assert.match(body,/joy\.x=joy\.y=0;resetStick\(\)/);
   assert.match(html,/const engineer=ch\.function==='engineer'&&ch\.role==='crew'/);
-  assert.match(html,/!ch\.alive\|\|!\(ch\.role==='imp'\|\|engineer\)/);
+  assert.match(html,/!ch\.alive\|\|!\(ch\.role==='imp'\|\|ch\.role==='neutral'&&ch\.function==='jester'\|\|engineer\)/);
   assert.match(html,/if\(engineer&&\(\(G\.sab\.comms\|\|0\)>0\|\|\(ch\.engVentCd\|\|0\)>0\)\)return false/);
   assert.match(server,/const BOT_NAMES_FALLBACK = Array\.from\(\{length:15\}/);
 });

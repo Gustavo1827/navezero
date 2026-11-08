@@ -1,0 +1,10 @@
+.neutralText,#cfgFunctionTabs .neutralGroup h3{color:#b7bdd0!important}
+#role.neutral #roleTitle{color:#b7bdd0;text-shadow:0 4px 0 #454958}
+#end.neutral #endTitle{color:#b7bdd0;text-shadow:0 4px 0 #454958}
+#cfgFunctionTabs .neutralGroup button{border-color:#9096a7;color:var(--ink);background:#303541}
+
+
+
+.presetCard[data-theme='neutrals']::before{background:radial-gradient(circle at 28% 18%,rgba(197,203,218,.19),transparent 30%),radial-gradient(circle at 85% 76%,rgba(156,37,76,.2),transparent 32%)}
+
+.presetCard[data-theme='neutrals'] .presetFoot{flex-wrap:wrap;row-gap:10px}

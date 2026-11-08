@@ -9,3 +9,5 @@
 #btnEngineerVent.hnsHide.cooldown-label{display:block}
 
 #role.hnsReveal #roleTitle{color:var(--coral);text-shadow:0 4px 0 #7a1b2a}
+
+#hnsRadar{position:fixed;z-index:3;left:12px;bottom:12px;display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid #a7c4d3;border-radius:9px;background:rgba(17,31,43,.92);pointer-events:none;color:#fff}#hnsRadar[hidden]{display:none}.radarBars{display:flex;gap:3px}.radarBars i{width:12px;height:18px;background:#2d414c;border-radius:3px;border-bottom:4px solid #49606b;transition:background .18s}.radarBars i.filled{background:#ffd76d;border-color:#b97f25}#hnsRadar.neutral{opacity:.65}.radarCrew,.radarMonster{font-size:12px}body[data-mobile-layout="portrait"] #hnsRadar{left:22px;bottom:calc(176px + var(--sb))}body[data-mobile-layout="landscape"] #hnsRadar{left:12px;bottom:calc(132px + var(--sb))}

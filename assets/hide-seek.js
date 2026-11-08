@@ -1,13 +1,17 @@
 /* Hide and Seek. Classic rules are delegated to their existing implementations. */
 'use strict';
 const HNS=(()=>{
- const MODE='esconde-esconde',defs={hnsKillerVision:[700,260,1200,5,'killerVision'],hnsCrewVision:[900,260,900,5,'crewVision'],hnsAlertDuration:[2,1,3,1,'alertDuration'],hnsAlertInterval:[6,3,10,1,'alertInterval'],hnsStartDuration:[90,60,120,1,'startDuration'],hnsFinalDuration:[60,60,120,1,'finalDuration'],hnsCrewSpeed:[180,120,300,5,'crewSpeed'],hnsKillerSpeed:[320,310,400,5,'killerSpeed'],hnsKillerFinalSpeed:[420,410,500,5,'killerFinalSpeed'],hnsVentUses:[3,1,5,1,'ventUses'],hnsVentDuration:[5,1,10,1,'ventDuration']};
+ const MODE='esconde-esconde',defs={hnsKillerVision:[700,260,1200,5,'killerVision'],hnsCrewVision:[900,260,900,5,'crewVision'],hnsAlertDuration:[2,1,3,1,'alertDuration'],hnsAlertInterval:[6,3,10,1,'alertInterval'],hnsStartDuration:[90,60,90,1,'startDuration'],hnsFinalDuration:[60,30,60,1,'finalDuration'],hnsCrewSpeed:[180,120,300,5,'crewSpeed'],hnsKillerSpeed:[320,310,400,5,'killerSpeed'],hnsKillerFinalSpeed:[420,410,500,5,'killerFinalSpeed'],hnsVentUses:[3,1,5,1,'ventUses'],hnsVentDuration:[5,1,10,1,'ventDuration']};
  let selected='classic',clock=performance.now(),received=performance.now(),heardAlert=0,lastPhase='',runtime=null;
  for(const [key,[value,min,max]] of Object.entries(defs)){CFG[key]=CFG_DEF[key]=value;CFG_LIM[key]=[min,max];NET_SETTING_KEYS.push(key);ROOM_CFG_LABELS[key]={label:(I18N['pt-BR']?.['hns.'+defs[key][4]]||key),unit:key.endsWith('Vision')?'px':(/Duration|Interval/.test(key)?'s':'')}}
+ CFG.hnsKillerId='';NET_SETTING_KEYS.push('hnsKillerId');ROOM_CFG_LABELS.hnsKillerId={label:I18N['pt-BR']?.['hns.killer']||'Assassino',unit:''};
  for(const key of ['speed','impVision','crewVision'])CFG[key]=clamp(Math.round(CFG[key]/5)*5,...CFG_LIM[key]);
  Snd.hnsAlarm=function(){if(!this.on||this.volume<=0)return;this.init();for(let i=0;i<2;i++){this.tone(660,.14,'triangle',.045,-30,i*.32);this.tone(990,.14,'sine',.038,-90,i*.32+.16)}};
  const active=()=>!!G.hns&&!G.freePlay&&G.state!=='menu',authority=()=>!NET.inRoom||NET.isHost;
  const mode=()=>G.freePlay?'classic':NET.inRoom?NET.room?.mode:(!$('createPanel').hidden?selected:'classic');
+ const killerOptions=()=>[...(NET.room?.players||[]),...(NET.room?.botRoster||[]).slice(0,NET.room?.bots||0)];
+ const validKillerId=id=>NET.inRoom&&NET.room?.mode===MODE&&NET.room?.privacy==='private'&&killerOptions().some(p=>p.id===id)?id:'';
+ const killerSettingName=id=>killerOptions().find(p=>p.id===validKillerId(id))?.name||t('hns.random');
  const killer=()=>charById(G.hns?.killerId),locked=ch=>active()&&ch?.id===G.hns.killerId&&G.hns.phase==='preparing';
  const live=()=>['playing','task','tool'].includes(G.state)&&!G.over;
  const status=el('div','',null);status.id='hnsStatus';status.hidden=true;status.setAttribute('role','status');status.setAttribute('data-i18n-skip','');status.append(el('span',''),el('b',''));document.body.append(status);
@@ -18,10 +22,13 @@ const HNS=(()=>{
  const participating=ch=>!NET.inRoom||ch?.isBot||NET.room?.players?.some(p=>p.id===ch?.id);
  const livingCrew=()=>G.chars.filter(c=>c.alive&&c.role==='crew'&&participating(c));
  function updateCrewCount(){
-  crewCount.hidden=!(active()&&live()&&G.player?.alive&&G.player.role==='imp');
+  crewCount.hidden=!(active()&&live()&&G.player);
   if(crewCount.hidden)return;const text=t('role.teamCrew')+' × '+livingCrew().length;if(crewCount.lastChild.textContent!==text)crewCount.lastChild.textContent=text;
  }
- const modes=[['classic','public.classic'],[MODE,'hns.mode']];
+ const radar=el('div');radar.id='hnsRadar';radar.hidden=true;radar.setAttribute('role','img');radar.setAttribute('data-i18n-skip','');radar.append(el('span','radarCrew','●'),el('div','radarBars'),el('span','radarMonster','◆'));for(let i=0;i<5;i++)radar.children[1].append(el('i'));document.body.append(radar);let radarLevel=0,releaseHeard=false;
+ function updateRadar(){const p=G.player,k=killer(),on=active()&&live()&&p?.role==='crew';radar.hidden=!on;if(!on){radarLevel=0;return}const threat=p.alive&&k?.alive&&participating(k)&&!locked(k),scale=Math.hypot(WORLD_W,WORLD_H),far=scale*.24,near=TILE*2,distance=threat?dist(p,k):far;const target=threat?clamp((far-distance)/(far-near),0,1):0;radarLevel+=(target-radarLevel)*Math.min(1,(G.dt||.016)*7);const bars=threat?Math.round(radarLevel*5):0;for(const [i,b]of [...radar.children[1].children].entries())b.classList.toggle('filled',i<bars);radar.classList.toggle('neutral',!threat);radar.setAttribute('aria-label',t(threat?'stage2.radarLevel':'stage2.radarNeutral',{count:bars}))}
+ Snd.hnsRelease=function(){if(!this.on||this.volume<=0)return;this.init();this.tone(78,.75,'sawtooth',.045,-42);this.tone(123,.55,'triangle',.04,-75,.08);this.tone(52,.65,'sine',.07,-17,.2)};
+ const modes=[['classic','public.classic'],[MODE,'hns.mode'],['batata-quente','hp.mode']];
  function labels(){
   for(const [key,def] of Object.entries(defs))ROOM_CFG_LABELS[key].label=I18N['pt-BR']?.['hns.'+def[4]]||key;
   const group=$('createModeButtons');for(const [id,key] of modes){let b=group.querySelector(`[data-mode="${id}"]`);if(!b){b=el('button','chip');b.type='button';b.dataset.mode=id;b.addEventListener('click',()=>{selected=id;labels();Snd.click()});group.append(b)}const label=t(key);if(b.textContent!==label)b.textContent=label;b.setAttribute('aria-pressed',String(selected===id))}
@@ -71,6 +78,11 @@ const HNS=(()=>{
   mapTop.append(el('span','',t('freeplay.mapTitle')));
   for(const [id,map] of Object.entries(MAP_LIBRARY)){const button=el('button','',translateRuntimeText(map.name));button.type='button';button.disabled=disabled;button.setAttribute('aria-pressed',String(SELECTED_MAP_ID===id));button.addEventListener('click',()=>{if(disabled)return;selectGameMap(id)});mapChoices.append(button)}
   mapRow.append(mapTop,mapChoices);box.append(mapRow);
+  const killerRow=el('div','cfgrow'),killerTop=el('div','cfgtop'),killerChoices=el('div','cfgChoice'),killerValue=el('b','',killerSettingName(CFG.hnsKillerId));
+  killerValue.setAttribute('data-i18n-skip','');killerTop.append(el('span','',t('hns.killer')),killerValue);killerRow.append(killerTop);killerChoices.setAttribute('data-i18n-skip','');
+  const manual=NET.inRoom&&NET.room?.privacy==='private';
+  for(const option of [{id:'',name:t('hns.random')},...(manual?killerOptions():[])]){const button=el('button','',option.name);button.type='button';button.dataset.killerId=option.id;button.disabled=disabled||!manual;button.setAttribute('aria-pressed',String(validKillerId(CFG.hnsKillerId)===option.id));button.addEventListener('click',()=>{if(disabled||!manual)return;netNoteRoomSetting('hnsKillerId',option.id);netSaveRoomSettings();settings();Snd.click()});killerChoices.append(button)}
+  killerRow.append(killerChoices,el('small','',t(manual?'hns.killerSelectionHelp':'hns.publicRandom')));box.append(killerRow);
   for(const [key,min,max,step,label,desc] of settingEntries()){
    const row=el('div','cfgrow'),top=el('div','cfgtop'),name=el('label','',label),out=el('b','',formatSetting(key,CFG[key]));top.append(name,out);row.append(top);
    const change=value=>{if(disabled)return;CFG[key]=clamp(Math.round(Number(value)/step)*step,min,max);out.textContent=formatSetting(key,CFG[key]);netNoteRoomSetting(key,CFG[key]);saveCfg()};
@@ -99,7 +111,7 @@ const HNS=(()=>{
   $('taskList').hidden=!tasksAllowed()||!G.player.alive||G.player.role!=='crew';$('tasksPanel').hidden=false;
  }
 
- function init(){const k=G.imps[0];G.hns={killerId:k.id,phase:'preparing',remaining:10,mainRemaining:CFG.hnsStartDuration,alertRemaining:0,nextAlert:0,alertSeq:0,counted:G.tasks.filter(t=>!t.fake&&t.done).map(t=>t.id)};clock=received=performance.now();heardAlert=0;lastPhase='';G.killCd=1;for(const c of G.chars){c.function=null;c.guardian=c.instructor=false;c.netKillCd=1;c.hnsVentsUsed=0;c.hnsVentTime=0;if(c.ai)c.ai.killCd=1}G.sab={lights:0,reactor:0,comms:0,doors:0,cd:0};}
+ function init(){releaseHeard=false;const k=G.imps[0];G.hns={killerId:k.id,phase:'preparing',remaining:10,mainRemaining:CFG.hnsStartDuration,alertRemaining:0,nextAlert:0,alertSeq:0,counted:G.tasks.filter(t=>!t.fake&&t.done).map(t=>t.id)};clock=received=performance.now();heardAlert=0;lastPhase='';G.killCd=1;for(const c of G.chars){c.function=null;c.guardian=c.instructor=false;c.netKillCd=1;c.hnsVentsUsed=0;c.hnsVentTime=0;if(c.ai)c.ai.killCd=1}G.sab={lights:0,reactor:0,comms:0,doors:0,cd:0};}
  function alert(){const h=G.hns;h.alertSeq++;h.alertRemaining=CFG.hnsAlertDuration;h.nextAlert=CFG.hnsAlertDuration+CFG.hnsAlertInterval}
  function tick(){
   const now=performance.now(),elapsed=Math.max(0,(now-clock)/1000);clock=now;if(!active()||!live()||!authority())return;
@@ -112,7 +124,9 @@ const HNS=(()=>{
   blockTasks();checkEnd();
  }
  function ui(){
-  updateCrewCount();
+  updateCrewCount();updateRadar();
+  if(active()&&G.hns.phase==='preparing')releaseHeard=false;
+  if(active()&&live()&&!releaseHeard&&G.hns.phase!=='preparing'){releaseHeard=true;Snd.hnsRelease()}
   const on=active()&&live(),p=G.player,h=G.hns;status.hidden=true;blind.hidden=!(on&&p?.alive&&locked(p));vignette.hidden=!on;
   if(!on){$('game').style.transform='';vignette.style.opacity=0;music.stop();return}
   blockTasks();taskBar();
@@ -126,7 +140,7 @@ const HNS=(()=>{
   music.update(intensity);
  }
  function endCheck(){if(!active()||G.over||!authority())return !!G.over;const k=killer();if(!livingCrew().length){endGame('imp',t('hns.killerWin'));return true}if(!k||!k.alive||!participating(k)){endGame('crew',t('hns.killerLeft'));return true}if(G.hns.phase==='final'&&G.hns.remaining<=0){endGame('crew',t('hns.crewWin'));return true}return false}
- function hide(ch,v){if(!active()||!live()||!ch?.alive||ch.role!=='crew'||ch.vent||ch.ventAnim||(ch.ventCd||0)>0||(ch.hnsVentsUsed||0)>=CFG.hnsVentUses||!v||dist(ch,{x:v.px,y:v.py-OFF_Y})>actionDistancePx('vent'))return false;ch.hnsVentsUsed=(ch.hnsVentsUsed||0)+1;ch.hnsVentTime=CFG.hnsVentDuration;ch.vent=v.id;ch.x=v.px;ch.y=v.py-OFF_Y;ch.moving=false;ch.ventAnim={t:0,dur:.45,kind:'in'};ch.ventMv=0;if(ch.ai){ch.ai.path=[];ch.ai.state='idle';ch.ai.hnsHideAt=G.gt}if(ch===G.player){G.action=null;refreshVentPanel();Snd.tone(140,.2,'triangle',.035,-40)}return true}
+ function hide(ch,v){if(!active()||!live()||!ch?.alive||!canAccessStation(ch,{x:v?.x,y:v?.y,w:1,h:1})||ch.role!=='crew'||ch.vent||ch.ventAnim||(ch.ventCd||0)>0||(ch.hnsVentsUsed||0)>=CFG.hnsVentUses||!v||dist(ch,{x:v.px,y:v.py-OFF_Y})>actionDistancePx('vent'))return false;ch.hnsVentsUsed=(ch.hnsVentsUsed||0)+1;ch.hnsVentTime=CFG.hnsVentDuration;ch.vent=v.id;ch.x=v.px;ch.y=v.py-OFF_Y;ch.moving=false;ch.ventAnim={t:0,dur:.45,kind:'in'};ch.ventSeq=(ch.ventSeq||0)+1;playVentSound(ch,'in');ch.ventMv=0;if(ch.ai){ch.ai.path=[];ch.ai.state='idle';ch.ai.hnsHideAt=G.gt}if(ch===G.player){G.action=null;refreshVentPanel()}return true}
  function restoreHideButton(){
   const b=$('btnEngineerVent');if(!b.classList.contains('hnsHide'))return;
   b.classList.remove('hnsHide','cooldown-label');b.innerHTML=b._classicContent||'';b.title=b._classicTitle||'';delete b._classicTitle;delete b._classicContent;delete b._l;delete b.dataset.abilityCaption;
@@ -148,42 +162,50 @@ const HNS=(()=>{
 
  function route(ch,target,type='hns'){const tile=tileOf(target);return goTo(ch,{type},(x,y)=>Math.abs(x-tile.x)+Math.abs(y-tile.y)<=1)}
  function bot(ch,dt){
-  const ai=ch.ai;if(!ai||!ch.alive)return;if(locked(ch)){ch.moving=false;return}ch.netKillCd=Math.max(0,(ch.netKillCd||0)-dt);ai.hnsPlan=(ai.hnsPlan||0)-dt;
-  if(ch.vent){ch.moving=false;const k=killer(),safe=!k||dist(ch,k)>600;if(!ch.ventAnim&&G.gt-(ai.hnsHideAt||0)>4&&safe){exitVent(ch);ai.hnsPlan=0}return}
+  const ai=ch.ai;if(!ai||!ch.alive)return;ai.hnsTalk=(ai.hnsTalk||0)-dt;if(ai.hnsTalk<=0){ai.hnsTalk=14+Math.random()*12;oldSay(ch,t(ch.role==='imp'?'hns.npcHunt':ch.vent?'hns.npcHidden':'hns.npcHide'))}if(locked(ch)){ch.moving=false;return}ch.netKillCd=Math.max(0,(ch.netKillCd||0)-dt);ai.hnsPlan=(ai.hnsPlan||0)-dt;
+  if(ch.vent){ch.moving=false;ai.hnsVentPlan=(ai.hnsVentPlan||0)-dt;if(!ch.ventAnim&&ch.ventMv<=0&&ai.hnsVentPlan<=0){ai.hnsVentPlan=1;const routes=(VENT_ADJ[ch.vent]||[]).map(id=>ventById[id]).filter(v=>v&&v.id!==ai.hnsPreviousVent),memory=ai.hnsThreat;if(routes.length&&(ch.hnsVentTime||0)>1.2&&!ai.hnsVentMoved){routes.sort((a,b)=>memory?dist(b,memory)-dist(a,memory):0);ai.hnsPreviousVent=ch.vent;if(ventMove(ch,routes[0].id))ai.hnsVentMoved=true}else if(G.gt-(ai.hnsHideAt||0)>=Math.min(3.5,CFG.hnsVentDuration-0.3)){exitVent(ch);ai.hnsPlan=0}}return}
   if(ch.role==='imp'){
-   const range=CFG.hnsKillerVision,targets=G.chars.filter(t=>t!==ch&&t.alive&&t.role==='crew'&&!t.vent&&(G.hns.alertRemaining>0||dist(ch,t)<range&&losClear(ch.x,ch.y,t.x,t.y))).sort((a,b)=>dist(ch,a)-dist(ch,b)),t=targets[0];
-   const victim=targets.find(v=>dist(ch,v)<=actionDistancePx('kill')&&losClear(ch.x,ch.y,v.x,v.y));if(victim&&(ch.netKillCd||0)<=0){doKill(ch,victim);return}
-   if(ai.hnsPlan<=0){ai.hnsPlan=.55;let routed=false;for(const candidate of targets)if(route(ch,candidate,'hnsHunt')){routed=true;break}if(!routed&&!ai.path?.length)wander(ch)}
+   const targets=G.chars.filter(c=>c!==ch&&c.alive&&c.role==='crew'&&!c.vent&&(G.hns.alertRemaining>0||npcCanSeeChar(ch,c))).sort((a,b)=>dist(ch,a)-dist(ch,b)),victim=targets.find(v=>dist(ch,v)<=actionDistancePx('kill')&&losClear(ch.x,ch.y,v.x,v.y));
+   if(victim&&ch.netKillCd<=0){doKill(ch,victim);return}
+   const previous=targets.find(c=>c.id===ai.hnsTargetId),target=previous&&dist(ch,previous)<dist(ch,targets[0]||previous)*1.35?previous:targets[0];
+   if(target){ai.hnsTargetId=target.id;ai.hnsLastSeen={x:target.x,y:target.y,until:G.gt+4}}
+   if(ai.hnsPlan<=0){ai.hnsPlan=.65+Math.random()*.2;if(target)route(ch,target,'hnsHunt');else if(ai.hnsLastSeen&&G.gt<ai.hnsLastSeen.until){if(!ai.path?.length)route(ch,ai.hnsLastSeen,'hnsSearch')}else if(ai.state!=='walk'||!ai.path?.length)wander(ch)}
   }else{
-   const k=killer(),threat=k&&G.hns.phase!=='preparing'&&dist(ch,k)<750;
-   if(threat){const vent=nearestVentFor(ch);if(vent&&(ch.ventCd||0)<=0&&hide(ch,vent))return;
-    if(ai.hnsPlan<=0){ai.hnsPlan=.8;const options=ROOM_DEFS.map(r=>({x:(r.x+r.w/2)*TILE,y:(r.y+r.h/2)*TILE})).sort((a,b)=>(dist(b,k)-dist(b,ch)*.25)-(dist(a,k)-dist(a,ch)*.25));let ok=false;for(const dest of options.slice(0,5))if(route(ch,dest,'hnsFlee')){ok=true;break}if(!ok)wander(ch);}
+   const k=killer(),perceived=k&&k.alive&&!locked(k)&&npcCanSeeChar(ch,k);
+   if(perceived)ai.hnsThreat={x:k.x,y:k.y,until:G.gt+3};
+   const threat=ai.hnsThreat&&G.gt<ai.hnsThreat.until?ai.hnsThreat:null;
+   if(threat){const vent=nearestVentFor(ch);if(vent&&(ch.ventCd||0)<=0&&hide(ch,vent)){ai.hnsVentMoved=false;ai.hnsPreviousVent=null;ai.hnsVentPlan=.6;return}
+    if(ai.hnsPlan<=0||!ai.path?.length){ai.hnsPlan=1.2+Math.random()*.4;botFleeRoute(ch,threat,'hnsFlee')}
    }else if(ai.state==='work'&&tasksAllowed()){ch.moving=false;ai.work-=dt;if(ai.work<=0)finishWork(ch);return}
-   else if(ai.hnsPlan<=0){ai.hnsPlan=1.5;const tasks=G.hns.phase==='start'?pendingFor(ch).filter(t=>!t.fake):[];let chosen=false;for(const task of tasks.sort((a,b)=>dist(ch,stationPos(nextStep(a).st))-dist(ch,stationPos(nextStep(b).st)))){const step=nextStep(task),s=stationById[step.st],set=approachSet(s.id,s);if(goTo(ch,{type:'task',t:task,step,s},(x,y)=>set.has(y*COLS+x))){chosen=true;break}}if(!chosen&&!ai.path?.length)wander(ch)}
+   else if(ai.hnsPlan<=0){ai.hnsPlan=1.2+Math.random()*.8;if(ai.state!=='walk'||!ai.path?.length){const chosen=G.hns.phase==='start'&&tasksAllowed()&&botTaskRoute(ch);if(!chosen)wander(ch)}}
   }
-  if(ai.state==='walk'){if(ai.pathVer!==G.walkVer&&!repath(ch)){ai.state='idle';ai.hnsPlan=0;return}if(followPath(ch,dt)){if(ai.goal?.type==='task'&&tasksAllowed())onArrive(ch);else{ai.state='idle';ai.hnsPlan=0}}}
+  if(ai.state==='walk'){if(ai.pathVer!==G.walkVer&&!repath(ch)){ai.state='idle';ai.hnsPlan=.8;return}if(followPath(ch,dt)){if(ai.goal?.type==='task'&&tasksAllowed())onArrive(ch);else{ai.navVisits=ai.navVisits||{};if(ai.navRoom)ai.navVisits[ai.navRoom]=G.gt;ai.state='idle';ai.hnsPlan=.5}}}
  }
  // Only mode-specific execution takes these branches. Existing Classic functions stay intact.
+ const oldDrawImpostors=drawImpostors;drawImpostors=function(participants,count){const id=!G.freePlay&&validKillerId(CFG.hnsKillerId),chosen=id&&participants.find(p=>p.id===id);return chosen&&count===1?[chosen]:oldDrawImpostors(participants,count)};
  const oldNew=newGame;newGame=function(...args){G.hns=null;if(!NET.inRoom||NET.room?.mode!==MODE)return oldNew(...args);const saved={...CFG};for(const key of Object.keys(CFG))if(key.endsWith('Chance')||key.endsWith('Max'))CFG[key]=0;CFG.impostors=1;CFG.kill=1;try{const result=oldNew(...args);init();showLocalRoleReveal(false);if(args[0]){G.state='loading';$('role').hidden=true}return result}finally{Object.assign(CFG,saved)}};
- const oldSettings=netSettings;netSettings=function(){const settings=oldSettings();if(runtime)Object.assign(settings,runtime);return settings};
+ const oldSettings=netSettings;netSettings=function(){const settings=oldSettings();if(runtime)Object.assign(settings,runtime);settings.hnsKillerId=validKillerId(CFG.hnsKillerId);return settings};
+ const oldApplySettings=netApplySettings;netApplySettings=function(s){const result=oldApplySettings(s);CFG.hnsKillerId=validKillerId(s?.hnsKillerId);return result};
+ const oldNoteSetting=netNoteRoomSetting;netNoteRoomSetting=function(key,value){if(key!=='hnsKillerId')return oldNoteSetting(key,value);if(!NET.isHost||NET.room?.status!=='lobby'||NET.room?.mode!==MODE)return;const d=netEnsureRoomDraft();CFG.hnsKillerId=d.hnsKillerId=validKillerId(value);NET.roomDraftDirty=true;netAnnounceConfigChange(key,d.hnsKillerId)};
+ const oldRoomSettings=netRoomSettingsFromControls;netRoomSettingsFromControls=function(){const result=oldRoomSettings();result.settings.hnsKillerId=validKillerId(NET.roomDraft?.hnsKillerId??CFG.hnsKillerId);return result};
  const oldPayload=netRoomPayload;netRoomPayload=function(){return {...oldPayload(),mode:selected}};
  const oldLabels=syncPublicRoomLabels;syncPublicRoomLabels=function(){oldLabels();labels()};
  const oldLanguage=applyGameLanguage;applyGameLanguage=function(){oldLanguage();labels();if(G.cfgOpen&&mode()===MODE)settings()};
  const oldValue=roomViewSettingValue;roomViewSettingValue=function(key,value,unit){return key==='impVision'||key==='crewVision'?String(value)+' px':oldValue(key,value,unit)};
- const oldNoticeValue=roomCfgDisplayValue;roomCfgDisplayValue=function(key,value){return key==='speed'||key.endsWith('Speed')?String(value):key==='impVision'||key==='crewVision'||key.endsWith('Vision')?String(value)+' px':oldNoticeValue(key,value)};
+ const oldNoticeValue=roomCfgDisplayValue;roomCfgDisplayValue=function(key,value){return key==='hnsKillerId'?killerSettingName(value):key==='speed'||key.endsWith('Speed')?String(value):key==='impVision'||key==='crewVision'||key.endsWith('Vision')?String(value)+' px':oldNoticeValue(key,value)};
  const oldRoom=netRenderRoom,classicHelp=$('hostRoomConfig').querySelector('p.phase').innerHTML,modeLine=el('span');modeLine.id='roomModeText';$('roomLobby').querySelector('.roomMetaLine').append(modeLine);netRenderRoom=function(){oldRoom();const h=NET.room?.mode===MODE;modeLine.textContent='🎮 '+t(h?'hns.mode':'public.classic');const help=$('hostRoomConfig').querySelector('p.phase');if(h){help.textContent=t('hns.modeHelp')+' '+t('hns.taskHelp');help.dataset.hns='1'}else if(help.dataset.hns){help.innerHTML=classicHelp;delete help.dataset.hns;localizeDom(help)}};
- const oldView=renderRoomViewSettings;renderRoomViewSettings=function(){if(NET.room?.mode!==MODE)return oldView();const box=$('roomViewSettingsBody'),cfg=NET.room.settings||CFG;box.replaceChildren();for(const [key,def] of Object.entries(defs)){const row=el('div','roomViewSettingRow');row.append(el('span','',t('hns.'+def[4])),el('b','',formatSetting(key,cfg[key])));box.append(row)}for(const key of ['renderDist','actionDistance','commonTasks','mediumTasks','longTasks']){const row=el('div','roomViewSettingRow');row.append(el('span','',t('settings.general.'+key+'.name')),el('b','',formatSetting(key,cfg[key])));box.append(row)}};
+ const oldView=renderRoomViewSettings;renderRoomViewSettings=function(){if(NET.room?.mode!==MODE)return oldView();const box=$('roomViewSettingsBody'),cfg=NET.room.settings||CFG;box.replaceChildren();const killerRow=el('div','roomViewSettingRow'),value=el('b','',killerSettingName(cfg.hnsKillerId));value.setAttribute('data-i18n-skip','');killerRow.append(el('span','',t('hns.killer')),value);box.append(killerRow);for(const [key,def] of Object.entries(defs)){const row=el('div','roomViewSettingRow');row.append(el('span','',t('hns.'+def[4])),el('b','',formatSetting(key,cfg[key])));box.append(row)}for(const key of ['renderDist','actionDistance','commonTasks','mediumTasks','longTasks']){const row=el('div','roomViewSettingRow');row.append(el('span','',t('settings.general.'+key+'.name')),el('b','',formatSetting(key,cfg[key])));box.append(row)}};
  const oldOpenCfg=openCfg;openCfg=function(){oldOpenCfg();if(mode()===MODE)$('cfgTabs').hidden=true};
  const oldCfg=setCfgPage;setCfgPage=function(page){if(mode()===MODE){settings();return}$('cfgTabs').hidden=false;$('cfgTabFunctions').hidden=$('cfgTabPresets').hidden=false;return oldCfg(page)};
  const oldBuild=buildCfgUI;buildCfgUI=function(){if(mode()===MODE)return settings();return oldBuild()};
- const oldSaveReset=$('cfgReset');oldSaveReset.addEventListener('click',e=>{if(mode()!==MODE)return;e.stopImmediatePropagation();if(cfgEditingLocked())return;for(const [key,[v]] of Object.entries(defs)){CFG[key]=v;netNoteRoomSetting(key,v)}for(const key of['renderDist','actionDistance','commonTasks','mediumTasks','longTasks']){CFG[key]=CFG_DEF[key];netNoteRoomSetting(key,CFG[key])}settings()},true);
+ const oldSaveReset=$('cfgReset');oldSaveReset.addEventListener('click',e=>{if(mode()!==MODE)return;e.stopImmediatePropagation();if(cfgEditingLocked())return;netNoteRoomSetting('hnsKillerId','');for(const [key,[v]] of Object.entries(defs)){CFG[key]=v;netNoteRoomSetting(key,v)}for(const key of['renderDist','actionDistance','commonTasks','mediumTasks','longTasks']){CFG[key]=CFG_DEF[key];netNoteRoomSetting(key,CFG[key])}settings()},true);
  const oldReveal=showLocalRoleReveal;showLocalRoleReveal=function(reset){const ret=oldReveal(reset);if(active()){const k=killer()||G.imp;$('roleTitle').textContent=t('hns.reveal',{name:k?.name||'—'});$('roleMsg').textContent=t(G.player?.role==='imp'?'hns.killerHelp':'hns.crewHelp');$('roleDetails').hidden=true;$('role').classList.add('hnsReveal')}return ret};
  const oldRoleDraw=drawRoleChar;drawRoleChar=function(dt){if(!active())return oldRoleDraw(dt);const k=killer()||G.imp;if(!k)return;rcv.setTransform(1,0,0,1,0,0);rcv.clearRect(0,0,320,240);rcv.setTransform(3.2,0,0,3.2,160,130);drawChar(rcv,{...k,x:0,y:0,moving:false},false,{portrait:true})};
  const oldPlay=startPlay;startPlay=function(){const before=G.state;oldPlay();if(active()&&before==='role'&&G.state==='playing')toast(t(G.player?.role==='imp'?'hns.killerHelp':'hns.crewHelp'),4000)};
  const oldPanel=updateRolePanel;updateRolePanel=function(p){const host=$('roleName'),on=active()&&p?.role==='imp';if(!on&&host._hnsKillerLabel){delete host._rolePanelKey;delete host._hnsKillerLabel}oldPanel(p);if(on){host._hnsKillerLabel=true;const name=t('hns.killer');let team=host.querySelector('.roleTeam.imp');if(!team){team=el('span','roleTeam imp');host.replaceChildren(team)}if(team.textContent!==name)team.textContent=name;if($('rolePanel').getAttribute('aria-label')!==name)$('rolePanel').setAttribute('aria-label',name)}};
  const oldCapture=netCaptureSnapshot;netCaptureSnapshot=function(){const snap=oldCapture();if(active()){snap.hns=JSON.parse(JSON.stringify(G.hns));const chars=new Map(G.chars.map(c=>[c.id,c]));for(const record of snap.chars){const ch=chars.get(record.id);record.hnsVentsUsed=ch?.hnsVentsUsed||0;record.hnsVentTime=ch?.hnsVentTime||0}}return snap};
  const oldApply=netApplySnapshot;netApplySnapshot=function(s,force){if(s&&(!Number.isFinite(+s.seq)||+s.seq>=NET.recvSeq)){G.hns=s.hns?JSON.parse(JSON.stringify(s.hns)):null;clock=received=performance.now()}const result=oldApply(s,force);blockTasks();taskBar();updateCrewCount();return result};
- const oldMessage=netHandleMessage;netHandleMessage=function(m){const result=oldMessage(m);if(active()&&['room_state','player_left'].includes(m?.type))updateCrewCount();return result};
+ const oldMessage=netHandleMessage;netHandleMessage=function(m){const result=oldMessage(m);if(['room_state','player_left'].includes(m?.type)){if(NET.roomDraft)NET.roomDraft.hnsKillerId=validKillerId(NET.roomDraft.hnsKillerId);CFG.hnsKillerId=validKillerId(CFG.hnsKillerId);if(G.cfgOpen&&mode()===MODE)settings();if(active())updateCrewCount()}return result};
  const oldEnd=checkEnd;checkEnd=function(){return active()?endCheck():oldEnd()};
  const oldMove=moveChar;moveChar=function(ch,...args){if(locked(ch))return false;if(!active()||!ch?.alive)return oldMove(ch,...args);const [dx,dy]=args,steps=Math.max(1,Math.ceil(Math.max(Math.abs(dx),Math.abs(dy))/8));let moved=false;for(let i=0;i<steps;i++)moved=oldMove(ch,dx/steps,dy/steps)||moved;return moved};
  const oldSpeed=moveSpeedFor;moveSpeedFor=function(ch,base){if(active()&&ch?.alive)return ch.role==='imp'?(G.hns.phase==='final'?CFG.hnsKillerFinalSpeed:CFG.hnsKillerSpeed):CFG.hnsCrewSpeed;return oldSpeed(ch,base)};
@@ -191,6 +213,7 @@ const HNS=(()=>{
  const oldNpc=updateNPC;updateNPC=function(ch,dt){return active()?bot(ch,dt):oldNpc(ch,dt)};
  const oldGhost=updateGhostNPC;updateGhostNPC=function(ch,dt){if(active()){ch.moving=false;return}return oldGhost(ch,dt)};
  const oldGhostRole=maybeActivateGhostRole;maybeActivateGhostRole=function(ch){if(active())return false;return oldGhostRole(ch)};
+ const oldVentNote=noteVentSeen;noteVentSeen=function(...args){if(!active())return oldVentNote(...args)};
  const oldSay=npcSay;npcSay=function(...args){if(!active())return oldSay(...args)};
  const oldKill=doKill;doKill=function(k,v){if(!active())return oldKill(k,v);if(v?.vent||locked(k)||!live()||(k===G.player?G.killCd:(k?.netKillCd||0))>0)return false;const ok=withRules(()=>oldKill(k,v));if(ok){k.netKillCd=1;if(k===G.player)G.killCd=1;if(k.ai)k.ai.killCd=1;if(v===G.player)toast(t('hns.spectate'),3500);updateCrewCount()}return ok};
  const oldPlayerKill=playerKill;playerKill=function(){if(!active())return oldPlayerKill();const p=G.player;if(!p?.alive||p.role!=='imp'||locked(p)||G.killCd>0||G.state!=='playing'||uiBusy()||!G.killT)return;if(NET.inRoom&&!NET.isHost){netSend({type:'action',action:'kill',targetId:G.killT.id});G.killCd=1;return}return doKill(p,G.killT)};
@@ -218,6 +241,6 @@ const HNS=(()=>{
  const oldDraw=drawChar;drawChar=function(c,ch,...args){if(active()&&ch.id===G.hns.killerId)ch.nameCol='#ff6b7e';if(args[1]?.portrait)ch={...ch,netVisualX:undefined,netVisualY:undefined,killDash:null};oldDraw(c,ch,...args);if(active()&&ch.alive!==false&&(ch.id===G.hns.killerId||ch._hnsMonster)){const v=netVisualState(ch);monster(c,ch,v?.x??ch.x,v?.y??ch.y)}};
  const oldDeath=showDeathIntro;showDeathIntro=function(k,v){if(!active())return oldDeath(k,v);const wrap=$('deathIntro'),cv=$('deathCv'),c=cv.getContext('2d');$('deathDesc').textContent=t('hns.spectate');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);c.save();c.translate(230,125);c.scale(1.55,1.55);drawChar(c,{...k,x:-48,y:-12,_hnsMonster:true},false,{portrait:true});drawBody(c,{x:48,y:17,color:v.color,cosmetics:v.cosmetics});c.restore();wrap.hidden=false;setTimeout(()=>wrap.hidden=true,2400)};
  const oldRender=render;render=function(){oldRender();if(active()&&live()&&G.hns.phase==='final'){ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='rgba(145,12,28,.075)';ctx.fillRect(0,0,innerWidth,innerHeight);ctx.restore()}if(!active()||!live()||G.player?.role!=='imp'||!G.player.alive||G.hns.phase!=='final'||G.hns.alertRemaining<=0)return;ctx.save();ctx.setTransform(DPR*ZOOM,0,0,DPR*ZOOM,-G.cam.x*DPR*ZOOM,-G.cam.y*DPR*ZOOM);for(const ch of G.chars)if(ch.alive&&ch.role==='crew'){const p=G.player,a=Math.atan2(ch.y-p.y,ch.x-p.x);ctx.save();ctx.translate(p.x+Math.cos(a)*75,p.y+Math.sin(a)*75);ctx.rotate(a);ctx.fillStyle='#ff5368';ctx.strokeStyle='#10122a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-10);ctx.lineTo(-2,0);ctx.lineTo(-8,10);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()};ctx.restore()};
- function clear(){G.hns=null;restoreHideButton();ui();heardAlert=0;lastPhase='';$('tasksPanel').hidden=false;$('taskList').hidden=false;$('barFill').classList.remove('hnsFinal')}
+ function clear(){releaseHeard=false;G.hns=null;restoreHideButton();ui();heardAlert=0;lastPhase='';$('tasksPanel').hidden=false;$('taskList').hidden=false;$('barFill').classList.remove('hnsFinal')}
  labels();return {active,mode,defs,init,tick,settings,hide,locked,bot,ui,clear,tasksAllowed,music};
 })();

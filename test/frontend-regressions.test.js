@@ -15,7 +15,8 @@ test('configurações completas incluem infiltrados e distância de renderizaç�
 });
 
 test('a reunião revela os votos por 5 segundos e mantém a tela de ejeção por 10 segundos', () => {
-  assert.match(html, /M\.replyQ=\[\]; M\.dur=5; \$\('meetTitle'\)\.textContent=t\('meeting\.voting'\)/);
+  assert.doesNotMatch(html, /#meet\.(?:vote-reveal|space-result|space-eject) #(?:meetChat|meetSay|sayChips)[,{]/);
+  assert.match(html, /M\.dur=5; \$\('meetTitle'\)\.textContent=t\('meeting\.voting'\)/);
   assert.match(html, /M\.dur=10; \$\('meetTitle'\)\.textContent=t\('meeting\.ejection'\)/);
   assert.match(html, /M\.phase==='result'\)\{if\(M\.t>=M\.dur\)setMeetPhase\('eject'\)\}/);
   assert.match(html, /M\.phase==='eject'\)\{if\(M\.t>=M\.dur\)endMeeting\(\)\}/);
@@ -460,7 +461,7 @@ test('distância para ações oferece Curta, Média e Longa e sincroniza no mult
   assert.match(html, /actionDistance:\[0,2\]/);
   assert.match(html, /const ACTION_DISTANCE_LABELS=\['Curta','Média','Longa'\]/);
   assert.match(html, /function actionDistancePx\(kind='default'\)/);
-  assert.match(html, /const ACTION_DISTANCE_VALUES=\[100,130,160\]/);
+  assert.match(html, /const ACTION_DISTANCE_VALUES=\[48,120,220\]/);
   assert.match(html, /return ACTION_DISTANCE_VALUES\[lv\]/);
   assert.doesNotMatch(html, /const maps=\{kill:/, 'ações não devem manter tabelas de alcance separadas');
   assert.match(html, /\['actionDistance','Distância para ações'/);
@@ -491,8 +492,8 @@ test('portas sabotadas bloqueiam a iluminação como paredes e liberam visão ao
 
 test('tarefas usam categorias configuráveis, comuns compartilhadas e sorteio individual para médias/longas', () => {
   for (const key of ['commonTasks','mediumTasks','longTasks']) {
-    assert.match(html, new RegExp(key+':\\[0,5\\]'));
-    assert.match(server, new RegExp(key+':\\[0,5\\]'));
+    assert.match(html, new RegExp(key+':\\[1,5\\]'));
+    assert.match(server, new RegExp(key+':\\[1,5\\]'));
   }
   assert.match(html, /Tarefas Comuns/);
   assert.match(html, /Tarefas Médias/);
@@ -528,7 +529,7 @@ test('Paramédico libera usos por tarefas, revive uma única vez e sincroniza o 
     assert.match(html, new RegExp(key+':\\['));
     assert.match(server, new RegExp(key+':\\['));
   }
-  assert.equal(languages.strings['pt-BR']['role.desc.paramedic'],'Paramédico - Reviva Tripulantes por meio de seus corpos.');
+  assert.equal(languages.strings['pt-BR']['role.desc.paramedic'],'Realize tarefas e reviva Tripulantes por meio de seus corpos.');
   assert.match(html, /paramedicEligible=shuffle\(G\.chars\.filter\(c=>c\.role==='crew'&&!c\.function\)\)/);
   assert.match(html, /done-ch\.paramedicTaskBase>=CFG\.paramedicTasksPerUse/);
   assert.match(html, /function paramedicAvailableUses\(ch\)\{return syncParamedicUses\(ch\)\}/, 'cada jogador deve manter um conjunto, sem acumular novos usos');

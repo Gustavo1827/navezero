@@ -237,6 +237,10 @@ test('configurações do Temporizador respeitam limites e valores padrão', () =
   assert.equal(defaults.delayedChance,35);
   assert.equal(defaults.delayedMax,1);
   assert.equal(defaults.delayedDuration,20);
+  assert.equal(defaults.commsExpanded,0);
+  assert.equal(cleanSettings({commsExpanded:1}).commsExpanded,1);
+  assert.equal(cleanSettings({commsExpanded:7}).commsExpanded,1);
+  assert.equal(cleanSettings({commsExpanded:-1}).commsExpanded,0);
 });
 
 
@@ -466,7 +470,7 @@ test('Esconde-Esconde isola descoberta, mantém configurações e bloqueia açõ
  send(guest,{type:'action',action:'sabotage',sabotage:'lights'});send(guest,{type:'action',action:'emergency'});send(guest,{type:'action',action:'vote',targetId:host.id});send(guest,{type:'action',action:'vent_enter',ventId:'test'});const allowed=await onceMessage(host,m=>m.type==='host_command');assert.equal(allowed.command,'vent_enter');assert.equal(host.messages.some(m=>m.type==='host_command'),false);
  const snapshot={seq:1,state:'role',hns:{killerId:host.id,phase:'preparing',remaining:10},chars:[{id:host.id,role:'imp',function:null,alive:true},{id:guest.id,role:'crew',function:null,alive:true}],cfg:{},tasks:[],bodies:[]};send(host,{type:'state_snapshot',snapshot});const received=await onceMessage(guest,m=>m.type==='snapshot');assert.equal(received.snapshot.chars.find(c=>c.id===host.id).role,'imp','o Assassino é público neste modo');assert.equal(received.snapshot.hns.remaining,10);
  send(host,{type:'state_snapshot',snapshot:{...snapshot,seq:2,state:'playing',hns:{...snapshot.hns,phase:'final'}}});await onceMessage(guest,m=>m.type==='snapshot'&&m.snapshot.seq===2);host.messages=[];send(guest,{type:'action',action:'task_complete',taskId:'late'});send(guest,{type:'input',x:0,y:0});const input=await onceMessage(host,m=>m.type==='host_command');assert.equal(input.command,'input','o servidor rejeita tarefas após o início do Esconderijo Final');
- send(host,{type:'game_end',winner:'crew',reason:'Final Hide',snapshot:{...snapshot,state:'over',over:true,winner:'crew'}});await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='ended');send(host,{type:'rematch'});const rematch=await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='lobby');assert.equal(rematch.room.code,code);assert.equal(rematch.room.mode,'esconde-esconde');assert.equal(rematch.room.settings.hnsFinalDuration,80);
+ send(host,{type:'game_end',winner:'crew',reason:'Final Hide',snapshot:{...snapshot,state:'over',over:true,winner:'crew'}});await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='ended');send(host,{type:'rematch'});const rematch=await onceMessage(host,m=>m.type==='room_state'&&m.room.status==='lobby');assert.equal(rematch.room.code,code);assert.equal(rematch.room.mode,'esconde-esconde');assert.equal(rematch.room.settings.hnsFinalDuration,60);
 });
 
  test('visão e velocidade respeitam faixas por equipe e usam passos de 5',()=>{
@@ -475,3 +479,51 @@ test('Esconde-Esconde isola descoberta, mantém configurações e bloqueia açõ
  const stepped=cleanSettings({speed:183,impVision:707,crewVision:518,hnsCrewSpeed:183,hnsKillerSpeed:333,hnsKillerFinalSpeed:427,hnsKillerVision:813,hnsCrewVision:1113});for(const key of ['speed','impVision','crewVision','hnsCrewSpeed','hnsKillerSpeed','hnsKillerFinalSpeed','hnsKillerVision','hnsCrewVision'])assert.equal(stepped[key]%5,0,key);
  assert.ok(stepped.hnsKillerFinalSpeed>stepped.hnsKillerSpeed&&stepped.hnsKillerSpeed>stepped.hnsCrewSpeed);
  });
+
+test('filtro de mapa combina com região, idioma e modo e valida entrada pública',async t=>{
+ const app=createGameServer({port:0,host:'127.0.0.1'});await new Promise(r=>app.server.once('listening',r));const url=`ws://127.0.0.1:${app.server.address().port}`,host=await connect(url,'Host'),guest=await connect(url,'Guest');t.after(async()=>{await closeClient(host);await closeClient(guest);await new Promise(r=>app.server.close(r));rooms.clear()});
+ send(host,{type:'create_room',mode:'classic',region:'europe',language:'en',size:8,bots:2,settings:{mapId:'kryos'}});const made=await onceMessage(host,m=>m.type==='room_state'),code=made.room.code;assert.equal(made.room.settings.mapId,'kryos');send(host,{type:'set_room_privacy',privacy:'public'});await onceMessage(host,m=>m.type==='room_state'&&m.room.privacy==='public');
+ for(const [mapId,region,language,mode,n]of [['all','europe','en','classic',1],['kryos','europe','en','classic',1],['nave','europe','en','classic',0],['nexus','europe','en','classic',0],['kryos','asia','en','classic',0],['kryos','europe','ja','classic',0],['kryos','europe','en','batata-quente',0]]){const requestId=[mapId,region,language,mode].join('-');send(guest,{type:'list_rooms',requestId,mapId,region,language,mode});const list=await onceMessage(guest,m=>m.type==='room_list'&&m.requestId===requestId);assert.equal(list.rooms.length,n);if(n)assert.equal(list.rooms[0].mapId,'kryos')}
+ send(guest,{type:'room_info',code,publicEntry:true,mapId:'nave',region:'europe',language:'en',mode:'classic'});await onceMessage(guest,m=>m.type==='room_error');send(guest,{type:'join_room',code,publicEntry:true,mapId:'kryos',region:'europe',language:'en',mode:'classic'});const joined=await onceMessage(guest,m=>m.type==='room_state'&&m.room.players.length===2);assert.equal(joined.room.settings.mapId,'kryos');
+});
+
+test('Batata Quente: servidor calcula vencedores individuais e informa também o host',async t=>{
+ const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:5,loadingMs:5});await new Promise(r=>app.server.once('listening',r));const url=`ws://127.0.0.1:${app.server.address().port}`,all=[];
+ t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+ for(const cause of ['time','tasks','survivor','allDead']){
+  const host=await connect(url,'Host'),guest=await connect(url,'Guest');all.push(host,guest);
+  send(host,{type:'create_room',mode:'batata-quente',size:4,bots:2,settings:{hpType:cause==='tasks'?1:0,hpExplosion:10,hpPassCooldown:15}});const created=await onceMessage(host,m=>m.type==='room_state');assert.equal(created.room.settings.hpPassCooldown,9);
+  send(guest,{type:'join_room',code:created.room.code,name:'Guest'});await onceMessage(host,m=>m.type==='room_state'&&m.room.players.length===2);send(host,{type:'start_game'});const started=await onceMessage(host,m=>m.type==='game_start');await onceMessage(guest,m=>m.type==='game_start');
+  const chars=[{id:host.id,role:'crew',alive:cause!=='survivor'&&cause!=='allDead'},{id:guest.id,role:'crew',alive:cause!=='allDead'},...started.room.botRoster.map((c,i)=>({id:c.id,isBot:true,role:'crew',alive:i===0&&cause!=='survivor'&&cause!=='allDead'}))];
+  const tasks=chars.map(c=>({owner:c.id,fake:false,steps:[{done:true}]}));
+  // Client-proposed ids and team are intentionally wrong; server must replace both.
+  send(host,{type:'game_end',winner:'imp',snapshot:{seq:3,state:'playing',chars,tasks,hp:{holderId:guest.id,matchRemaining:cause==='time'?0:50,winnerIds:[guest.id,'forged']}}});
+  const result=await onceMessage(host,m=>m.type==='game_end'),remote=await onceMessage(guest,m=>m.type==='game_end');
+  const expected=cause==='allDead'?[]:cause==='survivor'?[guest.id]:[host.id,started.room.botRoster[0].id];
+  assert.deepEqual(result.snapshot.hp.winnerIds,expected);assert.deepEqual(remote.snapshot.hp.winnerIds,expected);assert.equal(result.snapshot.hp.endCause,cause);assert.equal(result.snapshot.over,true);assert.equal(result.snapshot.state,'over');assert.equal(result.winner,cause==='allDead'?'imp':'crew');
+  await closeClient(guest);await closeClient(host);
+ }
+});
+
+test('servidor serializa sabotagens e portas, respeita recargas e valida cada reparo manual',async t=>{
+ const fs=require('node:fs'),vm=require('node:vm'),rules=require('../assets/sabotage-rules'),html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8'),a=html.indexOf('const MAP_LIBRARY='),b=html.indexOf('\n};\nfunction loadMapSelection',a)+3,maps=vm.runInNewContext(html.slice(a,b)+';MAP_LIBRARY');
+ const app=createGameServer({port:0,host:'127.0.0.1',countdownMs:5,loadingMs:5,lobbySweepMs:100});await new Promise(r=>app.server.once('listening',r));const url=`ws://127.0.0.1:${app.server.address().port}`,all=[];
+ t.after(async()=>{for(const c of all)await closeClient(c);await new Promise(r=>app.server.close(r));rooms.clear()});
+ for(const mapId of ['nave','nexus','kryos']){
+  const host=await connect(url,'Host'),guest=await connect(url,'Guest');all.push(host,guest);send(host,{type:'create_room',mode:'classic',size:4,bots:2,settings:{mapId}});const made=await onceMessage(host,m=>m.type==='room_state');send(guest,{type:'join_room',code:made.room.code});await onceMessage(host,m=>m.type==='room_state'&&m.room.players.length===2);send(host,{type:'start_game'});await onceMessage(host,m=>m.type==='game_start');await onceMessage(guest,m=>m.type==='game_start');const room=rooms.get(made.room.code),cat=rules.catalog(maps[mapId]),first=cat.groups[0],second=cat.groups.find(g=>!g.doorIds.some(id=>first.doorIds.includes(id))),third=cat.groups.find(g=>g!==first&&g!==second);
+  assert.ok(first&&second);if(mapId==='kryos')assert.ok(!cat.groups.some(g=>g.id==='ship'));
+  const snap={seq:1,state:'playing',chars:[{id:host.id,alive:true,role:'imp',x:-200,y:-200},{id:guest.id,alive:true,role:'imp',x:-200,y:-200}],sab:{lights:0,reactor:0,comms:0,oxygen:0,doors:0,cd:0},doors:maps[mapId].doors.map(d=>!!d.decon),tasks:[],bodies:[]};
+  send(host,{type:'state_snapshot',snapshot:snap});await onceMessage(guest,m=>m.type==='snapshot');
+  send(host,{type:'sabotage_request',sabotage:'doors',roomId:first.id});send(guest,{type:'sabotage_request',sabotage:'reactor'});send(guest,{type:'sabotage_request',sabotage:'doors',roomId:second.id});await onceMessage(guest,m=>m.type==='door_state'&&Object.values(m.control.locks).some(l=>l.roomId===second.id));
+  const state=room.doorControl;assert.equal(state.main,null,'a primeira porta bloqueia imediatamente a sabotagem concorrente');assert.ok(first.doorIds.every(id=>state.locks[id]));assert.ok(second.doorIds.every(id=>state.locks[id]));
+  if(mapId!=='kryos'){
+   for(const l of Object.values(state.locks))l.until=Date.now()-1;await onceMessage(guest,m=>m.type==='door_state'&&!Object.keys(m.control.locks).length);assert.ok(state.cooldowns[first.id]>Date.now());send(host,{type:'sabotage_request',sabotage:'doors',roomId:first.id});send(guest,{type:'sabotage_request',sabotage:'reactor'});await onceMessage(host,m=>m.type==='sabotage_commit');assert.equal(Object.keys(state.locks).length,0,'a sala em recarga não pode ser trancada');
+   if(third)send(host,{type:'sabotage_request',sabotage:'doors',roomId:third.id});send(host,{type:'sabotage_ack',sabotage:'reactor',success:false});await onceMessage(guest,m=>m.type==='door_state'&&!m.control.main);assert.equal(Object.keys(state.locks).length,0,'a reserva da sabotagem bloqueia novas portas');
+  }else{
+   const before=Object.keys(state.locks).length;rules.expire(state,Date.now()+10001);assert.equal(Object.keys(state.locks).length,before,'Kryos não abre automaticamente');const id=first.doorIds[0],door=cat.doors.find(d=>d.id===id);snap.seq++;snap.chars[1].x=door.x*48-20;snap.chars[1].y=(door.y+door.h/2)*48-6;send(host,{type:'state_snapshot',snapshot:snap});await onceMessage(guest,m=>m.type==='snapshot'&&m.snapshot.seq===snap.seq);
+   send(guest,{type:'door_repair_begin',doorId:id});const grant=await onceMessage(guest,m=>m.type==='door_repair_ready');room.doorRepairs.get(guest.id).at-=2000;send(guest,{type:'door_repair_finish',doorId:id,nonce:grant.nonce,values:grant.target.map(v=>1-v)});send(guest,{type:'input',x:0,y:0});await onceMessage(host,m=>m.type==='host_command'&&m.command==='input');assert.ok(state.locks[id],'interruptores errados não abrem a porta');
+   send(guest,{type:'door_repair_finish',doorId:id,nonce:grant.nonce,values:grant.target});await onceMessage(host,m=>m.type==='door_state'&&!m.control.locks[id]);assert.equal(Object.keys(state.locks).length,before-1,'o reparo abre apenas uma porta');send(guest,{type:'sabotage_request',sabotage:'oxygen'});send(guest,{type:'input',x:0,y:0});await onceMessage(host,m=>m.type==='host_command'&&m.command==='input');assert.equal(state.main,null,'outras portas manuais ainda bloqueiam Oxigênio');
+  }
+  await closeClient(guest);await closeClient(host);
+ }
+});

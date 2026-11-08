@@ -11,12 +11,12 @@ for(const name of ['languages.json','assets/how-to-play-i18n.json']){
 let guide=read('assets/how-to-play.js');
 guide=guide.replace(/how-to-play-i18n\.json\?v=[a-f0-9]+/,'how-to-play-i18n.json?v='+hash(read('assets/how-to-play-i18n.json')));
 write('assets/how-to-play.js',guide);
-const css=read('assets/hide-seek.css')+'\n'+read('assets/how-to-play.css');
+const css=read('assets/kryos.css')+'\n'+read('assets/hot-potato.css')+'\n'+read('assets/neutrals.css')+'\n'+read('assets/hide-seek.css')+'\n'+read('assets/how-to-play.css');
 write('assets/ui-shared.css',css);
 let html=read('index.html');
 html=html.replace(/<link rel="stylesheet" href="assets\/(?:hide-seek|how-to-play|game-addons|ui-shared)\.css\?v=[a-f0-9]+">\s*/g,'');
 html=html.replace('</head>','<link rel="stylesheet" href="assets/ui-shared.css?v='+hash(css)+'">\n</head>');
-html=html.replace(/<script src="assets\/(?:hide-seek|how-to-play|game-addons)\.js\?v=[a-f0-9]+"><\/script>\s*/g,'');
-const scripts=['hide-seek','how-to-play'].map(name=>'<script src="assets/'+name+'.js?v='+hash(read('assets/'+name+'.js'))+'"></script>').join('\n');
+html=html.replace(/<script src="assets\/(?:sabotage-rules|sabotage|interactions|decontamination|kryos|kryos-games|kryos-render|hot-potato|neutrals|hide-seek|how-to-play|game-addons)\.js\?v=[a-f0-9]+"><\/script>\s*/g,'');
+const scripts=['neutrals','hide-seek','hot-potato','kryos-games','kryos-render','kryos','decontamination','interactions','sabotage-rules','sabotage','how-to-play'].map(name=>'<script src="assets/'+name+'.js?v='+hash(read('assets/'+name+'.js'))+'"></script>').join('\n');
 write('index.html',html.replace('</body>',scripts+'\n</body>'));
 console.log('UI styles grouped; independent scripts preserved; catalogs compacted; asset versions refreshed.');
