@@ -2,7 +2,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8')+'\n'+fs.readFileSync(require('node:path').join(__dirname,'../assets/bot-ai.js'),'utf8');
 const server=fs.readFileSync(path.join(__dirname,'..','server.js'),'utf8');
 
 test('Espectral tem configuração, aba e botão vermelhos',()=>{

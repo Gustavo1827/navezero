@@ -39,6 +39,7 @@ function minerHarness(){
  const G={state:'playing',over:false,chars:[actor,other],gt:0,minerHoles:[]},CFG={minerHoles:5,minerCooldown:5};
  const context={playVentSound(){},G,CFG,NET:{inRoom:false},OFF_Y:6,roomAtPx:()=>({id:'room'}),boxBlocked:()=>false,dist:(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),actionDistancePx:()=>100,nearestWalkablePosition:(x,y)=>({x,y})};
  const start=html.indexOf('function isMinerHoleId('),end=html.indexOf('\nfunction morphLook(',start);
+ context.abilityCooldownDelta=run('abilityCooldownDelta',context);
  vm.runInNewContext(html.slice(start,end),context);return {context,G,CFG,actor,other};
 }
 test('Minerador conclui escavação em 1 segundo e respeita limite ou infinito',()=>{

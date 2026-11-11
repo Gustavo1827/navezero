@@ -133,7 +133,8 @@ test('transferência de host preserva o snapshot completo e permite reiniciar a 
   const restarted=await onceMessage(guest,m=>m.type==='game_start'&&m.rematch===true);await onceMessage(peer,m=>m.type==='game_start'&&m.rematch===true);
   assert.equal(restarted.room.code,code,'a nova partida continua usando o mesmo código');
   assert.equal(restarted.room.round,2);assert.equal(restarted.room.bots,3,'a quantidade de bots deve sobreviver à revanche');assert.equal(restarted.room.settings.impostors,1);assert.equal(restarted.room.settings.renderDist,950);assert.equal(restarted.room.settings.sheriffCooldown,50);assert.equal(restarted.room.settings.sheriffChance,85);assert.equal(restarted.room.settings.sheriffMax,2);
-  assert.deepEqual(restarted.room.botRoster,botRosterBefore,'nomes e IDs dos bots devem permanecer estáveis ao reiniciar');
+  assert.deepEqual(restarted.room.botRoster.map(({id,name})=>({id,name})),botRosterBefore.map(({id,name})=>({id,name})),'nomes e IDs dos bots devem permanecer estáveis ao reiniciar');
+  const colors=[...restarted.room.players,...restarted.room.botRoster].map(p=>p.color);assert.equal(new Set(colors).size,colors.length,'cores dos bots devem evitar conflitos com os humanos após a transferência de host e a revanche');
 });
 
 test('revanche continua quando a saída do host deixa exatamente três participantes', async t=>{
@@ -237,6 +238,11 @@ test('configurações do Temporizador respeitam limites e valores padrão', () =
   assert.equal(defaults.delayedChance,35);
   assert.equal(defaults.delayedMax,1);
   assert.equal(defaults.delayedDuration,20);
+  assert.equal(defaults.ninjaChance,0);
+  assert.equal(defaults.ninjaCooldown,25);
+  const ninja=cleanSettings({impostors:3,ninjaChance:150,ninjaMax:99,ninjaCooldown:1,ninjaDuration:99});
+  assert.equal(ninja.ninjaChance,100);assert.equal(ninja.ninjaMax,3);assert.equal(ninja.ninjaCooldown,10);assert.equal(ninja.ninjaDuration,8);
+  assert.equal(cleanSettings({impostors:1,ninjaMax:3}).ninjaMax,1);
   assert.equal(defaults.commsExpanded,0);
   assert.equal(cleanSettings({commsExpanded:1}).commsExpanded,1);
   assert.equal(cleanSettings({commsExpanded:7}).commsExpanded,1);

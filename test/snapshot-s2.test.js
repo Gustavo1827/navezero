@@ -11,7 +11,7 @@ async function connect(url,name='Host'){const ws=new WebSocket(url),client={ws,m
 async function closeClient(c){try{c?.ws?.close()}catch{}await new Promise(r=>setTimeout(r,25))}
 
 test('0.4b-s6 inclui streamer mode, idiomas e prévia de sala com estrutura de localização',()=>{
-  assert.match(html,/Versão 0\.4b-s6/);
+  assert.match(html,/Versão 0\.4b-s7/);
   assert.match(html,/id="streamerModeIn"/);assert.match(html,/Modo para Streamers/);assert.match(html,/maskedRoomCode/);assert.match(html,/navigator\.clipboard\.writeText\(code\)/);
   for(const label of ['Português (Brasil)','Português (Portugal)','Español','English','Русский','日本語'])assert.ok(html.includes(label),`idioma ausente: ${label}`);
   assert.match(html,/let I18N=/);assert.match(html,/function t\(key,vars=\{\}\)/);assert.match(html,/languages\.json/);assert.match(html,/navezero_user_preferences_v1/);

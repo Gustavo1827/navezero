@@ -30,7 +30,7 @@ async function connect(url,name='Host'){
 async function closeClient(client){try{client?.ws?.close()}catch{}await new Promise(r=>setTimeout(r,25))}
 
 test('Snapshot 75 integra votação automática, Anjo Guardião e Ascensão dos Mortos',()=>{
-  assert.match(html,/Versão 0\.4b-s6/);
+  assert.match(html,/Versão 0\.4b-s7/);
   assert.match(html,/const everyoneVoted=voters\.every\(c=>M\.votes\[c\.id\]!==undefined\)/);
   assert.match(html,/id="btnGuardian"[\s\S]*?🪽<small>Proteger<\/small>/);
   assert.match(html,/guardianDuration:\[10,30\]/);
@@ -40,7 +40,7 @@ test('Snapshot 75 integra votação automática, Anjo Guardião e Ascensão dos 
   assert.match(html,/consumeGuardianProtection\(v,'kill'\)/);
   assert.match(html,/consumeGuardianProtection\(victim,'delayed'\)/);
   assert.match(html,/consumeGuardianProtection\(t,'parasite'\)/);
-  assert.match(html,/const GUARDIAN_BLOCK_KINDS=new Set\(\['kill','delayed','parasite'\]\)/);
+  assert.match(html,/const GUARDIAN_BLOCK_KINDS=new Set\(\['kill','delayed','parasite','sheriff'\]\)/);
   assert.doesNotMatch(html,/consumeGuardianProtection\([^)]*,'control'\)/);
   assert.match(html,/name:'Ascensão dos Mortos'/);
   assert.match(html,/if\(id==='dead'\)[\s\S]*?const help=preservedPresetConfig\('help'\)[\s\S]*?cfg\[role\.chanceKey\]=100[\s\S]*?Math\.min\(5,configuredPlayerCount\(\),15\)/);

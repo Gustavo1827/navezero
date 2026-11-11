@@ -4,7 +4,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
-const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8')+'\n'+fs.readFileSync(require('node:path').join(__dirname,'../assets/bot-ai.js'),'utf8');
 
 function mapLibrary(){
   const a=html.indexOf('const MAP_LIBRARY=');
@@ -113,7 +113,7 @@ test('Nexus usa minigames próprios e exatamente a rede de dutos planejada',()=>
 });
 
 test('interação das tarefas da Nexus é recalculada e fantasmas veem somente a própria posição no mapa',()=>{
-  assert.match(html,/function stationUseRange\(s\)\{return actionDistancePx\('object'\)\}/);
+  assert.match(html,/function stationUseRange\(s\)\{return s\?\.id==='freeplay_pc'\?Math\.max\(TILE\*1\.5,actionDistancePx\('object'\)\):actionDistancePx\('object'\)\}/);
   assert.match(html,/btnUse'\)\.addEventListener\('pointerdown'[\s\S]*const p=G\.player;[\s\S]*?const a=bestAction\(\);G\.action=a/);
   assert.doesNotMatch(html,/setLineDash\(\[8,5\]\)/,'tarefas não devem manter delineado constante; apenas o destaque de proximidade permanece');
   assert.match(html,/drawMapView\(mapc,512,368,true,false,true,true\)/);

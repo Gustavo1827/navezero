@@ -36,5 +36,5 @@ test('movimento online usa canal leve em ~30 Hz sem aumentar a frequência do sn
   assert.match(html, /type:'motion_state',motion:netCaptureMotion\(\)/);
   assert.match(html, /\},33\);\s*\/\/ Inputs também chegam ao host em ~30 Hz/);
   assert.match(server, /if\(m\.type==='motion_state'\)/);
-  assert.match(server, /send\(target\.ws,\{type:'motion',motion:m\.motion\}\)/);
+  assert.match(server, /send\(target\.ws,\{type:'motion',motion:\{\.\.\.m\.motion,chars:m\.motion\.chars\.map/);
 });

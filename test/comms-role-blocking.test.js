@@ -4,7 +4,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 
-const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8')+'\n'+fs.readFileSync(require('node:path').join(__dirname,'../assets/bot-ai.js'),'utf8');
 
 test('Comunicações bloqueia e padroniza botões das funções solicitadas',()=>{
   assert.match(html,/function roleAbilityBlockedByComms\(\)\{return \(G\.sab\.comms\|\|0\)>0\}/);
@@ -19,7 +19,7 @@ test('Comunicações bloqueia e padroniza botões das funções solicitadas',()=
 });
 
 test('Comunicações impede ativação por UI, IA e validação multiplayer sem gastar estado',()=>{
-  assert.match(html,/function doSheriffShot\(shooter,target\)\{if\(roleAbilityBlockedByComms\(\)\)return false/);
+  assert.match(html,/function doSheriffShot\(shooter,target,order=null\)\{[\s\S]*?if\(!order\)[\s\S]*?roleAbilityBlockedByComms\(\)/);
   assert.match(html,/function sheriffBotThink\(ch,dt\)\{[\s\S]*?roleAbilityBlockedByComms\(\)/);
   assert.match(html,/function inspectBody\(seer,body\)\{[\s\S]*?roleAbilityBlockedByComms\(\)/);
   assert.match(html,/function seerBotThink\(ch,dt\)\{[\s\S]*?roleAbilityBlockedByComms\(\)/);

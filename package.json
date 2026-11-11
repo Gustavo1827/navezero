@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server.js",
     "test": "node --test test/*.test.js",
-    "build": "node scripts/build-client.js"
+    "build": "node scripts/build-client.js",
+    "diagnose:ai": "node scripts/diagnose-ai.js"
   },
   "engines": {
     "node": ">=20"

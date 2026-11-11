@@ -11,7 +11,7 @@ const langs=['pt-BR','pt-PT','es','en','ru','ja'];
 
 test('Nexus traduz salas, estações, mensagens e nomes exibidos no mapa',()=>{
   const stationKeys=Object.keys(catalog.strings['pt-BR']).filter(k=>k.startsWith('nexus.station.'));
-  assert.equal(stationKeys.length,50);
+  assert.equal(stationKeys.length,51);
   for(const lang of langs){
     for(const key of stationKeys)assert.equal(typeof catalog.strings[lang][key],'string',`${lang}:${key}`);
     for(const key of ['roomName.ship','roomName.shipCorridor','roomName.medbay','roomName.decon','roomName.vision','roomName.reactor','roomName.lab','roomName.o2','roomName.admin','roomName.electrical','roomName.comms','roomName.storage','roomName.cafeteria','roomName.balcony'])assert.equal(typeof catalog.strings[lang][key],'string',`${lang}:${key}`);
@@ -40,12 +40,13 @@ test('configurações de funções usam chaves por campo nos seis idiomas',()=>{
   assert.match(html,/fieldDescKey=`settings\.field\.\$\{k\}\.desc`/);
 });
 
-test('botão de sabotagem usa o papel real do personagem e preserva permissões e cooldown',()=>{
+test('botão de sabotagem abre sem recarga e preserva permissões e recargas de ativação',()=>{
   assert.match(html,/const playerIsImpostor=\(\)=>!!G\.player&&\(G\.player\.role\|\|G\.role\)==='imp'/);
   assert.match(html,/imp=playerIsImpostor\(\)/);
   assert.match(html,/hv\(bs,!imp\|\|\(!p\.alive&&!ghostCanSab\(\)\)\)/);
   assert.match(html,/const S=G\.sab; if\(S\.cd>0\)return false/);
-  assert.match(html,/const st=G\.sab\.cd>0\?String\(Math\.ceil\(G\.sab\.cd\)\):'Sabotar'/);
+  assert.match(html,/const st='Sabotar';setCls\(bs,'cooldown-label',false\)/);
+  assert.doesNotMatch(html,/setCls\(bs,'ready',[^;]*G\.sab\.cd/);
   assert.match(html,/command==='sabotage'[\s\S]*ch\.role==='imp'/);
 });
 
@@ -58,8 +59,8 @@ test('saída do duto limpa estado residual sem alterar regras de Engenheiro e In
   assert.match(body,/ch\.vent=null;ch\.ventMv=0/);
   assert.match(body,/puppet\.vent=null;puppet\.ventMv=0/);
   assert.match(body,/joy\.x=joy\.y=0;resetStick\(\)/);
-  assert.match(html,/const engineer=ch\.function==='engineer'&&ch\.role==='crew'/);
-  assert.match(html,/!ch\.alive\|\|!\(ch\.role==='imp'\|\|ch\.role==='neutral'&&ch\.function==='jester'\|\|engineer\)/);
-  assert.match(html,/if\(engineer&&\(\(G\.sab\.comms\|\|0\)>0\|\|\(ch\.engVentCd\|\|0\)>0\)\)return false/);
+  assert.match(html,/const identity=ventIdentity\(ch\),engineer=identity\.function==='engineer'&&identity\.role==='crew'/);
+  assert.match(html,/!ch\.alive\|\|!ventPermission\(ch\)/);
+  assert.match(html,/if\(engineer&&\(\(G\.sab\.comms\|\|0\)>0\|\|\(identity\.engVentCd\|\|0\)>0\)\)return false/);
   assert.match(server,/const BOT_NAMES_FALLBACK = Array\.from\(\{length:15\}/);
 });

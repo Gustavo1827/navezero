@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8')+'\n'+fs.readFileSync(require('node:path').join(__dirname,'../assets/bot-ai.js'),'utf8');
 const match = html.match(/function checkEnd\(\)\{[\s\S]*?\n\}/);
 assert.ok(match, 'checkEnd deve existir no jogo');
 

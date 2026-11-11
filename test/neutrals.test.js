@@ -1,16 +1,16 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
-const {cleanSettings}=require('../server');
+const {cleanSettings}=require('../server'),NZNeutralRules=require('../assets/neutral-rules'),NET={inRoom:false};
 const source=fs.readFileSync(path.join(__dirname,'../assets/neutrals.js'),'utf8');
 test('Neutros respeitam um terço, não substituem Infiltrados e sempre possuem função',()=>{
  const assign=source.match(/ function assign\(\)\{[\s\S]*?\n \}/)[0];
  for(const total of [4,6,9,15]){const G={freePlay:false,chars:Array.from({length:total},(_,id)=>({id,role:id===0?'imp':'crew',function:null}))};G.player=G.chars[1];let classic=true;
-  const context={G,roles:[{id:'jester',maxKey:'jesterMax',chanceKey:'jesterChance'}],CFG:{neutrals:5,jesterMax:5,jesterChance:100},classic:()=>classic,shuffle:x=>x};vm.runInNewContext(assign,context);context.assign();assert.equal(G.chars.filter(c=>c.role==='imp').length,1);assert.equal(G.chars.filter(c=>c.role==='neutral').length,Math.floor(total/3));assert.ok(G.chars.filter(c=>c.role==='neutral').every(c=>c.function==='jester'));
-  for(const c of G.chars)if(c.role==='neutral'){c.role='crew';c.function=null}context.CFG.jesterChance=0;context.assign();assert.ok(!G.chars.some(c=>c.role==='neutral'));context.CFG.jesterChance=100;classic=false;context.assign();assert.ok(!G.chars.some(c=>c.role==='neutral'),'isolado do Esconde-Esconde');
+  const context={NET,NZNeutralRules,G,roles:[{id:'jester',maxKey:'jesterMax',chanceKey:'jesterChance'}],CFG:{neutrals:Math.floor(total/3),jesterMax:5,jesterChance:100},classic:()=>classic,shuffle:x=>x};vm.runInNewContext(assign,context);context.assign();assert.equal(G.chars.filter(c=>c.role==='imp').length,1);assert.equal(G.chars.filter(c=>c.role==='neutral').length,Math.floor(total/3));assert.ok(G.chars.filter(c=>c.role==='neutral').every(c=>c.function==='jester'));
+  for(const c of G.chars)if(c.role==='neutral'){c.role='crew';c.function=null}context.CFG.jesterChance=0;assert.throws(()=>context.assign(),/neutral_capacity/);assert.ok(!G.chars.some(c=>c.role==='neutral'));context.CFG.jesterChance=100;classic=false;context.assign();assert.ok(!G.chars.some(c=>c.role==='neutral'),'isolado do Esconde-Esconde');
  }
 });
 test('servidor limita configurações neutras e mantém chances independentes',()=>{
- for(const total of [4,6,9,15]){const cfg=cleanSettings({neutrals:99,jesterMax:99,jesterChance:100,impostors:1},total);assert.equal(cfg.neutrals,Math.floor(total/3));assert.equal(cfg.jesterMax,cfg.neutrals);assert.equal(cfg.impostors,1);assert.equal(cfg.jesterChance,100)}assert.equal(cleanSettings({neutrals:3,jesterMax:1},9).jesterMax,3);assert.equal(cleanSettings({neutrals:0,jesterMax:5}).jesterMax,0);
+ for(const total of [4,6,9,15]){const cfg=cleanSettings({neutrals:99,jesterMax:99,jesterChance:100,impostors:1},total);assert.equal(cfg.neutrals,Math.floor(total/3));assert.equal(cfg.jesterMax,cfg.neutrals);assert.equal(cfg.impostors,1);assert.equal(cfg.jesterChance,100)}assert.equal(cleanSettings({neutrals:3,jesterMax:1},9).jesterMax,1);assert.equal(cleanSettings({neutrals:0,jesterMax:5}).jesterMax,0);
 });
 
 test('Hora dos Neutros copia Todos ajudam e muda apenas os parâmetros das funções neutras',()=>{
@@ -29,14 +29,22 @@ test('Hora dos Neutros copia Todos ajudam e muda apenas os parâmetros das funç
 
 test('funções neutras registradas dividem as vagas respeitando chance e máximo',()=>{
  const assign=source.match(/ function assign\(\)\{[\s\S]*?\n \}/)[0],G={freePlay:false,chars:Array.from({length:15},(_,id)=>({id,role:id===0?'imp':'crew',function:null}))};G.player=G.chars[1];
- const roles=[{id:'jester',maxKey:'jesterMax',chanceKey:'jesterChance'},{id:'future',maxKey:'futureMax',chanceKey:'futureChance'}],context={G,roles,CFG:{neutrals:5,jesterMax:2,jesterChance:100,futureMax:3,futureChance:100},classic:()=>true,shuffle:x=>x};vm.runInNewContext(assign,context);context.assign();
- assert.equal(G.chars.filter(c=>c.function==='jester').length,2);assert.equal(G.chars.filter(c=>c.function==='future').length,3);assert.equal(G.chars.filter(c=>c.role==='imp').length,1);
+ const roles=[{id:'jester',maxKey:'jesterMax',chanceKey:'jesterChance'},{id:'worker',maxKey:'workerMax',chanceKey:'workerChance'}],context={NET,NZNeutralRules,G,roles,CFG:{neutrals:5,jesterMax:2,jesterChance:100,workerMax:3,workerChance:100},classic:()=>true,shuffle:x=>x};vm.runInNewContext(assign,context);context.assign();
+ assert.equal(G.chars.filter(c=>c.function==='jester').length,2);assert.equal(G.chars.filter(c=>c.function==='worker').length,3);assert.equal(G.chars.filter(c=>c.role==='imp').length,1);
 });
 
 
-test('a soma das vagas neutras nunca fica abaixo da quantidade configurada',()=>{
- const helper=source.match(/ function ensureCapacity\(config=CFG\)\{[\s\S]*?\n \}/)[0],roles=[{maxKey:'jesterMax'},{maxKey:'secondMax'},{maxKey:'thirdMax'},{maxKey:'offMax'}],context={roles};vm.runInNewContext(helper,context);
- const mixed={neutrals:5,jesterMax:1,secondMax:2,thirdMax:3,offMax:0};context.ensureCapacity(mixed);assert.deepEqual(mixed,{neutrals:5,jesterMax:1,secondMax:2,thirdMax:3,offMax:0});
- const insufficient={neutrals:5,jesterMax:1,secondMax:1,thirdMax:0,offMax:0};context.ensureCapacity(insufficient);assert.equal(insufficient.jesterMax+insufficient.secondMax,5);assert.equal(insufficient.thirdMax,0);assert.equal(insufficient.offMax,0);
- const only={neutrals:5,jesterMax:0};const single={roles:[roles[0]]};vm.runInNewContext(helper,single);single.ensureCapacity(only);assert.equal(only.jesterMax,5);
+test('máximos individuais não forçam quantidades e podem somar menos que o total',()=>{
+ const helper=source.match(/ function ensureCapacity\(config=CFG\)\{[\s\S]*?\n \}/)[0],roles=[{maxKey:'jesterMax',chanceKey:'jesterChance'},{maxKey:'secondMax',chanceKey:'secondChance'},{maxKey:'thirdMax',chanceKey:'thirdChance'},{maxKey:'offMax',chanceKey:'offChance'}],context={roles};vm.runInNewContext(helper,context);
+ const mixed={neutrals:5,jesterMax:1,secondMax:2,thirdMax:3,offMax:0,jesterChance:0,secondChance:0,thirdChance:0,offChance:0};context.ensureCapacity(mixed);assert.deepEqual(mixed,{neutrals:5,jesterMax:1,secondMax:2,thirdMax:3,offMax:0,jesterChance:0,secondChance:0,thirdChance:0,offChance:0});
+ const insufficient={neutrals:5,jesterMax:1,secondMax:1,thirdMax:0,offMax:0};context.ensureCapacity(insufficient);assert.equal(insufficient.jesterMax+insufficient.secondMax,2);assert.equal(insufficient.thirdMax,0);assert.equal(insufficient.offMax,0);
+ const only={neutrals:5,jesterMax:0};const single={roles:[roles[0]]};vm.runInNewContext(helper,single);single.ensureCapacity(only);assert.equal(only.jesterMax,0);
+});
+
+test('exact enabled neutral capacities include Child and Shifter without changing crew chances',()=>{
+ const ids=Array.from({length:15},(_,i)=>String(i));
+ for(let i=0;i<100;i++){const cfg=cleanSettings({neutrals:5,jesterChance:100,jesterMax:1,workerChance:100,workerMax:3,pyromancerChance:100,pyromancerMax:1,childChance:0,childMax:5,shifterChance:0,shifterMax:5,sheriffChance:37});const plan=NZNeutralRules.createPlan(ids,cfg);assert.equal(plan.roles.length,5);assert.equal(plan.roles.filter(r=>r==='worker').length,3);assert.equal(plan.roles.filter(r=>r==='jester').length,1);assert.equal(plan.roles.filter(r=>r==='pyromancer').length,1);assert.equal(cfg.sheriffChance,37)}
+ assert.equal(cleanSettings({neutrals:3,childChance:40,shifterChance:1},9).childChance,100);assert.equal(cleanSettings({neutrals:3,childChance:40,shifterChance:1},9).shifterChance,100);
+ assert.throws(()=>NZNeutralRules.createPlan(ids,{neutrals:5,jesterChance:100,jesterMax:1}),/neutral_capacity/);
+ const plan=NZNeutralRules.createPlan(ids,{neutrals:5,childChance:100,childMax:3,shifterChance:100,shifterMax:2});assert.equal(plan.roles.filter(r=>r==='child').length,3);assert.equal(plan.roles.filter(r=>r==='shifter').length,2);
 });

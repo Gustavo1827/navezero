@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8')+'\n'+fs.readFileSync(require('node:path').join(__dirname,'../assets/bot-ai.js'),'utf8');
 const server = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
 const languages = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'languages.json'), 'utf8'));
 
@@ -14,10 +14,10 @@ test('configurações completas incluem infiltrados e distância de renderizaç�
   assert.match(server, /cleanSettings\(\{\.\.\.room\.settings,\.\.\.\(m\.settings&&typeof m\.settings==='object'\?m\.settings:\{\}\)\},room\.size\)/);
 });
 
-test('a reunião revela os votos por 5 segundos e mantém a tela de ejeção por 10 segundos', () => {
+test('a reunião revela os votos por 5 segundos e mantém a tela de ejeção por 5 segundos (velocidade 2×)', () => {
   assert.doesNotMatch(html, /#meet\.(?:vote-reveal|space-result|space-eject) #(?:meetChat|meetSay|sayChips)[,{]/);
   assert.match(html, /M\.dur=5; \$\('meetTitle'\)\.textContent=t\('meeting\.voting'\)/);
-  assert.match(html, /M\.dur=10; \$\('meetTitle'\)\.textContent=t\('meeting\.ejection'\)/);
+  assert.match(html, /M\.dur=5; \$\('meetTitle'\)\.textContent=t\('meeting\.ejection'\)/);
   assert.match(html, /M\.phase==='result'\)\{if\(M\.t>=M\.dur\)setMeetPhase\('eject'\)\}/);
   assert.match(html, /M\.phase==='eject'\)\{if\(M\.t>=M\.dur\)endMeeting\(\)\}/);
   assert.match(html, /\$\('meet'\)\.classList\.toggle\('vote-reveal',ph==='result'\)/);
@@ -76,15 +76,15 @@ test('Observador amplia somente a detecção de jogadores no mapa completo', () 
 
 });
 
-test('disparo do Xerife é validado pelo host e respeita alcance, linha de visão e cooldown', () => {
+test('disparo do Xerife é validado no servidor e apresentado pelo motor existente e respeita alcance, linha de visão e cooldown', () => {
   assert.match(html, /command==='sheriff_shoot'[\s\S]*?activePlay&&!G\.M&&ch\.alive&&ch\.role==='crew'&&ch\.function==='sheriff'[\s\S]*?dist\(ch,target\)<=actionDistancePx\('sheriff'\)&&losClear/);
   assert.match(server, /'sheriff_shoot'/);
-  assert.match(html, /function doSheriffShot\(shooter,target\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(target\);addSheriffBody/);
-  assert.match(html.slice(html.indexOf('function doSheriffShot(shooter,target)'),html.indexOf('function playerSheriffShot()')), /addSheriffBody\(/, 'vítimas dos disparos ficam no registro normal de corpos');
-  const shotBody=html.slice(html.indexOf('function doSheriffShot(shooter,target)'),html.indexOf('function playerSheriffShot()'));
-  assert.doesNotMatch(shotBody.slice(shotBody.indexOf("if(target.role==='imp')"),shotBody.indexOf('}else{')), /killChar\(shooter\)/, 'o Xerife sobrevive ao acertar um Infiltrado');
+  assert.match(html, /function doSheriffShot\(shooter,target,order=null\)[\s\S]*?target\.role==='imp'[\s\S]*?killChar\(target\);addSheriffBody/);
+  assert.match(html.slice(html.indexOf('function doSheriffShot(shooter,target,order=null)'),html.indexOf('function playerSheriffShot()')), /addSheriffBody\(/, 'vítimas dos disparos ficam no registro normal de corpos');
+  const shotBody=html.slice(html.indexOf('function doSheriffShot(shooter,target,order=null)'),html.indexOf('function playerSheriffShot()'));
+  assert.doesNotMatch(shotBody.slice(shotBody.indexOf("if(outcome==='hit')"),shotBody.indexOf('}else{')), /killChar\(shooter\)/, 'o Xerife sobrevive ao acertar um Infiltrado');
   assert.match(shotBody, /killChar\(shooter\);addSheriffBody/, 'ao errar, somente o Xerife morre e deixa um corpo normal');
-  assert.match(html, /if\(shooter===G\.player\)G\.sheriffCd=CFG\.sheriffCooldown;else shooter\.netSheriffCd=CFG\.sheriffCooldown/);
+  assert.match(html, /if\(shooter===G\.player\)G\.sheriffCd=cooldown;shooter\.netSheriffCd=cooldown/);
 });
 
 
@@ -234,7 +234,7 @@ test('após a reunião, ações e habilidades voltam à recarga completa sem rei
 });
 
 test('NPCs não usam a causa interna do corpo para descobrir funções', () => {
-  const statement=html.slice(html.indexOf('function npcStatement(ch,M){'),html.indexOf('function meetingNPCs(){'));
+  const statement=html.slice(html.indexOf('function npcStatement(ch,M){'),html.indexOf('function genChat(){',html.indexOf('function npcStatement(ch,M){')));
   assert.doesNotMatch(statement, /M\.body\.cause|const cause=/, 'NPC não pode ler a causa interna do corpo durante a reunião');
   assert.match(statement, /Não usa `body\.cause`: NPCs só discutem o que poderiam observar ou ouvir/);
   assert.match(statement, /Não sei qual habilidade causou isso; precisamos de testemunhas/);
@@ -286,14 +286,14 @@ test('Engenheiro tem configuração, atribuição e sincronização multiplayer'
   assert.match(html, /if\(G\.freePlay\)return;[\s\S]*?const locked=inGame\(\)/);
 });
 
-test('NPCs usam falas contextuais e jogadores mortos veem funções sem revelar aos vivos', () => {
+test('NPCs usam falas contextuais e a morte não revela funções secretas', () => {
   assert.match(html, /Onde que mataram \${M\.body\.name}\?/);
   assert.match(html, /Encontrei o corpo de \${M\.body\.name} em \${M\.body\.room}!/);
   for (const phrase of ['Sim.','Não.','Concordo.','Discordo.','Isso é verdade.','Mentira!','Eu vi!','Não vi','Faltam poucas tarefas, vamos!','Vamos fazer tarefas para vencer!','Mortos, façam as suas tarefas!','Cuidado! Vamos resolver ']) {
     assert.ok(html.includes(phrase), 'fala contextual ausente: '+phrase);
   }
-  assert.match(html, /\(\(!G\.player\?\.alive\|\|G\.role==='imp'\)&&ch\.role==='imp'\?'#ff6b7e'/);
-  assert.match(html, /if\(!G\.player\.alive\)\{const fl=\{sheriff:'Xerife'.*const roleLine=el\('small','pfunction',fl\);/s);
+  assert.doesNotMatch(html, /\(\(!G\.player\?\.alive\|\|G\.role==='imp'\)&&ch\.role==='imp'/);
+  assert.doesNotMatch(html, /const roleLine=el\('small','pfunction',fl\)/);
   assert.match(html, /if\(G\.player\.role==='imp'&&ch\.role==='imp'\)pn\.style\.color='#ff6b7e'/);
   assert.match(html, /if\(ai\.ventSaw&&G\.gt-ai\.ventSaw\.gt<45/);
   assert.match(html, /\.pc\.dead\{filter:none;border-color/);
@@ -385,7 +385,7 @@ test('Vidente inspeciona corpos com reconstituição privada e pistas factuais p
   assert.match(html, /\['engineer','🔧 Engenheiro'\]/);
   assert.match(html, /Vi a silhueta de quem matou \$\{q\.victimName\}, entrou em um duto!/);
   assert.match(html, /Vi a silhueta de quem matou \$\{q\.victimName\}, foi para \$\{q\.room\}/);
-  assert.match(server, /s\.selfSeerReplay=recipient\?\.alive!==false&&recipient\?\.role==='crew'&&recipient\?\.function==='seer'\?\(s\.seerReplays\?\.\[recipientId\]\|\|null\):null;delete s\.seerReplays;for\(const b of \(s\.bodies\|\|\[\]\)\)delete b\.killerTrace/);
+  assert.match(server, /s\.selfSeerReplay=recipient\?\.alive!==false&&recipient\?\.role==='crew'&&recipient\?\.function==='seer'\?\(s\.seerReplays\?\.\[recipientId\]\|\|null\):null;delete s\.seerReplays;for\(const b of \(s\.bodies\|\|\[\]\)\)\{delete b\.killerTrace/);
   assert.match(server, /'seer_inspect'/);
 });
 
@@ -403,7 +403,7 @@ test('Instrutor é secreto até a morte, cria trilhas privadas e respeita Comuni
   assert.match(html, /action:'instructor_mark'/);
   assert.match(server, /'instructor_mark'/);
   assert.match(server, /s\.instructorTrails=\(s\.instructorTrails\|\|\[\]\)\.filter\(t=>String\(t\.targetId\)===String\(recipientId\)\|\|String\(t\.ownerId\)===String\(recipientId\)\)/);
-  assert.match(server, /recipient\?\.instructor\|\|recipient\?\.guardian[\s\S]*?c\.alive&&c\.role==='crew'\)c\.function=null/);
+  assert.match(server, /if\(!s\.hns && !ended\)[\s\S]*?c\.role='crew';c\.function=null/);
 });
 
 test('Instrutor só pode selecionar jogadores vivos dentro da Distância para ações', () => {
@@ -443,8 +443,8 @@ test('Instrutor pode ser aplicado e removido pelo computador da Partida Livre', 
 });
 
 
-test('fantasmas veem apenas a função acima do nome, eliminações têm respingo e novos cosméticos são aceitos', () => {
-  assert.match(html, /c\.strokeText\(fn,ch\.x,ch\.y-74\)/);
+test('fantasmas preservam nomes sem rótulos de função, eliminações têm respingo e novos cosméticos são aceitos', () => {
+  assert.doesNotMatch(html, /c\.strokeText\(fn,ch\.x,ch\.y-74\)/);
   assert.doesNotMatch(html, /const label=fn\+' — '\+ch\.name/);
   assert.match(html, /function spawnKillSplash\(k,v\)/);
   assert.match(html, /drawKillSplashes\(c\)/);
@@ -477,9 +477,9 @@ test('configurações de funções mostram descrição localizada no topo de cad
   assert.match(html, /box\.appendChild\(info\)/);
 });
 
-test('texto da função para fantasmas é maior e portas sabotadas são redesenhadas por cima da névoa', () => {
+test('rótulos secretos ficam ocultos dos fantasmas e portas sabotadas são redesenhadas por cima da névoa', () => {
   assert.match(html, /\.pfunction\{[^}]*font-size:14px/);
-  assert.match(html, /c\.font='800 16px/);
+  assert.doesNotMatch(html, /const hideCrewFn=/);
   assert.match(html, /Durante a sabotagem de portas, as portas fechadas permanecem legíveis sobre a névoa/);
   assert.match(html, /if\(\(G\.sab\.doors\|\|0\)>0\)[\s\S]*?for\(const d of doors\)\{if\(!d\.closed\)continue/);
 });
@@ -646,7 +646,7 @@ test('Preguiçoso é Tripulante vivo com tarefas reduzidas e peso normal na barr
 });
 
 test('NPCs formam suspeitas de funções por evidência e não leem função alheia em reuniões', () => {
-  const statement=html.slice(html.indexOf('function npcStatement(ch,M){'),html.indexOf('function meetingNPCs(){'));
+  const statement=html.slice(html.indexOf('function npcStatement(ch,M){'),html.indexOf('function genChat(){',html.indexOf('function npcStatement(ch,M){')));
   assert.match(statement, /controlVictimSaw/);
   assert.match(statement, /reviveSaw/);
   assert.match(statement, /cleanSaw/);
