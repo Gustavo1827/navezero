@@ -28,10 +28,10 @@ const HNS=(()=>{
  const radar=el('div');radar.id='hnsRadar';radar.hidden=true;radar.setAttribute('role','img');radar.setAttribute('data-i18n-skip','');radar.append(el('span','radarCrew','●'),el('div','radarBars'),el('span','radarMonster','◆'));for(let i=0;i<5;i++)radar.children[1].append(el('i'));document.body.append(radar);let radarLevel=0,releaseHeard=false;
  function updateRadar(){const p=G.player,k=killer(),on=active()&&live()&&p?.role==='crew';radar.hidden=!on;if(!on){radarLevel=0;return}const threat=p.alive&&k?.alive&&participating(k)&&!locked(k),scale=Math.hypot(WORLD_W,WORLD_H),far=scale*.24,near=TILE*2,distance=threat?dist(p,k):far;const target=threat?clamp((far-distance)/(far-near),0,1):0;radarLevel+=(target-radarLevel)*Math.min(1,(G.dt||.016)*7);const bars=threat?Math.round(radarLevel*5):0;for(const [i,b]of [...radar.children[1].children].entries())b.classList.toggle('filled',i<bars);radar.classList.toggle('neutral',!threat);radar.setAttribute('aria-label',t(threat?'stage2.radarLevel':'stage2.radarNeutral',{count:bars}))}
  Snd.hnsRelease=function(){if(!this.on||this.volume<=0)return;this.init();this.tone(78,.75,'sawtooth',.045,-42);this.tone(123,.55,'triangle',.04,-75,.08);this.tone(52,.65,'sine',.07,-17,.2)};
- const modes=[['classic','public.classic'],[MODE,'hns.mode'],['batata-quente','hp.mode']];
+ const modes=[['classic','public.classic'],[MODE,'hns.mode'],['batata-quente','hp.mode'],['mimica','mimic.mode']];
  function labels(){
   for(const [key,def] of Object.entries(defs))ROOM_CFG_LABELS[key].label=I18N['pt-BR']?.['hns.'+def[4]]||key;
-  const group=$('createModeButtons');for(const [id,key] of modes){let b=group.querySelector(`[data-mode="${id}"]`);if(!b){b=el('button','chip');b.type='button';b.dataset.mode=id;b.addEventListener('click',()=>{selected=id;labels();Snd.click()});group.append(b)}const label=t(key);if(b.textContent!==label)b.textContent=label;b.setAttribute('aria-pressed',String(selected===id))}
+  const group=$('createModeButtons');for(const [id,key] of modes){let b=group.querySelector(`[data-mode="${id}"]`);if(!b){b=el('button','chip');b.type='button';b.dataset.mode=id;b.addEventListener('click',()=>{selected=id;labels();accountRememberRoomSettings();Snd.click()});group.append(b)}const label=t(key);if(b.textContent!==label)b.textContent=label;b.setAttribute('aria-pressed',String(selected===id))}
   group.setAttribute('aria-label',t('public.mode'));const opt=$('publicModeIn').options[1];if(opt)opt.textContent=t('hns.mode');
  }
  // A single local scheduler keeps music independent of rendering and remote snapshots.
@@ -161,26 +161,7 @@ const HNS=(()=>{
  }
 
  function route(ch,target,type='hns'){const tile=tileOf(target);return goTo(ch,{type},(x,y)=>Math.abs(x-tile.x)+Math.abs(y-tile.y)<=1)}
- function bot(ch,dt){
-  const ai=ch.ai;if(!ai||!ch.alive)return;ai.hnsTalk=(ai.hnsTalk||0)-dt;if(ai.hnsTalk<=0){ai.hnsTalk=14+Math.random()*12;oldSay(ch,t(ch.role==='imp'?'hns.npcHunt':ch.vent?'hns.npcHidden':'hns.npcHide'))}if(locked(ch)){ch.moving=false;return}ch.netKillCd=Math.max(0,(ch.netKillCd||0)-dt);ai.hnsPlan=(ai.hnsPlan||0)-dt;
-  if(ch.vent){ch.moving=false;ai.hnsVentPlan=(ai.hnsVentPlan||0)-dt;if(!ch.ventAnim&&ch.ventMv<=0&&ai.hnsVentPlan<=0){ai.hnsVentPlan=1;const routes=(VENT_ADJ[ch.vent]||[]).map(id=>ventById[id]).filter(v=>v&&v.id!==ai.hnsPreviousVent),memory=ai.hnsThreat;if(routes.length&&(ch.hnsVentTime||0)>1.2&&!ai.hnsVentMoved){routes.sort((a,b)=>memory?dist(b,memory)-dist(a,memory):0);ai.hnsPreviousVent=ch.vent;if(ventMove(ch,routes[0].id))ai.hnsVentMoved=true}else if(G.gt-(ai.hnsHideAt||0)>=Math.min(3.5,CFG.hnsVentDuration-0.3)){exitVent(ch);ai.hnsPlan=0}}return}
-  if(ch.role==='imp'){
-   const targets=G.chars.filter(c=>c!==ch&&c.alive&&c.role==='crew'&&!c.vent&&(G.hns.alertRemaining>0||npcCanSeeChar(ch,c))).sort((a,b)=>dist(ch,a)-dist(ch,b)),victim=targets.find(v=>dist(ch,v)<=actionDistancePx('kill')&&losClear(ch.x,ch.y,v.x,v.y));
-   if(victim&&ch.netKillCd<=0){doKill(ch,victim);return}
-   const previous=targets.find(c=>c.id===ai.hnsTargetId),target=previous&&dist(ch,previous)<dist(ch,targets[0]||previous)*1.35?previous:targets[0];
-   if(target){ai.hnsTargetId=target.id;ai.hnsLastSeen={x:target.x,y:target.y,until:G.gt+4}}
-   if(ai.hnsPlan<=0){ai.hnsPlan=.65+Math.random()*.2;if(target)route(ch,target,'hnsHunt');else if(ai.hnsLastSeen&&G.gt<ai.hnsLastSeen.until){if(!ai.path?.length)route(ch,ai.hnsLastSeen,'hnsSearch')}else if(ai.state!=='walk'||!ai.path?.length)wander(ch)}
-  }else{
-   const k=killer(),perceived=k&&k.alive&&!locked(k)&&npcCanSeeChar(ch,k);
-   if(perceived)ai.hnsThreat={x:k.x,y:k.y,until:G.gt+3};
-   const threat=ai.hnsThreat&&G.gt<ai.hnsThreat.until?ai.hnsThreat:null;
-   if(threat){const vent=nearestVentFor(ch);if(vent&&(ch.ventCd||0)<=0&&hide(ch,vent)){ai.hnsVentMoved=false;ai.hnsPreviousVent=null;ai.hnsVentPlan=.6;return}
-    if(ai.hnsPlan<=0||!ai.path?.length){ai.hnsPlan=1.2+Math.random()*.4;botFleeRoute(ch,threat,'hnsFlee')}
-   }else if(ai.state==='work'&&tasksAllowed()){ch.moving=false;ai.work-=dt;if(ai.work<=0)finishWork(ch);return}
-   else if(ai.hnsPlan<=0){ai.hnsPlan=1.2+Math.random()*.8;if(ai.state!=='walk'||!ai.path?.length){const chosen=G.hns.phase==='start'&&tasksAllowed()&&botTaskRoute(ch);if(!chosen)wander(ch)}}
-  }
-  if(ai.state==='walk'){if(ai.pathVer!==G.walkVer&&!repath(ch)){ai.state='idle';ai.hnsPlan=.8;return}if(followPath(ch,dt)){if(ai.goal?.type==='task'&&tasksAllowed())onArrive(ch);else{ai.navVisits=ai.navVisits||{};if(ai.navRoom)ai.navVisits[ai.navRoom]=G.gt;ai.state='idle';ai.hnsPlan=.5}}}
- }
+ function bot(ch,dt){return hideSeekBot(ch,dt,{oldSay,locked,route,killer,hide,tasksAllowed})}
  // Only mode-specific execution takes these branches. Existing Classic functions stay intact.
  const oldDrawImpostors=drawImpostors;drawImpostors=function(participants,count){const id=!G.freePlay&&validKillerId(CFG.hnsKillerId),chosen=id&&participants.find(p=>p.id===id);return chosen&&count===1?[chosen]:oldDrawImpostors(participants,count)};
  const oldNew=newGame;newGame=function(...args){G.hns=null;if(!NET.inRoom||NET.room?.mode!==MODE)return oldNew(...args);const saved={...CFG};for(const key of Object.keys(CFG))if(key.endsWith('Chance')||key.endsWith('Max'))CFG[key]=0;CFG.impostors=1;CFG.kill=1;try{const result=oldNew(...args);init();showLocalRoleReveal(false);if(args[0]){G.state='loading';$('role').hidden=true}return result}finally{Object.assign(CFG,saved)}};
@@ -242,5 +223,5 @@ const HNS=(()=>{
  const oldDeath=showDeathIntro;showDeathIntro=function(k,v){if(!active())return oldDeath(k,v);const wrap=$('deathIntro'),cv=$('deathCv'),c=cv.getContext('2d');$('deathDesc').textContent=t('hns.spectate');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);c.save();c.translate(230,125);c.scale(1.55,1.55);drawChar(c,{...k,x:-48,y:-12,_hnsMonster:true},false,{portrait:true});drawBody(c,{x:48,y:17,color:v.color,cosmetics:v.cosmetics});c.restore();wrap.hidden=false;setTimeout(()=>wrap.hidden=true,2400)};
  const oldRender=render;render=function(){oldRender();if(active()&&live()&&G.hns.phase==='final'){ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='rgba(145,12,28,.075)';ctx.fillRect(0,0,innerWidth,innerHeight);ctx.restore()}if(!active()||!live()||G.player?.role!=='imp'||!G.player.alive||G.hns.phase!=='final'||G.hns.alertRemaining<=0)return;ctx.save();ctx.setTransform(DPR*ZOOM,0,0,DPR*ZOOM,-G.cam.x*DPR*ZOOM,-G.cam.y*DPR*ZOOM);for(const ch of G.chars)if(ch.alive&&ch.role==='crew'){const p=G.player,a=Math.atan2(ch.y-p.y,ch.x-p.x);ctx.save();ctx.translate(p.x+Math.cos(a)*75,p.y+Math.sin(a)*75);ctx.rotate(a);ctx.fillStyle='#ff5368';ctx.strokeStyle='#10122a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-10);ctx.lineTo(-2,0);ctx.lineTo(-8,10);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()};ctx.restore()};
  function clear(){releaseHeard=false;G.hns=null;restoreHideButton();ui();heardAlert=0;lastPhase='';$('tasksPanel').hidden=false;$('taskList').hidden=false;$('barFill').classList.remove('hnsFinal')}
- labels();return {active,mode,defs,init,tick,settings,hide,locked,bot,ui,clear,tasksAllowed,music};
+ labels();return {selectedMode:()=>selected,selectMode:id=>{if(modes.some(m=>m[0]===id)){selected=id;labels()}},active,mode,defs,init,tick,settings,hide,locked,bot,ui,clear,tasksAllowed,music};
 })();

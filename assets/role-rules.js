@@ -1,0 +1,9 @@
+/* Initial role lottery shared by Node and offline matches. */
+'use strict';
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.NZRoleRules=api})(globalThis,()=>{
+ const crew=[['locator','loc'],['sheriff','sheriff'],['observer','obs'],['lazy','lazy'],['paramedic','paramedic'],['seer','seer'],['noisy','noisy'],['judge','judge'],['engineer','eng'],['captain','captain']],imp=[['delayed','delayed'],['cleaner','cleaner'],['parasite','parasite'],['spectral','spectral'],['marionette','marion'],['miner','miner'],['metamorph','morph'],['hunter','hunter'],['ninja','ninja']];
+ function shuffle(a,r){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+ function functions(ids,defs,cfg,out,r){const slots=defs.filter(([,key])=>cfg[key+'Max']>0&&r()*100<cfg[key+'Chance']).map(([id,key])=>({id,left:Math.max(0,Math.floor(cfg[key+'Max']))}));let players=shuffle(ids,r);while(players.length){const available=shuffle(slots.filter(s=>s.left>0),r);if(!available.length)break;for(const slot of available){if(!players.length)break;out[players.pop()].function=slot.id;slot.left--}}}
+ function create(ids,cfg,neutralRules,r=Math.random){const order=shuffle([...new Set(ids)],r),n=order.length,imps=Math.min(Math.max(1,Math.floor(cfg.impostors)||1),n<8?1:n<10?2:3),out=Object.fromEntries(order.map((id,i)=>[id,{role:i<imps?'imp':'crew',function:null}]));const plan=neutralRules.createPlan(ids,cfg,r),chosen=neutralRules.assignments(plan,order.map(id=>({id,role:out[id].role})));for(const[id,fn]of Object.entries(chosen))out[id]={role:'neutral',function:fn};functions(order.filter(id=>out[id].role==='crew'),crew,cfg,out,r);functions(order.filter(id=>out[id].role==='imp'),imp,cfg,out,r);return out}
+ return{create};
+});

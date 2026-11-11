@@ -42,18 +42,7 @@ const HOT_POTATO=(()=>{
   const passSeq=h.passSeq||0;if(passSeq!==heardPass){if(playing&&passSeq>heardPass)Snd.hpPass();heardPass=passSeq}
   if(playing&&h.seq!==announced){announced=h.seq;if(h.seq===1)toast(t('hp.starts',{name:holder()?.name||'—'}),4500)}
  }
- function bot(ch,dt){if(!ch.alive||!ch.ai||!live())return;const ai=ch.ai,h=holder();ai.hpPlan=(ai.hpPlan||0)-dt;ai.hpTalk=(ai.hpTalk||0)-dt;if(ai.hpTalk<=0){ai.hpTalk=15+Math.random()*12;npcSay(ch,t(ch===h?'hp.npcHolder':'hp.npcFlee'))}
- const route=(target,type)=>{const pos=tileOf(target);return goTo(ch,{type},(x,y)=>Math.abs(x-pos.x)+Math.abs(y-pos.y)<=1)};
- if(ch===h){const target=nearest(ch);if(target&&G.hp.passCd<=0){transfer(ch,target,G.hp.seq);ai.hpTargetId=null;return}if(ai.hpPlan<=0){ai.hpPlan=G.hp.remaining<5?.4:.8;const visible=living().filter(c=>c!==ch&&npcCanSeeChar(ch,c)).sort((a,b)=>dist(ch,a)-dist(ch,b)),kept=visible.find(c=>c.id===ai.hpTargetId),targets=kept?[kept,...visible.filter(c=>c!==kept)]:visible;let routed=false;for(const to of targets){if(route(to,'hpHunt')){ai.hpTargetId=to.id;routed=true;break}}if(!routed&&(ai.state!=='walk'||!ai.path?.length))wander(ch)}}
- else{
-  if(h&&npcCanSeeChar(ch,h)&&dist(ch,h)<(G.hp.remaining<6?900:650))ai.hpThreat={x:h.x,y:h.y,id:h.id,until:G.gt+2};
-  const threat=ai.hpThreat&&ai.hpThreat.id===h?.id&&G.gt<ai.hpThreat.until?ai.hpThreat:null;
-  if(threat){if(ai.hpPlan<=0||!ai.path?.length){ai.hpPlan=.9+Math.random()*.4;botFleeRoute(ch,threat,'hpFlee')}}
-  else if(CFG.hpType&&ai.state==='work'){ai.work-=dt;ch.moving=false;if(ai.work<=0)finishWork(ch);return}
-  else if(ai.hpPlan<=0){ai.hpPlan=1.1+Math.random()*.8;if(ai.state!=='walk'||!ai.path?.length){if(!CFG.hpType||!botTaskRoute(ch))wander(ch)}}
- }
- if(ai.state==='walk'){if(ai.pathVer!==G.walkVer&&!repath(ch)){ai.state='idle';ai.hpPlan=.6;return}if(followPath(ch,dt)){if(ai.goal?.type==='task'&&CFG.hpType&&ch!==holder())onArrive(ch);else{ai.navVisits=ai.navVisits||{};if(ai.navRoom)ai.navVisits[ai.navRoom]=G.gt;ai.state='idle';ai.hpPlan=.5}}}
- }
+ function bot(ch,dt){return hotPotatoBot(ch,dt,{live,holder,nearest,transfer,living})}
  const oldNew=newGame;newGame=function(...args){G.hp=null;announced=heardPass=0;restoreDeath();if(!mode())return oldNew(...args);const saved={...CFG};for(const key of Object.keys(CFG))if(key.endsWith('Chance')||key.endsWith('Max'))CFG[key]=0;try{oldNew(...args);for(const ch of G.chars){ch.role='crew';ch.function=null;ch.guardian=ch.instructor=false}G.imps=[];G.imp=null;G.role='crew';G.vision=G.visionTarget=CFG.crewVision;G.tasks=CFG.hpType?G.tasks:[];for(const task of G.tasks)task.fake=false;G.hp={holderId:null,lastPasserId:null,previous:{},remaining:0,passCd:0,matchRemaining:CFG.hpDuration,seq:0,passSeq:0};selectHolder(pick(living()));clock=received=performance.now();if(!args[0])showLocalRoleReveal(false);renderTasks()}finally{Object.assign(CFG,saved)}};
  const oldNormalize=normalizeCfgCaps;normalizeCfgCaps=function(cfg){const r=oldNormalize(cfg);if(Number.isFinite(cfg.hpExplosion)&&Number.isFinite(cfg.hpPassCooldown))cfg.hpPassCooldown=Math.min(cfg.hpPassCooldown,cfg.hpExplosion-1);return r};
  const oldProgress=progress;progress=function(){if(!active())return oldProgress();const ids=new Set(living().map(c=>c.id)),steps=G.tasks.filter(t=>ids.has(t.owner)&&!t.fake).flatMap(t=>t.steps);return steps.length?steps.filter(s=>s.done).length/steps.length:0};

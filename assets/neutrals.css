@@ -8,3 +8,8 @@
 .presetCard[data-theme='neutrals']::before{background:radial-gradient(circle at 28% 18%,rgba(197,203,218,.19),transparent 30%),radial-gradient(circle at 85% 76%,rgba(156,37,76,.2),transparent 32%)}
 
 .presetCard[data-theme='neutrals'] .presetFoot{flex-wrap:wrap;row-gap:10px}
+
+.act2.neutralAbility{background:#a6adbb!important;color:#141827!important;border-color:#232838!important;box-shadow:0 7px 0 #555e70,0 10px 0 #101425!important}
+.act2.neutralAbility:disabled{filter:grayscale(1);opacity:.55}
+.act2.neutralAbility.ready{background:#c4cbd5!important}
+body.matchEnding #actions,body.matchEnding #joy,body.matchEnding #hud button{visibility:hidden!important;pointer-events:none!important}

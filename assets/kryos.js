@@ -11,7 +11,7 @@ const KRYOS=(()=>{
  $('btnCreateRoom').addEventListener('click',()=>select.value=SELECTED_MAP_ID);
  const oldSelect=selectGameMap;selectGameMap=function(...a){const r=oldSelect(...a);select.value=SELECTED_MAP_ID;return r};
  const oldInfo=showRoomInfo;showRoomInfo=function(data){oldInfo(data);info.textContent=t('kr.mapInfo',{map:translateRuntimeText(MAP_LIBRARY[data?.mapId]?.name||'—')})};
- const oldView=renderRoomViewSettings;renderRoomViewSettings=function(){oldView();if(NET.room?.mode!=='classic'){const row=el('div','roomViewSettingRow');row.append(el('span','',t('kr.map')),el('b','',translateRuntimeText(MAP_LIBRARY[NET.room?.settings?.mapId]?.name||'—')));$('roomViewSettingsBody').prepend(row)}};
+ const oldView=renderRoomViewSettings;renderRoomViewSettings=function(){oldView();if(!['classic','mimica'].includes(NET.room?.mode)){const row=el('div','roomViewSettingRow');row.append(el('span','',t('kr.map')),el('b','',translateRuntimeText(MAP_LIBRARY[NET.room?.settings?.mapId]?.name||'—')));$('roomViewSettingsBody').prepend(row)}};
  const oldRoom=netRenderRoom;netRenderRoom=function(){oldRoom();let tag=$('roomKryosMap');if(!tag){tag=el('span');tag.id='roomKryosMap';$('roomLobby').querySelector('.roomMetaLine').append(tag)}tag.textContent='🗺️ '+translateRuntimeText(MAP_LIBRARY[NET.room?.settings?.mapId]?.name||'—')};
  const oldLanguage=applyGameLanguage;applyGameLanguage=function(){const r=oldLanguage();labels();return r};
 

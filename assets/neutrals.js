@@ -1,7 +1,7 @@
 /* Classic neutral roles. Assignment never creates a neutral without a role. */
 'use strict';
 const NEUTRALS=(()=>{
- const classic=()=>!NET.inRoom||NET.room?.mode==='classic';
+ const classic=()=>!NET.inRoom||['classic','mimica'].includes(NET.room?.mode);
  const isJester=ch=>classic()&&ch?.role==='neutral'&&ch.function==='jester';
  const winners=()=>[...new Set((Array.isArray(G.neutralWinnerIds)&&G.neutralWinnerIds.length?G.neutralWinnerIds:[G.neutralWinnerId]).filter(id=>typeof id==='string'&&id))];
  const victoryTitle=()=>t(winners().length>1?'neutral.teamVictoryPlural':'neutral.teamVictory');
@@ -9,8 +9,9 @@ const NEUTRALS=(()=>{
  const limit=()=>Math.max(0,Math.floor(count()/3));
  let saved={};try{saved=JSON.parse(localStorage.getItem('nz_cfg')||'{}')}catch{}
  for(const [key,value,hi] of [['neutrals',0,5],['jesterMax',5,5],['jesterChance',100,100]]){CFG_DEF[key]=value;CFG_LIM[key]=[0,hi];CFG[key]=clamp(Number.isFinite(+saved[key])?Math.round(+saved[key]):value,0,hi);NET_SETTING_KEYS.push(key);ROOM_CFG_LABELS[key]={label:key,unit:key.endsWith('Chance')?'%':''}}
+ for(const [key,value,hi]of [['workerMax',1,5],['workerChance',0,100],['pyromancerMax',1,5],['pyromancerChance',0,100],['pyromancerCooldown',15,25],['childMax',1,5],['childChance',0,100],['shifterMax',1,5],['shifterChance',0,100],['shifterCooldown',15,30]]){CFG_DEF[key]=value;CFG_LIM[key]=[key.endsWith('Cooldown')?5:0,hi];CFG[key]=clamp(Number.isFinite(+saved[key])?Math.round(+saved[key]):value,...CFG_LIM[key]);NET_SETTING_KEYS.push(key);ROOM_CFG_LABELS[key]={label:key,unit:key.endsWith('Chance')?'%':key.endsWith('Cooldown')?'s':''}}
  // New neutral roles can register their own quantity and chance keys here.
- const roles=[{id:'jester',maxKey:'jesterMax',chanceKey:'jesterChance'}];
+ const roles=[{id:'jester',maxKey:'jesterMax',chanceKey:'jesterChance'},{id:'worker',maxKey:'workerMax',chanceKey:'workerChance'},{id:'pyromancer',maxKey:'pyromancerMax',chanceKey:'pyromancerChance'},{id:'child',maxKey:'childMax',chanceKey:'childChance'},{id:'shifter',maxKey:'shifterMax',chanceKey:'shifterChance'}];
  CFG_ROWS.push(['jesterMax','Quantidade de Palhaços','Máximo de Palhaços sorteados, limitado pela quantidade geral de Neutros e pelos participantes.',''],['jesterChance','Chance de existir Palhaço','Chance de habilitar Palhaços no sorteio da partida. Se não forem sorteados, essas vagas continuam Tripulantes.','%']);
  PRESET_DEFS.push({id:'neutrals',theme:'neutrals',name:'Hora dos Neutros',desc:'Base de Todos ajudam com um terço dos participantes em funções Neutras disponíveis.',tag:'Objetivos próprios',art:'assets/presets/preset_hora_neutros.png?v=d497714380b06fc5'});
  const oldPreset=presetConfig;presetConfig=function(id){
@@ -21,30 +22,24 @@ const NEUTRALS=(()=>{
  function ensureCapacity(config=CFG){
   const changed=[],n=Math.max(0,Number(config.neutrals)||0);
   const set=(key,value)=>{if(config[key]!==value){config[key]=value;changed.push(key)}};
+  for(const role of roles)set(role.chanceKey,Number(config[role.chanceKey])>0?100:0);
   for(const role of roles)set(role.maxKey,Math.min(n,Math.max(0,Number(config[role.maxKey])||0)));
-  let missing=n-roles.reduce((sum,role)=>sum+config[role.maxKey],0);
-  const selected=roles.filter(role=>config[role.maxKey]>0);
-  for(const role of (selected.length?selected:roles)){
-   if(missing<=0)break;const extra=Math.min(missing,n-config[role.maxKey]);set(role.maxKey,config[role.maxKey]+extra);missing-=extra;
-  }
   return changed;
  }
  ensureCapacity();
 
  function assign(){
   if(!classic()||G.freePlay)return;
-  const n=Math.min(Math.floor(G.chars.length/3),CFG.neutrals),pool=shuffle(G.chars.filter(c=>c.role==='crew'));
-  const available=shuffle(roles.filter(role=>Math.random()*100<CFG[role.chanceKey]&&CFG[role.maxKey]>0)),used={};
-  for(const ch of pool.slice(0,n)){
-   const role=available.filter(role=>(used[role.id]||0)<CFG[role.maxKey]).sort((a,b)=>(used[a.id]||0)-(used[b.id]||0))[0];
-   if(!role)break;used[role.id]=(used[role.id]||0)+1;ch.role='neutral';ch.function=role.id;ch.instructor=ch.guardian=false;
-  }
+  const plan=NET.inRoom?NET.neutralPlan?.plan:NZNeutralRules.createPlan(G.chars.map(c=>c.id),CFG);
+  if(!plan)return;
+  const chosen=NZNeutralRules.assignments(plan,G.chars);
+  for(const ch of G.chars)if(ch.role==='crew'&&chosen[ch.id]){ch.role='neutral';ch.function=chosen[ch.id];ch.instructor=ch.guardian=false}
   G.role=G.player.role;
  }
 
  const oldLimit=cfgLimitFor;cfgLimitFor=function(key){
   if(key==='neutrals')return[0,limit()];
-  const role=roles.find(role=>role.maxKey===key);if(role){const n=Math.min(limit(),CFG.neutrals),others=roles.filter(other=>other!==role).reduce((sum,other)=>sum+(Number(CFG[other.maxKey])||0),0);return[Math.max(0,n-others),n]}
+  const role=roles.find(role=>role.maxKey===key);if(role){const n=Math.min(limit(),CFG.neutrals);return[0,n]}
   return oldLimit(key);
  };
  function row(box,key){
@@ -52,7 +47,7 @@ const NEUTRALS=(()=>{
  }
  const oldBuild=buildCfgUI;buildCfgUI=function(){
   if(!classic())return oldBuild();const neutral=G.cfgPage==='functions'&&G.cfgFunctionTab==='jester';
-  oldBuild();if(G.cfgPage==='settings')row($('cfgRows'),'neutrals');if(neutral)$('cfgRows').append(el('small','cfgnote',t('neutral.capacityHelp',{count:Math.min(CFG.neutrals,limit())})));
+  oldBuild();if(G.cfgPage==='settings'){const box=$('cfgRows');row(box,'neutrals');const comms=box.querySelector('[data-setting="commsExpanded"]');if(comms)box.append(comms)}if(neutral)$('cfgRows').append(el('small','cfgnote',t('neutral.capacityHelp',{count:Math.min(CFG.neutrals,limit())})));
   const root=$('cfgFunctionTabs');let group=root.querySelector('.neutralGroup');if(!group){group=el('section','functionGroup neutralGroup');group.append(el('h3'),el('div','functionButtons'));const b=el('button','big alt');b.id='btnJesterSection';b.type='button';b.addEventListener('click',()=>{G.cfgFunctionTab='jester';setCfgPage('functions');Snd.click()});group.lastChild.append(b);root.append(group)}group.firstChild.textContent=t('neutral.category');$('btnJesterSection').textContent='🤡 '+roleLabelByFunction('jester');$('btnJesterSection').classList.toggle('alt',!neutral);
   for(const key of ['neutrals','jesterMax','jesterChance'])ROOM_CFG_LABELS[key].label=t('neutral.'+key);
  };
@@ -83,6 +78,6 @@ const NEUTRALS=(()=>{
  const oldStatement=npcStatement;npcStatement=function(ch,...args){return isJester(ch)?{from:ch,text:t('npc.jesterGoal'),claim:null}:oldStatement(ch,...args)};
  const oldReason=reasonText;reasonText=function(ch,id,rs,...args){return classic()&&rs.type==='vent'?t('npc.ventWitness',{name:charById(id)?.name||'—'}):oldReason(ch,id,rs,...args)};
  const oldHear=hear;hear=function(ch,claim){const reply=oldHear(ch,claim);if(!reply||!classic())return reply;if(isJester(ch))reply.text=t('npc.jesterGoal');else if(claim.vent)reply.text=t('npc.ventUncertain');return reply};
- const oldDraw=drawChar;drawChar=function(c,ch,...args){if(isJester(ch)&&(ch.id===G.player?.id||!G.player?.alive))ch.nameCol='#b7bdd0';return oldDraw(c,ch,...args)};
+ const oldDraw=drawChar;drawChar=function(c,ch,...args){if(isJester(ch)&&ch.id===G.player?.id)ch.nameCol='#b7bdd0';return oldDraw(c,ch,...args)};
  return{assign,isJester,limit,winners,victoryTitle,roles,ensureCapacity};
 })();
