@@ -17,11 +17,12 @@ const ABILITY_BUTTONS=(()=>{
   }
   const signal=button.classList.contains('no-signal');if(signal){icon='📡';name=t('message.noSignalText')}
   if(button.id==='btnParamedic'&&!signal&&/^\d/.test(detail))name=base;
-  const key=[USER_PREFS.language,icon,name,detail,hiding,signal].join('|');
+  const cooling=!signal&&button.disabled&&/^[0-9]+(?:[.,][0-9]+)?\s*s?$/u.test(detail)&&(button.classList.contains('cooldown-label')||['btnMiner','btnMorph','btnPotatoPass'].includes(button.id));
+  const key=[USER_PREFS.language,icon,name,detail,hiding,signal,cooling].join('|');
   button.classList.add('abilityButton');
-  if(same&&last.key===key){last.detail.hidden=!detail;return}
+  if(same&&last.key===key){last.name.hidden=cooling;last.detail.hidden=!detail;return}
   const emoji=el('span','abilityIcon nativeEmoji'+(button.id==='btnMorph'?' morphIcon':'')+(signal?' signalIcon':''),icon),label=el('small','abilityCaption abilityName',name),status=el('small','abilityDetail'+(hiding?' hnsVentInfo':''),detail);
-  emoji.setAttribute('aria-hidden','true');status.hidden=!detail;button.replaceChildren(emoji,label,status);
+  emoji.setAttribute('aria-hidden','true');label.hidden=cooling;status.hidden=!detail;button.replaceChildren(emoji,label,status);
   button.setAttribute('aria-label',[icon,name,detail].filter(Boolean).join(' · '));saved.set(button,{key,icon:emoji,name:label,detail:status,language:USER_PREFS.language});
  }
  function refresh(){for(const [id,definition]of Object.entries(definitions)){const button=$(id);if(button)present(button,definition)}for(const button of document.querySelectorAll('.judgeVoteBtn'))if(!button.closest('[hidden]'))present(button,['👨‍⚖️',()=>roleLabelByFunction('judge')])}

@@ -49,6 +49,8 @@ body.mapEjectionActive #toast,body.mapEjectionActive #ghostChatPanel,body.mapEje
 .act2.neutralAbility.ready{background:#c4cbd5!important}
 body.matchEnding #actions,body.matchEnding #joy,body.matchEnding #hud button{visibility:hidden!important;pointer-events:none!important}
 
+#matchFade{position:fixed;inset:0;z-index:10000;background:#000;opacity:0;pointer-events:auto;touch-action:none}#matchFade[hidden]{display:none!important}
+
 .modeChoices{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.modeChoices .chip[aria-pressed="true"]{border-color:var(--amber);color:var(--amber);background:#30260f}
 #hnsStatus{position:fixed;z-index:22;top:calc(8px + var(--st));left:50%;transform:translateX(-50%);max-width:44vw;padding:5px 12px;border:2px solid #8d344c;border-radius:14px;background:rgba(20,9,30,.9);text-align:center;pointer-events:none;font-size:15px;line-height:1.2;color:#fff}#hnsStatus b{display:block;font-size:24px;color:#ffc233}#hnsStatus.final{border-color:#ff5368;box-shadow:0 0 14px #b5153b}
 #hnsBlind{position:fixed;inset:0;z-index:125;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff}#hnsBlind h2{color:#ff5468;font-size:32px}#hnsBlind p{font-size:24px}#hnsVignette{position:fixed;inset:0;z-index:21;pointer-events:none;box-shadow:inset 0 0 90px 25px #ff1839;opacity:0}
@@ -92,7 +94,7 @@ body:has(#meet:not([hidden])) #pingMeter,body:has(#gameSettingsOverlay:not([hidd
 @media(max-height:480px){.surveillanceMonitor{max-width:440px;margin:auto}.surveillanceControls{margin-top:4px}.surveillanceCameraInfo strong{font-size:13px}.sensorLogList{max-height:45dvh}.sensorLogRow{min-height:44px}.sensorLogRow p{font-size:13px}}
 
 /* One circular frame; each existing role keeps its own colors. */
-.abilityButton{--ability-shadow:#1f9d6c;box-sizing:border-box;border:4px solid #10122a!important;border-radius:50%!important;box-shadow:0 6px 0 var(--ability-shadow),0 8px 0 #10122a!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:1px!important;padding:1px 3px!important;overflow:hidden;isolation:isolate;text-align:center;animation:none!important;line-height:1!important}
+.abilityButton{--ability-shadow:#1f9d6c;box-sizing:border-box;border:4px solid #10122a!important;border-radius:50%!important;box-shadow:0 6px 0 var(--ability-shadow),0 8px 0 #10122a!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;padding:2px 3px!important;overflow:hidden;isolation:isolate;text-align:center;animation:none!important;line-height:1!important}
 .abilityButton.kill{--ability-shadow:#a02a3a}.abilityButton.sab{--ability-shadow:#161a4a}.abilityButton.sheriff{--ability-shadow:#2055a5}.abilityButton.locator{--ability-shadow:#2685b0}.abilityButton.instructor{--ability-shadow:#a7bfd9}.abilityButton.guardian{--ability-shadow:#8dc7df}.abilityButton.paramedic{--ability-shadow:#3b9f75}.abilityButton.seer{--ability-shadow:#7656b2}.abilityButton.engineer{--ability-shadow:#9baedb}.abilityButton.miner{--ability-shadow:#89602b}.abilityButton.metamorph,.abilityButton.delayed,.abilityButton.cleaner,.abilityButton.parasite,.abilityButton.spectral,.abilityButton.marionette,.abilityButton.hunter,.abilityButton.ninja{--ability-shadow:#a91f39}.abilityButton.neutralAbility{--ability-shadow:#555e70}
 #actions .abilityButton:not(:disabled){filter:none!important;opacity:1!important}
 #actions .abilityButton:disabled{filter:saturate(.12) brightness(.70)!important;opacity:1!important}
@@ -101,7 +103,7 @@ body:has(#meet:not([hidden])) #pingMeter,body:has(#gameSettingsOverlay:not([hidd
 #actions .abilityButton small[hidden]{display:none!important}
 #actions .abilityButton .abilityDetail{font-size:11px!important}
 @media(max-width:560px),(pointer:coarse){#actions .abilityButton .abilityIcon{font-size:26px!important}#actions .abilityButton small{font-size:9.5px!important}#actions .abilityButton .abilityDetail{font-size:10px!important}}
-.meetingVoteConfirm .judgeVoteBtn.abilityButton{--judge-size:max(44px,calc(44px / var(--ui-scale,1)));flex:0 0 var(--judge-size)!important;min-width:var(--judge-size)!important;width:var(--judge-size);height:var(--judge-size);min-height:var(--judge-size);padding:1px!important;--ability-shadow:#14569b}
+.meetingVoteConfirm .judgeVoteBtn.abilityButton{--judge-size:max(44px,calc(44px / var(--ui-scale,1)));flex:0 0 var(--judge-size)!important;min-width:var(--judge-size)!important;width:var(--judge-size);height:var(--judge-size);min-height:var(--judge-size);padding:0!important;gap:2px!important;--ability-shadow:#14569b}
 .judgeVoteBtn.abilityButton .abilityIcon{font:23px/1 system-ui,sans-serif}.judgeVoteBtn.abilityButton small{font:800 8px/1 var(--font)}
 .judgeVoteBtn.abilityButton:disabled{filter:saturate(.12) brightness(.70)!important;opacity:1!important}
 
@@ -113,3 +115,5 @@ body:has(#meet:not([hidden])) #pingMeter,body:has(#gameSettingsOverlay:not([hidd
 .meetingVoteConfirm:has(.judgeVoteBtn.abilityButton:not([hidden])){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:stretch}
 .meetingVoteConfirm .judgeVoteBtn.abilityButton:not([hidden]){grid-column:1/-1;justify-self:center}
 .pc.vote-pending:has(+.meetingVoteConfirm .judgeVoteBtn.abilityButton:not([hidden])){padding-bottom:110px}
+
+.seerEvidence{white-space:pre-line;font-size:12px;line-height:1.35;padding:7px;margin-top:7px;border:1px solid #7762ab;border-radius:8px;background:#14132c;color:#e4d5ff}

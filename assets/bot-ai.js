@@ -246,7 +246,7 @@ function perceive(ch){
     for(const b of G.bodies){
       if(ai.ignore.has(b.id))continue;
       if(ch.function==='paramedic'&&validReviveBodyFor(ch,b,Math.max(R,actionDistancePx('paramedic'))))continue;if(ch.function==='seer'&&(ch.seerCd||0)<=0&&!ch.seerPending){ai.bodySeen=b;break}
-      if(npcCanSeePoint(ch,b.x,b.y)){ai.bodySeen=b;ai.reactT=ai.witnessOf?.5:rand(5,12)/10;break}
+      if(MATCH_UPDATE.allowed()&&npcCanSeePoint(ch,b.x,b.y)){ai.bodySeen=b;ai.reactT=ai.witnessOf?.5:rand(5,12)/10;break}
     }
   }
   const vis=[];
@@ -381,7 +381,7 @@ function finishWork(ch){
 }
 
 function reactToBody(ch){
-  const ai=ch.ai, b=ai.bodySeen; if(!b||!G.bodies.includes(b))return;
+  if(!MATCH_UPDATE.allowed())return;const ai=ch.ai, b=ai.bodySeen; if(!b||!G.bodies.includes(b))return;
   if(ch.role==='crew'){ai.bodiesFound.push({id:b.id,room:b.room,gt:G.gt}); if(ai.bodiesFound.length>4)ai.bodiesFound.shift(); ai.avoid={room:b.room,until:G.gt+60}; npcSay(ch,pick(['Um corpo!','Alguém viu quem passou por aqui?','Chamem todo mundo!']))}
   if(ch.role==='imp'&&Math.random()>.2){ai.ignore.add(b.id);return}
   ai.hunt=null; const bt={x:clamp(Math.floor(b.x/TILE),0,COLS-1),y:clamp(Math.floor((b.y+OFF_Y)/TILE),0,ROWS-1)};
@@ -399,7 +399,7 @@ function npcSay(ch,text){
 }
 
 function noteVentSeen(imp,v,act){
-  const room=ROOM_BY_ID[v.room].name, ws=ventWitnesses(v,imp);
+  const room=ventRoomName(v), ws=ventWitnesses(v,imp);
   ws.forEach(o=>{
     if(o.isPlayer||!o.ai)return;   // humanos veem com os próprios olhos; somente bots guardam testemunhos
     const ai=o.ai; addSusp(o,imp.id,6,'vent',{room});   // testemunho real: identifica o impostor para esta testemunha
@@ -413,7 +413,7 @@ function noteVentSeen(imp,v,act){
 
 function noteEngineerVentSeen(ch,v,act){
   if(ch.controlTargetId)ch=ventIdentity(ch);
-  const room=ROOM_BY_ID[v.room].name;
+  const room=ventRoomName(v);
   G.chars.filter(o=>o.alive&&!o.vent&&o!==ch&&o.role==='crew'&&npcCanSeePoint(o,v.px,v.py)).forEach(o=>{
     if(o.isPlayer||!o.ai)return;
     // Um Tripulante usando duto é evidência positiva de Engenheiro, não de Infiltrado.
@@ -527,6 +527,7 @@ function impThink(ch,dt){
 }
 
 function aiSabotage(ch){
+  if(!MATCH_UPDATE.allowed())return;
   const opts=ACTIVE_MAP_ID==='nexus'?[['lights',2],['comms',3.2],['doors',1.5],['reactor',progress()>.45?4.5:1.3]]:[['lights',2],['comms',2],['doors',1],['reactor',progress()>.5?4:1]];
   if(ACTIVE_MAP_ID==='kryos')opts.push(['oxygen',1.3]);
   let r=Math.random()*opts.reduce((a,o)=>a+o[1],0), type='lights';
@@ -552,7 +553,7 @@ function paramedicBotThink(ch,dt){
 function seerBotThink(ch,dt){
   if(!ch?.alive||ch.role!=='crew'||ch.function!=='seer'||roleAbilityBlockedByComms()||ch.vent||G.M||G.over)return false;const ai=ch.ai;
   if(ch.seerPending){ch.moving=false;return true}
-  if(ai?.seerReportBody){const body=G.bodies.find(b=>String(b.id)===String(ai.seerReportBody));if(!body){ai.seerReportBody=null;return false}if(dist(ch,body)<=actionDistancePx('report')&&losClear(ch.x,ch.y,body.x,body.y)){ai.seerReportBody=null;callMeeting(ch,'body',body);return true}}
+  if(ai?.seerReportBody&&MATCH_UPDATE.allowed()){const body=G.bodies.find(b=>String(b.id)===String(ai.seerReportBody));if(!body){ai.seerReportBody=null;return false}if(dist(ch,body)<=actionDistancePx('report')&&losClear(ch.x,ch.y,body.x,body.y)){ai.seerReportBody=null;callMeeting(ch,'body',body);return true}}
   if((ch.seerCd||0)>0)return false;
   const candidates=G.bodies.filter(b=>npcCanSeePoint(ch,b.x,b.y)||ai?.bodySeen===b).sort((a,b)=>dist(ch,a)-dist(ch,b));if(!candidates.length)return false;const body=candidates[0];
   if(dist(ch,body)<=actionDistancePx('seer')&&losClear(ch.x,ch.y,body.x,body.y)){if(inspectBody(ch,body)){ai.seerReportBody=String(body.id);ai.bodySeen=null;ch.moving=false;return true}}
@@ -838,23 +839,23 @@ function mimicHearGesture(g){
  }
 }
 function mimicBotThink(ch){
- if(!MIMIC.active()||!ch.ai||G.over||MIMIC.remaining(ch)>0)return;const ai=ch.ai,now=MIMIC.now(),ctx=NZGestureRules.context({state:G.state,meeting:G.M,over:G.over});if(!ctx||ch.vent||ch.ventAnim||ch.controlledBy||ch.spectralInvisible)return;
+ if(!MIMIC.active()||!ch.ai||G.over||G.M&&!ch.alive||MIMIC.remaining(ch)>0)return;const ai=ch.ai,now=MIMIC.now(),ctx=NZGestureRules.context({state:G.state,meeting:G.M,over:G.over});if(!ctx||ch.vent||ch.ventAnim||ch.controlledBy||ch.spectralInvisible)return;
  if(now<(ai.mimicNextAt||0))return;ai.mimicNextAt=now+1400+Math.random()*800;
  const send=(kind,angle=0,targetId=null)=>{if(MIMIC.request(kind,angle,targetId,ch)){ai.mimicNextAt=now+CFG.gestureCooldown*1000+1000+Math.random()*3000;ai.mimicEvent=false;return true}return false};
  if(ctx==='meeting'){
   if(ai.mimicMeeting!==G.M){ai.mimicMeeting=G.M;ai.mimicAccused=null;ai.mimicReply=null;ai.mimicMeetingOpinion=null;ai.mimicNextAt=now+700+(String(ch.id).split('').reduce((n,v)=>n+v.charCodeAt(0),0)%13)*220;return}
   if(ai.mimicReply&&now>=ai.mimicReply.at){const kind=ai.mimicReply.kind;ai.mimicReply=null;if(send(kind))return}
   const top=topSuspect(ch),target=top&&charById(top.id),threshold=PERS[ai.pers]?.thr||2.5;
-  if(target?.alive&&target!==ch&&top.s>=threshold*.65){if(ai.mimicAccused!==target.id||now-(ai.mimicAccusedAt||0)>22000){if(send('right',0,target.id)){ai.mimicAccused=target.id;ai.mimicAccusedAt=now}return}}
+  if(target?.alive&&target!==ch&&top.s>=threshold*.65){if(ai.mimicAccused!==target.id||now-(ai.mimicAccusedAt||0)>22000){if(send('point',0,target.id)){ai.mimicAccused=target.id;ai.mimicAccusedAt=now}return}}
   if(ch.role==='neutral'&&ch.function==='jester'&&ai.mimicEvent){send('palm');return}
   if(!ai.mimicMeetingOpinion&&G.M.clock>5){ai.mimicMeetingOpinion=G.M;send('palm')}
   return;
  }
  if(!ch.alive)return;
  const top=topSuspect(ch),suspect=top&&charById(top.id);
- if(suspect&&top.s>=2&&npcCanSeeChar(ch,suspect)&&dist(ch,suspect)<500){if(ai.mimicWorldTarget!==suspect.id||G.gt-(ai.mimicWorldAt||0)>30){if(send('right',Math.atan2(suspect.y-ch.y,suspect.x-ch.x))){ai.mimicWorldTarget=suspect.id;ai.mimicWorldAt=G.gt}return}}
+ if(suspect&&top.s>=2&&npcCanSeeChar(ch,suspect)&&dist(ch,suspect)<500){if(ai.mimicWorldTarget!==suspect.id||G.gt-(ai.mimicWorldAt||0)>30){if(send('point',Math.atan2(suspect.y-ch.y,suspect.x-ch.x))){ai.mimicWorldTarget=suspect.id;ai.mimicWorldAt=G.gt}return}}
  if(ai.mimicCompletedAt&&G.gt-ai.mimicCompletedAt<8){const peer=G.chars.find(c=>c!==ch&&npcCanSeeChar(ch,c)&&dist(ch,c)<260);if(peer&&send('up'))ai.mimicCompletedAt=0;return}
- if(ai.mimicEvent){const body=G.bodies.find(b=>npcCanSeePoint(ch,b.x,b.y)&&dist(ch,b)<400);if(body){send('right',Math.atan2(body.y-ch.y,body.x-ch.x));return}if(ai.fix&&G.sab[ai.fix]>0){const station=stationPos(FIX[ai.fix].st);send('right',Math.atan2(station.y-ch.y,station.x-ch.x));return}ai.mimicEvent=false}
+ if(ai.mimicEvent){const body=G.bodies.find(b=>npcCanSeePoint(ch,b.x,b.y)&&dist(ch,b)<400);if(body){send('point',Math.atan2(body.y-ch.y,body.x-ch.x));return}if(ai.fix&&G.sab[ai.fix]>0){const station=stationPos(FIX[ai.fix].st);send('point',Math.atan2(station.y-ch.y,station.x-ch.x));return}ai.mimicEvent=false}
  const peer=G.chars.find(c=>c!==ch&&c.alive&&npcCanSeeChar(ch,c)&&dist(ch,c)<190);if(peer&&G.gt-(ai.mimicGreetAt||-50)>45){if(send('wave'))ai.mimicGreetAt=G.gt}
 }
 function ninjaBotUpdate(ch,dt,next){

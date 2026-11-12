@@ -13,3 +13,5 @@
 .act2.neutralAbility:disabled{filter:grayscale(1);opacity:.55}
 .act2.neutralAbility.ready{background:#c4cbd5!important}
 body.matchEnding #actions,body.matchEnding #joy,body.matchEnding #hud button{visibility:hidden!important;pointer-events:none!important}
+
+#matchFade{position:fixed;inset:0;z-index:10000;background:#000;opacity:0;pointer-events:auto;touch-action:none}#matchFade[hidden]{display:none!important}
