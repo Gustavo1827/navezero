@@ -474,7 +474,7 @@ body.touch #stick{display:block}
 .freeplayRoster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.freeplayPlayerButton{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:12px;min-height:146px;padding:14px!important;text-align:left;border:2px solid var(--crew-accent,var(--edge));border-radius:18px;background:linear-gradient(135deg,#151d43,#0c1230);color:var(--ink);width:100%}.freeplayPlayerButton:disabled{opacity:.45}.freeplayPlayerButton canvas{width:64px;height:76px}.freeplayPlayerInfo{display:grid;gap:5px;min-width:0}.freeplayPlayerName{font-size:20px;line-height:1.1;overflow-wrap:anywhere}.freeplayPlayerColor{font-size:12px;color:var(--ink2)}.freeplayPlayerState{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}.freeplayPlayerState b{border:1px solid currentColor;border-radius:12px;padding:1px 8px}.freeplayPlayerDetail{font-size:12px;color:#cbd5f4;line-height:1.35;white-space:pre-line}.emergencyCard{width:min(420px,94vw)}.emergencyConsole{margin:14px auto;width:126px;height:100px;display:grid;place-items:center;background:#19234b;border:3px solid #52659a;border-radius:22px;box-shadow:0 7px 0 #080c22;transform:perspective(300px) rotateX(12deg)}.emergencyConsole span{display:block;width:62px;height:58px;border:5px solid #642936;border-radius:50%;background:radial-gradient(circle at 34% 25%,#ff9f9f,#f74660 60%);box-shadow:0 8px 0 #8d2038}.emergencyCard button:disabled{filter:grayscale(1);opacity:.4;cursor:not-allowed;box-shadow:none}.emergencyRemaining{font-weight:800;font-size:20px}.ventRoute{position:absolute;width:140px;min-height:58px;display:grid;justify-items:center;gap:2px;padding:7px 10px;border:2px solid #6bded2;border-radius:15px;background:rgba(12,22,49,.95);color:#f0fcff;font:800 13px var(--font);box-shadow:0 4px 0 #050919;pointer-events:auto;transform:translate(-50%,-50%)}.ventRoute:disabled{opacity:.45;cursor:wait}.ventRouteArrow{font-size:30px;line-height:1;display:block;color:#79f2d1}.ventRouteLabel{text-align:center;line-height:1.1;overflow-wrap:anywhere}#ventPanel{position:fixed;inset:0!important;width:auto!important;max-width:none!important;height:auto!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;pointer-events:none;z-index:20}#ventList{position:absolute;inset:0;pointer-events:none}@media(max-width:600px){.freeplayRoster{grid-template-columns:1fr}.freeplayPlayerButton{min-height:124px}.ventRoute{width:116px;font-size:12px;min-height:55px}}
 .nativeEmoji{font-family:system-ui,sans-serif;font-variant-emoji:normal;line-height:1;display:inline-block;flex:none}#sayChips .quickCategories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;width:100%;flex:none}#sayChips .quickCategories .chip{min-width:0;display:flex;justify-content:center;align-items:center;gap:4px;overflow-wrap:anywhere;white-space:normal;font-size:13px;padding:7px 5px}@media(orientation:landscape) and (max-height:540px){#sayChips .quickCategories{grid-template-columns:repeat(4,minmax(0,1fr))}}#sayChips .quickCategories [aria-pressed=true]{border-color:var(--amber);color:var(--amber)}
 </style>
-<link rel="stylesheet" href="assets/ui-shared.css?v=0e1d6e0e9cd83bca">
+<link rel="stylesheet" href="assets/ui-shared.css?v=2f8d262fe118c53c">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -721,7 +721,7 @@ body.touch #stick{display:block}
 </div>
 
 <script src="assets/chat-moderation.js"></script>
-<script src="assets/bot-ai.js?v=9fd26b7f3af8fa22"></script>
+<script src="assets/bot-ai.js?v=8e1fc731805a8d43"></script>
 <script>
 'use strict';
 const _dom={};
@@ -794,13 +794,9 @@ const MAP_LIBRARY={
       {id:'reactor',room:'reactor',x:3,y:38,w:1,h:3,label:'Núcleo do reator'},
       {id:'fuel_reactor',room:'reactor',x:9,y:42,w:3,h:1,label:'Entrada de combustível'},
     ],
-    vents:[
-      {id:'v_cafe',room:'cafe',x:40,y:12},{id:'v_med',room:'med',x:13,y:10},{id:'v_sec',room:'sec',x:11,y:25},
-      {id:'v_hub',room:'hub',x:26,y:18},{id:'v_admin',room:'admin',x:55,y:23},{id:'v_elec',room:'elec',x:21,y:38},
-      {id:'v_stor',room:'stor',x:44,y:32},{id:'v_reactor',room:'reactor',x:12,y:39},{id:'v_comm',room:'comm',x:59,y:10},
-    ],
+    vents:[{"id":"v_med","room":"med","x":13,"y":4},{"id":"v_sec","room":"sec","x":10.7,"y":25.1},{"id":"v_hub_a","room":"hub","x":24.1,"y":17.6},{"id":"v_reactor_a","room":"reactor","x":12.2,"y":34},{"id":"v_hub_b","room":"hub","x":25.6,"y":17.4},{"id":"v_elec","room":"elec","x":30,"y":38.3},{"id":"v_reactor_b","room":"reactor","x":11.4,"y":34.6},{"id":"v_reactor_c","room":"reactor","x":3.5,"y":41.5},{"id":"v_hub_c","room":"hub","x":37.8,"y":17.4},{"id":"v_lower","room":"lower","x":51.6,"y":35.5},{"id":"v_admin_a","room":"admin","x":55.7,"y":22.9},{"id":"v_cafe","room":"cafe","x":40.5,"y":2.5},{"id":"v_admin_b","room":"admin","x":55.1,"y":24}],
     roomEdges:[['med','cafe'],['cafe','comm'],['cafe','hub'],['hub','admin'],['hub','sec'],['med','sec'],['sec','reactor'],['hub','elec'],['hub','stor'],['reactor','elec'],['stor','admin']],
-    ventLinks:[['v_cafe','v_med'],['v_cafe','v_comm'],['v_cafe','v_hub'],['v_med','v_sec'],['v_sec','v_hub'],['v_sec','v_reactor'],['v_hub','v_elec'],['v_hub','v_stor'],['v_hub','v_admin'],['v_elec','v_reactor'],['v_stor','v_admin'],['v_reactor','v_stor'],['v_admin','v_comm']],
+    ventLinks:[["v_med","v_hub_a"],["v_sec","v_hub_a"],["v_reactor_a","v_hub_b"],["v_hub_b","v_elec"],["v_reactor_b","v_reactor_c"],["v_hub_c","v_lower"],["v_lower","v_admin_a"],["v_cafe","v_admin_b"]],
     spawn:{x:31,y:11},table:{x:29,y:6,w:6,h:3},freeComputer:{id:'freeplay_pc',room:'cafe',x:38,y:10,w:1,h:1,label:'Computador da Partida Livre'},
     cams:[{name:'Cafeteria',tx:31,ty:8},{name:'Corredor Central',tx:32,ty:21},{name:'Elétrica',tx:26,ty:35},{name:'Armazém',tx:40,ty:35}],
     decon:null
@@ -2241,7 +2237,7 @@ function actionFor(s){
 }
 // The visible body retains its own vent permission, including during possession.
 function ventIdentity(ch){return ch?.controlTargetId?charById(ch.controlTargetId)||ch:ch}
-function ventPermission(ch){const body=ventIdentity(ch);return !!body?.alive&&(body.role==='imp'||body.role==='neutral'&&body.function==='jester'||body.role==='crew'&&body.function==='engineer')}
+function ventPermission(ch){const body=ventIdentity(ch);if(NET.inRoom&&!NET.isHost&&body?.controlVentAccess&&body.controlledBy===NET.id)return !!body.alive&&body.controlVentAccess.allowed;return !!body?.alive&&(body.role==='imp'||body.role==='neutral'&&body.function==='jester'||body.role==='crew'&&body.function==='engineer')}
 function controlledVentAction(ch){if(!ch?.controlledBy||!ventPermission(ch)||ch.vent)return null;const v=nearestVentFor(ch);if(!v)return null;return{type:'vent',vent:v,station:{x:v.x,y:v.y,w:1,h:1},label:t('action.enterVent')}}
 function bestAction(){
   if(G.player.vent)return null;if(G.player.controlledBy)return controlledVentAction(G.player);
@@ -2385,16 +2381,12 @@ function finishStep(tok){
   const m=G.mini; if(!m||m.tok!==tok||m.finished)return;
   m.finished=true;
   const onlineClient=typeof NET!=='undefined'&&NET.inRoom&&!NET.isHost&&!NET.applying;
-  if(onlineClient){
-    // O host valida vida, posse, estação e distância antes de confirmar o passo.
-    // Não marcar localmente como concluído evita tarefas “fantasmas” quando o host recusa uma ação.
-    const taskKey=String(m.task.id)+':'+String(m.step.st);
-    if(!NET.pendingTasks.has(taskKey)){NET.pendingTasks.add(taskKey);netSend({type:'action',action:'task_complete',taskId:m.task.id,stepId:m.step.st,fix:m.task.fix||null});setTimeout(()=>NET.pendingTasks.delete(taskKey),2500)}
-  }else{m.step.done=true}
+  if(onlineClient)return TASK_CONFIRMATIONS.start(m);
+  m.step.done=true;
   Snd.ok();
   const task=m.task;
   if(!onlineClient){task.done=task.steps.every(s=>s.done);if(G.player?.function==='lazy')lazyTasksDone(G.player)}
-  const fx=$('mfx'); fx.className='show'; fx.innerHTML='✓<small>'+(onlineClient?t('message.taskSentHost'):task.fix?t('message.sabotageSolved'):task.done?t('message.taskComplete'):t('message.stepComplete'))+'</small>';
+  const fx=$('mfx'); fx.className='show'; fx.innerHTML='✓<small>'+(task.fix?t('message.sabotageSolved'):task.done?t('message.taskComplete'):t('message.stepComplete'))+'</small>';
   renderTasks();
   if(!onlineClient){if(task.fix)resolveSab(task.fix);else if(checkEnd())return}
   setTimeout(()=>{
@@ -2402,7 +2394,7 @@ function finishStep(tok){
     closeModal(); renderTasks();
     if(task.fix||task.fakeOnly)return;
     if(task.done){toast(t('task.completed',{name:taskDisplayName(task)}));if(G.player?.function==='lazy'&&lazyTasksDone(G.player))toast(t('task.lazyCompleted'),2600); if(G.pin===task.id)G.pin=null; renderTasks()}
-    else{const n=nextStep(task); if(n){G.pin=task.id;renderTasks();toast(onlineClient?t('message.taskSentHost'):t('task.nextStep',{room:roomDisplayName(ROOM_BY_ID[stationById[n.st].room].name)}))}}
+    else{const n=nextStep(task); if(n){G.pin=task.id;renderTasks();toast(t('task.nextStep',{room:roomDisplayName(ROOM_BY_ID[stationById[n.st].room].name)}))}}
   },800);
 }
 function openTool(a){
@@ -3357,7 +3349,7 @@ function drawPotatoExplosion(c,b,p){c.save();c.translate(b.x,b.y-8);c.scale(.35+
 function bodyCleaningAlpha(body){
   let alpha=1;for(const ch of G.chars||[]){const pending=ch.cleanPending;if(!pending||String(pending.bodyId)!==String(body.id))continue;const remaining=Number.isFinite(pending.readyAt)?pending.readyAt-G.gt:pending.remaining;alpha=Math.min(alpha,clamp(remaining/ROLE_FIXED.cleanerDuration,0,1))}return alpha;
 }
-function drawBody(c,b){c.save();c.globalAlpha*=bodyCleaningAlpha(b);if(b.cause==='hot-potato'&&Number.isFinite(b._deathStart)&&G.t<b._deathStart){drawChar(c,{x:b.x,y:b.y,color:b.color,cosmetics:b.cosmetics,face:b.face,walk:0,moving:false,alive:true},false,{portrait:true,noPet:true});drawPotatoExplosion(c,b,clamp((G.t-b._deathStart+POTATO_EXPLOSION_DURATION)/POTATO_EXPLOSION_DURATION,0,1))}else drawBodyShape(c,b);c.restore()}
+function drawBody(c,b){c.save();c.globalAlpha*=bodyCleaningAlpha(b);if(b.cause==='hot-potato'&&Number.isFinite(b._deathStart)&&G.t<b._deathStart){drawChar(c,{id:b.victimId??b.id,x:b.x,y:b.y,color:b.color,cosmetics:b.cosmetics,face:b.face,walk:0,moving:false,alive:true},false,{portrait:true,noPet:true});drawPotatoExplosion(c,b,clamp((G.t-b._deathStart+POTATO_EXPLOSION_DURATION)/POTATO_EXPLOSION_DURATION,0,1))}else drawBodyShape(c,b);c.restore()}
 function drawBodyShape(c,b){
   const progress=Number.isFinite(b._deathStart)?clamp((G.t-b._deathStart)/DEATH_FALL_DURATION,0,1):1;
   const facing=b.face<0?-1:1;
@@ -3365,7 +3357,7 @@ function drawBodyShape(c,b){
     const fall=clamp((progress-.18)/.72,0,1),ease=fall*fall*(3-2*fall),sway=Math.sin(progress*Math.PI*5)*.10*(1-fall);
     c.save();c.translate(b.x,b.y+10);c.rotate(facing*(sway+ease*1.10));c.translate(-b.x,-b.y-10);
     c.globalAlpha*=1-clamp((progress-.65)/.35,0,1);
-    drawChar(c,{x:b.x,y:b.y,color:b.color,cosmetics:b.cosmetics,face:facing,walk:0,moving:false,alive:true},false,{portrait:true,noPet:true,worldBody:true});c.restore();
+    drawChar(c,{id:b.victimId??b.id,x:b.x,y:b.y,color:b.color,cosmetics:b.cosmetics,face:facing,walk:0,moving:false,alive:true},false,{portrait:true,noPet:true,worldBody:true});c.restore();
   }
   if(progress<.58)return;
   const masked=commsAnonymized(),col=masked?COMMS_COLOR:COLOR_BY[b.color]||COLOR_BY.azul,cosmetics=normalizeCosmetics(masked?DEFAULT_COSMETICS:b.cosmetics),settle=progress<1?Math.sin((progress-.58)/.42*Math.PI)*2:0;
@@ -3733,14 +3725,14 @@ function buildCfgUI(){
     const fieldLabelKey=`settings.field.${k}.label`,fieldDescKey=`settings.field.${k}.desc`;l=hasI18nKey(fieldLabelKey)?t(fieldLabelKey):translateRuntimeText(l);d=hasI18nKey(fieldDescKey)?t(fieldDescKey):translateRuntimeText(d);
     const row=el('div','cfgrow'+(isFn?' fncompact':'')), top=el('div','cfgtop');
     if(isFn){
-      const showCfgValue=()=>cfgValueIsInfinite(k,CFG[k])?'∞':(k==='noisyImpostorVisible'||k==='guardianImpostorVisible')?(CFG[k]?t('common.yes'):t('common.no')):(k==='lazySlowdown'?(CFG[k]/10).toFixed(1)+'x':CFG[k]+(unit?' '+unit:''));
+      const showCfgValue=()=>cfgValueIsInfinite(k,CFG[k])?'∞':(k==='noisyImpostorVisible'||k==='guardianImpostorVisible'||k==='childSmall')?(CFG[k]?t('common.yes'):t('common.no')):(k==='lazySlowdown'?(CFG[k]/10).toFixed(1)+'x':CFG[k]+(unit?' '+unit:''));
       const value=el('b','',showCfgValue());
       const icon=el('span','fnicon',isChild?'🍭':isShifter?'🧬':isWorker?'💼':isPyromancer?'🔥':isCaptain?'📣':isNinja?'⚔️':isJester?'🤡':isDelayed?'⏱️':isSheriff?'🔫':isObserver?'👀':isInstructor?'↔️':isGuardian?'🪽':isCleaner?'🧹':isParasite?'🦠':isMiner?'⛏️':isMorph?'🎭':isSpectral?'👻':isParamedic?'⛑️':isSeer?'🔮':isNoisy?'🔊':isJudge?'👨‍⚖️':isLazy?'🍕':isEngineer?'🔧':isMarionette?'✋':isHunter?'🎯':'🧭'); top.append(icon,el('span','',l),value);
       const stepper=el('div','fnstepper');
-      const minus=el('button','','−'), number=el('output','',(k==='noisyImpostorVisible'||k==='guardianImpostorVisible')?(CFG[k]?t('common.yes'):t('common.no')):((k==='lazySlowdown')?(CFG[k]/10).toFixed(1):cfgNumericDisplay(k,CFG[k]))), plus=el('button','', '+');
+      const minus=el('button','','−'), number=el('output','',(k==='noisyImpostorVisible'||k==='guardianImpostorVisible'||k==='childSmall')?(CFG[k]?t('common.yes'):t('common.no')):((k==='lazySlowdown')?(CFG[k]/10).toFixed(1):cfgNumericDisplay(k,CFG[k]))), plus=el('button','', '+');
       minus.type=plus.type='button'; minus.setAttribute('aria-label',t('settings.decrease',{label:l})); plus.setAttribute('aria-label',t('settings.increase',{label:l})); number.setAttribute('aria-label',l);
       const activeLim=()=>cfgLimitFor(k);{const lim=activeLim();CFG[k]=clamp(CFG[k],lim[0],lim[1])}
-      const sync=()=>{const lim=activeLim();number.textContent=(k==='noisyImpostorVisible'||k==='guardianImpostorVisible')?(CFG[k]?t('common.yes'):t('common.no')):((k==='lazySlowdown')?(CFG[k]/10).toFixed(1):cfgNumericDisplay(k,CFG[k]));value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=lim[0];plus.disabled=locked||CFG[k]>=lim[1]};
+      const sync=()=>{const lim=activeLim();number.textContent=(k==='noisyImpostorVisible'||k==='guardianImpostorVisible'||k==='childSmall')?(CFG[k]?t('common.yes'):t('common.no')):((k==='lazySlowdown')?(CFG[k]/10).toFixed(1):cfgNumericDisplay(k,CFG[k]));value.textContent=showCfgValue();minus.disabled=locked||CFG[k]<=lim[0];plus.disabled=locked||CFG[k]>=lim[1]};
       const change=(delta,silent=false)=>{if(locked)return;const lim=activeLim();CFG[k]=clamp(CFG[k]+delta,lim[0],lim[1]);sync();saveCfg();if(typeof netNoteRoomSetting==='function')netNoteRoomSetting(k,CFG[k]);if(!silent)Snd.click()};
       const wireRepeat=(btn,delta)=>{let delayTimer=null,repeatTimer=null;const stop=()=>{if(delayTimer!==null){clearTimeout(delayTimer);delayTimer=null}if(repeatTimer!==null){clearInterval(repeatTimer);repeatTimer=null}};const canStep=()=>{const lim=activeLim();return !locked&&(delta<0?CFG[k]>lim[0]:CFG[k]<lim[1])};const down=e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();if(!canStep())return;stop();if(btn.setPointerCapture&&e.pointerId!==undefined){try{btn.setPointerCapture(e.pointerId)}catch{}}change(delta);delayTimer=setTimeout(()=>{delayTimer=null;if(!canStep())return;repeatTimer=setInterval(()=>{if(!canStep()){stop();return}change(delta,true)},70)},280)};btn.addEventListener('pointerdown',down);btn.addEventListener('pointerup',stop);btn.addEventListener('pointercancel',stop);btn.addEventListener('lostpointercapture',stop);btn.addEventListener('click',e=>{if(e.detail===0)change(delta)});};
       if(k.endsWith('Chance')&&(isChild||isShifter||isJester||isWorker||isPyromancer)){wireRepeat(minus,-100);wireRepeat(plus,100)}else if(k==='judgeTaskPct'){wireRepeat(minus,-25);wireRepeat(plus,25)}else if(k==='instructorMaxDistance'){wireRepeat(minus,-100);wireRepeat(plus,100)}else if(k==='hunterTargetCooldown'){wireRepeat(minus,-5);wireRepeat(plus,5)}else{wireRepeat(minus,-1);wireRepeat(plus,1)}stepper.append(minus,number,plus);row.append(top,stepper);const desc=descriptionKey(d);if(desc&&!descriptionTexts.has(desc)){row.append(el('small','',d));descriptionTexts.add(desc)}sync();
@@ -4380,6 +4372,7 @@ const histNear=(ai,id,gt,win)=>(ai.hist[id]||[]).filter(h=>Math.abs(h.gt-gt)<=wi
 /* ---------- dutos: exclusivos de Infiltrados vivos ---------- */
 const VENT_SEE=380, VENT_CD=3, IMP_VENT_REENTRY=.12;
 const ventPos=v=>({x:v.px,y:v.py});
+function ventRoomName(v){return v?.room==='lower'?t('vents.lower'):roomDisplayName(ROOM_BY_ID[v?.room]?.name||roomName(v?.px||0,v?.py||0))}
 
 
 
@@ -4417,7 +4410,7 @@ function ventMove(ch,toId){
   // A rede de dutos já define as conexões permitidas. Não use a distância dos corredores
   // para recusá-las: Nave↔Reator e Enfermaria↔Varanda são ligações diretas do duto.
   ch.vent=toId; ch.x=to.px; ch.y=to.py-OFF_Y; ch.ventMv=.8;const puppet=ch.controlTargetId&&charById(ch.controlTargetId);if(puppet){puppet.vent=toId;puppet.x=ch.x;puppet.y=ch.y;puppet.ventMv=.8} if(ch===G.player)Snd.tone(220,.15,'triangle',.05);
-  if(ch.isPlayer){refreshVentPanel();toast(t('runtime.ventRoom',{room:roomDisplayName(ROOM_BY_ID[to.room]?.name||'')}),1200)}
+  if(ch.isPlayer){refreshVentPanel();toast(t('runtime.ventRoom',{room:ventRoomName(to)}),1200)}
   return true;
 }
 function refreshNearbyInteractions(){
@@ -4430,7 +4423,7 @@ function exitVent(ch){
   // Um snapshot antigo ou uma troca de mapa nunca pode deixar o jogador preso num duto inexistente.
   if(!v){ch.vent=null;ch.ventAnim=null;ch.ventMv=0;ch.moving=false;if(wasEngineer){identity.engVentTime=0;identity.engVentCd=CFG.engCooldown}if(ch.isPlayer){$('ventPanel').hidden=true;joy.x=joy.y=0;resetStick();refreshNearbyInteractions()}return true}
   if(wasEngineer)noteEngineerVentSeen(ch,v,'exit');else noteVentSeen(ch,v,'exit');
-  ch.vent=null;ch.ventMv=0;ch.x=v.px;ch.y=v.py-OFF_Y;ch.moving=false;ch.ventAnim={t:0,dur:wasEngineer?.45:.18,kind:'out'};ch.ventSeq=(ch.ventSeq||0)+1;ch.ventCd=wasEngineer?0:IMP_VENT_REENTRY;
+  ch.vent=null;ch.ventMv=0;const exitPoint=ACTIVE_MAP_ID==='nave'&&boxBlocked(v.px,v.py-OFF_Y,false)?nearestWalkablePosition(v.px,v.py-OFF_Y):null;ch.x=exitPoint?.x??v.px;ch.y=exitPoint?.y??v.py-OFF_Y;ch.moving=false;ch.ventAnim={t:0,dur:wasEngineer?.45:.18,kind:'out'};ch.ventSeq=(ch.ventSeq||0)+1;ch.ventCd=wasEngineer?0:IMP_VENT_REENTRY;
   if(wasEngineer){identity.engVentTime=0;identity.engVentCd=CFG.engCooldown}
   const puppet=ch.controlTargetId&&charById(ch.controlTargetId);if(puppet){puppet.vent=null;puppet.ventMv=0;puppet.x=ch.x;puppet.y=ch.y;puppet.moving=false;puppet.ventAnim={...ch.ventAnim};puppet.ventSeq=ch.ventSeq}
   if(ch.ai){ch.ai.path=[];ch.ai.goal=null;ch.ai.state='idle';ch.ai.wait=.15}
@@ -4500,7 +4493,7 @@ function tickControls(dt){
   for(const ch of G.chars){if(ch.controlledBy){const owner=charById(ch.controlledBy);if(!owner||owner.controlTargetId!==ch.id){ch.controlledBy=null;ch.moving=false;if(ch.vent){ch.ventAnim=null;exitVent(ch)}}}if(ch.controlCd>0)ch.controlCd=Math.max(0,ch.controlCd-abilityCooldownDelta(ch,dt));if(!ch.controlTargetId)continue;const target=charById(ch.controlTargetId);if(!target||!target.alive||target.controlledBy!==ch.id||!ch.alive||G.M||G.state!=='playing'){stopControl(ch,G.M?'meeting':'end');continue}ch.controlTime=Math.max(0,(ch.controlTime||0)-dt);ch.x=ch.controlReturn?.x??ch.x;ch.y=ch.controlReturn?.y??ch.y;ch.moving=false;if(target.ai){const rm=roomName(target.x,target.y),hist=target.ai.my,last=hist[hist.length-1];if(!last||last.room!==rm||G.gt-last.gt>4){hist.push({room:rm,gt:G.gt});if(hist.length>14)hist.shift()}if(target.ai.trail[target.ai.trail.length-1]!==rm){target.ai.trail.push(rm);if(target.ai.trail.length>4)target.ai.trail.shift()}}if(ch.controlTime<=0)stopControl(ch,'timeout')}
 }
 // Keep cooldowns frozen through the whole exit frame, including after its animation finishes.
-function abilityCooldownDelta(ch,dt){return ch&&(ch.vent||ch.ventAnim||ch._ventCooldownFrame!=null&&ch._ventCooldownFrame===G.t)?0:dt}
+function abilityCooldownDelta(ch,dt){const body=controlledBodyFor(ch);return body&&(body.vent||body.ventAnim||body._ventCooldownFrame!=null&&body._ventCooldownFrame===G.t)?0:dt}
 function tickVents(dt){
   VENT_DEFS.forEach(v=>{if(v.flash>0)v.flash=Math.max(0,v.flash-dt)});
   G.chars.forEach(c=>{
@@ -4515,8 +4508,8 @@ function refreshVentPanel(){
   const p=G.player;if(!p||!p.vent){$('ventPanel').hidden=true;return}
   $('ventList').classList.toggle('mineRoutes',isMinerHoleId(p.vent));if(isMinerHoleId(p.vent)){renderMinerRoutes(p);return}
   if(!ventById[p.vent]||!VENT_ADJ[p.vent]){p.ventAnim=null;exitVent(p);return}
-  const box=$('ventList');box.replaceChildren();$('ventHere').textContent=t('runtime.ventRoom',{room:roomDisplayName(ROOM_BY_ID[ventById[p.vent].room].name)});
-  for(const id of VENT_ADJ[p.vent]){const to=ventById[id];if(!to)continue;const room=roomDisplayName(ROOM_BY_ID[to.room]?.name||'');const button=el('button','ventRoute');button.type='button';button.dataset.ventId=id;button.setAttribute('aria-label',t('roleUpdate.ventTo',{room}));button.append(el('span','ventRouteArrow','➜'),el('span','ventRouteLabel',room));button.addEventListener('click',e=>{e.stopPropagation();if(ventMove(G.player,id))Snd.click();else Snd.err()});box.appendChild(button)}positionVentArrows();
+  const box=$('ventList');box.replaceChildren();$('ventHere').textContent=t('runtime.ventRoom',{room:ventRoomName(ventById[p.vent])});
+  for(const id of VENT_ADJ[p.vent]){const to=ventById[id];if(!to)continue;const room=ventRoomName(to);const button=el('button','ventRoute');button.type='button';button.dataset.ventId=id;button.setAttribute('aria-label',t('roleUpdate.ventTo',{room}));button.append(el('span','ventRouteArrow','➜'),el('span','ventRouteLabel',room));button.addEventListener('click',e=>{e.stopPropagation();if(ventMove(G.player,id))Snd.click();else Snd.err()});box.appendChild(button)}positionVentArrows();
 }
 function positionVentArrows(){
   const p=G.player,body=controlledBodyFor(p);if(isMinerHoleId(body?.vent)){positionMinerArrows(body);return}const from=ventById[body?.vent];if(!from)return;
@@ -4560,6 +4553,7 @@ function parkPetAtBody(body,ch){
   G.deadPets.push({id:'pet_'+String(body.id),ownerId,pet,color:body.color,x:body.x-face*28,y:body.y+18,face,phase:ownerId.length*.7,sad:true});
 }
 function seedBodyKillerTrace(body){
+  if(!body.deathContext){const actor=charById(body.killerId);body.deathContext={executorId:body.killerId||null,controllerId:actor?.controlledBy||null,cause:NZDeathRules.causes.has(body.cause)?body.cause:body.killerId?'kill':'unknown',face:actor?.face<0?-1:1}}
   if(!body?.killerId)return body;const killer=charById(body.killerId);if(!killer)return body;
   body.killerTrace=[{t:0,x:body.x,y:body.y,room:body.room||roomName(body.x,body.y),vent:killer.vent||null}];body.traceUntil=G.gt+10;body.traceNext=G.gt+.16;return body;
 }
@@ -4574,22 +4568,24 @@ function seerBodyFor(ch,range=actionDistancePx('seer')){if(!ch||!ch.alive||ch.ro
 function buildSeerReplay(seer,body){
   if(!seer||!body)return false;const raw=Array.isArray(body.killerTrace)&&body.killerTrace.length?body.killerTrace:[{t:0,x:body.x,y:body.y,room:body.room||roomName(body.x,body.y),vent:null}];
   const trace=raw.map(f=>({t:+f.t||0,x:+f.x||body.x,y:+f.y||body.y,room:String(f.room||roomName(f.x,f.y)),vent:f.vent||null}));
-  const replay={bodyId:String(body.id),victimName:String(body.name||'Tripulante'),trace,startedAt:G.gt,until:G.gt+ROLE_FIXED.seerDuration,duration:ROLE_FIXED.seerDuration};seer.seerReplay=replay;seer.seerPending=null;
-  const last=trace[trace.length-1]||trace[0],vented=trace.some(f=>!!f.vent);if(seer.ai)seer.ai.seerClue={victimName:replay.victimName,room:last?.room||body.room||'algum lugar',vented,t:G.gt};
+  const provenance=body.deathContext||NZDeathRules.context(charById(body.killerId),G.chars,body.cause||'unknown');
+  const replay=NZDeathRules.replay({...provenance,bodyId:String(body.id),victimName:String(body.name||'Tripulante'),trace},G.gt,ROLE_FIXED.seerDuration);seer.seerReplay=replay;seer.seerPending=null;
+  const last=trace[trace.length-1]||trace[0],vented=trace.some(f=>!!f.vent);if(seer.ai)seer.ai.seerClue={victimName:replay.victimName,room:last?.room||body.room||'algum lugar',vented,cause:replay.cause,controlled:replay.controlled,t:G.gt};
   if(seer===G.player){G.seerReplay=replay;emitRoleFx(body.x,body.y,'seer');Snd.roleFx('seer','done');toast(`🔮 Reconstituição de ${replay.victimName} iniciada.`,2200)}return true;
 }
 function inspectBody(seer,body){
   if(!seer||!body||G.M||G.over||!seer.alive||seer.role!=='crew'||seer.function!=='seer'||roleAbilityBlockedByComms()||seer.vent||(seer.seerCd||0)>0||seer.seerPending||!G.bodies.includes(body)||dist(seer,body)>actionDistancePx('seer')||!losClear(seer.x,seer.y,body.x,body.y))return false;
+  if(NET.inRoom&&!NET.applying){if(seer!==G.player&&!(NET.isHost&&seer.isBot)||(seer._seerRequestUntil||0)>performance.now())return false;seer._seerRequestUntil=performance.now()+900;return netSend({type:'seer_request',actorId:seer.id,bodyId:String(body.id)})}
   seer.seerCd=CFG.seerCooldown;seer.seerPending={bodyId:String(body.id),readyAt:G.gt+CFG.seerDelay};if(seer===G.player){Snd.roleFx('seer','use');toast(CFG.seerDelay>0?`🔮 Analisando o corpo… ${CFG.seerDelay}s`:'🔮 Analisando o corpo…',1600)}return true;
 }
 function playerSeerInspect(){const p=G.player;if(!p||p.controlledBy||G.state!=='playing'||G.M||uiBusy()||!p.alive||p.role!=='crew'||p.function!=='seer'||p.vent||(p.seerCd||0)>0||p.seerPending)return;if(roleAbilityBlockedByComms()){toast('📡 Sem sinal');Snd.err();return}const b=G.seerT||seerBodyFor(p);if(!b){Snd.err();return}inspectBody(p,b)}
 function updateSeerStates(dt){
-  for(const c of G.chars||[]){if(c.seerCd>0)c.seerCd=Math.max(0,c.seerCd-abilityCooldownDelta(c,dt));if(c.seerPending&&G.gt>=Number(c.seerPending.readyAt||0)){const b=G.bodies.find(x=>String(x.id)===String(c.seerPending.bodyId));if(b)buildSeerReplay(c,b);else c.seerPending=null}if(c.seerReplay&&G.gt>=Number(c.seerReplay.until||0))c.seerReplay=null}
+  for(const c of G.chars||[]){if(c.seerCd>0)c.seerCd=Math.max(0,c.seerCd-abilityCooldownDelta(c,dt));if(c.seerPending&&!c.seerPending.server&&G.gt>=Number(c.seerPending.readyAt||0)){const b=G.bodies.find(x=>String(x.id)===String(c.seerPending.bodyId));if(b)buildSeerReplay(c,b);else c.seerPending=null}if(c.seerReplay&&G.gt>=Number(c.seerReplay.until||0))c.seerReplay=null}
   if(G.seerReplay&&G.gt>=Number(G.seerReplay.until||0))G.seerReplay=null;
 }
 function drawSeerReplay(c){
   // A reconstituição é estritamente privada: só o próprio Vidente vivo pode vê-la.
-  const r=G.seerReplay;if(!r||!G.player?.alive||G.player.role!=='crew'||G.player.function!=='seer'||G.gt>=Number(r.until||0)||!Array.isArray(r.trace)||!r.trace.length)return;
+  const r=G.seerReplay;if(!r||r.hasExecutor===false||!G.player?.alive||G.player.role!=='crew'||G.player.function!=='seer'||G.gt>=Number(r.until||0)||!Array.isArray(r.trace)||!r.trace.length)return;
   const duration=Math.max(.1,r.duration||ROLE_FIXED.seerDuration),elapsed=Math.max(0,G.gt-(r.startedAt||G.gt)),fraction=clamp(elapsed/duration,0,1),maxTrace=Math.max(.01,Number(r.trace[r.trace.length-1].t)||.01),traceT=fraction*maxTrace;
   let idx=0;for(let i=0;i<r.trace.length;i++){if((r.trace[i].t||0)<=traceT)idx=i;else break}
   const a=r.trace[idx]||r.trace[0],b=r.trace[Math.min(idx+1,r.trace.length-1)]||a,span=Math.max(.001,(Number(b.t)||0)-(Number(a.t)||0)),mix=clamp((traceT-(Number(a.t)||0))/span,0,1);
@@ -4599,7 +4595,7 @@ function drawSeerReplay(c){
   c.save();c.globalAlpha=alpha*ventFade;c.translate(x,y+(vented?12:0));if(vented)c.scale(1,.62);
   c.fillStyle='#050509';c.strokeStyle='rgba(200,205,225,.5)';c.lineWidth=2;
   c.beginPath();c.ellipse(0,4,18,25,0,0,Math.PI*2);c.fill();c.stroke();
-  c.fillStyle='#171820';c.beginPath();c.ellipse(8,-5,11,7,0,0,Math.PI*2);c.fill();
+  c.fillStyle='#171820';c.beginPath();c.ellipse((r.face||1)*8,-5,11,7,0,0,Math.PI*2);c.fill();
   c.restore();
 }
 function drawDeadPet(c,p){if(commsAnonymized()||G.bodies.some(b=>b.cause==='hot-potato'&&String(b.victimId??b.id)===String(p.ownerId)&&G.t<b._deathStart+DEATH_FALL_DURATION*.58))return;const owner=charById(p.ownerId);c._nzCosmeticColor=owner?.color||p.color||'azul';drawPetShape(c,p.pet,p.x,p.y,p.phase||0,{sad:true})}
@@ -4752,9 +4748,10 @@ function doKill(k,v){
   if(!k||!v||!k.alive||k.role!=='imp'||k.function==='delayed'||k.killDash||k.morphTransition||k.minerDig||k.spectralInvisible||!v.alive||v.role==='imp'||k===v||k.vent||v.vent||dist(k,v)>actionDistancePx('kill')||!losClear(k.x,k.y,v.x,v.y))return false;
   if(guardianProtectionFor(v))rememberGuardianAttackSource(v,k);
   if(consumeGuardianProtection(v,'kill')){if(k.ai){k.netKillCd=CFG.kill;k.ai.killCd=k.netKillCd}if(k.isPlayer){G.killCd=CFG.kill;k.netKillCd=G.killCd;toast('O ataque foi bloqueado por uma proteção.',1800)}return false}
+  const deathContext=NZDeathRules.context(k,G.chars,k.function==='ninja'&&k.ninja?.phase==='away'?'ninja':'kill');
   spawnKillSplash(k,v);killChar(v);
   if(hunterWrongHit)endHunterTarget(k,true);
-  const body={id:v.id,victimId:v.id,name:v.name,color:v.color,cosmetics:cloneCosmetics(v.cosmetics),x:v.x,y:v.y,room:roomName(v.x,v.y),tKill:G.gt,killerId:k.id};addBodyWithPet(body,v);
+  const body={id:v.id,victimId:v.id,name:v.name,color:v.color,cosmetics:cloneCosmetics(v.cosmetics),x:v.x,y:v.y,room:roomName(v.x,v.y),tKill:G.gt,killerId:deathContext.executorId,cause:deathContext.cause,deathContext};addBodyWithPet(body,v);
   startDirectKillDash(k,body);
   G.chars.forEach(o=>{if(o.alive&&!o.isPlayer&&!o.isRemoteHuman&&o.role==='crew'&&o!==k&&o!==v&&npcCanSeePoint(o,v.x,v.y)&&npcCanSeeChar(o,k)){o.ai.witnessOf=k;addSusp(o,k.id,6,'kill',{room:body.room})}});
   if(!k.isPlayer&&!k.isRemoteHuman){const ai=k.ai;k.netKillCd=CFG.kill;ai.killCd=k.netKillCd;ai.hunt=null;ai.huntPause=6;ai.state='idle';ai.wait=0;if(k.killDash)ai.afterKillDash=true;else if(!ventFlee(k))wander(k,900)}
@@ -4772,8 +4769,8 @@ function showDeathIntro(k,v){
   const c=cv.getContext('2d'); c.clearRect(0,0,cv.width,cv.height); c.save();
   c.translate(230,125); c.scale(1.55,1.55);
   // O impostor mantém a cor real dele; a vítima aparece caída no chão.
-  drawChar(c,{x:-48,y:-12,color:k.color,face:1,walk:0,moving:false,cosmetics:k.cosmetics},false,{portrait:true});
-  drawBody(c,{x:48,y:17,color:v.color,cosmetics:v.cosmetics});const deathPet=normalizeCosmetics(v.cosmetics).pet;if(deathPet!=='none')drawPetShape(c,deathPet,78,36,String(v.id||v.name||'').length*.7,{sad:true,colorId:v.color});
+  drawChar(c,{id:k.id,x:-48,y:-12,color:k.color,face:1,walk:0,moving:false,cosmetics:k.cosmetics},false,{portrait:true});
+  drawBody(c,{id:v.id,x:48,y:17,color:v.color,cosmetics:v.cosmetics});const deathPet=normalizeCosmetics(v.cosmetics).pet;if(deathPet!=='none')drawPetShape(c,deathPet,78,36,String(v.id||v.name||'').length*.7,{sad:true,colorId:v.color});
   c.restore(); wrap.hidden=false;
   window.setTimeout(()=>{wrap.hidden=true},2400);
 }
@@ -5491,7 +5488,7 @@ function renderMeetingIntro(){
     desc.textContent=M.captainCallId?t('captain.meeting'):t('meeting.emergencyCalled',{name:caller.name});
     const color=COLOR_BY[caller.color]; wrap.style.setProperty('--intro-color',color?color.main:'var(--amber)');
     c.setTransform(1.8,0,0,1.8,cv.width/2,cv.height/2);
-    drawChar(c,{x:-35,y:0,color:caller.color,face:1,walk:0,moving:false,cosmetics:caller.cosmetics},false,{portrait:true});
+    drawChar(c,{id:caller.id,x:-35,y:0,color:caller.color,face:1,walk:0,moving:false,cosmetics:caller.cosmetics},false,{portrait:true});
     if(M.captainCallId)CAPTAIN.drawWhistle(c,caller);else{
     // Ilustração do botão de emergência, no estilo já usado no mapa.
     c.lineWidth=3; c.strokeStyle='#10122a'; c.fillStyle='#7f89c9'; c.beginPath(); c.arc(35,-6,22,0,6.283); c.fill(); c.stroke();
@@ -5770,7 +5767,7 @@ function updateButtons(){
   // O conjunto extra de ações do Marionetista não pode ocupar a área física do joystick em telas estreitas.
   $('actions').classList.toggle('marionette-controls',marionette&&p.alive&&G.state==='playing');
   $('actions').classList.toggle('miner-controls',p.function==='miner'&&p.alive&&G.state==='playing');
-  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(directKill&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bdel,!(delayed&&p.alive)); hv(bcl,!(cleaner&&p.alive)); hv(bp,!(parasite&&p.alive)); hv(bspec,!(spectral&&p.alive)); hv(bpa,!(paramedic&&p.alive)); hv(bse,!(seer&&p.alive)); hv(bh,!(hunter&&p.alive)); hv(bi,!(G.state==='playing'&&!p.alive&&!!p.instructor)); hv(bg,!(G.state==='playing'&&!p.alive&&!!p.guardian)); hv(bs,!imp||(!p.alive&&!ghostCanSab())); hv(br,!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));hv(be,!(G.state==='playing'&&p.alive&&engineer));hv(bc,!(G.state==='playing'&&p.alive&&marionette));
+  const hv=(e,v)=>{if(e._hv!==v){e._hv=v;e.hidden=v}}; hv(bk,!(directKill&&p.alive)); hv(bsh,!(sheriff&&p.alive)); hv(bdel,!(delayed&&p.alive)); hv(bcl,!(cleaner&&p.alive)); hv(bp,!(parasite&&p.alive)); hv(bspec,!(spectral&&p.alive)); hv(bpa,!(paramedic&&p.alive)); hv(bse,!(seer&&p.alive)); hv(bh,!(hunter&&p.alive)); hv(bi,!(G.state==='playing'&&!p.alive&&!!p.instructor)); hv(bg,!(G.state==='playing'&&!p.alive&&!!p.guardian)); hv(bs,!MATCH_UPDATE.allowed()||!imp||(!p.alive&&!ghostCanSab())); hv(br,!MATCH_UPDATE.allowed()||!p.alive); hv(bl,!(G.state==='playing'&&p.alive&&G.locator));hv(be,!(G.state==='playing'&&p.alive&&engineer));hv(bc,!(G.state==='playing'&&p.alive&&marionette));
   hv(bn,!(G.state==='playing'&&p.alive&&p.role==='imp'&&p.function==='ninja'&&!G.hns&&!G.hp));
   if(!bn.hidden){const state=NINJA.buttonState(p);bn.disabled=state.disabled;setCls(bn,'ready',!bn.disabled);setCls(bn,'cooldown-label',state.cooldown);if(state.cooldown){const label=String(Math.ceil(p.ninjaCd));if(bn.textContent!==label)bn.textContent=label}else setAbilityCaption(bn,'⚔️',state.label);bn.title=t('role.ninja')+' · '+keyLabel(KEY_BINDINGS.function)}
   const commsAbilityDown=roleAbilityBlockedByComms();const ventReady=!commsAbilityDown&&(!!p.vent||((p.engVentCd||0)<=0&&!!nearestVentFor(p)));be.disabled=commsAbilityDown||(!p.vent&&!ventReady);be.classList.toggle('ready',ventReady&&!be.disabled);
@@ -6233,7 +6230,7 @@ function updateRoomExpiryDisplay(){const r=NET.room,elx=$('roomExpiryText');if(!
 setInterval(updateRoomExpiryDisplay,250);
 function roomViewSettingValue(key,value,unit=''){
   if(cfgValueIsInfinite(key,value))return '∞';
-  if(key==='allowMeetings'||key==='geminiBot'||key==='commsExpanded')return t(Number(value)?'common.yes':'common.no');if(key==='actionDistance')return translateRuntimeText(ACTION_DISTANCE_LABELS[clamp(Number(value)||0,0,2)]||String(value));
+  if(key==='childSmall'||key==='allowMeetings'||key==='geminiBot'||key==='commsExpanded')return t(Number(value)?'common.yes':'common.no');if(key==='actionDistance')return translateRuntimeText(ACTION_DISTANCE_LABELS[clamp(Number(value)||0,0,2)]||String(value));
   if(key==='noisyImpostorVisible'||key==='guardianImpostorVisible')return translateRuntimeText(Number(value)?'Sim':'Não');
   if(key==='lazySlowdown')return (Number(value)/10).toFixed(1)+'x';
   return String(value)+(unit?' '+unit:'');
@@ -6244,7 +6241,7 @@ function renderRoomViewSettings(){
   const section=(title,rows,translate=true)=>{const tx=v=>translate?translateRuntimeText(v):String(v);const h=el('h3','',tx(title)),list=el('div','roomViewSettingsList');if(!translate){h.setAttribute('data-i18n-skip','');list.setAttribute('data-i18n-skip','')}for(const [label,value] of rows){const row=el('div','roomViewSettingRow');row.append(el('span','',tx(label)),el('b','',tx(String(value))));list.appendChild(row)}body.append(h,list)};
   const map=MAP_LIBRARY[settings.mapId]||MAP_LIBRARY.nave;
   section('Sala',[['Mapa',map?.name||settings.mapId||'—'],['Tamanho fixo da sala',r.size],['Bots',r.bots??0],['Região',regionLabel(r.region)],['Idioma da sala',GAME_LANGUAGES[r.language]||r.language||'—']]);
-  const fnKeys=new Set(['childMax','childChance','shifterMax','shifterChance','shifterCooldown','neutrals','jesterMax','jesterChance','ninjaMax','ninjaChance','ninjaCooldown','ninjaDuration','workerMax','workerChance','pyromancerMax','pyromancerChance','pyromancerCooldown','captainChance','captainMax','captainCooldown','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorMaxDistance','guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible','cleanerChance','cleanerMax','cleanerCooldown','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','morphChance','morphMax','morphCooldown','morphDuration','minerCooldown','minerChance','minerMax','minerHoles','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','seerMax','seerChance','seerCooldown','seerDelay','noisyDuration','noisyChance','noisyMax','noisyImpostorVisible','judgeChance','judgeMax','judgeTaskPct','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','hunterChance','hunterMax','hunterTargetCooldown']);
+  const fnKeys=new Set(['childSmall','childMax','childChance','shifterMax','shifterChance','shifterCooldown','neutrals','jesterMax','jesterChance','ninjaMax','ninjaChance','ninjaCooldown','ninjaDuration','workerMax','workerChance','pyromancerMax','pyromancerChance','pyromancerCooldown','captainChance','captainMax','captainCooldown','locMax','locChance','locCooldown','locDuration','sheriffCooldown','sheriffChance','sheriffMax','obsChance','obsMax','instructorChance','instructorMax','instructorCooldown','instructorMaxDistance','guardianCooldown','guardianDuration','guardianChance','guardianMax','guardianImpostorVisible','cleanerChance','cleanerMax','cleanerCooldown','parasiteChance','parasiteMax','spectralChance','spectralMax','spectralCooldown','spectralDuration','morphChance','morphMax','morphCooldown','morphDuration','minerCooldown','minerChance','minerMax','minerHoles','paramedicChance','paramedicMax','paramedicCooldown','paramedicTasksPerUse','paramedicMaxUses','seerMax','seerChance','seerCooldown','seerDelay','noisyDuration','noisyChance','noisyMax','noisyImpostorVisible','judgeChance','judgeMax','judgeTaskPct','lazyChance','lazyMax','lazySlowdown','lazyTasks','delayedChance','delayedMax','delayedDuration','engVentDuration','engChance','engMax','engCooldown','marionCooldown','marionDuration','marionChance','marionMax','hunterChance','hunterMax','hunterTargetCooldown']);
   const general=[],functions=[];
   for(const [key,label,_desc,unit] of CFG_ROWS){const raw=settings[key]??CFG[key];const item=[label,roomViewSettingValue(key,raw,unit)];(fnKeys.has(key)?functions:general).push(item)}
   section('Configurações',general);section('Funções',functions,false);
@@ -6425,7 +6422,7 @@ function netCaptureSnapshot(){if(G.player){G.player.cleanCd=G.cleanerCd;G.player
   if(G.player){G.player.netKillCd=G.killCd;G.player.netDelayedCd=G.delayedCd;G.player.netTrackTarget=G.trackTarget;G.player.netTrackTime=G.trackTime;G.player.netTrackCd=G.trackCd}
   const chars=G.chars.map(c=>({id:c.id,name:c.name,color:c.color,x:c.x,y:c.y,face:c.face,walk:c.walk,moving:c.moving,alive:c.alive,ghost:c.ghost,vent:c.vent||null,ventSeq:c.ventSeq||0,ventAnim:c.ventAnim?{...c.ventAnim}:null,ventCd:c.ventCd||0,ventMv:c.ventMv||0,teleportSeq:c.teleportSeq||0,killDash:c.killDash?{...c.killDash}:null,minerCd:c.minerCd||0,minerDig:c.minerDig?{...c.minerDig}:null,morphAppearance:c.morphAppearance?{...c.morphAppearance,cosmetics:cloneCosmetics(c.morphAppearance.cosmetics)}:null,morphTransition:c.morphTransition?{...c.morphTransition}:null,morphSeq:c.morphSeq||0,morphTime:c.morphTime||0,morphCd:c.morphCd||0,engVentTime:Number.isFinite(c.engVentTime)?c.engVentTime:(c.engVentTime===Infinity?61:0),engVentCd:c.engVentCd||0,controlTargetId:c.controlTargetId||null,controlledBy:c.controlledBy||null,controlTime:c.controlTime||0,controlCd:c.controlCd||0,controlReturn:c.controlReturn?{...c.controlReturn}:null,bubble:c.bubble||null,isPlayer:!!c.isPlayer,isRemoteHuman:!!c.isRemoteHuman,isBot:!!c.isBot,role:c.role||'crew',function:c.function||null,emUses:c.emUses??1,netKillCd:c.isPlayer?G.killCd:(c.netKillCd||0),netSheriffCd:c.isPlayer?G.sheriffCd:(c.netSheriffCd||0),netDelayedCd:c.isPlayer?G.delayedCd:(c.netDelayedCd||0),netTrackTarget:c.netTrackTarget||null,netTrackTime:c.netTrackTime||0,netTrackCd:c.netTrackCd||0,netInputAck:c.netInputAck||0,parasiteReady:c.parasiteReady!==false,parasiteCd:c.parasiteCd||0,parasiteTargetId:c.parasiteTargetId||null,cleanCd:c.cleanCd||0,cleanUses:c.cleanUses||0,cleanPending:c.cleanPending?{...c.cleanPending}:null,paramedicCd:c.paramedicCd||0,paramedicSpent:c.paramedicSpent||0,paramedicUses:c.paramedicUses||0,paramedicTaskBase:c.paramedicTaskBase||0,seerCd:c.seerCd||0,seerPending:c.seerPending?{...c.seerPending}:null,revivedOnce:!!c.revivedOnce,noisyTriggered:!!c.noisyTriggered,judgeUsed:!!c.judgeUsed,judgeTargetId:c.judgeTargetId||null,lazyNormalSteps:c.lazyNormalSteps||0,lazyDone:!!c.lazyDone,spectralInvisible:!!c.spectralInvisible,spectralTime:c.spectralTime||0,spectralEndsAt:c.spectralEndsAt||0,spectralSeq:c.spectralSeq||0,spectralCd:c.spectralCd||0,spectralTransition:c.spectralTransition?{...c.spectralTransition}:null,guardian:!!c.guardian,guardianCd:c.guardianCd||0,guardianTargetId:c.guardianTargetId||null,hunterTargetId:c.hunterTargetId||null,hunterTargetCd:c.hunterTargetCd||0,instructor:!!c.instructor,instructorCd:c.instructorCd||0,instructorTargetId:c.instructorTargetId||null,cosmetics:cloneCosmetics(c.cosmetics)}));
   const tasks=G.tasks.map(t=>({id:t.id,key:t.key,name:t.name,owner:t.owner,done:!!t.done,fake:!!t.fake,fakeOnly:!!t.fakeOnly,lazy:!!t.lazy,fix:t.fix||null,steps:(t.steps||[]).map(s=>({...s}))}));
-  const bodies=G.bodies.map(b=>({id:b.id,victimId:b.victimId??b.id,name:b.name,color:b.color,cosmetics:cloneCosmetics(b.cosmetics),x:b.x,y:b.y,room:b.room,tKill:b.tKill,face:b.face||1,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null,killerTrace:Array.isArray(b.killerTrace)?b.killerTrace.map(f=>({...f})):[]}));
+  const bodies=G.bodies.map(b=>({id:b.id,victimId:b.victimId??b.id,name:b.name,color:b.color,cosmetics:cloneCosmetics(b.cosmetics),x:b.x,y:b.y,room:b.room,tKill:b.tKill,face:b.face||1,killerId:b.killer&&b.killer.id||b.killerId||null,cause:b.cause||null,deathContext:b.deathContext?{...b.deathContext}:null,killerTrace:Array.isArray(b.killerTrace)?b.killerTrace.map(f=>({...f})):[]}));
   const deadPets=(G.deadPets||[]).map(p=>({id:p.id,ownerId:p.ownerId,pet:p.pet,x:p.x,y:p.y,face:p.face||1,phase:p.phase||0,sad:true}));
   const meeting=G.M?{phase:G.M.phase,t:G.M.t,clock:G.M.clock,dur:G.M.dur,callerId:G.M.caller?.id,reason:G.M.reason,bodyId:G.M.body?.id||null,votes:{...G.M.votes},voteAt:{...G.M.voteAt},log:G.M.log.map(v=>({...v})),ejectId:G.M.result?.eject?.id||null,skipN:G.M.result?.skipN||0,counts:G.M.result?.counts||{},headline:$('meetDesc').textContent,resultHeadline:G.M.resultHeadline||'',ejectHeadline:G.M.result?.headline||'',chat:(G.M.chat||[]).map(m=>({fromId:m.fromId,text:m.text})),chatCount:$('meetChat').children.length,botNextChatAt:G.M.nextBotChatAt||0,voteSoundCount:G.M.voteSoundCount||0,judge:G.M.judge?{...G.M.judge}:null}:null;
   return {sheriffShotIds:{...(G.sheriffShotIds||{})},neutralWinnerIds:NEUTRALS.winners(),neutralWinnerId:G.neutralWinnerId||null,seq:++NET.seq,state:st,roleT:G.roleT,gt:G.gt,chars,tasks,bodies,deadPets,minerHoles:(G.minerHoles||[]).map(h=>({...h})),killSplashes:(G.killSplashes||[]).map(s=>({...s})),spectralSmokes:(G.spectralSmokes||[]).map(f=>({...f})),noisyAlerts:(G.noisyAlerts||[]).filter(a=>G.gt<(a.until||0)).map(a=>({...a})),guardianProtections:{...(G.guardianProtections||{})},guardianBreakFx:(G.guardianBreakFx||[]).map(f=>({...f})),instructorTrails:(G.instructorTrails||[]).map(t=>({id:t.id,ownerId:t.ownerId,targetId:t.targetId,points:(t.points||[]).map(p=>({x:p.x,y:p.y})),t:t.t,max:t.max})),delayedMarks:{...G.delayedMarks},parasiteInfections:{...(G.parasiteInfections||{})},parasiteWinnerId:G.parasiteWinnerId||null,seerReplays:Object.fromEntries((G.chars||[]).filter(c=>c.seerReplay&&G.gt<(c.seerReplay.until||0)).map(c=>[c.id,{...c.seerReplay,trace:(c.seerReplay.trace||[]).map(f=>({...f}))}])),sab:{...G.sab},doors:doors.map(d=>!!d.closed),decon:{...(G.decon||{})},cfg:netSettings(),killCd:G.killCd,sheriffCd:G.sheriffCd,delayedCd:G.delayedCd,trackTarget:G.trackTarget,trackTime:G.trackTime,trackCd:G.trackCd,meetCd:G.meetCd,fixT:G.fixT,meeting,over:G.over,winner:G.winner||null,endReason:G.endReason||'',role:G.role,locator:G.locator,observer:G.observer,cleaner:G.cleaner,parasite:G.parasite,paramedic:G.paramedic,seer:G.seer,noisy:G.noisy,judge:G.judge,lazy:G.player?.function==='lazy',selfParamedicCd:G.player?.paramedicCd||0,selfParamedicSpent:G.player?.paramedicSpent||0,selfSeerCd:G.player?.seerCd||0,selfSeerReplay:G.seerReplay?{...G.seerReplay,trace:(G.seerReplay.trace||[]).map(f=>({...f}))}:null,selfParasiteReady:G.player?.parasiteReady!==false,selfGuardian:!!G.player?.guardian,selfGuardianTargetId:G.player?.guardianTargetId||null,selfInstructor:!!G.player?.instructor,selfInstructorCd:G.player?.instructorCd||0,selfInstructorTargetId:G.player?.instructorTargetId||null,selfCleanerCd:G.cleanerCd,selfCleanerUses:G.cleanerUses,cam:{x:G.cam.x,y:G.cam.y},walkVer:G.walkVer};
@@ -6798,7 +6795,7 @@ const netOriginalPostMsg=postMsg;postMsg=function(from,text,advanced=false){cons
 const CHAT_COOLDOWN_MS=3000;
 let GHOST_QUICK_PENDING=false;
 const controlBestAction=bestAction;bestAction=function(){return withControlledBody(G.player,()=>controlBestAction())};
-const controlUpdateButtons=updateButtons;updateButtons=function(){const result=withControlledBody(G.player,()=>controlUpdateButtons());syncControlledVentPanel();return result};
+const controlUpdateButtons=updateButtons;updateButtons=function(){const result=withControlledBody(G.player,()=>controlUpdateButtons());const body=controlledBodyFor(G.player),blocked=body?.controlVentAccess?.blocked||body?.function==='engineer'&&((body.engVentCd||0)>0||roleAbilityBlockedByComms());if(G.player?.controlTargetId&&G.action?.type==='vent'&&blocked){$('btnUse').disabled=true;setCls($('btnUse'),'ready',false)}syncControlledVentPanel();return result};
 const controlDoInteract=doInteract;doInteract=function(a){return withControlledBody(G.player,()=>controlDoInteract(a))};
 const controlPlayerKill=playerKill;playerKill=function(){return withControlledBody(G.player,()=>controlPlayerKill())};
 const controlPlayerReport=playerReport;playerReport=function(){return withControlledBody(G.player,()=>controlPlayerReport())};
@@ -6932,14 +6929,14 @@ window.addEventListener('beforeunload',()=>{accountFlushPreferences();if(NET.inR
 netStartSnapshots();
 
 </script>
-<script src="assets/neutrals.js?v=ed8c9a9b2062c6e1"></script>
+<script src="assets/neutrals.js?v=bd50fd5ce38f250a"></script>
 <script src="assets/hide-seek.js?v=a04c6e4c0ca929d0"></script>
 <script src="assets/hot-potato.js?v=10bbbb7034b175ad"></script>
 <script src="assets/kryos-games.js?v=3f13bea530217990"></script>
 <script src="assets/kryos-render.js?v=5d939c626e5900b4"></script>
 <script src="assets/kryos.js?v=12eec0329654817e"></script>
 <script src="assets/decontamination.js?v=91b6458502682bcc"></script>
-<script src="assets/interactions.js?v=3dc6339088a90fec"></script>
+<script src="assets/interactions.js?v=dbb3b2463f391881"></script>
 <script src="assets/sabotage-rules.js?v=5056358df23f332d"></script>
 <script src="assets/sabotage.js?v=13415714c996ab17"></script>
 <script src="assets/ninja.js?v=495e8035a5fa67aa"></script>
@@ -6948,21 +6945,24 @@ netStartSnapshots();
 <script src="assets/surveillance.js?v=96d59f649785d19e"></script>
 <script src="assets/meeting-audio.js?v=863fb334abeb91b6"></script>
 <script src="assets/interface-scale.js?v=95bc046786122893"></script>
-<script src="assets/gesture-rules.js?v=47258131db589c14"></script>
-<script src="assets/mimic.js?v=f349ec3ad34566e9"></script>
+<script src="assets/gesture-rules.js?v=7ca2f7a730f358aa"></script>
+<script src="assets/mimic.js?v=2c5ca7c3cde36de5"></script>
 <script src="assets/ejection.js?v=d11fc5775b7b4cf9"></script>
 <script src="assets/how-to-play.js?v=1c0ff2a00f9af8bc"></script>
-<script src="assets/lobby-rules.js?v=4798d8298905896d"></script>
-<script src="assets/lobby.js?v=f5a51019a4a71fe6"></script>
+<script src="assets/lobby-rules.js?v=4536c56e86e4d3e3"></script>
+<script src="assets/lobby.js?v=c339a133a609b32c"></script>
 <script src="assets/ping-meter.js?v=93e299f4019c462f"></script>
+<script src="assets/death-rules.js?v=fb05233edac9e1bc"></script>
 <script src="assets/match-rules.js?v=39b084f19bbb1c3a"></script>
 <script src="assets/neutral-rules.js?v=93e24e363d59f4db"></script>
 <script src="assets/role-rules.js?v=ae1c08c2b65e2d55"></script>
-<script src="assets/new-neutrals.js?v=641daaad05dcbd0e"></script>
+<script src="assets/new-neutrals.js?v=7588fd7d9a6c055c"></script>
 <script src="assets/gemini-bot.js?v=e07d0e445c7536fb"></script>
 <script src="assets/quick-chat.js?v=fada56a1c7417809"></script>
 <script src="assets/authority-handoff.js?v=e986f47a736ec39c"></script>
-<script src="assets/match-update.js?v=ec5eacf6a4ecfe97"></script>
-<script src="assets/ability-buttons.js?v=f29ff25b823195ad"></script>
+<script src="assets/match-update.js?v=9dcd5a595a2cc9b2"></script>
+<script src="assets/task-confirmation.js?v=a9db4e611e382220"></script>
+<script src="assets/seer-evidence.js?v=bafc35ead1bcb323"></script>
+<script src="assets/ability-buttons.js?v=382f9e352e5973cf"></script>
 </body>
 </html>

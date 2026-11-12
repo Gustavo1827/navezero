@@ -10,14 +10,14 @@ module.exports=function({send,broadcast,clients,personalize,hostSnapshot,roomSta
  }
  function lock(room,result){
   if(!Rules.classic(room.mode)||room.status!=='playing'||room.ending||!result||!room.lastSnapshot)return false;
-  const s=room.lastSnapshot,ending={id:crypto.randomUUID(),endsAt:Date.now()+2500,winner:result.winner,reason:result.reason};room.ending=ending;
+  const s=room.lastSnapshot,now=Date.now(),ending={id:crypto.randomUUID(),serverNow:now,fadeAt:now+2400,endsAt:now+2850,fadeMs:450,winner:result.winner,reason:result.reason};room.ending=ending;
   s.ending=ending;s.state='ending';s.over=false;s.winner=result.winner;s.endReason=result.reason;
   if(result.id){s.neutralWinnerId=result.id;s.neutralWinnerIds=[result.id];s.newNeutralWinnerKind=result.kind}
   s.delayedMarks={};s.parasiteInfections={};room.captainPending=null;room.doorControl&&(room.doorControl.main=null);
   for(const r of room.neutralLedger?.records.values()||[]){r.pending=null;r.ticket=null}
   for(const c of s.chars){c.moving=false;c.killDash=null;c.minerDig=null;c.morphTransition=null;c.controlTargetId=null;c.controlledBy=null;c.cleanPending=null;c.seerPending=null}
   for(const p of room.players)send(clients.get(p.id)?.ws,{type:'match_ending',code:room.code,round:room.round,ending,snapshot:p.id===room.hostId?hostSnapshot(s,p.id):personalize(s,p.id)});
-  room.finishTimer=setTimeout(()=>finish(room),2500);room.finishTimer.unref?.();return true;
+  room.finishTimer=setTimeout(()=>finish(room),2850);room.finishTimer.unref?.();return true;
  }
  function evaluate(room,previous,claim=null){
   if(!Rules.classic(room.mode)||room.ending||room.status!=='playing')return false;
